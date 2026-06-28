@@ -1502,7 +1502,7 @@ function openModal() {
   document.getElementById('m-cover').value    = '';
   document.getElementById('m-appid').value    = '';
   document.getElementById('steam-search-results').style.display = 'none';
-  document.getElementById('m-hours-group').style.display = '';
+  const mhg = document.getElementById('m-hours-group'); if (mhg) mhg.style.display = '';
   renderModalStars();
   document.getElementById('modal-overlay').classList.add('open');
 }
