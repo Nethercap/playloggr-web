@@ -250,73 +250,47 @@
       <div class="stat-value" id="g-wishlist" style="color:#EF9F27">—</div>
     </div>
   </div>
-  <!-- Totales filtrados -->
-  <div id="filter-stats-row" style="display:flex;align-items:center;gap:16px;padding:6px 16px;font-size:12px;color:var(--text2);border-bottom:0.5px solid var(--border)">
-    <span>Seleccionados: <strong id="s-total" style="color:var(--text)">—</strong></span>
-    <span>Horas: <strong id="s-hours" style="color:var(--text)">—</strong></span>
-  </div>
-
-  <div class="controls">
-    <input class="search-box" type="text" placeholder="Buscar juego..." id="search-input" oninput="applyFilters()" />
-    <select id="platform-sel" onchange="applyFilters()">
-      <option value="">Todas las plataformas</option>
-      <option value="Steam">Steam</option>
-      <option value="PlayStation 5">PlayStation 5</option>
-      <option value="PlayStation 4">PlayStation 4</option>
-      <option value="XBOX X">XBOX X</option>
-      <option value="XBOX S">XBOX S</option>
-      <option value="XBOX PC">XBOX PC</option>
-      <option value="Epic">Epic</option>
-      <option value="EA Play">EA Play</option>
-      <option value="Nintendo Switch 1">Nintendo Switch 1</option>
-      <option value="Nintendo Switch 2">Nintendo Switch 2</option>
-    </select>
-    <div style="display:flex;align-items:center;gap:4px">
-      <select id="sort-sel" onchange="applyFilters()" style="font-size:12px;padding:6px 9px;border-radius:var(--radius-md);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text)">
-        <option value="name">Nombre</option>
-        <option value="hours">Horas jugadas</option>
-        <option value="rating-desc">Mejor calificación</option>
-        <option value="rating-asc">Peor calificación</option>
-            </select>
-      <button id="sort-dir-btn" onclick="toggleSortDir()" title="Cambiar dirección" style="font-size:15px;width:30px;height:30px;border-radius:var(--radius-md);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0">↓</button>
+  <!-- View selector + filters -->
+  <div style="border-bottom:0.5px solid var(--border)">
+    <!-- Main selector: Biblioteca / Deseados -->
+    <div style="display:flex;padding:8px 16px;gap:8px;align-items:center">
+      <button id="view-library"  onclick="setView('library')"
+        style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--green);color:#fff">
+        📚 Biblioteca
+      </button>
+      <button id="view-wishlist" onclick="setView('wishlist')"
+        style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);color:var(--text2)">
+        ⭐ Deseados
+      </button>
+      <span style="margin-left:auto;font-size:12px;color:var(--text2)">
+        Seleccionados: <strong id="s-total">—</strong> &nbsp;·&nbsp; Horas: <strong id="s-hours">—</strong>
+      </span>
     </div>
-    <select id="genre-filter" onchange="applyFilters()" style="margin-right:4px">
-      <option value="">Todos los géneros</option>
-      <option value="Acción">Acción</option>
-      <option value="Aventura">Aventura</option>
-      <option value="RPG">RPG</option>
-      <option value="FPS">FPS</option>
-      <option value="Estrategia">Estrategia</option>
-      <option value="Simulación">Simulación</option>
-      <option value="Deportes">Deportes</option>
-      <option value="Carreras">Carreras</option>
-      <option value="Terror">Terror</option>
-      <option value="Roguelite">Roguelite</option>
-      <option value="Plataformas">Plataformas</option>
-      <option value="Puzzle">Puzzle</option>
-      <option value="Lucha">Lucha</option>
-      <option value="Mundo Abierto">Mundo Abierto</option>
-      <option value="Multijugador">Multijugador</option>
-      <option value="Indie">Indie</option>
-      <option value="Visual Novel">Visual Novel</option>
-      <option value="Música/Ritmo">Música/Ritmo</option>
-    </select>
-    <select id="rating-filter" onchange="applyFilters()">
-      <option value="">Todas las calificaciones</option>
-      <option value="5">5 estrellas</option>
-      <option value="4">4+ estrellas</option>
-      <option value="3">3+ estrellas</option>
-      <option value="sin">Sin calificar</option>
-    </select>
-    <div class="filter-group" id="status-btns">
-      <button class="fbtn active" data-s="">Todos</button>
-      <button class="fbtn" data-s="Jugando">Jugando</button>
-      <button class="fbtn" data-s="Completado">Completado</button>
-      <button class="fbtn" data-s="Backlog">Backlog</button>
-      <button class="fbtn" data-s="Abandonado">Abandonado</button>
-      <button class="fbtn" data-s="Intermitente">Intermitente</button>
-      <button class="fbtn" data-s="__hidden__"><i class="ti ti-eye-off"></i> Ocultos</button>
-      <button class="fbtn" data-s="Deseados"><i class="ti ti-star"></i> Deseados</button>
+
+    <!-- Filter bar -->
+    <div id="filter-bar" style="display:flex;flex-wrap:wrap;gap:6px;padding:6px 16px 8px;align-items:center">
+      <!-- Filters injected by JS -->
+      <div id="filter-dropdowns" style="display:flex;flex-wrap:wrap;gap:6px;flex:1"></div>
+
+      <!-- Sort -->
+      <div style="display:flex;align-items:center;gap:4px;margin-left:auto">
+        <select id="sort-sel" onchange="applyFilters()" style="font-size:12px;padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text)">
+          <option value="name">Nombre</option>
+          <option value="hours">Horas</option>
+          <option value="rating">Calificación</option>
+          <option value="platform">Plataforma</option>
+          <option value="status">Estado</option>
+          <option value="genre">Género</option>
+        </select>
+        <button onclick="toggleSortOrder()" id="sort-dir-btn"
+          style="padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">
+          ↑
+        </button>
+      </div>
+
+      <!-- Search -->
+      <input type="text" id="search-input" placeholder="Buscar juego..." oninput="applyFilters()"
+        style="padding:4px 10px;font-size:12px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text);width:160px" />
     </div>
   </div>
 
@@ -863,6 +837,141 @@ async function changeGenre(gameId, genre) {
   } catch(e) {}
 }
 
+// ── View & Filter System ─────────────────────────────────────────────────────
+
+let currentView     = 'library'; // 'library' | 'wishlist'
+let availableFilters = {};
+let activeFilters   = {}; // { statuses: Set, platforms: Set, genres: Set, hours: Set, ratings: Set }
+
+function resetActiveFilters() {
+  activeFilters = {
+    statuses: new Set(), platforms: new Set(), genres: new Set(),
+    hours: new Set(), ratings: new Set()
+  };
+}
+
+async function loadAvailableFilters() {
+  try {
+    const res  = await fetch(`${apiBase()}/api/v1/backlog/filters`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    if (!res.ok) return;
+    availableFilters = await res.json();
+    renderFilterDropdowns();
+  } catch(e) {}
+}
+
+function renderFilterDropdowns() {
+  const container = document.getElementById('filter-dropdowns');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const filters = currentView === 'library'
+    ? [
+        { key: 'statuses',  label: 'Estado',     options: availableFilters.library?.statuses  || [] },
+        { key: 'platforms', label: 'Plataforma',  options: availableFilters.library?.platforms || [] },
+        { key: 'genres',    label: 'Género',      options: availableFilters.library?.genres    || [] },
+        { key: 'hours',     label: 'Horas',       options: availableFilters.library?.hours     || [] },
+        { key: 'ratings',   label: 'Calificación',options: availableFilters.library?.ratings   || [] },
+      ]
+    : [
+        { key: 'platforms', label: 'Plataforma',  options: availableFilters.wishlist?.platforms || [] },
+        { key: 'genres',    label: 'Género',      options: availableFilters.wishlist?.genres    || [] },
+      ];
+
+  filters.forEach(({ key, label, options }) => {
+    if (!options.length) return;
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'position:relative';
+
+    const active = activeFilters[key] || new Set();
+    const hasActive = active.size > 0;
+    const btn = document.createElement('button');
+    btn.id = `filter-btn-${key}`;
+    btn.innerHTML = `${label}${hasActive ? ` <span style="background:var(--green);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px">${active.size}</span>` : ' ▾'}`;
+    btn.style.cssText = `padding:4px 10px;font-size:12px;border-radius:6px;border:0.5px solid ${hasActive ? 'var(--green)' : 'var(--border)'};background:var(--bg2);color:${hasActive ? 'var(--green)' : 'var(--text)'};cursor:pointer`;
+    btn.onclick = (e) => { e.stopPropagation(); toggleFilterDropdown(key, options, wrap, btn); };
+
+    wrap.appendChild(btn);
+    container.appendChild(wrap);
+  });
+
+  // Clear all button
+  const totalActive = Object.values(activeFilters).reduce((s, v) => s + v.size, 0);
+  if (totalActive > 0) {
+    const clearBtn = document.createElement('button');
+    clearBtn.textContent = '✕ Limpiar';
+    clearBtn.style.cssText = 'padding:4px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer';
+    clearBtn.onclick = () => { resetActiveFilters(); renderFilterDropdowns(); applyFilters(); };
+    container.appendChild(clearBtn);
+  }
+}
+
+function toggleFilterDropdown(key, options, wrap, btn) {
+  // Close any open dropdown
+  document.querySelectorAll('.filter-popup').forEach(p => p.remove());
+
+  const popup = document.createElement('div');
+  popup.className = 'filter-popup';
+  popup.style.cssText = 'position:absolute;top:calc(100% + 4px);left:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:200;min-width:160px;padding:4px 0;box-shadow:0 4px 16px rgba(0,0,0,0.3)';
+
+  const active = activeFilters[key] || new Set();
+  options.forEach(opt => {
+    const item = document.createElement('div');
+    const checked = active.has(opt);
+    item.innerHTML = `<label style="display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;font-size:13px">
+      <input type="checkbox" ${checked ? 'checked' : ''} style="accent-color:var(--green)">
+      ${opt}
+    </label>`;
+    item.querySelector('input').onchange = (e) => {
+      if (!activeFilters[key]) activeFilters[key] = new Set();
+      if (e.target.checked) activeFilters[key].add(opt);
+      else activeFilters[key].delete(opt);
+      renderFilterDropdowns();
+      applyFilters();
+    };
+    popup.appendChild(item);
+  });
+
+  wrap.appendChild(popup);
+
+  // Close on outside click
+  setTimeout(() => {
+    document.addEventListener('click', function handler() {
+      popup.remove();
+      document.removeEventListener('click', handler);
+    }, { once: true });
+  }, 10);
+}
+
+function setView(view) {
+  currentView = view;
+  resetActiveFilters();
+  document.getElementById('view-library').style.background  = view === 'library'  ? 'var(--green)' : 'var(--bg2)';
+  document.getElementById('view-library').style.color       = view === 'library'  ? '#fff' : 'var(--text2)';
+  document.getElementById('view-wishlist').style.background = view === 'wishlist' ? '#EF9F27' : 'var(--bg2)';
+  document.getElementById('view-wishlist').style.color      = view === 'wishlist' ? '#fff' : 'var(--text2)';
+
+  // Update sort options
+  const sortSel = document.getElementById('sort-sel');
+  if (sortSel) {
+    const wishlistOpts = ['<option value="name">Nombre</option>','<option value="platform">Plataforma</option>','<option value="genre">Género</option>'];
+    const libraryOpts  = ['<option value="name">Nombre</option>','<option value="hours">Horas</option>','<option value="rating">Calificación</option>','<option value="platform">Plataforma</option>','<option value="status">Estado</option>','<option value="genre">Género</option>'];
+    sortSel.innerHTML  = (view === 'wishlist' ? wishlistOpts : libraryOpts).join('');
+  }
+
+  renderFilterDropdowns();
+  syncAll(1);
+}
+
+function toggleSortOrder() {
+  sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  document.getElementById('sort-dir-btn').textContent = sortDir === 'asc' ? '↑' : '↓';
+  applyFilters();
+}
+
+// ── Apply Filters ─────────────────────────────────────────────────────────────
+
 async function changeStatus(gameId, newStatus) {
   const g = allGames.find(x => x.id === gameId);
   const wasWishlist = g && g.status === 'Deseados';
@@ -1012,10 +1121,8 @@ function toggleSortDir() {
 }
 
 function applyFilters() {
-  searchQ        = document.getElementById('search-input').value;
-  platformFilter = document.getElementById('platform-sel').value;
-  sortMode       = document.getElementById('sort-sel').value;
-  ratingFilter   = document.getElementById('rating-filter').value;
+  searchQ  = document.getElementById('search-input')?.value || '';
+  sortMode = document.getElementById('sort-sel')?.value || 'name';
   syncAll(1);
 }
 
@@ -1086,8 +1193,11 @@ function closeWishlistModal() {
   document.getElementById('wishlist-modal-overlay').classList.remove('open');
 }
 
-document.getElementById('wishlist-modal-overlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('wishlist-modal-overlay')) closeWishlistModal();
+document.addEventListener('DOMContentLoaded', () => {
+  const wmo = document.getElementById('wishlist-modal-overlay');
+  if (wmo) wmo.addEventListener('click', e => {
+    if (e.target === wmo) closeWishlistModal();
+  });
 });
 
 let _wishlistSearchTimer = null;
@@ -1496,6 +1606,8 @@ async function submitAuth() {
 
 function onLoginSuccess() {
   document.getElementById('login-screen').style.display = 'none';
+  resetActiveFilters();
+  loadAvailableFilters();
   const chip = document.createElement('div');
   chip.className = 'user-chip';
   chip.innerHTML = `<i class="ti ti-user" style="font-size:14px"></i>${authUser}<button class="logout-btn" onclick="openRecovery()">Código</button><button class="logout-btn" onclick="logout()">Salir</button>`;
@@ -1566,11 +1678,21 @@ async function syncAll(page = 1, silent = false) {
   if (platformFilter) params.set('platform', platformFilter);
   if (searchQ)        params.set('search',   searchQ);
   if (showHidden)     params.set('show_hidden', 'true');
-  const ratingVal = document.getElementById('rating-filter')?.value;
-  if (ratingVal === 'sin') params.set('rating_min', '0');
-  else if (ratingVal)      params.set('rating_min', ratingVal);
-  const genreVal = document.getElementById('genre-filter')?.value;
-  if (genreVal) params.set('genre', genreVal);
+  // View mode
+  if (currentView === 'wishlist') {
+    params.set('status', 'Deseados');
+  }
+
+  // Multi-value filters
+  const af = activeFilters || {};
+  if (af.statuses?.size)  params.set('statuses',   [...af.statuses].join(','));
+  if (af.platforms?.size) params.set('platforms',  [...af.platforms].join(','));
+  if (af.genres?.size)    params.set('genres',     [...af.genres].join(','));
+  if (af.hours?.size)     params.set('hours_range',[...af.hours].join(','));
+  if (af.ratings?.size)   params.set('ratings',    [...af.ratings].join(','));
+
+  // Sort direction
+  params.set('order', sortDir || 'asc');
 
   try {
     const res = await fetch(`${apiBase()}/api/v1/backlog?${params}`, {
@@ -1591,6 +1713,8 @@ async function syncAll(page = 1, silent = false) {
     renderGames();
     renderPagination();
     loadGlobalStats();
+    // Refresh available filter options (in background)
+    loadAvailableFilters();
 
   } catch(e) {
     showError('Error al cargar los juegos: ' + e.message);
