@@ -923,6 +923,7 @@ function toggleFilterDropdown(key, options, wrap, btn) {
     item.onmousedown = (e) => {
       e.preventDefault();
       e.stopPropagation();
+      e.stopImmediatePropagation();
       if (!activeFilters[key]) activeFilters[key] = new Set();
       if (activeFilters[key].has(opt)) activeFilters[key].delete(opt);
       else activeFilters[key].add(opt);
@@ -981,13 +982,15 @@ function toggleFilterDropdown(key, options, wrap, btn) {
 
   // Close on outside click — apply filters
   setTimeout(() => {
-    document.addEventListener('click', function handler(e) {
+    function outsideHandler(e) {
       if (!popup.contains(e.target) && !btn.contains(e.target)) {
         applyFilters();
+        renderFilterDropdowns();
         popup.remove();
-        document.removeEventListener('click', handler);
+        document.removeEventListener('mousedown', outsideHandler);
       }
-    });
+    }
+    document.addEventListener('mousedown', outsideHandler);
   }, 10);
 }
 
