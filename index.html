@@ -926,10 +926,20 @@ function toggleFilterDropdown(key, options, wrap, btn) {
       if (!activeFilters[key]) activeFilters[key] = new Set();
       if (activeFilters[key].has(opt)) activeFilters[key].delete(opt);
       else activeFilters[key].add(opt);
+      // Only update checkbox visually — don't close or re-render popup
       const cb = item.querySelector('input');
       if (cb) cb.checked = activeFilters[key].has(opt);
-      renderFilterDropdowns();
+      item.style.background = activeFilters[key].has(opt) ? 'rgba(29,158,117,0.1)' : '';
+      // Update counter on button
+      const filterBtn = document.getElementById(`filter-btn-${key}`);
+      if (filterBtn) {
+        const count = activeFilters[key].size;
+        filterBtn.innerHTML = count > 0
+          ? `${key === 'statuses' ? 'Estado' : key === 'platforms' ? 'Plataforma' : key === 'genres' ? 'Género' : key === 'hours' ? 'Horas' : 'Calificación'} <span style="background:var(--green);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px">${count}</span>`
+          : `${key === 'statuses' ? 'Estado' : key === 'platforms' ? 'Plataforma' : key === 'genres' ? 'Género' : key === 'hours' ? 'Horas' : 'Calificación'} ▾`;
+      }
     };
+    if (checked) item.style.background = 'rgba(29,158,117,0.1)';
     const cb = document.createElement('input');
     cb.type = 'checkbox';
     cb.checked = checked;
