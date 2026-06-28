@@ -919,28 +919,43 @@ function toggleFilterDropdown(key, options, wrap, btn) {
   options.forEach(opt => {
     const item = document.createElement('div');
     const checked = active.has(opt);
-    item.innerHTML = `<label style="display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;font-size:13px">
-      <input type="checkbox" ${checked ? 'checked' : ''} style="accent-color:var(--green)">
-      ${opt}
-    </label>`;
-    item.querySelector('input').onchange = (e) => {
+    item.style.cssText = 'display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;font-size:13px;user-select:none';
+    item.onmousedown = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       if (!activeFilters[key]) activeFilters[key] = new Set();
-      if (e.target.checked) activeFilters[key].add(opt);
-      else activeFilters[key].delete(opt);
+      if (activeFilters[key].has(opt)) activeFilters[key].delete(opt);
+      else activeFilters[key].add(opt);
+      // Update checkbox visually
+      const cb = item.querySelector('input');
+      if (cb) cb.checked = activeFilters[key].has(opt);
       renderFilterDropdowns();
       applyFilters();
+      // Re-render popup in place
+      toggleFilterDropdown(key, options, item.closest('[style*="position:relative"]'), document.getElementById(`filter-btn-${key}`));
     };
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = checked;
+    cb.style.accentColor = 'var(--green)';
+    cb.style.pointerEvents = 'none';
+    const label = document.createElement('span');
+    label.textContent = opt;
+    item.appendChild(cb);
+    item.appendChild(label);
     popup.appendChild(item);
   });
 
   wrap.appendChild(popup);
 
-  // Close on outside click
+  // Close on outside click (not on popup itself)
   setTimeout(() => {
-    document.addEventListener('click', function handler() {
-      popup.remove();
-      document.removeEventListener('click', handler);
-    }, { once: true });
+    document.addEventListener('click', function handler(e) {
+      if (!popup.contains(e.target)) {
+        popup.remove();
+        document.removeEventListener('click', handler);
+      }
+    });
   }, 10);
 }
 
