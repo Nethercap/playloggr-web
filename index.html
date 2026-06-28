@@ -227,12 +227,7 @@
       <button class="add-btn" onclick="syncWishlist()" style="margin-left:4px" title="Sincronizar lista de deseados de Steam">
         <i class="ti ti-star"></i> Wishlist
       </button>
-      <button class="add-btn" onclick="openModal()" style="margin-left:4px">
-        <i class="ti ti-plus"></i> Agregar juego
-      </button>
-      <button class="add-btn" onclick="openWishlistModal()" style="margin-left:4px">
-        <i class="ti ti-star"></i> Agregar deseado
-      </button>
+
     </div>
   </div>
 
@@ -272,8 +267,18 @@
       <!-- Filters injected by JS -->
       <div id="filter-dropdowns" style="display:flex;flex-wrap:wrap;gap:6px;flex:1"></div>
 
+      <!-- Add button (conditional) -->
+      <div id="add-game-btn-wrap" style="margin-left:auto;display:flex;gap:6px;align-items:center">
+        <button id="add-game-btn" onclick="openModal()" style="display:none;padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">
+          <i class="ti ti-plus"></i> Agregar juego
+        </button>
+        <button id="add-wishlist-btn" onclick="openWishlistModal()" style="display:none;padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:#EF9F27;color:#fff;cursor:pointer">
+          <i class="ti ti-star"></i> Agregar juego deseado
+        </button>
+      </div>
+
       <!-- Sort -->
-      <div style="display:flex;align-items:center;gap:4px;margin-left:auto">
+      <div style="display:flex;align-items:center;gap:4px">
         <select id="sort-sel" onchange="applyFilters()" style="font-size:12px;padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text)">
           <option value="name">Nombre</option>
           <option value="hours">Horas</option>
@@ -1011,6 +1016,11 @@ function setView(view) {
   }
 
   renderFilterDropdowns();
+  // Show correct add button
+  const addGameBtn     = document.getElementById('add-game-btn');
+  const addWishlistBtn = document.getElementById('add-wishlist-btn');
+  if (addGameBtn)     addGameBtn.style.display     = view === 'library'  ? '' : 'none';
+  if (addWishlistBtn) addWishlistBtn.style.display = view === 'wishlist' ? '' : 'none';
   syncAll(1);
 }
 
@@ -1659,6 +1669,10 @@ function onLoginSuccess() {
   document.getElementById('login-screen').style.display = 'none';
   resetActiveFilters();
   loadAvailableFilters();
+  setTimeout(() => {
+    const b = document.getElementById('add-game-btn');
+    if (b) b.style.display = '';
+  }, 100);
   const chip = document.createElement('div');
   chip.className = 'user-chip';
   chip.innerHTML = `<i class="ti ti-user" style="font-size:14px"></i>${authUser}<button class="logout-btn" onclick="openRecovery()">Código</button><button class="logout-btn" onclick="logout()">Salir</button>`;
