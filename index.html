@@ -800,16 +800,17 @@ function renderGames() {
         <select class="genre-sel" data-gid="${g.id}" onchange="changeGenre('${g.id}',this.value)" style="font-size:11px;margin-bottom:4px;width:100%;padding:2px 4px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text2)">
           ${genreOptions(g.genre)}
         </select>
-        <div style="display:flex;align-items:center;gap:5px">
-        <div class="sdot s-${g.status}" style="width:8px;height:8px;border-radius:50%;flex-shrink:0"></div>
-        <select class="status-sel" onchange="changeStatus('${g.id}',this.value)" style="background:transparent;border:none;color:var(--text2);font-size:12px;cursor:pointer;padding:0">
-          <option value="Jugando"      ${g.status==='Jugando'      ?'selected':''}><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#1D9E75;margin-right:6px"></span>Jugando</option>
-          <option value="Completado"   ${g.status==='Completado'   ?'selected':''}><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#378ADD;margin-right:6px"></span>Completado</option>
-          <option value="Backlog"      ${g.status==='Backlog'      ?'selected':''}><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#888780;margin-right:6px"></span>Backlog</option>
-          <option value="Abandonado"   ${g.status==='Abandonado'   ?'selected':''}><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#E24B4A;margin-right:6px"></span>Abandonado</option>
-          <option value="Intermitente" ${g.status==='Intermitente' ?'selected':''}><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#7F77DD;margin-right:6px"></span>Intermitente</option>
-          <option value="Deseados"     ${g.status==='Deseados'     ?'selected':''}><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#EF9F27;margin-right:6px"></span>Deseados</option>
-        </select>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+          <div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:${'${({Jugando:\'#378ADD\',Completado:\'#1D9E75\',Abandonado:\'#E24B4A\',Intermitente:\'#7F77DD\',Backlog:\'#888780\',Deseados:\'#EF9F27\'})[g.status] || \'#888\'}'}"></div>
+          <select class="status-sel" onchange="changeStatus('${g.id}',this.value)" style="background:transparent;border:none;color:var(--text);font-size:12px;cursor:pointer;padding:0;flex:1">
+            <option value="Jugando"      ${g.status==='Jugando'      ?'selected':''}>Jugando</option>
+            <option value="Completado"   ${g.status==='Completado'   ?'selected':''}>Completado</option>
+            <option value="Backlog"      ${g.status==='Backlog'      ?'selected':''}>Backlog</option>
+            <option value="Abandonado"   ${g.status==='Abandonado'   ?'selected':''}>Abandonado</option>
+            <option value="Intermitente" ${g.status==='Intermitente' ?'selected':''}>Intermitente</option>
+            <option value="Deseados"     ${g.status==='Deseados'     ?'selected':''}>Deseados</option>
+          </select>
+        </div>
         ${actionBtn(g)}
       </div>
     </div>`;
