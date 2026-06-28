@@ -626,7 +626,7 @@ function renderPlatStatus() {
   document.getElementById('plat-status-row').innerHTML = platNames.map(p => {
     const s = platStatus[p];
     const dc = s==='ok'?'ok':s==='err'?'err':'';
-    return `<div class="plat-chip"><i class="ti ${platIcon[p]||'ti-device-gamepad'}" style="font-size:12px"></i><div class="dot ${dc}"></div></div>`;
+    return `<div class="plat-chip"><div class="dot ${dc}"></div></div>`;
   }).join('');
 }
 
@@ -804,8 +804,6 @@ function renderGames() {
   }
 
   list.innerHTML = items.map(g => {
-    const pc    = platClass[g.platform] || '';
-    const pi    = platIcon[g.platform]  || 'ti-device-gamepad';
     const hours = g.hours_played != null ? `${parseFloat(g.hours_played).toFixed(1)} hs` : '— hs';
     const cover = g.cover_url
       ? `<img src="${g.cover_url}" alt="${g.name}" onerror="this.style.display='none'">`
