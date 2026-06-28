@@ -1523,7 +1523,8 @@ function renderPagination() {
   document.getElementById('game-list').after(bar);
 }
 
-document.getElementById('status-btns').addEventListener('click', e => {
+const _statusBtnsEl = document.getElementById('status-btns');
+if (_statusBtnsEl) _statusBtnsEl.addEventListener('click', e => {
   const btn = e.target.closest('.fbtn');
   if (!btn) return;
   document.querySelectorAll('#status-btns .fbtn').forEach(b => b.classList.remove('active'));
