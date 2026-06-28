@@ -1125,20 +1125,20 @@ async function changeStatus(gameId, newStatus) {
     }
   }
 
-  // If leaving or entering Deseados, remove card seamlessly
-  const currentFilter = statusFilter;
-  const shouldRemove = (wasWishlist && !isWishlist && currentFilter === 'Deseados')
-                    || (!wasWishlist && isWishlist && currentFilter !== 'Deseados' && currentFilter !== '');
+  // Move card between sections seamlessly
+  const inWishlist = currentView === 'wishlist';
+  const shouldRemove = (wasWishlist && !isWishlist && inWishlist)
+                    || (!wasWishlist && isWishlist && !inWishlist);
 
-  if (shouldRemove) {
-    if (card) {
-      card.classList.add('removing');
-      setTimeout(async () => {
-        card.remove();
-        allGames = allGames.filter(x => x.id !== gameId);
-        await Promise.all([syncAll(currentPage, true), loadGlobalStats()]);
-      }, 220);
-    }
+  if (shouldRemove && card) {
+    card.style.transition = 'opacity 0.2s, transform 0.2s';
+    card.style.opacity = '0';
+    card.style.transform = 'translateX(20px)';
+    setTimeout(async () => {
+      card.remove();
+      allGames = allGames.filter(x => x.id !== gameId);
+      loadGlobalStats();
+    }, 220);
   }
 
   // Save to server — no re-render
