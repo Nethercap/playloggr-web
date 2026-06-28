@@ -913,7 +913,7 @@ function toggleFilterDropdown(key, options, wrap, btn) {
 
   const popup = document.createElement('div');
   popup.className = 'filter-popup';
-  popup.style.cssText = 'position:absolute;top:calc(100% + 4px);left:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:200;min-width:160px;padding:4px 0;box-shadow:0 4px 16px rgba(0,0,0,0.3)';
+  popup.style.cssText = 'position:absolute;top:calc(100% + 4px);left:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:200;min-width:180px;padding:4px 0 0;box-shadow:0 4px 16px rgba(0,0,0,0.3)';
 
   const active = activeFilters[key] || new Set();
   options.forEach(opt => {
@@ -926,13 +926,9 @@ function toggleFilterDropdown(key, options, wrap, btn) {
       if (!activeFilters[key]) activeFilters[key] = new Set();
       if (activeFilters[key].has(opt)) activeFilters[key].delete(opt);
       else activeFilters[key].add(opt);
-      // Update checkbox visually
       const cb = item.querySelector('input');
       if (cb) cb.checked = activeFilters[key].has(opt);
       renderFilterDropdowns();
-      applyFilters();
-      // Re-render popup in place
-      toggleFilterDropdown(key, options, item.closest('[style*="position:relative"]'), document.getElementById(`filter-btn-${key}`));
     };
     const cb = document.createElement('input');
     cb.type = 'checkbox';
@@ -946,12 +942,38 @@ function toggleFilterDropdown(key, options, wrap, btn) {
     popup.appendChild(item);
   });
 
+  // OK button
+  const footer = document.createElement('div');
+  footer.style.cssText = 'padding:6px 10px;border-top:0.5px solid var(--border);display:flex;justify-content:flex-end;gap:6px';
+  const clearBtn = document.createElement('button');
+  clearBtn.textContent = 'Limpiar';
+  clearBtn.style.cssText = 'font-size:12px;padding:3px 10px;border-radius:5px;border:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer';
+  clearBtn.onmousedown = (e) => {
+    e.preventDefault();
+    if (activeFilters[key]) activeFilters[key].clear();
+    renderFilterDropdowns();
+    applyFilters();
+    popup.remove();
+  };
+  const okBtn = document.createElement('button');
+  okBtn.textContent = 'OK';
+  okBtn.style.cssText = 'font-size:12px;padding:3px 14px;border-radius:5px;border:none;background:var(--green);color:#fff;cursor:pointer';
+  okBtn.onmousedown = (e) => {
+    e.preventDefault();
+    applyFilters();
+    popup.remove();
+  };
+  footer.appendChild(clearBtn);
+  footer.appendChild(okBtn);
+  popup.appendChild(footer);
+
   wrap.appendChild(popup);
 
-  // Close on outside click (not on popup itself)
+  // Close on outside click — apply filters
   setTimeout(() => {
     document.addEventListener('click', function handler(e) {
-      if (!popup.contains(e.target)) {
+      if (!popup.contains(e.target) && !btn.contains(e.target)) {
+        applyFilters();
         popup.remove();
         document.removeEventListener('click', handler);
       }
