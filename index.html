@@ -562,8 +562,44 @@ let currentPage = 1, totalPages = 1, totalGames = 0;
 let showHidden = false;
 let modalStarVal = 0;
 
-const platClass = { Steam:'plat-Steam', PSN:'plat-PSN', Xbox:'plat-Xbox', 'EA Play':'plat-EA' };
-const platIcon  = { Steam:'ti-brand-steam', PSN:'ti-playstation', Xbox:'ti-brand-xbox', 'EA Play':'ti-xbox-a' };
+const platIcons = {
+  'Steam': {slug:'steam', color:'#1b2838'},
+  'Epic': {slug:'epicgames', color:'#2d2d2d'},
+  'EA Play': {slug:'ea', color:'#ff4747'},
+  'Windows PC': {slug:'windows', color:'#0078d4'},
+  'Mac iOS': {slug:'apple', color:'#555555'},
+  'PlayStation 5': {slug:'playstation', color:'#003087'},
+  'PlayStation 4': {slug:'playstation', color:'#003087'},
+  'PlayStation 2': {slug:'playstation', color:'#003087'},
+  'PlayStation 1': {slug:'playstation', color:'#003087'},
+  'PSP Vita': {slug:'playstation', color:'#003087'},
+  'XBOX X': {slug:'xbox', color:'#107c10'},
+  'XBOX S': {slug:'xbox', color:'#107c10'},
+  'XBOX PC': {slug:'xbox', color:'#107c10'},
+  'XBOX 360': {slug:'xbox', color:'#107c10'},
+  'XBOX One': {slug:'xbox', color:'#107c10'},
+  'Nintendo Switch 1': {slug:'nintendo', color:'#e4000f'},
+  'Nintendo Switch 2': {slug:'nintendo', color:'#e4000f'},
+  'Nintendo 3DS': {slug:'nintendo', color:'#e4000f'},
+  'Nintendo 64': {slug:'nintendo', color:'#e4000f'},
+  'Nintendo Gamecube': {slug:'nintendo', color:'#e4000f'},
+  'Game Boy': {slug:'nintendo', color:'#e4000f'},
+  'Game Boy Advance': {slug:'nintendo', color:'#e4000f'},
+  'SNES': {slug:'nintendo', color:'#e4000f'},
+  'Sega Genesis': {slug:'sega', color:'#1A50DB'},
+  'Sega Dreamcast': {slug:'sega', color:'#1A50DB'},
+  'Meta Quest': {slug:'meta', color:'#0081FB'}
+};
+
+function platBadge(platform) {
+  const p = platIcons[platform];
+  if (!p) return `<span class="plat-badge">${platform}</span>`;
+  const url = `https://cdn.simpleicons.org/${p.slug}/${p.color.replace('#','')}`;
+  return `<span class="plat-badge" style="display:inline-flex;align-items:center;gap:4px">
+    <img src="${url}" style="width:12px;height:12px;object-fit:contain" onerror="this.style.display='none'">
+    ${platform}
+  </span>`;
+}
 const platNames = [];
 const platSlug  = { Steam:'steam', PSN:'psn', Xbox:'xbox', 'EA Play':'ea' };
 const platStatus = {};
@@ -788,7 +824,7 @@ function renderGames() {
       <div>
         <div class="game-name">${g.name}</div>
         <div class="game-meta">
-          <span class="plat-badge ${pc}"><i class="ti ${pi}" style="font-size:11px"></i> ${g.platform}</span>
+          ${platBadge(g.platform)}
           ${scoreEl}
         </div>
         ${g.status !== 'Deseados' ? `<div id="stars-${g.id}" style="margin-bottom:4px">${starPickerHtml(g.id, g.user_rating || 0)}</div>` : ''}
