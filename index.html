@@ -754,8 +754,13 @@ function renderGames() {
     const cover = g.cover_url
       ? `<img src="${g.cover_url}" alt="${g.name}" onerror="this.style.display='none'">`
       : `<span>🎮</span>`;
-    const scoreEl = g._steamScore
-      ? `<span class="steam-score ${g._steamScore.cls}">${g._steamScore.label}</span>`
+    // Use cached score or server-provided score
+    let _score = g._steamScore;
+    if (!_score && g.steam_score && steamScoreLabel[g.steam_score]) {
+      _score = steamScoreLabel[g.steam_score];
+    }
+    const scoreEl = (_score && g.platform === 'Steam')
+      ? `<span class="steam-score ${_score.cls}">${_score.label}</span>`
       : '';
 
     return `<div class="game-card" id="card-${g.id}">
