@@ -88,8 +88,12 @@
     .status-sel { font-size:12px; padding:4px 7px; border-radius:var(--radius-md); border:0.5px solid var(--border2); background:var(--bg2); color:var(--text); cursor:pointer; width:115px; }
     .slabel { display:flex; align-items:center; gap:4px; font-size:11px; color:var(--text2); }
     .sdot { width:6px; height:6px; border-radius:50%; }
-    .s-Jugando { background:var(--green); } .s-Completado { background:var(--blue); }
-    .s-Abandonado { background:var(--red); } .s-Backlog { background:var(--gray); }
+    .s-Completado   { background:#1D9E75; }
+    .s-Jugando      { background:#378ADD; }
+    .s-Abandonado   { background:#E24B4A; }
+    .s-Intermitente { background:#7F77DD; }
+    .s-Backlog      { background:#888780; }
+    .s-Deseados     { background:#EF9F27; }
 
     .empty { text-align:center; padding:3.5rem 0; color:var(--text2); font-size:14px; background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg); }
     .empty i { font-size:30px; display:block; margin-bottom:9px; }
@@ -765,7 +769,9 @@ function renderGames() {
         <select class="genre-sel" data-gid="${g.id}" onchange="changeGenre('${g.id}',this.value)" style="font-size:11px;margin-bottom:4px;width:100%;padding:2px 4px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text2)">
           ${genreOptions(g.genre)}
         </select>
-        <select class="status-sel" onchange="changeStatus('${g.id}',this.value)">
+        <div style="display:flex;align-items:center;gap:5px">
+        <div class="sdot s-${g.status}" style="width:8px;height:8px;border-radius:50%;flex-shrink:0"></div>
+        <select class="status-sel" onchange="changeStatus('${g.id}',this.value)" style="background:transparent;border:none;color:var(--text2);font-size:12px;cursor:pointer;padding:0">
           <option value="Jugando"      ${g.status==='Jugando'      ?'selected':''}><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#1D9E75;margin-right:6px"></span>Jugando</option>
           <option value="Completado"   ${g.status==='Completado'   ?'selected':''}><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#378ADD;margin-right:6px"></span>Completado</option>
           <option value="Backlog"      ${g.status==='Backlog'      ?'selected':''}><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#888780;margin-right:6px"></span>Backlog</option>
