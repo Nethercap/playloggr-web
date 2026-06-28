@@ -781,12 +781,12 @@ function renderGames() {
           ${genreOptions(g.genre)}
         </select>
         <select class="status-sel" onchange="changeStatus('${g.id}',this.value)">
-          <option value="Jugando"    ${g.status==='Jugando'   ?'selected':''}>🎮 Jugando</option>
-          <option value="Completado" ${g.status==='Completado'?'selected':''}>✅ Completado</option>
-          <option value="Backlog"    ${g.status==='Backlog'   ?'selected':''}>📋 Backlog</option>
-          <option value="Abandonado"   ${g.status==='Abandonado'  ?'selected':''}>⛔ Abandonado</option>
-          <option value="Intermitente" ${g.status==='Intermitente'?'selected':''}>🔄 Intermitente</option>
-
+          <option value="Jugando"      ${g.status==='Jugando'      ?'selected':''}>🎮 Jugando</option>
+          <option value="Completado"   ${g.status==='Completado'   ?'selected':''}>✅ Completado</option>
+          <option value="Backlog"      ${g.status==='Backlog'      ?'selected':''}>📋 Backlog</option>
+          <option value="Abandonado"   ${g.status==='Abandonado'   ?'selected':''}>⛔ Abandonado</option>
+          <option value="Intermitente" ${g.status==='Intermitente' ?'selected':''}>🔄 Intermitente</option>
+          <option value="Deseados"     ${g.status==='Deseados'     ?'selected':''}>⭐ Deseados</option>
         </select>
         ${actionBtn(g)}
       </div>
@@ -865,12 +865,31 @@ async function changeGenre(gameId, genre) {
 
 async function changeStatus(gameId, newStatus) {
   const g = allGames.find(x => x.id === gameId);
+  const wasWishlist = g && g.status === 'Deseados';
+  const isWishlist  = newStatus === 'Deseados';
   if (g) g.status = newStatus;
-  // Update total count without touching hours
-  document.getElementById('s-total').textContent = totalGames || 0;
-  // Update status badge in DOM without re-rendering all cards
-  const sel = document.querySelector(`[onchange*="${gameId}"]`);
-  if (sel) sel.value = newStatus;
+
+  // If leaving or entering Deseados, remove card seamlessly
+  const currentFilter = statusFilter;
+  const shouldRemove = (wasWishlist && !isWishlist && currentFilter === 'Deseados')
+                    || (!wasWishlist && isWishlist && currentFilter !== 'Deseados' && currentFilter !== '');
+
+  if (shouldRemove) {
+    const card = document.getElementById(`card-${gameId}`);
+    if (card) {
+      card.classList.add('removing');
+      setTimeout(async () => {
+        card.remove();
+        allGames = allGames.filter(g => g.id !== gameId);
+        await Promise.all([syncAll(currentPage, true), loadGlobalStats()]);
+      }, 220);
+    }
+  } else {
+    document.getElementById('s-total').textContent = totalGames || 0;
+    const sel = document.querySelector(`[onchange*="${gameId}"]`);
+    if (sel) sel.value = newStatus;
+  }
+
   try {
     await fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gameId)}/status?status=${encodeURIComponent(newStatus)}`, {
       method: 'PATCH',
