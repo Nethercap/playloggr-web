@@ -770,7 +770,6 @@ function renderGames() {
         <div class="game-meta">
           <span class="plat-badge ${pc}"><i class="ti ${pi}" style="font-size:11px"></i> ${g.platform}</span>
           ${scoreEl}
-          ${g.genre ? `<span style="font-size:11px;color:var(--text2)">${g.genre}</span>` : ''}
         </div>
         ${g.status !== 'Deseados' ? `<div id="stars-${g.id}" style="margin-bottom:4px">${starPickerHtml(g.id, g.user_rating || 0)}</div>` : ''}
         <div class="game-foot">
