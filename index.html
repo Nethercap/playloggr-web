@@ -87,7 +87,7 @@
     .game-status-col { display:flex; flex-direction:column; align-items:flex-end; gap:7px; min-width:115px; }
     .status-sel { font-size:12px; padding:4px 7px; border-radius:var(--radius-md); border:0.5px solid var(--border2); background:var(--bg2); color:var(--text); cursor:pointer; width:115px; }
     .slabel { display:flex; align-items:center; gap:4px; font-size:11px; color:var(--text2); }
-    .sdot { width:6px; height:6px; border-radius:50%; }
+    .sdot { width:8px; height:8px; border-radius:50%; display:inline-block; flex-shrink:0; }
     .s-Completado   { background:#1D9E75; }
     .s-Jugando      { background:#378ADD; }
     .s-Abandonado   { background:#E24B4A; }
@@ -801,8 +801,8 @@ function renderGames() {
           ${genreOptions(g.genre)}
         </select>
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-          <div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:${'${({Jugando:\'#378ADD\',Completado:\'#1D9E75\',Abandonado:\'#E24B4A\',Intermitente:\'#7F77DD\',Backlog:\'#888780\',Deseados:\'#EF9F27\'})[g.status] || \'#888\'}'}"></div>
-          <select class="status-sel" onchange="changeStatus('${g.id}',this.value)" style="background:transparent;border:none;color:var(--text);font-size:12px;cursor:pointer;padding:0;flex:1">
+          <div class="sdot s-${g.status}"></div>
+          <select class="status-sel" onchange="changeStatus('${g.id}',this.value)">
             <option value="Jugando"      ${g.status==='Jugando'      ?'selected':''}>Jugando</option>
             <option value="Completado"   ${g.status==='Completado'   ?'selected':''}>Completado</option>
             <option value="Backlog"      ${g.status==='Backlog'      ?'selected':''}>Backlog</option>
@@ -1101,6 +1101,8 @@ function toggleSortOrder() {
 // ── Apply Filters ─────────────────────────────────────────────────────────────
 
 async function changeStatus(gameId, newStatus) {
+  const genreSel = document.querySelector(`.genre-sel[data-gid="${gameId}"]`);
+  const savedGenre = genreSel ? genreSel.value : null;
   const g = allGames.find(x => x.id === gameId);
   const wasWishlist = g && g.status === 'Deseados';
   const isWishlist  = newStatus === 'Deseados';
@@ -1132,6 +1134,11 @@ async function changeStatus(gameId, newStatus) {
       method: 'PATCH',
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
+    // Restore genre selector after re-render
+    if (savedGenre) {
+      const sel = document.querySelector(`.genre-sel[data-gid="${gameId}"]`);
+      if (sel) sel.value = savedGenre;
+    }
     loadGlobalStats();
   } catch(e) {}
 }
