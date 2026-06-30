@@ -2349,29 +2349,34 @@ function renderFolderGamePicker() {
   };
 
   list.innerHTML = `
-    <div style="padding:6px 12px;border-bottom:0.5px solid var(--border)">
+    <div style="padding:6px 12px 8px;border-bottom:0.5px solid var(--border)">
       <input type="text" placeholder="Buscar juego..." value="${_folderPickerSearch}"
         oninput="_folderPickerSearch=this.value;renderFolderGamePicker()"
-        style="width:100%;padding:4px 8px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text)" />
+        style="width:100%;box-sizing:border-box;padding:5px 10px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text)" />
     </div>
-    <div style="padding:6px 16px;border-bottom:0.5px solid var(--border);font-size:11px;color:var(--text2);display:grid;grid-template-columns:auto 1fr 100px 60px 50px 80px;gap:8px;align-items:center">
-      <span></span>${col('name','Nombre')}${col('platform','Plataforma')}${col('hours_played','Horas')}${col('user_rating','★')}${col('genre','Género')}
+    <div style="display:grid;grid-template-columns:32px 1fr 110px 65px 50px 90px;border-bottom:1px solid var(--border);background:var(--bg2);padding:6px 16px 6px 12px">
+      <span></span>
+      <span style="font-size:11px;color:var(--text2)">${col('name','Nombre')}</span>
+      <span style="font-size:11px;color:var(--text2)">${col('platform','Plataforma')}</span>
+      <span style="font-size:11px;color:var(--text2)">${col('hours_played','Horas')}</span>
+      <span style="font-size:11px;color:var(--text2)">${col('user_rating','★')}</span>
+      <span style="font-size:11px;color:var(--text2)">${col('genre','Género')}</span>
     </div>
-    <div style="max-height:420px;overflow-y:auto">
-    ${!games.length ? '<div style="padding:12px 16px;color:var(--text2);font-size:13px">Sin resultados</div>' :
-      games.map(g => `
-        <label style="display:grid;grid-template-columns:auto 2fr 120px 70px 60px 100px;gap:10px;align-items:center;padding:7px 16px;cursor:pointer;font-size:12px;border-bottom:0.5px solid var(--border)"
-          onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
-          <input type="checkbox" ${(g.in_folder || _folderPickerAdd.has(g.id)) && !_folderPickerRemove.has(g.id) ? 'checked' : ''}
-            style="accent-color:var(--green)" data-gid="${g.id}" data-was="${g.in_folder ? '1' : '0'}"
-            onchange="trackFolderGameChange(this)">
-          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${g.name}">${g.name}</span>
-          <span style="font-size:10px;color:var(--text2)">${g.platform}</span>
-          <span style="font-size:10px;color:var(--text2)">${g.hours_played}h</span>
-          <span style="font-size:10px;color:var(--text2)">${g.user_rating > 0 ? '★'.repeat(Math.floor(g.user_rating)) : '—'}</span>
-          <span style="font-size:10px;color:var(--text2)">${g.genre || '—'}</span>
-        </label>
-      `).join('')}
+    <div style="overflow-y:auto;max-height:400px">
+      ${!games.length
+        ? '<div style="padding:16px;color:var(--text2);font-size:13px">Sin resultados</div>'
+        : games.map(g => `
+          <div style="display:grid;grid-template-columns:32px 1fr 110px 65px 50px 90px;align-items:center;padding:7px 16px 7px 12px;border-bottom:0.5px solid var(--border);cursor:pointer"
+            onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
+            <input type="checkbox" ${(g.in_folder || _folderPickerAdd.has(g.id)) && !_folderPickerRemove.has(g.id) ? 'checked' : ''}
+              style="accent-color:var(--green)" data-gid="${g.id}" data-was="${g.in_folder ? '1' : '0'}"
+              onchange="trackFolderGameChange(this)">
+            <span style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:8px" title="${g.name}">${g.name}</span>
+            <span style="font-size:11px;color:var(--text2)">${g.platform}</span>
+            <span style="font-size:11px;color:var(--text2)">${g.hours_played}h</span>
+            <span style="font-size:11px;color:var(--text2)">${g.user_rating > 0 ? '★'.repeat(Math.floor(g.user_rating)) : '—'}</span>
+            <span style="font-size:11px;color:var(--text2)">${g.genre || '—'}</span>
+          </div>`).join('')}
     </div>`;
 }
 
