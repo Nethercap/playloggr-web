@@ -2354,29 +2354,33 @@ function renderFolderGamePicker() {
         oninput="_folderPickerSearch=this.value;renderFolderGamePicker()"
         style="width:100%;box-sizing:border-box;padding:5px 10px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text)" />
     </div>
-    <div style="display:grid;grid-template-columns:32px 1fr 110px 65px 50px 90px;border-bottom:1px solid var(--border);background:var(--bg2);padding:6px 16px 6px 12px">
-      <span></span>
-      <span style="font-size:11px;color:var(--text2)">${col('name','Nombre')}</span>
-      <span style="font-size:11px;color:var(--text2)">${col('platform','Plataforma')}</span>
-      <span style="font-size:11px;color:var(--text2)">${col('hours_played','Horas')}</span>
-      <span style="font-size:11px;color:var(--text2)">${col('user_rating','★')}</span>
-      <span style="font-size:11px;color:var(--text2)">${col('genre','Género')}</span>
+    <div style="display:table;width:100%;border-bottom:1px solid var(--border);background:var(--bg2)">
+      <div style="display:table-row">
+        <div style="display:table-cell;width:44px;padding:6px 8px 6px 16px"></div>
+        <div style="display:table-cell;padding:6px 8px;font-size:11px;color:var(--text2)">${col('name','Nombre')}</div>
+        <div style="display:table-cell;width:110px;padding:6px 8px;font-size:11px;color:var(--text2)">${col('platform','Plataforma')}</div>
+        <div style="display:table-cell;width:65px;padding:6px 8px;font-size:11px;color:var(--text2)">${col('hours_played','Horas')}</div>
+        <div style="display:table-cell;width:50px;padding:6px 8px;font-size:11px;color:var(--text2)">${col('user_rating','★')}</div>
+        <div style="display:table-cell;width:90px;padding:6px 16px 6px 8px;font-size:11px;color:var(--text2)">${col('genre','Género')}</div>
+      </div>
     </div>
     <div style="overflow-y:auto;max-height:400px">
       ${!games.length
         ? '<div style="padding:16px;color:var(--text2);font-size:13px">Sin resultados</div>'
-        : games.map(g => `
-          <div style="display:grid;grid-template-columns:32px 1fr 110px 65px 50px 90px;align-items:center;padding:7px 16px 7px 12px;border-bottom:0.5px solid var(--border);cursor:pointer"
+        : '<div style="display:table;width:100%">' + games.map(g => `
+          <div style="display:table-row;cursor:pointer"
             onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
-            <input type="checkbox" ${(g.in_folder || _folderPickerAdd.has(g.id)) && !_folderPickerRemove.has(g.id) ? 'checked' : ''}
-              style="accent-color:var(--green)" data-gid="${g.id}" data-was="${g.in_folder ? '1' : '0'}"
-              onchange="trackFolderGameChange(this)">
-            <span style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:8px" title="${g.name}">${g.name}</span>
-            <span style="font-size:11px;color:var(--text2)">${g.platform}</span>
-            <span style="font-size:11px;color:var(--text2)">${g.hours_played}h</span>
-            <span style="font-size:11px;color:var(--text2)">${g.user_rating > 0 ? '★'.repeat(Math.floor(g.user_rating)) : '—'}</span>
-            <span style="font-size:11px;color:var(--text2)">${g.genre || '—'}</span>
-          </div>`).join('')}
+            <div style="display:table-cell;width:44px;padding:8px 8px 8px 16px;vertical-align:middle">
+              <input type="checkbox" ${(g.in_folder || _folderPickerAdd.has(g.id)) && !_folderPickerRemove.has(g.id) ? 'checked' : ''}
+                style="accent-color:var(--green);display:block" data-gid="${g.id}" data-was="${g.in_folder ? '1' : '0'}"
+                onchange="trackFolderGameChange(this)">
+            </div>
+            <div style="display:table-cell;padding:8px 8px;font-size:12px;max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle" title="${g.name}">${g.name}</div>
+            <div style="display:table-cell;width:110px;padding:8px 8px;font-size:11px;color:var(--text2);vertical-align:middle">${g.platform}</div>
+            <div style="display:table-cell;width:65px;padding:8px 8px;font-size:11px;color:var(--text2);vertical-align:middle">${g.hours_played}h</div>
+            <div style="display:table-cell;width:50px;padding:8px 8px;font-size:11px;color:var(--text2);vertical-align:middle">${g.user_rating > 0 ? '★'.repeat(Math.floor(g.user_rating)) : '—'}</div>
+            <div style="display:table-cell;width:90px;padding:8px 16px 8px 8px;font-size:11px;color:var(--text2);vertical-align:middle;border-bottom:0.5px solid var(--border)">${g.genre || '—'}</div>
+          </div>`).join('') + '</div>'}
     </div>`;
 }
 
