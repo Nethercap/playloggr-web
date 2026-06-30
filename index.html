@@ -295,17 +295,16 @@
 
       <!-- Folder filter -->
       <div style="position:relative;display:inline-block" id="folder-filter-wrap">
-        <button id="folder-filter-btn" onclick="handleFolderBtnClick()"
-          style="padding:4px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;display:none;align-items:center;gap:5px">
-          <i class="ti ti-folder" style="font-size:12px"></i> Carpetas ▾
-        </button>
+        <div id="folder-filter-btn" style="display:none;align-items:center;border:0.5px solid var(--border);border-radius:6px;overflow:hidden;background:var(--bg2)">
+          <button onclick="handleFolderBtnClick()"
+            style="padding:4px 10px;font-size:12px;border:none;background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:5px">
+            <i class="ti ti-folder" style="font-size:12px"></i> <span id="folder-btn-label">Carpetas</span>
+          </button>
+          <button onclick="toggleFolderDropdown()"
+            style="padding:4px 8px;font-size:11px;border:none;border-left:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer">▾</button>
+        </div>
         <div id="folder-dropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:200;min-width:200px;padding:4px 0;box-shadow:0 4px 16px rgba(0,0,0,0.3)">
           <div id="folder-list-items"></div>
-          <div style="padding:6px 10px;border-top:0.5px solid var(--border)">
-            <button onclick="openCreateFolder()" style="width:100%;padding:5px;font-size:12px;border-radius:5px;border:0.5px dashed var(--border);background:transparent;color:var(--text2);cursor:pointer">
-              <i class="ti ti-plus"></i> Nueva carpeta
-            </button>
-          </div>
         </div>
       </div>
 
@@ -714,7 +713,8 @@ function actionBtn(g) {
   const hideLabel = g.hidden ? '<i class="ti ti-eye"></i> Mostrar' : '<i class="ti ti-eye-off"></i> Ocultar';
   const hideBtn   = '<button onclick="toggleHideGame(\'' + g.id + '\', ' + g.hidden + ')" style="font-size:11px;padding:2px 8px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;margin-top:4px">' + hideLabel + '</button>';
   const deleteBtn = '<button onclick="deleteGame(\'' + g.id + '\')" style="font-size:11px;padding:2px 8px;border-radius:6px;border:0.5px solid #E24B4A;background:transparent;color:#E24B4A;cursor:pointer;margin-top:4px">🗑 Borrar</button>';
-  return hideBtn + ' ' + deleteBtn;
+  const folderBtn = '<button onclick="openCardFolderPicker(\'' + g.id + '\')" style="font-size:11px;padding:2px 8px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;margin-top:4px" title="Agregar a carpeta"><i class="ti ti-folder-plus" style="font-size:11px"></i></button>';
+  return folderBtn + ' ' + hideBtn + ' ' + deleteBtn;
 }
 
 function starsHtml(rating) {
@@ -1243,7 +1243,7 @@ function setView(view) {
   const hiddenBtn = document.getElementById('btn-hidden');
   if (hiddenBtn) hiddenBtn.style.display = view === 'library' ? 'inline-flex' : 'none';
   const folderBtn2 = document.getElementById('folder-filter-btn');
-  if (folderBtn2) folderBtn2.style.display = userFolders.length ? 'inline-flex' : 'none';
+  if (folderBtn2) folderBtn2.style.display = 'inline-flex';
   if (activeFolderId === -1 || activeFolderId > 0) { activeFolderId = null; document.getElementById('filter-bar').style.display = ''; }
   showFolderLabel();
   updateFolderBtn();
@@ -1950,21 +1950,25 @@ function currentSectionFolders() {
 }
 
 function updateFolderBtn() {
-  const btn = document.getElementById('folder-filter-btn');
-  if (!btn) return;
+  const wrap  = document.getElementById('folder-filter-btn');
+  const label = document.getElementById('folder-btn-label');
+  if (!wrap || !label) return;
   const folders = currentSectionFolders();
-  btn.style.display = 'inline-flex';
+  wrap.style.display = 'inline-flex';
+
   if (activeFolderId === -1) {
-    btn.innerHTML = '<i class="ti ti-folder" style="font-size:12px;color:var(--green)"></i> <span style="color:var(--green)">Carpetas</span>';
-    btn.style.borderColor = 'var(--green)';
-  } else if (activeFolderId) {
+    label.textContent = 'Carpetas';
+    wrap.style.borderColor = 'var(--green)';
+    wrap.querySelectorAll('button').forEach(b => b.style.color = 'var(--green)');
+  } else if (activeFolderId > 0) {
     const f = folders.find(x => x.id === activeFolderId);
-    btn.innerHTML = `<i class="ti ti-folder" style="font-size:12px;color:var(--green)"></i> <span style="color:var(--green)">${f ? f.name : 'Carpeta'}</span> ✕`;
-    btn.style.borderColor = 'var(--green)';
+    label.textContent = f ? f.name : 'Carpeta';
+    wrap.style.borderColor = 'var(--green)';
+    wrap.querySelectorAll('button').forEach(b => b.style.color = 'var(--green)');
   } else {
-    btn.innerHTML = `<i class="ti ti-folder" style="font-size:12px"></i> Carpetas${folders.length ? ` (${folders.length})` : ''} ▾`;
-    btn.style.borderColor = 'var(--border)';
-    btn.style.color = 'var(--text2)';
+    label.textContent = `Carpetas${folders.length ? ' (' + folders.length + ')' : ''}`;
+    wrap.style.borderColor = 'var(--border)';
+    wrap.querySelectorAll('button').forEach(b => b.style.color = 'var(--text2)');
   }
 }
 
