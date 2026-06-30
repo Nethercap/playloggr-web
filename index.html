@@ -2096,6 +2096,8 @@ function exitFolder() {
 
 // Render folder list (the -1 state — show all folders as cards)
 function renderFolderList() {
+  // Guard: only render folder list when in folder list mode
+  if (activeFolderId !== -1) return;
   const gameList = document.getElementById('game-list');
   if (!gameList) return;
   const folders = [...currentSectionFolders()];
@@ -2721,7 +2723,14 @@ async function syncAll(page = 1, silent = false) {
     renderPlatStatus();
 
     renderStats(data);
-    if (activeFolderId === -1) { renderFolderList(); } else { renderGames(); updatePlayButtons(); renderPagination(); }
+    if (activeFolderId === -1) {
+      renderFolderList();
+    } else {
+      // Ensure filter-bar is visible
+      const _fb = document.getElementById('filter-bar');
+      if (_fb) _fb.style.removeProperty('display');
+      renderGames(); updatePlayButtons(); renderPagination();
+    }
     loadGlobalStats();
     // Refresh available filter options (in background)
     loadAvailableFilters();
