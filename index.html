@@ -1935,7 +1935,11 @@ let folderSortDir  = 'asc';
 
 function setFolderSort(val) {
   folderSort = val;
-  loadFolders().then(renderFolderList);
+  if (activeFolderId === -1) {
+    loadFolders().then(renderFolderList);
+  } else {
+    loadFolders().then(renderFolderDropdownItems);
+  }
 }
 
 function toggleFolderSortDir() {
@@ -2097,8 +2101,9 @@ function renderFolderList() {
   const folders = [...currentSectionFolders()];
   if (folderSortDir === 'desc') folders.reverse();
 
-  // Hide game filters, show folder sort
-  document.getElementById('filter-bar').style.display = 'none';
+  // Hide filter bar in folder list view
+  const _fb = document.getElementById('filter-bar');
+  if (_fb) _fb.style.display = 'none';
   const label = document.getElementById('active-folder-label');
   if (label) label.style.display = 'none';
 
@@ -2296,37 +2301,80 @@ let _folderPickerId = null;
 let _folderPickerAdd = new Set();
 let _folderPickerRemove = new Set();
 
+let _folderPickerAllGames = [];
+let _folderPickerSortCol  = 'name';
+let _folderPickerSortDir  = 'asc';
+let _folderPickerSearch   = '';
+
 async function openFolderAddGamePicker(folderId) {
   _folderPickerId     = folderId;
   _folderPickerAdd    = new Set();
   _folderPickerRemove = new Set();
+  _folderPickerSearch = '';
+  _folderPickerSortCol = 'name';
+  _folderPickerSortDir = 'asc';
 
   const res  = await fetch(`${apiBase()}/api/v1/folders/${folderId}/available-games`, {
     headers: { 'Authorization': `Bearer ${authToken}` }
   });
   const data = await res.json();
-  const games = data.games || [];
-
-  const list = document.getElementById('folder-add-game-list');
-  list.innerHTML = `
-    <div style="padding:8px 16px;border-bottom:0.5px solid var(--border);font-size:11px;color:var(--text2);display:grid;grid-template-columns:auto 1fr auto auto auto auto;gap:8px;align-items:center">
-      <span></span><span>Nombre</span><span>Plataforma</span><span>Horas</span><span>★</span><span>Género</span>
-    </div>
-    ${games.map(g => `
-      <label style="display:grid;grid-template-columns:auto 1fr auto auto auto auto;gap:8px;align-items:center;padding:8px 16px;cursor:pointer;font-size:12px;border-bottom:0.5px solid var(--border)"
-        onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
-        <input type="checkbox" ${g.in_folder ? 'checked' : ''}
-          style="accent-color:var(--green)" data-gid="${g.id}" data-was="${g.in_folder ? '1' : '0'}"
-          onchange="trackFolderGameChange(this)">
-        <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${g.name}</span>
-        <span style="font-size:10px;color:var(--text2)">${g.platform}</span>
-        <span style="font-size:10px;color:var(--text2)">${g.hours_played}h</span>
-        <span style="font-size:10px;color:var(--text2)">${g.user_rating > 0 ? '★'.repeat(Math.floor(g.user_rating)) : '—'}</span>
-        <span style="font-size:10px;color:var(--text2)">${g.genre || '—'}</span>
-      </label>
-    `).join('')}`;
-
+  _folderPickerAllGames = data.games || [];
+  renderFolderGamePicker();
   document.getElementById('folder-add-game-overlay').classList.add('open');
+}
+
+function renderFolderGamePicker() {
+  const list   = document.getElementById('folder-add-game-list');
+  const q      = _folderPickerSearch.toLowerCase();
+  let games    = _folderPickerAllGames.filter(g => !q || g.name.toLowerCase().includes(q));
+
+  // Sort
+  games = games.sort((a, b) => {
+    let va = a[_folderPickerSortCol] ?? '', vb = b[_folderPickerSortCol] ?? '';
+    if (typeof va === 'string') va = va.toLowerCase();
+    if (typeof vb === 'string') vb = vb.toLowerCase();
+    return _folderPickerSortDir === 'asc'
+      ? (va > vb ? 1 : va < vb ? -1 : 0)
+      : (va < vb ? 1 : va > vb ? -1 : 0);
+  });
+
+  const col = (key, label) => {
+    const active = _folderPickerSortCol === key;
+    const arrow  = active ? (_folderPickerSortDir === 'asc' ? ' ↑' : ' ↓') : '';
+    return `<span onclick="sortFolderPicker('${key}')" style="cursor:pointer;${active?'color:var(--green)':''}">${label}${arrow}</span>`;
+  };
+
+  list.innerHTML = `
+    <div style="padding:6px 12px;border-bottom:0.5px solid var(--border)">
+      <input type="text" placeholder="Buscar juego..." value="${_folderPickerSearch}"
+        oninput="_folderPickerSearch=this.value;renderFolderGamePicker()"
+        style="width:100%;padding:4px 8px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text)" />
+    </div>
+    <div style="padding:6px 16px;border-bottom:0.5px solid var(--border);font-size:11px;color:var(--text2);display:grid;grid-template-columns:auto 1fr 100px 60px 50px 80px;gap:8px;align-items:center">
+      <span></span>${col('name','Nombre')}${col('platform','Plataforma')}${col('hours_played','Horas')}${col('user_rating','★')}${col('genre','Género')}
+    </div>
+    <div style="max-height:320px;overflow-y:auto">
+    ${!games.length ? '<div style="padding:12px 16px;color:var(--text2);font-size:13px">Sin resultados</div>' :
+      games.map(g => `
+        <label style="display:grid;grid-template-columns:auto 1fr 100px 60px 50px 80px;gap:8px;align-items:center;padding:7px 16px;cursor:pointer;font-size:12px;border-bottom:0.5px solid var(--border)"
+          onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
+          <input type="checkbox" ${(g.in_folder || _folderPickerAdd.has(g.id)) && !_folderPickerRemove.has(g.id) ? 'checked' : ''}
+            style="accent-color:var(--green)" data-gid="${g.id}" data-was="${g.in_folder ? '1' : '0'}"
+            onchange="trackFolderGameChange(this)">
+          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${g.name}">${g.name}</span>
+          <span style="font-size:10px;color:var(--text2)">${g.platform}</span>
+          <span style="font-size:10px;color:var(--text2)">${g.hours_played}h</span>
+          <span style="font-size:10px;color:var(--text2)">${g.user_rating > 0 ? '★'.repeat(Math.floor(g.user_rating)) : '—'}</span>
+          <span style="font-size:10px;color:var(--text2)">${g.genre || '—'}</span>
+        </label>
+      `).join('')}
+    </div>`;
+}
+
+function sortFolderPicker(col) {
+  if (_folderPickerSortCol === col) _folderPickerSortDir = _folderPickerSortDir === 'asc' ? 'desc' : 'asc';
+  else { _folderPickerSortCol = col; _folderPickerSortDir = 'asc'; }
+  renderFolderGamePicker();
 }
 
 function trackFolderGameChange(cb) {
@@ -2362,18 +2410,19 @@ async function confirmFolderGamePicker() {
 
 // ── Folder button click (main btn) ────────────────────────────────────────────
 function handleFolderBtnClick() {
-  // Left part always goes to folder list view (or exits it)
-  if (activeFolderId === -1) {
-    // Already in folder list — exit back to normal view
+  if (activeFolderId === -1 || activeFolderId > 0) {
+    // Exit folder view — restore normal view
     activeFolderId = null;
-    document.getElementById('filter-bar').style.display = '';
+    const fb = document.getElementById('filter-bar');
+    if (fb) fb.style.removeProperty('display');
     showFolderLabel();
     updateFolderBtn();
     syncAll(1);
   } else {
-    // Go to folder list view (works from any state)
+    // Enter folder list view
     activeFolderId = -1;
-    document.getElementById('filter-bar').style.display = 'none';
+    const fb = document.getElementById('filter-bar');
+    if (fb) fb.style.display = 'none';
     document.getElementById('folder-dropdown').style.display = 'none';
     showFolderLabel();
     updateFolderBtn();
