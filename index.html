@@ -279,43 +279,46 @@
     </div>
 
     <!-- Filter bar -->
-    <div id="filter-bar" style="display:flex;flex-wrap:wrap;gap:6px;padding:6px 16px 8px;align-items:center">
-      <!-- Filters injected by JS -->
-      <div id="filter-dropdowns" style="display:flex;flex-wrap:wrap;gap:6px;flex:1"></div>
+    <div id="filter-bar" style="display:flex;flex-direction:column;gap:6px;padding:6px 16px 8px">
+      <!-- Row 1: filters + folder + add btn -->
+      <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+        <!-- Filter dropdowns injected by JS -->
+        <div id="filter-dropdowns" style="display:flex;flex-wrap:wrap;gap:6px"></div>
 
-      <!-- Add button (conditional) -->
-      <div id="add-game-btn-wrap" style="margin-left:auto;display:flex;gap:6px;align-items:center">
-        <button id="add-game-btn" onclick="openModal()" style="display:none;padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">
-          <i class="ti ti-plus"></i> Agregar juego
-        </button>
-        <button id="add-wishlist-btn" onclick="openWishlistModal()" style="display:none;padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:#EF9F27;color:#fff;cursor:pointer">
-          <i class="ti ti-star"></i> Agregar juego deseado
-        </button>
-      </div>
+        <!-- Folder filter -->
+        <div style="position:relative" id="folder-filter-wrap">
+          <div id="folder-filter-btn" style="display:none;align-items:center;border:0.5px solid var(--border);border-radius:6px;overflow:hidden;background:var(--bg2)">
+            <button onclick="handleFolderBtnClick()"
+              style="padding:4px 8px;font-size:12px;border:none;background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap">
+              <i class="ti ti-folder" style="font-size:11px"></i><span id="folder-btn-label">Carpetas</span>
+            </button>
+            <button onclick="toggleFolderDropdown()"
+              style="padding:4px 6px;font-size:11px;border:none;border-left:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer">▾</button>
+          </div>
+          <div id="folder-dropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:200;min-width:220px;padding:4px 0;box-shadow:0 4px 16px rgba(0,0,0,0.3)">
+            <div id="folder-list-items"></div>
+          </div>
+        </div>
 
-      <!-- Folder filter -->
-      <div style="position:relative" id="folder-filter-wrap">
-        <div id="folder-filter-btn" style="display:none;align-items:center;border:0.5px solid var(--border);border-radius:6px;overflow:hidden;background:var(--bg2);height:26px">
-          <button onclick="handleFolderBtnClick()"
-            style="height:100%;padding:0 8px;font-size:12px;border:none;background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap">
-            <i class="ti ti-folder" style="font-size:11px"></i><span id="folder-btn-label">Carpetas</span>
+        <!-- Hidden toggle -->
+        <button id="btn-hidden" onclick="toggleShowHidden()"
+          style="padding:4px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;display:none;align-items:center;gap:4px">
+          <i class="ti ti-eye-off" style="font-size:12px"></i> Ocultos
+        </button>
+
+        <!-- Add button -->
+        <div id="add-game-btn-wrap" style="margin-left:auto;display:flex;gap:6px;align-items:center">
+          <button id="add-game-btn" onclick="openModal()" style="display:none;padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">
+            <i class="ti ti-plus"></i> Agregar juego
           </button>
-          <button onclick="toggleFolderDropdown()"
-            style="height:100%;padding:0 6px;font-size:11px;border:none;border-left:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer">▾</button>
-        </div>
-        <div id="folder-dropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:200;min-width:220px;padding:4px 0;box-shadow:0 4px 16px rgba(0,0,0,0.3)">
-          <div id="folder-list-items"></div>
+          <button id="add-wishlist-btn" onclick="openWishlistModal()" style="display:none;padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:#EF9F27;color:#fff;cursor:pointer">
+            <i class="ti ti-star"></i> Agregar juego deseado
+          </button>
         </div>
       </div>
 
-      <!-- Hidden toggle (library only) -->
-      <button id="btn-hidden" onclick="toggleShowHidden()"
-        style="padding:4px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;display:none;align-items:center;gap:4px">
-        <i class="ti ti-eye-off" style="font-size:12px"></i> Ocultos
-      </button>
-
-      <!-- Sort -->
-      <div style="display:flex;align-items:center;gap:4px">
+      <!-- Row 2: sort + search -->
+      <div style="display:flex;align-items:center;gap:6px">
         <select id="sort-sel" onchange="applyFilters()" style="font-size:12px;padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text)">
           <option value="name">Nombre</option>
           <option value="hours">Horas</option>
@@ -328,13 +331,10 @@
           style="padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">
           ↑
         </button>
+        <input type="text" id="search-input" placeholder="Buscar juego..." oninput="applyFilters()"
+          style="padding:4px 10px;font-size:12px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text);width:160px" />
       </div>
-
-      <!-- Search -->
-      <input type="text" id="search-input" placeholder="Buscar juego..." oninput="applyFilters()"
-        style="padding:4px 10px;font-size:12px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text);width:160px" />
     </div>
-  </div>
 
   <div class="game-list" id="game-list">
     <div class="empty"><div class="spinner" style="margin:0 auto 12px"></div>Conectando con el backend...</div>
@@ -1929,15 +1929,26 @@ async function submitAuth() {
 // ── Folders ──────────────────────────────────────────────────────────────────
 
 let userFolders    = { library: [], wishlist: [] };
-let activeFolderId = null;   // null = showing all games; -1 = showing folder list
-let folderSort     = 'name'; // name | created_at
+let activeFolderId = null;
+let folderSort     = 'name';
+let folderSortDir  = 'asc';
+
+function setFolderSort(val) {
+  folderSort = val;
+  loadFolders().then(renderFolderList);
+}
+
+function toggleFolderSortDir() {
+  folderSortDir = folderSortDir === 'asc' ? 'desc' : 'asc';
+  renderFolderList();
+}
 
 async function loadFolders() {
   try {
     const section = currentView === 'wishlist' ? 'wishlist' : 'library';
     const [libRes, wishRes] = await Promise.all([
-      fetch(`${apiBase()}/api/v1/folders?section=library`, { headers: { 'Authorization': `Bearer ${authToken}` } }),
-      fetch(`${apiBase()}/api/v1/folders?section=wishlist`, { headers: { 'Authorization': `Bearer ${authToken}` } }),
+      fetch(`${apiBase()}/api/v1/folders?section=library&sort=${folderSort}`, { headers: { 'Authorization': `Bearer ${authToken}` } }),
+      fetch(`${apiBase()}/api/v1/folders?section=wishlist&sort=${folderSort}`, { headers: { 'Authorization': `Bearer ${authToken}` } }),
     ]);
     userFolders.library  = (await libRes.json()).folders  || [];
     userFolders.wishlist = (await wishRes.json()).folders || [];
@@ -2080,9 +2091,10 @@ function exitFolder() {
 
 // Render folder list (the -1 state — show all folders as cards)
 function renderFolderList() {
-  const folders = currentSectionFolders();
   const gameList = document.getElementById('game-list');
   if (!gameList) return;
+  const folders = [...currentSectionFolders()];
+  if (folderSortDir === 'desc') folders.reverse();
 
   // Hide game filters, show folder sort
   document.getElementById('filter-bar').style.display = 'none';
