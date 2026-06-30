@@ -133,6 +133,17 @@
 </head>
 <body>
 
+<!-- Play Session Floating Timer -->
+<div id="play-timer-bar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(90deg,#1D9E75,#157a5b);color:#fff;padding:10px 20px;display:none;align-items:center;gap:14px;box-shadow:0 2px 12px rgba(0,0,0,0.4)">
+  <div style="font-size:18px">🎮</div>
+  <div style="flex:1;min-width:0">
+    <div id="play-timer-game" style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+    <div id="play-timer-clock" style="font-size:18px;font-variant-numeric:tabular-nums;font-weight:700">00:00:00</div>
+  </div>
+  <button id="play-timer-pause" onclick="pausePlaySession()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:14px">⏸</button>
+  <button onclick="finishPlaySession()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:8px 16px;border-radius:20px;cursor:pointer;font-size:13px;font-weight:600">Finalizar</button>
+</div>
+
 <style>
   #login-screen {
     position:fixed;inset:0;background:var(--bg3);
@@ -840,7 +851,13 @@ function renderGames() {
       : '';
 
     return `<div class="game-card" id="card-${g.id}">
-      <div class="game-cover" data-gid="${g.id}" onclick="openCoverEditFromCard(this)" style="cursor:pointer;position:relative" title="Click para cambiar portada">${cover}<div class="cover-edit-hint" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);opacity:0;transition:opacity 0.15s;font-size:18px">✏️</div></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0">
+        <div class="game-cover" data-gid="${g.id}" onclick="openCoverEditFromCard(this)" style="cursor:pointer;position:relative" title="Click para cambiar portada">${cover}<div class="cover-edit-hint" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);opacity:0;transition:opacity 0.15s;font-size:18px">✏️</div></div>
+        <button class="play-btn" data-gid="${g.id}" onclick="togglePlaySession('${g.id}')" title="Registrar sesión de juego"
+          style="width:28px;height:28px;border-radius:50%;border:1.5px solid #1D9E75;background:transparent;color:#1D9E75;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px">
+          ▶
+        </button>
+      </div>
       <div>
         <div class="game-name">${g.name}</div>
         <div class="game-meta">
@@ -1860,10 +1877,170 @@ async function submitAuth() {
   }
 }
 
+// ── Play Session Timer ──────────────────────────────────────────────────────
+
+let playSession = { gameId: null, gameName: null, status: null, elapsedSeconds: 0, tickHandle: null };
+
+function fmtClock(totalSeconds) {
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = Math.floor(totalSeconds % 60);
+  return [h,m,s].map(n => String(n).padStart(2,'0')).join(':');
+}
+
+function updateTimerDisplay() {
+  document.getElementById('play-timer-clock').textContent = fmtClock(playSession.elapsedSeconds);
+}
+
+function startTimerTick() {
+  stopTimerTick();
+  playSession.tickHandle = setInterval(() => {
+    if (playSession.status === 'active') {
+      playSession.elapsedSeconds += 1;
+      updateTimerDisplay();
+    }
+  }, 1000);
+}
+
+function stopTimerTick() {
+  if (playSession.tickHandle) { clearInterval(playSession.tickHandle); playSession.tickHandle = null; }
+}
+
+function showTimerBar() {
+  document.getElementById('play-timer-bar').style.display = 'flex';
+  document.body.style.paddingTop = '52px';
+}
+
+function hideTimerBar() {
+  document.getElementById('play-timer-bar').style.display = 'none';
+  document.body.style.paddingTop = '';
+}
+
+function updatePlayButtons() {
+  document.querySelectorAll('.play-btn').forEach(btn => {
+    const gid = btn.dataset.gid;
+    if (gid === playSession.gameId) {
+      btn.innerHTML = playSession.status === 'active' ? '⏸' : '▶';
+      btn.style.background = playSession.status === 'active' ? '#1D9E75' : 'transparent';
+      btn.style.color = playSession.status === 'active' ? '#fff' : '#1D9E75';
+    } else {
+      btn.innerHTML = '▶';
+      btn.style.background = 'transparent';
+      btn.style.color = '#1D9E75';
+    }
+  });
+}
+
+async function togglePlaySession(gameId) {
+  // If clicking the same game that's active → pause
+  if (playSession.gameId === gameId && playSession.status === 'active') {
+    return pausePlaySession();
+  }
+  // If clicking the same game that's paused → resume
+  if (playSession.gameId === gameId && playSession.status === 'paused') {
+    return resumePlaySession();
+  }
+  // Otherwise → start new session (server auto-finishes any previous one)
+  const g = allGames.find(x => x.id === gameId);
+  try {
+    await fetch(`${apiBase()}/api/v1/session/start`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ game_id: gameId }),
+    });
+    playSession = { gameId, gameName: g ? g.name : gameId, status: 'active', elapsedSeconds: 0, tickHandle: null };
+    document.getElementById('play-timer-game').textContent = playSession.gameName;
+    updateTimerDisplay();
+    showTimerBar();
+    startTimerTick();
+    updatePlayButtons();
+  } catch(e) {}
+}
+
+async function pausePlaySession() {
+  try {
+    await fetch(`${apiBase()}/api/v1/session/pause`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    playSession.status = 'paused';
+    stopTimerTick();
+    document.getElementById('play-timer-pause').textContent = '▶';
+    document.getElementById('play-timer-pause').onclick = resumePlaySession;
+    updatePlayButtons();
+  } catch(e) {}
+}
+
+async function resumePlaySession() {
+  try {
+    await fetch(`${apiBase()}/api/v1/session/resume`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    playSession.status = 'active';
+    startTimerTick();
+    document.getElementById('play-timer-pause').textContent = '⏸';
+    document.getElementById('play-timer-pause').onclick = pausePlaySession;
+    updatePlayButtons();
+  } catch(e) {}
+}
+
+async function finishPlaySession() {
+  stopTimerTick();
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/session/finish`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    if (data.counted) {
+      const g = allGames.find(x => x.id === playSession.gameId);
+      if (g) g.hours_played = (g.hours_played || 0) + data.hours_added;
+      syncAll(currentPage, true);
+      loadGlobalStats();
+    }
+  } catch(e) {}
+  hideTimerBar();
+  playSession = { gameId: null, gameName: null, status: null, elapsedSeconds: 0, tickHandle: null };
+  updatePlayButtons();
+}
+
+async function checkActiveSession() {
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/session/active`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    if (data.active) {
+      const g = allGames.find(x => x.id === data.game_id);
+      playSession = {
+        gameId: data.game_id,
+        gameName: g ? g.name : data.game_id,
+        status: data.status,
+        elapsedSeconds: data.elapsed_seconds,
+        tickHandle: null,
+      };
+      document.getElementById('play-timer-game').textContent = playSession.gameName;
+      updateTimerDisplay();
+      showTimerBar();
+      if (data.status === 'active') {
+        startTimerTick();
+        document.getElementById('play-timer-pause').textContent = '⏸';
+        document.getElementById('play-timer-pause').onclick = pausePlaySession;
+      } else {
+        document.getElementById('play-timer-pause').textContent = '▶';
+        document.getElementById('play-timer-pause').onclick = resumePlaySession;
+      }
+      updatePlayButtons();
+    }
+  } catch(e) {}
+}
+
 function onLoginSuccess() {
   document.getElementById('login-screen').style.display = 'none';
   resetActiveFilters();
   loadAvailableFilters();
+  checkActiveSession();
   setTimeout(() => {
     const b = document.getElementById('add-game-btn');
     if (b) b.style.display = '';
@@ -1973,6 +2150,7 @@ async function syncAll(page = 1, silent = false) {
 
     renderStats(data);
     renderGames();
+    updatePlayButtons();
     renderPagination();
     loadGlobalStats();
     // Refresh available filter options (in background)
