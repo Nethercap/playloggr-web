@@ -854,9 +854,7 @@ function renderGames() {
       <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0">
         <div class="game-cover" data-gid="${g.id}" onclick="openCoverEditFromCard(this)" style="cursor:pointer;position:relative" title="Click para cambiar portada">${cover}<div class="cover-edit-hint" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);opacity:0;transition:opacity 0.15s;font-size:18px">✏️</div></div>
         <button class="play-btn" data-gid="${g.id}" onclick="togglePlaySession('${g.id}')" title="Registrar sesión de juego"
-          style="width:28px;height:28px;border-radius:50%;border:1.5px solid #1D9E75;background:transparent;color:#1D9E75;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px">
-          ▶
-        </button>
+          style="width:28px;height:28px;min-width:28px;border-radius:50%;border:1.5px solid #1D9E75;background:transparent;color:#1D9E75;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1;padding:0">▶</button>
       </div>
       <div>
         <div class="game-name">${g.name}</div>
@@ -1879,7 +1877,7 @@ async function submitAuth() {
 
 // ── Play Session Timer ──────────────────────────────────────────────────────
 
-let playSession = { gameId: null, gameName: null, status: null, elapsedSeconds: 0, tickHandle: null };
+let playSession = { gameId: null, gameName: null, status: null, baseSeconds: 0, activeSince: null, tickHandle: null };
 
 function fmtClock(totalSeconds) {
   const h = Math.floor(totalSeconds / 3600);
@@ -1888,18 +1886,23 @@ function fmtClock(totalSeconds) {
   return [h,m,s].map(n => String(n).padStart(2,'0')).join(':');
 }
 
+function currentElapsedSeconds() {
+  let total = playSession.baseSeconds || 0;
+  if (playSession.status === 'active' && playSession.activeSince) {
+    total += Math.floor((Date.now() - playSession.activeSince) / 1000);
+  }
+  return total;
+}
+
 function updateTimerDisplay() {
-  document.getElementById('play-timer-clock').textContent = fmtClock(playSession.elapsedSeconds);
+  document.getElementById('play-timer-clock').textContent = fmtClock(currentElapsedSeconds());
 }
 
 function startTimerTick() {
   stopTimerTick();
-  playSession.tickHandle = setInterval(() => {
-    if (playSession.status === 'active') {
-      playSession.elapsedSeconds += 1;
-      updateTimerDisplay();
-    }
-  }, 1000);
+  playSession.activeSince = Date.now();
+  playSession.tickHandle = setInterval(updateTimerDisplay, 1000);
+  updateTimerDisplay();
 }
 
 function stopTimerTick() {
@@ -1948,7 +1951,7 @@ async function togglePlaySession(gameId) {
       headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ game_id: gameId }),
     });
-    playSession = { gameId, gameName: g ? g.name : gameId, status: 'active', elapsedSeconds: 0, tickHandle: null };
+    playSession = { gameId, gameName: g ? g.name : gameId, status: 'active', baseSeconds: 0, activeSince: null, tickHandle: null };
     document.getElementById('play-timer-game').textContent = playSession.gameName;
     updateTimerDisplay();
     showTimerBar();
@@ -1963,7 +1966,9 @@ async function pausePlaySession() {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
+    playSession.baseSeconds = currentElapsedSeconds();
     playSession.status = 'paused';
+    playSession.activeSince = null;
     stopTimerTick();
     document.getElementById('play-timer-pause').textContent = '▶';
     document.getElementById('play-timer-pause').onclick = resumePlaySession;
@@ -2001,7 +2006,7 @@ async function finishPlaySession() {
     }
   } catch(e) {}
   hideTimerBar();
-  playSession = { gameId: null, gameName: null, status: null, elapsedSeconds: 0, tickHandle: null };
+  playSession = { gameId: null, gameName: null, status: null, baseSeconds: 0, activeSince: null, tickHandle: null };
   updatePlayButtons();
 }
 
@@ -2017,7 +2022,8 @@ async function checkActiveSession() {
         gameId: data.game_id,
         gameName: g ? g.name : data.game_id,
         status: data.status,
-        elapsedSeconds: data.elapsed_seconds,
+        baseSeconds: data.elapsed_seconds,
+        activeSince: null,
         tickHandle: null,
       };
       document.getElementById('play-timer-game').textContent = playSession.gameName;
