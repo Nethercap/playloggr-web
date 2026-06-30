@@ -295,7 +295,7 @@
 
       <!-- Folder filter -->
       <div style="position:relative;display:inline-block" id="folder-filter-wrap">
-        <button id="folder-filter-btn" onclick="toggleFolderDropdown()"
+        <button id="folder-filter-btn" onclick="handleFolderBtnClick()"
           style="padding:4px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;display:none;align-items:center;gap:5px">
           <i class="ti ti-folder" style="font-size:12px"></i> Carpetas ▾
         </button>
@@ -470,7 +470,8 @@
     <div class="modal-title"><i class="ti ti-folder-plus"></i> Agregar a carpeta</div>
     <div id="folder-add-game-list" style="max-height:300px;overflow-y:auto;padding:4px 0"></div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeFolderAddGame()">Cerrar</button>
+      <button class="btn-cancel" onclick="closeFolderAddGame()">Cancelar</button>
+      <button class="btn-save" onclick="_folderPickerId ? confirmFolderGamePicker() : confirmCardFolderPicker()">OK</button>
     </div>
   </div>
 </div>
@@ -1243,7 +1244,9 @@ function setView(view) {
   if (hiddenBtn) hiddenBtn.style.display = view === 'library' ? 'inline-flex' : 'none';
   const folderBtn2 = document.getElementById('folder-filter-btn');
   if (folderBtn2) folderBtn2.style.display = userFolders.length ? 'inline-flex' : 'none';
-  if (view !== 'library') { activeFolderId = null; renderFolderFilterBtn(); }
+  if (activeFolderId === -1 || activeFolderId > 0) { activeFolderId = null; document.getElementById('filter-bar').style.display = ''; }
+  showFolderLabel();
+  updateFolderBtn();
   // Reset hidden state on view change
   showingHidden = false;
   // Show correct add button
@@ -1925,95 +1928,205 @@ async function submitAuth() {
 
 // ── Folders ──────────────────────────────────────────────────────────────────
 
-let userFolders    = [];
-let activeFolderId = null;
-let _folderAddGameId = null;
+let userFolders    = { library: [], wishlist: [] };
+let activeFolderId = null;   // null = showing all games; -1 = showing folder list
+let folderSort     = 'name'; // name | created_at
 
 async function loadFolders() {
   try {
-    const res  = await fetch(`${apiBase()}/api/v1/folders`, {
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    });
-    const data = await res.json();
-    userFolders = data.folders || [];
-    renderFolderFilterBtn();
-    renderFolderDropdownItems();
+    const section = currentView === 'wishlist' ? 'wishlist' : 'library';
+    const [libRes, wishRes] = await Promise.all([
+      fetch(`${apiBase()}/api/v1/folders?section=library`, { headers: { 'Authorization': `Bearer ${authToken}` } }),
+      fetch(`${apiBase()}/api/v1/folders?section=wishlist`, { headers: { 'Authorization': `Bearer ${authToken}` } }),
+    ]);
+    userFolders.library  = (await libRes.json()).folders  || [];
+    userFolders.wishlist = (await wishRes.json()).folders || [];
+    updateFolderBtn();
   } catch(e) {}
 }
 
-function renderFolderFilterBtn() {
+function currentSectionFolders() {
+  return currentView === 'wishlist' ? userFolders.wishlist : userFolders.library;
+}
+
+function updateFolderBtn() {
   const btn = document.getElementById('folder-filter-btn');
   if (!btn) return;
+  const folders = currentSectionFolders();
   btn.style.display = 'inline-flex';
-  if (activeFolderId) {
-    const f = userFolders.find(x => x.id === activeFolderId);
-    btn.innerHTML = `<i class="ti ti-folder" style="font-size:12px;color:var(--green)"></i> <span style="color:var(--green)">${f ? f.name : 'Carpeta'}</span> ▾`;
+  if (activeFolderId === -1) {
+    btn.innerHTML = '<i class="ti ti-folder" style="font-size:12px;color:var(--green)"></i> <span style="color:var(--green)">Carpetas</span>';
+    btn.style.borderColor = 'var(--green)';
+  } else if (activeFolderId) {
+    const f = folders.find(x => x.id === activeFolderId);
+    btn.innerHTML = `<i class="ti ti-folder" style="font-size:12px;color:var(--green)"></i> <span style="color:var(--green)">${f ? f.name : 'Carpeta'}</span> ✕`;
     btn.style.borderColor = 'var(--green)';
   } else {
-    btn.innerHTML = '<i class="ti ti-folder" style="font-size:12px"></i> Carpetas ▾';
+    btn.innerHTML = `<i class="ti ti-folder" style="font-size:12px"></i> Carpetas${folders.length ? ` (${folders.length})` : ''} ▾`;
     btn.style.borderColor = 'var(--border)';
     btn.style.color = 'var(--text2)';
   }
 }
 
-function renderFolderDropdownItems() {
-  const list = document.getElementById('folder-list-items');
-  if (!list) return;
-  if (!userFolders.length) {
-    list.innerHTML = '<div style="padding:8px 14px;font-size:12px;color:var(--text2)">Sin carpetas</div>';
-    return;
+function clickFolderBtn() {
+  if (activeFolderId === -1) {
+    // Already in folder list — show dropdown
+    toggleFolderDropdown();
+  } else if (activeFolderId) {
+    // In a folder — clear filter, go back to folder list
+    activeFolderId = -1;
+    updateFolderBtn();
+    renderFolderList();
+  } else {
+    // Show dropdown
+    toggleFolderDropdown();
   }
-  list.innerHTML = userFolders.map(f => `
-    <div style="display:flex;align-items:center;gap:6px;padding:7px 14px;cursor:pointer;font-size:13px"
-      onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''"
-    >
-      <div onclick="setFolderFilter(${f.id})" style="flex:1;display:flex;align-items:center;gap:6px">
-        <i class="ti ti-folder" style="font-size:13px;color:${activeFolderId===f.id?'var(--green)':'var(--text2)'}"></i>
-        <span style="color:${activeFolderId===f.id?'var(--green)':'inherit'}">${f.name}</span>
-        <span style="font-size:10px;color:var(--text2);margin-left:auto">${f.game_count}</span>
-      </div>
-      <button onclick="openRenameFolder(${f.id},'${f.name.replace(/'/g,'\'')}')"
-        style="background:none;border:none;color:var(--text2);cursor:pointer;padding:2px;font-size:11px"
-        title="Renombrar">✏️</button>
-      <button onclick="deleteFolder(${f.id})"
-        style="background:none;border:none;color:var(--red);cursor:pointer;padding:2px;font-size:11px"
-        title="Eliminar">🗑</button>
-    </div>
-  `).join('');
-
-  // Add "All" option at top
-  list.innerHTML = `
-    <div style="display:flex;align-items:center;gap:6px;padding:7px 14px;cursor:pointer;font-size:13px;color:${activeFolderId===null?'var(--green)':'inherit'}"
-      onclick="setFolderFilter(null)"
-      onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
-      <i class="ti ti-folders" style="font-size:13px"></i> Todas las carpetas
-    </div>
-  ` + list.innerHTML;
 }
 
 function toggleFolderDropdown() {
   const dd = document.getElementById('folder-dropdown');
   if (!dd) return;
   const isOpen = dd.style.display === 'block';
-  document.querySelectorAll('.filter-popup').forEach(p => p.remove());
   dd.style.display = isOpen ? 'none' : 'block';
+  renderFolderDropdownItems();
   if (!isOpen) {
     setTimeout(() => {
-      document.addEventListener('click', function handler(e) {
+      document.addEventListener('mousedown', function handler(e) {
         if (!document.getElementById('folder-filter-wrap')?.contains(e.target)) {
           dd.style.display = 'none';
-          document.removeEventListener('click', handler);
+          document.removeEventListener('mousedown', handler);
         }
       });
     }, 10);
   }
 }
 
-function setFolderFilter(folderId) {
+function renderFolderDropdownItems() {
+  const list  = document.getElementById('folder-list-items');
+  if (!list) return;
+  const folders = currentSectionFolders();
+
+  list.innerHTML = `
+    <div style="padding:6px 14px 4px;display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px">Mis carpetas</span>
+      <select onchange="folderSort=this.value;loadFolders()" style="font-size:11px;background:var(--bg2);border:none;color:var(--text2);cursor:pointer">
+        <option value="name" ${folderSort==='name'?'selected':''}>Nombre</option>
+        <option value="created_at" ${folderSort==='created_at'?'selected':''}>Fecha</option>
+      </select>
+    </div>
+    ${!folders.length ? '<div style="padding:8px 14px;font-size:12px;color:var(--text2)">Sin carpetas en esta sección</div>' :
+      folders.map(f => `
+        <div style="display:flex;align-items:center;gap:6px;padding:7px 14px;cursor:pointer;font-size:13px;border-top:0.5px solid var(--border)"
+          onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
+          <div onclick="enterFolder(${f.id})" style="flex:1;display:flex;align-items:center;gap:6px">
+            <i class="ti ti-folder" style="font-size:14px;color:var(--text2)"></i>
+            <div>
+              <div>${f.name}</div>
+              <div style="font-size:10px;color:var(--text2)">${f.game_count} juegos · ${new Date(f.created_at).toLocaleDateString('es-AR')}</div>
+            </div>
+          </div>
+          <button onclick="event.stopPropagation();openRenameFolder(${f.id},'${f.name.replace(/'/g,"\'")}')"
+            style="background:none;border:none;color:var(--text2);cursor:pointer;padding:2px 4px;font-size:12px" title="Renombrar">✏️</button>
+          <button onclick="event.stopPropagation();deleteFolder(${f.id})"
+            style="background:none;border:none;color:var(--red);cursor:pointer;padding:2px 4px;font-size:12px" title="Eliminar">🗑</button>
+        </div>
+      `).join('')
+    }
+    <div style="padding:6px 10px;border-top:0.5px solid var(--border)">
+      <button onclick="openCreateFolder()" style="width:100%;padding:5px;font-size:12px;border-radius:5px;border:0.5px dashed var(--border);background:transparent;color:var(--text2);cursor:pointer">
+        <i class="ti ti-plus"></i> Nueva carpeta
+      </button>
+    </div>`;
+}
+
+// Enter a specific folder — filter games list
+function enterFolder(folderId) {
   activeFolderId = folderId;
   document.getElementById('folder-dropdown').style.display = 'none';
-  renderFolderFilterBtn();
+  updateFolderBtn();
+  showFolderLabel();
   syncAll(1);
+}
+
+function showFolderLabel() {
+  let label = document.getElementById('active-folder-label');
+  if (activeFolderId && activeFolderId !== -1) {
+    const folders = currentSectionFolders();
+    const f = folders.find(x => x.id === activeFolderId);
+    if (!label) {
+      label = document.createElement('div');
+      label.id = 'active-folder-label';
+      label.style.cssText = 'padding:4px 16px;font-size:12px;color:var(--green);display:flex;align-items:center;gap:6px;border-bottom:0.5px solid var(--border)';
+      document.getElementById('filter-bar').insertAdjacentElement('afterend', label);
+    }
+    label.innerHTML = `<i class="ti ti-folder" style="font-size:13px"></i> <strong>${f ? f.name : 'Carpeta'}</strong>
+      <button onclick="exitFolder()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:11px;margin-left:4px">✕ Salir de carpeta</button>`;
+    label.style.display = 'flex';
+  } else if (label) {
+    label.style.display = 'none';
+  }
+}
+
+function exitFolder() {
+  activeFolderId = null;
+  updateFolderBtn();
+  showFolderLabel();
+  syncAll(1);
+}
+
+// Render folder list (the -1 state — show all folders as cards)
+function renderFolderList() {
+  const folders = currentSectionFolders();
+  const gameList = document.getElementById('game-list');
+  if (!gameList) return;
+
+  // Hide game filters, show folder sort
+  document.getElementById('filter-bar').style.display = 'none';
+  const label = document.getElementById('active-folder-label');
+  if (label) label.style.display = 'none';
+
+  const section = currentView === 'wishlist' ? 'wishlist' : 'library';
+
+  gameList.innerHTML = `
+    <div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--border)">
+      <span style="font-size:13px;font-weight:600">Carpetas de ${currentView === 'wishlist' ? 'Deseados' : 'Biblioteca'}</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select onchange="folderSort=this.value;loadFolders().then(renderFolderList)"
+          style="font-size:12px;padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text)">
+          <option value="name">Nombre</option>
+          <option value="created_at">Fecha creación</option>
+        </select>
+        <button onclick="openCreateFolder()"
+          style="padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">
+          <i class="ti ti-plus"></i> Nueva carpeta
+        </button>
+      </div>
+    </div>
+    ${!folders.length
+      ? '<div class="empty"><i class="ti ti-folder-off" style="font-size:32px;display:block;margin-bottom:8px"></i>Sin carpetas. Creá una.</div>'
+      : `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;padding:16px">
+          ${folders.map(f => `
+            <div onclick="enterFolder(${f.id})" style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius-md);padding:14px 16px;cursor:pointer;transition:border-color 0.15s"
+              onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--border2)'">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                <i class="ti ti-folder" style="font-size:20px;color:var(--green)"></i>
+                <div style="display:flex;gap:4px">
+                  <button onclick="event.stopPropagation();openFolderAddGamePicker(${f.id})"
+                    style="background:none;border:0.5px solid var(--border);border-radius:4px;color:var(--text2);cursor:pointer;padding:2px 6px;font-size:11px" title="Agregar juegos">
+                    <i class="ti ti-plus"></i>
+                  </button>
+                  <button onclick="event.stopPropagation();openRenameFolder(${f.id},'${f.name.replace(/'/g,"\'")}')"
+                    style="background:none;border:0.5px solid var(--border);border-radius:4px;color:var(--text2);cursor:pointer;padding:2px 6px;font-size:11px">✏️</button>
+                  <button onclick="event.stopPropagation();deleteFolder(${f.id})"
+                    style="background:none;border:0.5px solid var(--border);border-radius:4px;color:var(--red);cursor:pointer;padding:2px 6px;font-size:11px">🗑</button>
+                </div>
+              </div>
+              <div style="font-size:14px;font-weight:600;margin-bottom:4px">${f.name}</div>
+              <div style="font-size:11px;color:var(--text2)">${f.game_count} juegos · ${new Date(f.created_at).toLocaleDateString('es-AR')}</div>
+            </div>
+          `).join('')}
+        </div>`
+    }`;
 }
 
 // Create folder
@@ -2023,25 +2136,24 @@ function openCreateFolder() {
   document.getElementById('folder-create-overlay').classList.add('open');
   setTimeout(() => document.getElementById('folder-name-input').focus(), 100);
 }
-
 function closeFolderCreate() {
   document.getElementById('folder-create-overlay').classList.remove('open');
 }
-
 async function saveFolderCreate() {
   const name = document.getElementById('folder-name-input').value.trim();
   if (!name) return;
+  const section = currentView === 'wishlist' ? 'wishlist' : 'library';
   try {
-    const res = await fetch(`${apiBase()}/api/v1/folders`, {
+    const res  = await fetch(`${apiBase()}/api/v1/folders`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({ name, section }),
     });
     const data = await res.json();
-    userFolders.push(data);
+    userFolders[section].push(data);
     closeFolderCreate();
-    renderFolderDropdownItems();
-    renderFolderFilterBtn();
+    if (activeFolderId === -1) renderFolderList();
+    else updateFolderBtn();
     loadAvailableFilters();
   } catch(e) {}
 }
@@ -2055,10 +2167,13 @@ async function openRenameFolder(id, currentName) {
     headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: name.trim() }),
   });
-  const f = userFolders.find(x => x.id === id);
-  if (f) f.name = name.trim();
-  renderFolderDropdownItems();
-  renderFolderFilterBtn();
+  ['library','wishlist'].forEach(sec => {
+    const f = userFolders[sec].find(x => x.id === id);
+    if (f) f.name = name.trim();
+  });
+  if (activeFolderId === -1) renderFolderList();
+  else updateFolderBtn();
+  showFolderLabel();
   loadAvailableFilters();
 }
 
@@ -2069,61 +2184,186 @@ async function deleteFolder(id) {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${authToken}` }
   });
-  userFolders = userFolders.filter(x => x.id !== id);
-  if (activeFolderId === id) activeFolderId = null;
-  renderFolderDropdownItems();
-  renderFolderFilterBtn();
-  if (activeFolderId === null) syncAll(1);
+  ['library','wishlist'].forEach(sec => {
+    userFolders[sec] = userFolders[sec].filter(x => x.id !== id);
+  });
+  if (activeFolderId === id) { activeFolderId = -1; }
+  if (activeFolderId === -1) renderFolderList();
+  else { updateFolderBtn(); syncAll(1); }
   loadAvailableFilters();
 }
 
-// Add game to folder (from card)
-async function openFolderAddGame(gameId) {
-  _folderAddGameId = gameId;
-  const list = document.getElementById('folder-add-game-list');
-  if (!userFolders.length) {
-    list.innerHTML = '<div style="padding:12px;font-size:13px;color:var(--text2)">No tenés carpetas. Creá una primero.</div>';
-  } else {
-    // Get current folders for this game
-    list.innerHTML = userFolders.map(f => `
-      <label style="display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;font-size:13px;border-bottom:0.5px solid var(--border)">
-        <input type="checkbox" id="fc-${f.id}" style="accent-color:var(--green)"
-          onchange="toggleGameInFolder(${f.id}, this.checked)">
-        <i class="ti ti-folder" style="font-size:13px;color:var(--text2)"></i>
-        ${f.name}
-        <span style="margin-left:auto;font-size:11px;color:var(--text2)">${f.game_count} juegos</span>
-      </label>
-    `).join('');
+// ── Game → Folder picker (from card) ─────────────────────────────────────────
+
+let _cardFolderGameId = null;
+let _cardFolderSection = null;
+let _cardFolderPending = new Set(); // folders to add
+let _cardFolderRemove  = new Set(); // folders to remove
+
+async function openCardFolderPicker(gameId) {
+  _cardFolderGameId  = gameId;
+  _cardFolderSection = currentView === 'wishlist' ? 'wishlist' : 'library';
+  _cardFolderPending = new Set();
+  _cardFolderRemove  = new Set();
+
+  const folders = currentSectionFolders();
+  if (!folders.length) {
+    alert('No tenés carpetas en esta sección. Creá una primero.');
+    return;
   }
+
+  // Get current folder membership for this game
+  const inFolders = new Set();
+  await Promise.all(folders.map(async f => {
+    const r = await fetch(`${apiBase()}/api/v1/folders/${f.id}/games`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const d = await r.json();
+    if ((d.game_ids || []).includes(gameId)) inFolders.add(f.id);
+  }));
+
+  const list = document.getElementById('folder-add-game-list');
+  list.innerHTML = folders.map(f => `
+    <label style="display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;font-size:13px;border-bottom:0.5px solid var(--border)">
+      <input type="checkbox" id="fcp-${f.id}" ${inFolders.has(f.id) ? 'checked' : ''}
+        style="accent-color:var(--green)" data-folder="${f.id}" data-was="${inFolders.has(f.id) ? '1' : '0'}"
+        onchange="trackCardFolderChange(this)">
+      <i class="ti ti-folder" style="font-size:13px;color:var(--text2)"></i>
+      <span style="flex:1">${f.name}</span>
+      <span style="font-size:11px;color:var(--text2)">${f.game_count}</span>
+    </label>
+  `).join('');
+
   document.getElementById('folder-add-game-overlay').classList.add('open');
 }
 
-async function toggleGameInFolder(folderId, add) {
-  if (!_folderAddGameId) return;
-  if (add) {
-    await fetch(`${apiBase()}/api/v1/folders/${folderId}/games`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ game_id: _folderAddGameId }),
-    });
-    const f = userFolders.find(x => x.id === folderId);
-    if (f) f.game_count++;
-  } else {
-    await fetch(`${apiBase()}/api/v1/folders/${folderId}/games/${encodeURIComponent(_folderAddGameId)}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    });
-    const f = userFolders.find(x => x.id === folderId);
-    if (f) f.game_count--;
-  }
+function trackCardFolderChange(cb) {
+  const fid = parseInt(cb.dataset.folder);
+  const was = cb.dataset.was === '1';
+  if (cb.checked && !was) _cardFolderPending.add(fid);
+  else _cardFolderPending.delete(fid);
+  if (!cb.checked && was) _cardFolderRemove.add(fid);
+  else _cardFolderRemove.delete(fid);
+}
+
+async function confirmCardFolderPicker() {
+  const gid = _cardFolderGameId;
+  await Promise.all([
+    ...[..._cardFolderPending].map(fid =>
+      fetch(`${apiBase()}/api/v1/folders/${fid}/games`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ game_id: gid }),
+      })
+    ),
+    ...[..._cardFolderRemove].map(fid =>
+      fetch(`${apiBase()}/api/v1/folders/${fid}/games/${encodeURIComponent(gid)}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${authToken}` },
+      })
+    ),
+  ]);
+  closeFolderAddGame();
+  await loadFolders();
+  if (activeFolderId > 0) syncAll(currentPage, true);
 }
 
 function closeFolderAddGame() {
   document.getElementById('folder-add-game-overlay').classList.remove('open');
-  _folderAddGameId = null;
-  if (activeFolderId) syncAll(currentPage, true);
+  _cardFolderGameId = null;
 }
 
+// ── Folder → Game picker (from folder card "+") ───────────────────────────────
+
+let _folderPickerId = null;
+let _folderPickerAdd = new Set();
+let _folderPickerRemove = new Set();
+
+async function openFolderAddGamePicker(folderId) {
+  _folderPickerId     = folderId;
+  _folderPickerAdd    = new Set();
+  _folderPickerRemove = new Set();
+
+  const res  = await fetch(`${apiBase()}/api/v1/folders/${folderId}/available-games`, {
+    headers: { 'Authorization': `Bearer ${authToken}` }
+  });
+  const data = await res.json();
+  const games = data.games || [];
+
+  const list = document.getElementById('folder-add-game-list');
+  list.innerHTML = `
+    <div style="padding:8px 16px;border-bottom:0.5px solid var(--border);font-size:11px;color:var(--text2);display:grid;grid-template-columns:auto 1fr auto auto auto auto;gap:8px;align-items:center">
+      <span></span><span>Nombre</span><span>Plataforma</span><span>Horas</span><span>★</span><span>Género</span>
+    </div>
+    ${games.map(g => `
+      <label style="display:grid;grid-template-columns:auto 1fr auto auto auto auto;gap:8px;align-items:center;padding:8px 16px;cursor:pointer;font-size:12px;border-bottom:0.5px solid var(--border)"
+        onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
+        <input type="checkbox" ${g.in_folder ? 'checked' : ''}
+          style="accent-color:var(--green)" data-gid="${g.id}" data-was="${g.in_folder ? '1' : '0'}"
+          onchange="trackFolderGameChange(this)">
+        <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${g.name}</span>
+        <span style="font-size:10px;color:var(--text2)">${g.platform}</span>
+        <span style="font-size:10px;color:var(--text2)">${g.hours_played}h</span>
+        <span style="font-size:10px;color:var(--text2)">${g.user_rating > 0 ? '★'.repeat(Math.floor(g.user_rating)) : '—'}</span>
+        <span style="font-size:10px;color:var(--text2)">${g.genre || '—'}</span>
+      </label>
+    `).join('')}`;
+
+  document.getElementById('folder-add-game-overlay').classList.add('open');
+}
+
+function trackFolderGameChange(cb) {
+  const gid = cb.dataset.gid;
+  const was = cb.dataset.was === '1';
+  if (cb.checked && !was) _folderPickerAdd.add(gid);
+  else _folderPickerAdd.delete(gid);
+  if (!cb.checked && was) _folderPickerRemove.add(gid);
+  else _folderPickerRemove.delete(gid);
+}
+
+async function confirmFolderGamePicker() {
+  const fid = _folderPickerId;
+  await Promise.all([
+    ...[..._folderPickerAdd].map(gid =>
+      fetch(`${apiBase()}/api/v1/folders/${fid}/games`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ game_id: gid }),
+      })
+    ),
+    ...[..._folderPickerRemove].map(gid =>
+      fetch(`${apiBase()}/api/v1/folders/${fid}/games/${encodeURIComponent(gid)}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${authToken}` },
+      })
+    ),
+  ]);
+  closeFolderAddGame();
+  await loadFolders();
+  if (activeFolderId === -1) renderFolderList();
+}
+
+// ── Folder button click (main btn) ────────────────────────────────────────────
+function handleFolderBtnClick() {
+  if (activeFolderId === -1) {
+    // Already in folder view — exit
+    activeFolderId = null;
+    document.getElementById('filter-bar').style.display = '';
+    updateFolderBtn();
+    syncAll(1);
+  } else if (activeFolderId > 0) {
+    // In a folder — go back to folder list
+    activeFolderId = -1;
+    showFolderLabel();
+    updateFolderBtn();
+    document.getElementById('filter-bar').style.display = 'none';
+    renderFolderList();
+  } else {
+    toggleFolderDropdown();
+  }
+}
+
+// Update folder-add-game modal footer
 document.addEventListener('DOMContentLoaded', () => {
   const fco = document.getElementById('folder-create-overlay');
   if (fco) fco.addEventListener('click', e => { if (e.target === fco) closeFolderCreate(); });
@@ -2131,6 +2371,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (fao) fao.addEventListener('click', e => { if (e.target === fao) closeFolderAddGame(); });
 });
 
+// ── Play Session Timer ──────────────────────────────────────────────────────
 // ── Play Session Timer ──────────────────────────────────────────────────────
 
 let playSession = { gameId: null, gameName: null, status: null, baseSeconds: 0, activeSince: null, tickHandle: null };
@@ -2380,7 +2621,7 @@ async function syncAll(page = 1, silent = false) {
   if (platformFilter) params.set('platform', platformFilter);
   if (searchQ)        params.set('search',   searchQ);
   if (showingHidden)   params.set('show_hidden', 'true');
-  if (activeFolderId) params.set('folder_id', activeFolderId);
+  if (activeFolderId && activeFolderId !== -1) params.set('folder_id', activeFolderId);
   // View mode
   if (currentView === 'wishlist') {
     params.set('status', 'Deseados');
@@ -2413,9 +2654,7 @@ async function syncAll(page = 1, silent = false) {
     renderPlatStatus();
 
     renderStats(data);
-    renderGames();
-    updatePlayButtons();
-    renderPagination();
+    if (activeFolderId === -1) { renderFolderList(); } else { renderGames(); updatePlayButtons(); renderPagination(); }
     loadGlobalStats();
     // Refresh available filter options (in background)
     loadAvailableFilters();
