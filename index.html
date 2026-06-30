@@ -2089,6 +2089,8 @@ function showFolderLabel() {
 
 function exitFolder() {
   activeFolderId = null;
+  const fb = document.getElementById('filter-bar');
+  if (fb) fb.style.removeProperty('display');
   updateFolderBtn();
   showFolderLabel();
   syncAll(1);
