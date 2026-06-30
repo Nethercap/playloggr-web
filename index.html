@@ -281,9 +281,9 @@
     <!-- Filter bar -->
     <div id="filter-bar" style="display:flex;flex-direction:column;gap:6px;padding:6px 16px 8px">
       <!-- Row 1: filters + folder + add btn -->
-      <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+      <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;row-gap:4px">
         <!-- Filter dropdowns injected by JS -->
-        <div id="filter-dropdowns" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        <div id="filter-dropdowns" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"></div>
 
         <!-- Folder filter -->
         <div style="position:relative" id="folder-filter-wrap">
@@ -2024,10 +2024,11 @@ function renderFolderDropdownItems() {
   list.innerHTML = `
     <div style="padding:6px 14px 4px;display:flex;align-items:center;justify-content:space-between">
       <span style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px">Mis carpetas</span>
-      <select onchange="folderSort=this.value;loadFolders()" style="font-size:11px;background:var(--bg2);border:none;color:var(--text2);cursor:pointer">
-        <option value="name" ${folderSort==='name'?'selected':''}>Nombre</option>
-        <option value="created_at" ${folderSort==='created_at'?'selected':''}>Fecha</option>
+      <select onchange="setFolderSort(this.value)" style="font-size:12px;padding:3px 6px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer">
+        <option value="name" ${folderSort==="name"?"selected":""}>Nombre</option>
+        <option value="created_at" ${folderSort==="created_at"?"selected":""}>Fecha</option>
       </select>
+      <button onclick="toggleFolderSortDir()" style="padding:3px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">${folderSortDir==="asc"?"↑":"↓"}</button>
     </div>
     ${!folders.length ? '<div style="padding:8px 14px;font-size:12px;color:var(--text2)">Sin carpetas en esta sección</div>' :
       folders.map(f => `
