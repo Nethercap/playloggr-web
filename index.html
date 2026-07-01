@@ -1933,18 +1933,33 @@ let activeFolderId = null;
 let folderSort     = 'name';
 let folderSortDir  = 'asc';
 
+// After renderFolderList, sync the select value to folderSort variable
+function _syncFolderSortSelect() {
+  const sel = document.querySelector('[onchange="setFolderSort(this.value)"]');
+  if (sel) sel.value = folderSort;
+  const btn = document.querySelector('[onclick="toggleFolderSortDir()"]');
+  if (btn) btn.textContent = folderSortDir === 'asc' ? '↑' : '↓';
+}
+
 function setFolderSort(val) {
   folderSort = val;
-  if (activeFolderId === -1) {
-    loadFolders().then(renderFolderList);
+  if (folderSort === 'game_count') {
+    // Client-side sort only — no server call needed
+    if (activeFolderId === -1) renderFolderList();
+    else renderFolderDropdownItems();
   } else {
-    loadFolders().then(renderFolderDropdownItems);
+    if (activeFolderId === -1) {
+      loadFolders().then(renderFolderList);
+    } else {
+      loadFolders().then(renderFolderDropdownItems);
+    }
   }
 }
 
 function toggleFolderSortDir() {
   folderSortDir = folderSortDir === 'asc' ? 'desc' : 'asc';
-  renderFolderList();
+  if (activeFolderId === -1) renderFolderList();
+  else renderFolderDropdownItems();
 }
 
 async function loadFolders() {
@@ -2030,7 +2045,8 @@ function renderFolderDropdownItems() {
       <span style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px">Mis carpetas</span>
       <select onchange="setFolderSort(this.value)" style="font-size:12px;padding:3px 6px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer">
         <option value="name" ${folderSort==="name"?"selected":""}>Nombre</option>
-        <option value="created_at" ${folderSort==="created_at"?"selected":""}>Fecha</option>
+        <option value="created_at" ${folderSort==="created_at"?"selected":""}>Fecha creación</option>
+        <option value="game_count" ${folderSort==="game_count"?"selected":""}>Cantidad de juegos</option>
       </select>
       <button onclick="toggleFolderSortDir()" style="padding:3px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">${folderSortDir==="asc"?"↑":"↓"}</button>
     </div>
@@ -2098,16 +2114,22 @@ function exitFolder() {
 
 // Render folder list (the -1 state — show all folders as cards)
 function renderFolderList() {
-  // Guard: only render folder list when in folder list mode
   if (activeFolderId !== -1) return;
   const gameList = document.getElementById('game-list');
   if (!gameList) return;
-  const folders = [...currentSectionFolders()];
-  if (folderSortDir === 'desc') folders.reverse();
+  let folders = [...currentSectionFolders()];
+  if (folderSort === 'game_count') {
+    folders.sort((a, b) => folderSortDir === 'asc'
+      ? (a.game_count - b.game_count)
+      : (b.game_count - a.game_count));
+  } else if (folderSortDir === 'desc') {
+    folders.reverse();
+  }
 
   // Hide filter bar in folder list view
   const _fb = document.getElementById('filter-bar');
   if (_fb) _fb.style.display = 'none';
+  setTimeout(_syncFolderSortSelect, 0);
   const label = document.getElementById('active-folder-label');
   if (label) label.style.display = 'none';
 
