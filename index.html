@@ -2143,11 +2143,14 @@ function renderFolderList() {
     <div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--border)">
       <span style="font-size:13px;font-weight:600">Carpetas de ${currentView === 'wishlist' ? 'Deseados' : 'Biblioteca'}</span>
       <div style="display:flex;gap:8px;align-items:center">
-        <select onchange="folderSort=this.value;loadFolders().then(renderFolderList)"
+        <select onchange="folderSort=this.value;setFolderSort(this.value)" id="folder-sort-list"
           style="font-size:12px;padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text)">
-          <option value="name">Nombre</option>
-          <option value="created_at">Fecha creación</option>
+          <option value="name" ${folderSort==="name"?"selected":""}>Nombre</option>
+          <option value="created_at" ${folderSort==="created_at"?"selected":""}>Fecha creación</option>
+          <option value="game_count" ${folderSort==="game_count"?"selected":""}>Cantidad de juegos</option>
         </select>
+        <button id="folder-sort-list-btn" onclick="toggleFolderSortDir()"
+          style="padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">${folderSortDir==="asc"?"↑":"↓"}</button>
         <button onclick="openCreateFolder()"
           style="padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">
           <i class="ti ti-plus"></i> Nueva carpeta
@@ -2763,14 +2766,13 @@ async function syncAll(page = 1, silent = false) {
     if (activeFolderId === -1) {
       renderFolderList();
       // Hide pagination in folder view
-      const pg = document.getElementById('pagination');
-      if (pg) pg.style.display = 'none';
+      const pg = document.getElementById('pagination-bar');
+      if (pg) pg.remove();
     } else {
       // Ensure filter-bar is visible
       const _fb = document.getElementById('filter-bar');
       if (_fb) _fb.style.removeProperty('display');
-      const pg2 = document.getElementById('pagination');
-      if (pg2) pg2.style.removeProperty('display');
+
       renderGames(); updatePlayButtons(); renderPagination();
     }
     loadGlobalStats();
