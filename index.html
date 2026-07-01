@@ -1935,10 +1935,14 @@ let folderSortDir  = 'asc';
 
 // After renderFolderList, sync the select value to folderSort variable
 function _syncFolderSortSelect() {
-  const sel = document.querySelector('[onchange="setFolderSort(this.value)"]');
-  if (sel) sel.value = folderSort;
-  const btn = document.querySelector('[onclick="toggleFolderSortDir()"]');
-  if (btn) btn.textContent = folderSortDir === 'asc' ? '↑' : '↓';
+  ['folder-sort-list', 'folder-sort-dd'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (sel) sel.value = folderSort;
+  });
+  ['folder-sort-list-btn'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.textContent = folderSortDir === 'asc' ? '↑' : '↓';
+  });
 }
 
 function setFolderSort(val) {
@@ -2043,12 +2047,12 @@ function renderFolderDropdownItems() {
   list.innerHTML = `
     <div style="padding:6px 14px 4px;display:flex;align-items:center;justify-content:space-between">
       <span style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px">Mis carpetas</span>
-      <select onchange="setFolderSort(this.value)" style="font-size:12px;padding:3px 6px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer">
+      <select id="folder-sort-list" onchange="setFolderSort(this.value)" style="font-size:12px;padding:3px 6px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer">
         <option value="name" ${folderSort==="name"?"selected":""}>Nombre</option>
         <option value="created_at" ${folderSort==="created_at"?"selected":""}>Fecha creación</option>
         <option value="game_count" ${folderSort==="game_count"?"selected":""}>Cantidad de juegos</option>
       </select>
-      <button onclick="toggleFolderSortDir()" style="padding:3px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">${folderSortDir==="asc"?"↑":"↓"}</button>
+      <button id="folder-sort-list-btn" onclick="toggleFolderSortDir()" style="padding:3px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">${folderSortDir==="asc"?"↑":"↓"}</button>
     </div>
     ${!folders.length ? '<div style="padding:8px 14px;font-size:12px;color:var(--text2)">Sin carpetas en esta sección</div>' :
       folders.map(f => `
@@ -2758,10 +2762,15 @@ async function syncAll(page = 1, silent = false) {
     renderStats(data);
     if (activeFolderId === -1) {
       renderFolderList();
+      // Hide pagination in folder view
+      const pg = document.getElementById('pagination');
+      if (pg) pg.style.display = 'none';
     } else {
       // Ensure filter-bar is visible
       const _fb = document.getElementById('filter-bar');
       if (_fb) _fb.style.removeProperty('display');
+      const pg2 = document.getElementById('pagination');
+      if (pg2) pg2.style.removeProperty('display');
       renderGames(); updatePlayButtons(); renderPagination();
     }
     loadGlobalStats();
