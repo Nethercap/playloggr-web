@@ -872,7 +872,7 @@ function sortedFiltered() {
   return items;
 }
 
-function renderGames() {
+async function renderGames() {
   const list  = document.getElementById('game-list');
   const items = sortedFiltered();
   document.getElementById('count-label').textContent = `${items.length} de ${allGames.length} juegos`;
