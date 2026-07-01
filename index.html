@@ -2119,6 +2119,9 @@ function exitFolder() {
 // Render folder list (the -1 state — show all folders as cards)
 function renderFolderList() {
   if (activeFolderId !== -1) return;
+  // Remove pagination immediately
+  const _pgbar = document.getElementById('pagination-bar');
+  if (_pgbar) _pgbar.remove();
   const gameList = document.getElementById('game-list');
   if (!gameList) return;
   let folders = [...currentSectionFolders()];
@@ -2765,9 +2768,6 @@ async function syncAll(page = 1, silent = false) {
     renderStats(data);
     if (activeFolderId === -1) {
       renderFolderList();
-      // Hide pagination in folder view
-      const pg = document.getElementById('pagination-bar');
-      if (pg) pg.remove();
     } else {
       // Ensure filter-bar is visible
       const _fb = document.getElementById('filter-bar');
