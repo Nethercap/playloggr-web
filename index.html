@@ -933,16 +933,28 @@ function renderGames() {
     </div>`;
   }).join('');
 
-  // Cargar scores de Steam en background
-  items.filter(g => g.platform === 'Steam' && g.app_id && !g._steamScore).forEach(async g => {
-    const score = await fetchSteamScore(g.app_id);
-    if (!score) return;
-    const info = steamScoreLabel[score.review_score_desc];
-    if (!info) return;
-    g._steamScore = { ...info, total: score.total_reviews };
-    const el = document.getElementById(`score-${g.id}`);
-    if (el) el.outerHTML = `<span class="steam-score ${info.cls}">${info.label}</span>`;
-  });
+  // Cargar scores de Steam en background — UN solo request batch
+  const toFetch = items.filter(g => g.platform === 'Steam' && g.app_id && !g._steamScore);
+  if (toFetch.length > 0) {
+    const appIds = toFetch.map(g => g.app_id).join(',');
+    try {
+      const res = await fetch(`${apiBase()}/api/v1/steam/reviews/batch?app_ids=${encodeURIComponent(appIds)}`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+      if (res.ok) {
+        const scores = await res.json();
+        toFetch.forEach(g => {
+          const score = scores[g.app_id];
+          if (!score) return;
+          const info = steamScoreLabel[score.review_score_desc];
+          if (!info) return;
+          g._steamScore = { ...info, total: score.total_reviews };
+          const el = document.getElementById(`score-${g.id}`);
+          if (el) el.outerHTML = `<span class="steam-score ${info.cls}">${info.label}</span>`;
+        });
+      }
+    } catch(e) {}
+  }
 
   // Cargar promedios de la comunidad en background
   loadCommunityStats(items.map(g => g.id));
