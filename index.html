@@ -2356,7 +2356,7 @@ function renderFolderGamePicker() {
     </div>
     <div style="display:table;width:100%;border-bottom:1px solid var(--border);background:var(--bg2)">
       <div style="display:table-row">
-        <div style="display:table-cell;width:44px;padding:6px 8px 6px 16px"><input type="checkbox" style="visibility:hidden"></div>
+        <div style="display:table-cell;padding:6px 8px 6px 16px;white-space:nowrap"><input type="checkbox" style="visibility:hidden;margin:0"></div>
         <div style="display:table-cell;padding:6px 8px;font-size:11px;color:var(--text2)">${col('name','Nombre')}</div>
         <div style="display:table-cell;width:110px;padding:6px 8px;font-size:11px;color:var(--text2)">${col('platform','Plataforma')}</div>
         <div style="display:table-cell;width:65px;padding:6px 8px;font-size:11px;color:var(--text2)">${col('hours_played','Horas')}</div>
@@ -2370,8 +2370,8 @@ function renderFolderGamePicker() {
         : '<div style="display:table;width:100%">' + games.map(g => `
           <div style="display:table-row;cursor:pointer"
             onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
-            <div style="display:table-cell;width:44px;padding:8px 8px 8px 16px;vertical-align:middle">
-              <input type="checkbox" ${(g.in_folder || _folderPickerAdd.has(g.id)) && !_folderPickerRemove.has(g.id) ? 'checked' : ''}
+            <div style="display:table-cell;padding:8px 8px 8px 16px;vertical-align:middle;white-space:nowrap">
+              <input type="checkbox" style="margin:0" ${(g.in_folder || _folderPickerAdd.has(g.id)) && !_folderPickerRemove.has(g.id) ? 'checked' : ''}
                 style="accent-color:var(--green);display:block" data-gid="${g.id}" data-was="${g.in_folder ? '1' : '0'}"
                 onchange="trackFolderGameChange(this)">
             </div>
