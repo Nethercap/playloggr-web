@@ -2663,24 +2663,32 @@ async function checkActiveSession() {
   } catch(e) {}
 }
 
-function onLoginSuccess() {
+async function onLoginSuccess() {
   document.getElementById('login-screen').style.display = 'none';
   resetActiveFilters();
-  loadAvailableFilters();
-  loadFolders();
-  checkActiveSession();
+
+  const chip = document.createElement('div');
+  chip.className = 'user-chip';
+  chip.innerHTML = `<i class="ti ti-user" style="font-size:14px"></i>${authUser}<button class="logout-btn" onclick="openRecovery()">Código</button><button class="logout-btn" onclick="logout()">Salir</button>`;
+  document.getElementById('plat-status-row').before(chip);
+
   setTimeout(() => {
     const b = document.getElementById('add-game-btn');
     if (b) b.style.display = '';
     const hb = document.getElementById('btn-hidden');
     if (hb) hb.style.display = 'inline-flex';
   }, 100);
-  const chip = document.createElement('div');
-  chip.className = 'user-chip';
-  chip.innerHTML = `<i class="ti ti-user" style="font-size:14px"></i>${authUser}<button class="logout-btn" onclick="openRecovery()">Código</button><button class="logout-btn" onclick="logout()">Salir</button>`;
-  document.getElementById('plat-status-row').before(chip);
-  loadGlobalStats();
-  syncAll(1);
+
+  // Load games first (most important) — parallel with stats
+  await Promise.all([
+    syncAll(1),
+    loadGlobalStats(),
+  ]);
+
+  // Then load secondary data in background
+  loadAvailableFilters();
+  loadFolders();
+  checkActiveSession();
 }
 
 function logout() {
