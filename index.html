@@ -2356,12 +2356,12 @@ function renderFolderGamePicker() {
     </div>
     <div style="display:table;width:100%;border-bottom:1px solid var(--border);background:var(--bg2)">
       <div style="display:table-row">
-        <div style="display:table-cell;padding:6px 16px;width:36px"><input type="checkbox" style="visibility:hidden;width:13px;height:13px;margin:0;display:block"></div>
-        <div style="display:table-cell;padding:6px 8px;font-size:11px;color:var(--text2)">${col('name','Nombre')}</div>
-        <div style="display:table-cell;width:110px;padding:6px 8px;font-size:11px;color:var(--text2)">${col('platform','Plataforma')}</div>
-        <div style="display:table-cell;width:65px;padding:6px 8px;font-size:11px;color:var(--text2)">${col('hours_played','Horas')}</div>
-        <div style="display:table-cell;width:50px;padding:6px 8px;font-size:11px;color:var(--text2)">${col('user_rating','★')}</div>
-        <div style="display:table-cell;width:90px;padding:6px 16px 6px 8px;font-size:11px;color:var(--text2)">${col('genre','Género')}</div>
+        <div style="display:table-cell;padding:6px 16px;width:36px;min-width:36px;max-width:36px"><input type="checkbox" style="visibility:hidden;width:13px;height:13px;margin:0;display:block"></div>
+        <div style="display:table-cell;padding:6px 8px;font-size:11px;color:var(--text2);text-align:left">${col('name','Nombre')}</div>
+        <div style="display:table-cell;width:110px;min-width:110px;max-width:110px;padding:6px 8px;font-size:11px;color:var(--text2)">${col('platform','Plataforma')}</div>
+        <div style="display:table-cell;width:70px;min-width:70px;max-width:70px;padding:6px 8px;font-size:11px;color:var(--text2)">${col('hours_played','Horas')}</div>
+        <div style="display:table-cell;width:50px;min-width:50px;max-width:50px;padding:6px 8px;font-size:11px;color:var(--text2)">${col('user_rating','★')}</div>
+        <div style="display:table-cell;width:90px;min-width:90px;max-width:90px;padding:6px 16px 6px 8px;font-size:11px;color:var(--text2)">${col('genre','Género')}</div>
       </div>
     </div>
     <div style="overflow-y:auto;max-height:400px">
