@@ -237,12 +237,36 @@
       <button class="sync-btn" id="sync-btn" onclick="syncAll()">
         <i class="ti ti-refresh"></i> Sincronizar
       </button>
-      <button class="add-btn" onclick="openSettings()" style="margin-left:4px">
-        <i class="ti ti-brand-steam"></i> Steam
-      </button>
-      <button class="add-btn" onclick="syncWishlist()" style="margin-left:4px" title="Sincronizar lista de deseados de Steam">
-        <i class="ti ti-star"></i> Wishlist
-      </button>
+      <div style="position:relative;display:inline-block;margin-left:4px" id="steam-menu-wrap">
+        <button class="add-btn" onclick="toggleSteamMenu()" id="steam-menu-btn">
+          <i class="ti ti-brand-steam"></i> Steam ▾
+        </button>
+        <div id="steam-menu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:300;min-width:220px;box-shadow:0 4px 16px rgba(0,0,0,0.3);padding:4px 0">
+          <!-- Steam ID section -->
+          <div id="steam-id-section" style="padding:10px 14px;border-bottom:0.5px solid var(--border)">
+            <div style="font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Steam ID</div>
+            <div style="display:flex;gap:6px">
+              <input id="steam-id-input" type="text" placeholder="Steam ID o URL..."
+                style="flex:1;padding:5px 8px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);min-width:0"
+                onkeydown="if(event.key==='Enter') saveSteamId()" />
+              <button onclick="saveSteamId()" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;white-space:nowrap">Guardar</button>
+            </div>
+            <div id="steam-id-current" style="font-size:10px;color:var(--text2);margin-top:4px"></div>
+          </div>
+          <!-- Actions -->
+          <div style="padding:4px 0">
+            <button onclick="syncSteamLibrary()" class="steam-menu-item">
+              <i class="ti ti-library"></i> Sincronizar biblioteca
+            </button>
+            <button onclick="syncSteamWishlist()" class="steam-menu-item">
+              <i class="ti ti-star"></i> Sincronizar deseados
+            </button>
+            <button onclick="syncBoth()" class="steam-menu-item">
+              <i class="ti ti-refresh"></i> Sincronizar todo
+            </button>
+          </div>
+        </div>
+      </div>
 
     </div>
   </div>
@@ -1467,6 +1491,152 @@ function showEmailLogin() {
 function showGoogleLogin() {
   document.getElementById('email-login-section').style.display  = 'none';
   document.getElementById('google-login-section').style.display = 'block';
+}
+
+// ── Steam Unified Menu ───────────────────────────────────────────────────────
+
+let _steamMenuOpen = false;
+
+function toggleSteamMenu() {
+  const menu = document.getElementById('steam-menu');
+  _steamMenuOpen = !_steamMenuOpen;
+  menu.style.display = _steamMenuOpen ? 'block' : 'none';
+  if (_steamMenuOpen) {
+    loadSteamIdIntoMenu();
+    setTimeout(() => {
+      document.addEventListener('mousedown', _closeSteamMenuOutside);
+    }, 10);
+  }
+}
+
+function _closeSteamMenuOutside(e) {
+  if (!document.getElementById('steam-menu-wrap')?.contains(e.target)) {
+    document.getElementById('steam-menu').style.display = 'none';
+    _steamMenuOpen = false;
+    document.removeEventListener('mousedown', _closeSteamMenuOutside);
+  }
+}
+
+async function loadSteamIdIntoMenu() {
+  try {
+    const res  = await fetch(`${apiBase()}/api/v1/settings`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    const steamId = data.steam_user_id || '';
+    document.getElementById('steam-id-input').value = steamId;
+    const cur = document.getElementById('steam-id-current');
+    cur.textContent = steamId ? `Conectado: ${steamId}` : 'No conectado';
+    cur.style.color = steamId ? 'var(--green)' : 'var(--text2)';
+  } catch(e) {}
+}
+
+async function saveSteamId() {
+  const input   = document.getElementById('steam-id-input');
+  const userid  = input.value.trim();
+  if (!userid) return;
+
+  // Extract numeric ID from URL if pasted
+  const match = userid.match(/\/profiles\/(\d+)|\/id\/([^/]+)/);
+  const steamId = match ? (match[1] || match[2]) : userid;
+  input.value = steamId;
+
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/settings`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ steam_api_key: '1CB4EDC704B6B23B9E48E84B137E3F66', steam_user_id: steamId }),
+    });
+    if (!res.ok) throw new Error();
+    const cur = document.getElementById('steam-id-current');
+    cur.textContent = `✓ Guardado: ${steamId}`;
+    cur.style.color = 'var(--green)';
+  } catch(e) {
+    const cur = document.getElementById('steam-id-current');
+    cur.textContent = 'Error al guardar';
+    cur.style.color = 'var(--red)';
+  }
+}
+
+async function syncSteamLibrary() {
+  document.getElementById('steam-menu').style.display = 'none';
+  _steamMenuOpen = false;
+  const btn = document.getElementById('steam-menu-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-brand-steam"></i> Sincronizando...';
+  try {
+    // Library sync happens when /backlog fetches from Steam
+    await syncAll(1);
+    await loadGlobalStats();
+    showToast('✓ Biblioteca sincronizada');
+  } catch(e) {
+    showToast('Error al sincronizar biblioteca', true);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-brand-steam"></i> Steam ▾';
+  }
+}
+
+async function syncSteamWishlist() {
+  document.getElementById('steam-menu').style.display = 'none';
+  _steamMenuOpen = false;
+  const btn = document.getElementById('steam-menu-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-brand-steam"></i> Sincronizando...';
+  try {
+    const res  = await fetch(`${apiBase()}/api/v1/wishlist/sync`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error');
+    showToast(`✓ Deseados sincronizados: ${data.message || ''}`);
+    syncAll(currentPage);
+    loadGlobalStats();
+  } catch(e) {
+    showToast('Error al sincronizar deseados', true);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-brand-steam"></i> Steam ▾';
+  }
+}
+
+async function syncBoth() {
+  document.getElementById('steam-menu').style.display = 'none';
+  _steamMenuOpen = false;
+  const btn = document.getElementById('steam-menu-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-brand-steam"></i> Sincronizando...';
+  try {
+    // Sync library (via backlog) + wishlist in parallel
+    await Promise.all([
+      syncAll(1),
+      fetch(`${apiBase()}/api/v1/wishlist/sync`, { method: 'POST', headers: { 'Authorization': `Bearer ${authToken}` } }),
+    ]);
+    await loadGlobalStats();
+    showToast('✓ Biblioteca y deseados sincronizados');
+  } catch(e) {
+    showToast('Error al sincronizar', true);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-brand-steam"></i> Steam ▾';
+  }
+}
+
+function showToast(msg, isError = false) {
+  let toast = document.getElementById('toast-msg');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast-msg';
+    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;transition:opacity 0.3s';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.background = isError ? 'var(--red)' : 'var(--green)';
+  toast.style.color = '#fff';
+  toast.style.opacity = '1';
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => { toast.style.opacity = '0'; }, 3000);
 }
 
 async function syncWishlist() {
