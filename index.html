@@ -237,6 +237,11 @@
       <button class="sync-btn" id="sync-btn" onclick="syncAll()">
         <i class="ti ti-refresh"></i> Sincronizar
       </button>
+      <!-- Stats button -->
+      <button onclick="openStatsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" title="Estadísticas">
+        <i class="ti ti-chart-bar" style="font-size:14px"></i>
+      </button>
+
       <!-- Config button -->
       <button onclick="openConfigPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" title="Configuración">
         <i class="ti ti-settings" style="font-size:14px"></i>
@@ -477,6 +482,35 @@
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeCoverEdit()">Cancelar</button>
       <button class="btn-save" onclick="saveCoverEdit()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Stats Panel -->
+<div class="modal-overlay" id="stats-overlay" style="align-items:flex-start;padding-top:40px">
+  <div class="modal" style="max-width:700px;width:95vw;max-height:85vh;overflow-y:auto">
+    <div class="modal-title"><i class="ti ti-chart-bar"></i> Estadísticas</div>
+
+    <!-- Tabs -->
+    <div style="display:flex;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:0.5px solid var(--border)">
+      <button id="stab-user" onclick="switchStatsTab('user')"
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--green);background:var(--bg2);color:var(--green);cursor:pointer;border-radius:20px;margin-right:6px;font-weight:600">Mis stats</button>
+      <button id="stab-global" onclick="switchStatsTab('global')"
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px">Global</button>
+    </div>
+
+    <!-- User stats tab -->
+    <div id="stats-user-tab">
+      <div id="stats-user-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>Cargando...</div></div>
+    </div>
+
+    <!-- Global stats tab -->
+    <div id="stats-global-tab" style="display:none">
+      <div id="stats-global-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>Cargando...</div></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeStatsPanel()">Cerrar</button>
     </div>
   </div>
 </div>
@@ -1575,6 +1609,167 @@ function showGoogleLogin() {
   document.getElementById('email-login-section').style.display  = 'none';
   document.getElementById('google-login-section').style.display = 'block';
 }
+
+// ── Statistics ───────────────────────────────────────────────────────────────
+
+async function openStatsPanel() {
+  document.getElementById('stats-overlay').classList.add('open');
+  switchStatsTab('user');
+}
+
+function closeStatsPanel() {
+  document.getElementById('stats-overlay').classList.remove('open');
+}
+
+function switchStatsTab(tab) {
+  document.getElementById('stats-user-tab').style.display    = tab === 'user'   ? '' : 'none';
+  document.getElementById('stats-global-tab').style.display  = tab === 'global' ? '' : 'none';
+  ['user','global'].forEach(t => {
+    const btn = document.getElementById(`stab-${t}`);
+    if (!btn) return;
+    btn.style.color       = t === tab ? 'var(--green)' : 'var(--text2)';
+    btn.style.borderColor = t === tab ? 'var(--green)' : 'var(--border)';
+    btn.style.fontWeight  = t === tab ? '600' : 'normal';
+  });
+  if (tab === 'user')   loadUserStats();
+  if (tab === 'global') loadGlobalRankings();
+}
+
+async function loadUserStats() {
+  const el = document.getElementById('stats-user-content');
+  el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>Cargando...</div>';
+  try {
+    const res  = await fetch(`${apiBase()}/api/v1/stats/user`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const d = await res.json();
+
+    const statusColors = {
+      'Jugando': '#3B82F6', 'Completado': '#1D9E75', 'Backlog': '#6B7280',
+      'Abandonado': '#E24B4A', 'Intermitente': '#8B5CF6', 'Deseados': '#EF9F27'
+    };
+
+    el.innerHTML = `
+      <!-- Totals -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px">
+        <div class="stat-card"><div class="stat-label">BIBLIOTECA</div><div class="stat-value">${d.library_count}</div></div>
+        <div class="stat-card"><div class="stat-label">DESEADOS</div><div class="stat-value" style="color:var(--wishlist)">${d.wishlist_count}</div></div>
+        <div class="stat-card"><div class="stat-label">CALIFICADOS</div><div class="stat-value">${d.rated_count}</div></div>
+      </div>
+
+      <!-- By status -->
+      <div style="margin-bottom:20px">
+        <div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Por estado</div>
+        ${d.by_status.map(s => `
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <div style="width:10px;height:10px;border-radius:50%;background:${statusColors[s.status]||'#6B7280'};flex-shrink:0"></div>
+            <span style="flex:1;font-size:13px">${s.status}</span>
+            <span style="font-size:12px;color:var(--text2)">${s.hours}h</span>
+            <span style="font-size:13px;font-weight:600;min-width:30px;text-align:right">${s.count}</span>
+          </div>
+          <div style="height:4px;background:var(--bg3);border-radius:2px;margin-bottom:10px">
+            <div style="height:100%;border-radius:2px;background:${statusColors[s.status]||'#6B7280'};width:${Math.round(s.count/d.library_count*100)}%"></div>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- By platform -->
+      <div style="margin-bottom:20px">
+        <div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Por plataforma</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          ${d.by_platform.map(p => `
+            <div style="padding:4px 12px;background:var(--bg3);border-radius:20px;font-size:12px">
+              ${p.platform} <strong>${p.count}</strong>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Activity last 2 weeks -->
+      <div style="margin-bottom:8px">
+        <div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Últimas 2 semanas</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
+          <div class="stat-card"><div class="stat-label">AGREGADOS</div><div class="stat-value">${d.activity.library_added}</div></div>
+          <div class="stat-card"><div class="stat-label">CALIFICADOS</div><div class="stat-value">${d.activity.rated}</div></div>
+          <div class="stat-card"><div class="stat-label">HORAS</div><div class="stat-value">${d.activity.session_hours}h</div></div>
+        </div>
+        ${d.activity.top_games.length > 0 ? `
+          <div style="font-size:12px;color:var(--text2);margin-bottom:6px">Juegos más jugados</div>
+          ${d.activity.top_games.map((g,i) => `
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:13px">
+              <span style="color:var(--text2);min-width:18px">${i+1}.</span>
+              <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${g.name}</span>
+              <span style="color:var(--text2)">${g.hours}h</span>
+            </div>
+          `).join('')}
+        ` : '<div style="color:var(--text2);font-size:13px">Sin sesiones registradas</div>'}
+      </div>
+    `;
+  } catch(e) {
+    el.innerHTML = '<div style="color:var(--red);padding:16px">Error al cargar estadísticas</div>';
+  }
+}
+
+async function loadGlobalRankings() {
+  const el = document.getElementById('stats-global-content');
+  el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>Cargando...</div>';
+  try {
+    const res  = await fetch(`${apiBase()}/api/v1/stats/global-rankings`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const d = await res.json();
+
+    const rankList = (items, valueKey, valueLabel, valueSuffix='') => {
+      if (!items.length) return '<div style="color:var(--text2);font-size:13px;padding:8px 0">Sin datos</div>';
+      return items.slice(0,20).map((g,i) => `
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:0.5px solid var(--border);font-size:13px">
+          <span style="color:var(--text2);min-width:24px;font-size:11px">${i+1}</span>
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${g.name}">${g.name}</span>
+          <span style="color:var(--text2);font-size:12px">${g[valueKey]}${valueSuffix}</span>
+        </div>
+      `).join('');
+    };
+
+    const section = (title, content) => `
+      <div style="margin-bottom:20px">
+        <div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">${title}</div>
+        ${content}
+      </div>`;
+
+    el.innerHTML = `
+      <div style="margin-bottom:16px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--green)">Histórico</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            ${section('En más bibliotecas', rankList(d.most_in_library, 'count', 'usuarios', ' usuarios'))}
+            ${section('Más jugados', rankList(d.most_played, 'hours', 'horas', 'h'))}
+            ${section('Más completados', rankList(d.most_completed, 'count', '', ' usuarios'))}
+          </div>
+          <div>
+            ${section('Más deseados', rankList(d.most_wished, 'count', '', ' usuarios'))}
+            ${section('Mejor puntuados', rankList(d.best_rated, 'avg_rating', '', '★'))}
+            ${section('Más abandonados', rankList(d.most_abandoned, 'count', '', ' usuarios'))}
+          </div>
+        </div>
+      </div>
+
+      <div style="border-top:0.5px solid var(--border);padding-top:16px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--green)">Últimas 2 semanas</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>${section('Más agregados', rankList(d.recent.most_added, 'count', '', ' usuarios'))}</div>
+          <div>${section('Más deseados', rankList(d.recent.most_wished, 'count', '', ' usuarios'))}</div>
+        </div>
+      </div>
+    `;
+  } catch(e) {
+    el.innerHTML = '<div style="color:var(--red);padding:16px">Error al cargar estadísticas</div>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const so = document.getElementById('stats-overlay');
+  if (so) so.addEventListener('click', e => { if (e.target === so) closeStatsPanel(); });
+});
 
 // ── User Configuration ───────────────────────────────────────────────────────
 
