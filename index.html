@@ -488,8 +488,10 @@
 
     <!-- Tabs -->
     <div style="display:flex;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:0.5px solid var(--border)">
-      <button class="config-tab active" id="tab-profile" onclick="switchConfigTab('profile')">Perfil</button>
-      <button class="config-tab" id="tab-account" onclick="switchConfigTab('account')">Cuenta</button>
+      <button id="tab-profile" onclick="switchConfigTab('profile')"
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--green);background:var(--bg2);color:var(--green);cursor:pointer;border-radius:20px;margin-right:6px;font-weight:600">Perfil</button>
+      <button id="tab-account" onclick="switchConfigTab('account')"
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px">Cuenta</button>
     </div>
 
     <!-- Profile tab -->
@@ -1603,8 +1605,14 @@ function switchConfigTab(tab) {
   document.getElementById('config-profile').style.display = tab === 'profile' ? '' : 'none';
   document.getElementById('config-account').style.display = tab === 'account' ? '' : 'none';
   document.getElementById('cfg-save-btn').style.display   = tab === 'profile' ? '' : 'none';
-  document.querySelectorAll('.config-tab').forEach(b => b.classList.remove('active'));
-  document.getElementById(`tab-${tab}`).classList.add('active');
+  ['profile','account'].forEach(t => {
+    const btn = document.getElementById(`tab-${t}`);
+    if (!btn) return;
+    const active = t === tab;
+    btn.style.color       = active ? 'var(--green)' : 'var(--text2)';
+    btn.style.borderColor = active ? 'var(--green)' : 'var(--border)';
+    btn.style.fontWeight  = active ? '600' : 'normal';
+  });
 }
 
 async function saveConfig() {
