@@ -264,6 +264,13 @@
             <button onclick="syncBoth()" class="steam-menu-item">
               <i class="ti ti-refresh"></i> Sincronizar todo
             </button>
+            <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
+            <button onclick="restoreDeletedSteam('library')" class="steam-menu-item">
+              <i class="ti ti-restore"></i> Restablecer biblioteca borrada
+            </button>
+            <button onclick="restoreDeletedSteam('wishlist')" class="steam-menu-item">
+              <i class="ti ti-restore"></i> Restablecer deseados borrados
+            </button>
           </div>
         </div>
       </div>
@@ -1617,6 +1624,32 @@ async function syncBoth() {
     showToast('✓ Biblioteca y deseados sincronizados');
   } catch(e) {
     showToast('Error al sincronizar', true);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-brand-steam"></i> Steam ▾';
+  }
+}
+
+async function restoreDeletedSteam(section) {
+  document.getElementById('steam-menu').style.display = 'none';
+  _steamMenuOpen = false;
+  const label = section === 'wishlist' ? 'deseados' : 'biblioteca';
+  if (!confirm(`¿Restablecer todos los juegos de Steam borrados de ${label}?`)) return;
+  const btn = document.getElementById('steam-menu-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-brand-steam"></i> Restableciendo...';
+  try {
+    const res  = await fetch(`${apiBase()}/api/v1/steam/restore-deleted?section=${section}`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error');
+    showToast(`✓ ${data.message}`);
+    syncAll(1);
+    loadGlobalStats();
+  } catch(e) {
+    showToast('Error al restablecer', true);
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="ti ti-brand-steam"></i> Steam ▾';
