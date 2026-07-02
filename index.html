@@ -2328,11 +2328,10 @@ async function submitAuth() {
   if (!email || !password) { errEl.textContent='Completá email y contraseña'; errEl.style.display='block'; return; }
   if (isRegister && !username) { errEl.textContent='Completá el nombre de usuario'; errEl.style.display='block'; return; }
 
-  // Check username availability before registering
+  // Check username availability (public endpoint, no auth required)
   if (isRegister && username) {
     try {
-      const chk = await fetch(`${apiBase()}/api/v1/user/check-username?username=${encodeURIComponent(username)}`);
-      // If endpoint requires auth, fall back to server-side check on register
+      const chk = await fetch(`${apiBase()}/api/v1/auth/check-username?username=${encodeURIComponent(username)}`);
       if (chk.ok) {
         const chkData = await chk.json();
         if (!chkData.available) {
