@@ -2328,21 +2328,6 @@ async function submitAuth() {
   if (!email || !password) { errEl.textContent='Completá email y contraseña'; errEl.style.display='block'; return; }
   if (isRegister && !username) { errEl.textContent='Completá el nombre de usuario'; errEl.style.display='block'; return; }
 
-  // Check username availability (public endpoint, no auth required)
-  if (isRegister && username) {
-    try {
-      const chk = await fetch(`${apiBase()}/api/v1/auth/check-username?username=${encodeURIComponent(username)}`);
-      if (chk.ok) {
-        const chkData = await chk.json();
-        if (!chkData.available) {
-          errEl.textContent = 'Ese nombre de usuario ya está en uso';
-          errEl.style.display = 'block';
-          return;
-        }
-      }
-    } catch(e) {}
-  }
-
   const endpoint = isRegister ? '/api/v1/auth/register' : '/api/v1/auth/login';
   const body     = isRegister ? { email, password, username } : { email, password };
 
@@ -2354,7 +2339,11 @@ async function submitAuth() {
       body: JSON.stringify(body),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(res.status === 401 ? 'Verificá los datos ingresados' : data.detail || 'Error de autenticación');
+    if (!res.ok) {
+      if (res.status === 409) throw new Error(data.detail || 'Nombre de usuario ya en uso');
+      if (res.status === 401) throw new Error('Verificá los datos ingresados');
+      throw new Error(data.detail || 'Error de autenticación');
+    }
 
     authToken = data.access_token;
     authUser  = data.username;
