@@ -487,7 +487,7 @@
     <div class="modal-title"><i class="ti ti-settings"></i> Configuración</div>
 
     <!-- Tabs -->
-    <div style="display:flex;border-bottom:0.5px solid var(--border);margin-bottom:16px">
+    <div style="display:flex;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:0.5px solid var(--border)">
       <button class="config-tab active" id="tab-profile" onclick="switchConfigTab('profile')">Perfil</button>
       <button class="config-tab" id="tab-account" onclick="switchConfigTab('account')">Cuenta</button>
     </div>
@@ -499,11 +499,7 @@
           <label>Nombre de usuario</label>
           <input type="text" id="cfg-username" placeholder="Tu nombre de usuario" maxlength="50" />
         </div>
-        <div class="modal-group full">
-          <label>Biografía</label>
-          <textarea id="cfg-bio" placeholder="Contá algo sobre vos..." maxlength="300"
-            style="width:100%;padding:8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;resize:vertical;min-height:80px;box-sizing:border-box"></textarea>
-        </div>
+
         <div class="modal-group">
           <label>Idioma</label>
           <select id="cfg-language" style="width:100%;padding:8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:13px">
@@ -532,7 +528,7 @@
       <div style="display:flex;flex-direction:column;gap:12px">
         <div style="padding:12px;background:var(--bg3);border-radius:8px;font-size:13px;color:var(--text2)">
           <div id="cfg-email" style="margin-bottom:4px"></div>
-          <div id="cfg-user-id" style="font-size:11px;color:var(--text2)"></div>
+
         </div>
         <button onclick="confirmDeleteLibrary()"
           style="padding:10px;border-radius:8px;border:0.5px solid var(--red);background:transparent;color:var(--red);cursor:pointer;font-size:13px;text-align:left">
@@ -1588,10 +1584,8 @@ async function openConfigPanel() {
     });
     const data = await res.json();
     document.getElementById('cfg-username').value  = data.username || '';
-    document.getElementById('cfg-bio').value       = data.bio      || '';
     document.getElementById('cfg-language').value  = data.language || 'es';
     document.getElementById('cfg-email').textContent  = `Email: ${data.email || ''}`;
-    document.getElementById('cfg-user-id').textContent = `ID: ${data.user_id || ''}`;
     const vis = data.is_public ? 'public' : 'private';
     document.querySelector(`input[name="cfg-visibility"][value="${vis}"]`).checked = true;
   } catch(e) {}
@@ -1614,9 +1608,25 @@ function switchConfigTab(tab) {
 }
 
 async function saveConfig() {
+  const username = document.getElementById('cfg-username').value.trim();
+
+  // Check username availability
+  if (username) {
+    const chk = await fetch(`${apiBase()}/api/v1/user/check-username?username=${encodeURIComponent(username)}`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const chkData = await chk.json();
+    if (!chkData.available) {
+      const msg = document.getElementById('cfg-profile-msg');
+      msg.style.display = 'block';
+      msg.style.color   = 'var(--red)';
+      msg.textContent   = 'Ese nombre de usuario ya está en uso';
+      return;
+    }
+  }
+
   const body = {
-    username:  document.getElementById('cfg-username').value.trim(),
-    bio:       document.getElementById('cfg-bio').value.trim(),
+    username:  username,
     language:  document.getElementById('cfg-language').value,
     is_public: document.querySelector('input[name="cfg-visibility"]:checked').value === 'public',
   };
