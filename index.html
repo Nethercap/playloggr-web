@@ -1572,10 +1572,15 @@ async function syncSteamLibrary() {
   btn.disabled = true;
   btn.innerHTML = '<i class="ti ti-brand-steam"></i> Sincronizando...';
   try {
-    // Library sync happens when /backlog fetches from Steam
+    const res  = await fetch(`${apiBase()}/api/v1/steam/sync-library`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error');
+    showToast(`✓ ${data.message}`);
     await syncAll(1);
-    await loadGlobalStats();
-    showToast('✓ Biblioteca sincronizada');
+    loadGlobalStats();
   } catch(e) {
     showToast('Error al sincronizar biblioteca', true);
   } finally {
@@ -1615,11 +1620,11 @@ async function syncBoth() {
   btn.disabled = true;
   btn.innerHTML = '<i class="ti ti-brand-steam"></i> Sincronizando...';
   try {
-    // Sync library (via backlog) + wishlist in parallel
     await Promise.all([
-      syncAll(1),
-      fetch(`${apiBase()}/api/v1/wishlist/sync`, { method: 'POST', headers: { 'Authorization': `Bearer ${authToken}` } }),
+      fetch(`${apiBase()}/api/v1/steam/sync-library`, { method: 'POST', headers: { 'Authorization': `Bearer ${authToken}` } }),
+      fetch(`${apiBase()}/api/v1/wishlist/sync`,      { method: 'POST', headers: { 'Authorization': `Bearer ${authToken}` } }),
     ]);
+    await syncAll(1);
     await loadGlobalStats();
     showToast('✓ Biblioteca y deseados sincronizados');
   } catch(e) {
