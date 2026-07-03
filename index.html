@@ -1369,10 +1369,12 @@ function setView(view) {
   const statsView = document.getElementById('stats-view');
   const filterBar = document.getElementById('filter-bar');
   const footer    = document.querySelector('.footer');
+  const pagBar    = document.getElementById('pagination-bar');
   if (gameList)  gameList.style.display  = isStats ? 'none' : '';
   if (statsView) statsView.style.display = isStats ? 'flex' : 'none';
   if (filterBar) filterBar.style.display = isStats ? 'none' : '';
   if (footer)    footer.style.display    = isStats ? 'none' : '';
+  if (pagBar)    pagBar.style.display    = isStats ? 'none' : '';
 
   const libBtn   = document.getElementById('view-library');
   const wishBtn  = document.getElementById('view-wishlist');
