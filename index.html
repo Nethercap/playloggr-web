@@ -1724,25 +1724,6 @@ async function loadUserStats() {
         </div>
       </div>
 
-      <!-- Activity last 2 weeks -->
-      <div>
-        <div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Últimas 2 semanas</div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
-          <div class="stat-card"><div class="stat-label">AGREGADOS</div><div class="stat-value">${panelTotal}</div></div>
-          <div class="stat-card"><div class="stat-label">CALIFICADOS</div><div class="stat-value">${d.rated_count}</div></div>
-          <div class="stat-card"><div class="stat-label">HORAS</div><div class="stat-value">${panelHours.toLocaleString('es-AR')}h</div></div>
-        </div>
-        ${d.activity.top_games && d.activity.top_games.length > 0 ? `
-          <div style="font-size:12px;color:var(--text2);margin-bottom:6px">Juegos más jugados</div>
-          ${d.activity.top_games.map((g,i) => `
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:13px">
-              <span style="color:var(--text2);min-width:18px">${i+1}.</span>
-              <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${g.name}</span>
-              <span style="color:var(--text2)">${g.hours}h</span>
-            </div>
-          `).join('')}
-        ` : '<div style="color:var(--text2);font-size:13px">Sin sesiones registradas</div>'}
-      </div>
     `;
   } catch(e) {
     el.innerHTML = '<div style="color:var(--red);padding:16px">Error al cargar estadísticas</div>';
