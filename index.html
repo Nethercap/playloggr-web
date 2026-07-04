@@ -247,6 +247,11 @@
         <i class="ti ti-settings" style="font-size:14px"></i>
       </button>
 
+      <!-- Friends button -->
+      <button onclick="openFriendsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" title="Amigos">
+        <i class="ti ti-users" style="font-size:14px"></i>
+      </button>
+
       <div style="position:relative;display:inline-block;margin-left:4px" id="steam-menu-wrap">
         <button class="add-btn" onclick="toggleSteamMenu()" id="steam-menu-btn">
           <i class="ti ti-brand-steam"></i> Steam ▾
@@ -618,6 +623,79 @@
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeConfigPanel()">Cancelar</button>
       <button class="btn-save" id="cfg-save-btn" onclick="saveConfig()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Friends Modal -->
+<div class="modal-overlay" id="friends-overlay">
+  <div class="modal" style="max-width:520px;max-height:82vh;display:flex;flex-direction:column">
+    <div class="modal-title"><i class="ti ti-users"></i> Amigos</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <input type="text" id="friend-username-input" placeholder="Nombre de usuario..."
+        style="flex:1;padding:8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"
+        onkeydown="if(event.key==='Enter') addFriendByUsername()" />
+      <button class="btn-save" style="white-space:nowrap" onclick="addFriendByUsername()">Agregar</button>
+    </div>
+    <div id="friends-msg" style="font-size:12px;margin-bottom:8px;display:none"></div>
+    <div id="friends-list" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:8px;min-height:120px"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeFriendsPanel()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Friend Profile Modal (read-only) -->
+<div class="modal-overlay" id="friend-profile-overlay">
+  <div class="modal" style="max-width:640px;max-height:85vh;display:flex;flex-direction:column">
+    <div class="modal-title" id="friend-profile-title"><i class="ti ti-user"></i> Perfil</div>
+    <div style="display:flex;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:0.5px solid var(--border)">
+      <button id="ftab-library" onclick="switchFriendTab('library')"
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--green);background:var(--bg2);color:var(--green);cursor:pointer;border-radius:20px;margin-right:6px;font-weight:600">Biblioteca</button>
+      <button id="ftab-wishlist" onclick="switchFriendTab('wishlist')"
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px">Deseados</button>
+      <button id="ftab-stats" onclick="switchFriendTab('stats')"
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px">Estadísticas</button>
+    </div>
+
+    <div id="friend-tab-library">
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <input type="text" id="friend-search-library" placeholder="Buscar..."
+          style="flex:1;padding:6px 8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:12px"
+          onkeydown="if(event.key==='Enter') loadFriendLibrary()" />
+        <select id="friend-sort-library" onchange="loadFriendLibrary()"
+          style="padding:6px 8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:12px">
+          <option value="name">Nombre</option>
+          <option value="hours">Horas</option>
+          <option value="rating">Calificación</option>
+          <option value="platform">Plataforma</option>
+        </select>
+      </div>
+      <div id="friend-library-list" style="overflow-y:auto;max-height:50vh;display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+
+    <div id="friend-tab-wishlist" style="display:none">
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <input type="text" id="friend-search-wishlist" placeholder="Buscar..."
+          style="flex:1;padding:6px 8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:12px"
+          onkeydown="if(event.key==='Enter') loadFriendWishlist()" />
+        <select id="friend-sort-wishlist" onchange="loadFriendWishlist()"
+          style="padding:6px 8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:12px">
+          <option value="name">Nombre</option>
+          <option value="hours">Horas</option>
+          <option value="rating">Calificación</option>
+          <option value="platform">Plataforma</option>
+        </select>
+      </div>
+      <div id="friend-wishlist-list" style="overflow-y:auto;max-height:50vh;display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+
+    <div id="friend-tab-stats" style="display:none;overflow-y:auto;max-height:55vh">
+      <div id="friend-stats-content"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeFriendProfile()">Cerrar</button>
     </div>
   </div>
 </div>
@@ -2075,6 +2153,247 @@ document.addEventListener('change', (e) => {
   if (e.target.id === 'avatar-show-lentes') { currentAvatarConfig.showLentes = e.target.checked; renderAvatarPreview(); }
   if (e.target.id === 'avatar-show-barba') { currentAvatarConfig.showBarba = e.target.checked; renderAvatarPreview(); }
 });
+
+// ── Social / Amigos ─────────────────────────────────────────────────────
+
+let currentFriendUsername = null;
+let currentFriendTab = 'library';
+
+const _statusColorsFriend = {
+  'Jugando':      '#378ADD',
+  'Completado':   '#1D9E75',
+  'Backlog':      '#888780',
+  'Abandonado':   '#E24B4A',
+  'Intermitente': '#7F77DD',
+  'Deseados':     '#EF9F27',
+};
+
+async function openFriendsPanel() {
+  document.getElementById('friends-overlay').classList.add('open');
+  await loadFriendsList();
+}
+
+function closeFriendsPanel() {
+  document.getElementById('friends-overlay').classList.remove('open');
+}
+
+async function loadFriendsList() {
+  const list = document.getElementById('friends-list');
+  list.innerHTML = `<div class="empty"><i class="ti ti-loader"></i>Cargando...</div>`;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/friends`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    const friends = data.friends || [];
+    if (!friends.length) {
+      list.innerHTML = `<div class="empty"><i class="ti ti-users"></i>Todavía no agregaste amigos</div>`;
+      return;
+    }
+    list.innerHTML = friends.map(f => {
+      let avatarSvg = '';
+      try {
+        const cfg = f.avatar_config ? JSON.parse(f.avatar_config) : null;
+        avatarSvg = cfg ? buildAvatarMarkup(cfg) : '';
+      } catch(e) {}
+      const sessionBadge = f.in_session
+        ? `<span style="background:#1D9E75;color:#fff;font-size:10px;padding:2px 6px;border-radius:6px;margin-left:6px">En sesión</span>`
+        : '';
+      const subtitle = f.in_session
+        ? `<span style="color:#1D9E75">${f.session_game || ''} · ${f.session_platform || ''}</span>`
+        : `${f.library_count} juegos · ${f.wishlist_count} deseados · ${Math.round(f.total_hours)} hs`;
+      return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px">
+        <div style="width:44px;height:44px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;cursor:pointer" onclick="openFriendProfile('${f.username}')">
+          <svg viewBox="9 5 182 186" width="40" height="40">${avatarSvg}</svg>
+        </div>
+        <div style="flex:1;min-width:0;cursor:pointer" onclick="openFriendProfile('${f.username}')">
+          <div style="font-weight:600;font-size:13px">${f.username}${sessionBadge}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">${subtitle}</div>
+        </div>
+        <button onclick="removeFriendByUsername('${f.username}')" title="Quitar amigo"
+          style="padding:5px 8px;font-size:11px;border-radius:6px;border:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer">
+          <i class="ti ti-user-minus"></i>
+        </button>
+        <button onclick="blockFriendByUsername('${f.username}')" title="Bloquear"
+          style="padding:5px 8px;font-size:11px;border-radius:6px;border:0.5px solid var(--red);background:transparent;color:var(--red);cursor:pointer">
+          <i class="ti ti-ban"></i>
+        </button>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    list.innerHTML = `<div class="empty"><i class="ti ti-alert-triangle"></i>Error al cargar amigos</div>`;
+  }
+}
+
+async function addFriendByUsername() {
+  const input = document.getElementById('friend-username-input');
+  const username = input.value.trim();
+  if (!username) return;
+  const msg = document.getElementById('friends-msg');
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/friends/add`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error');
+    input.value = '';
+    msg.style.display = 'none';
+    await loadFriendsList();
+  } catch(e) {
+    msg.style.display = 'block';
+    msg.style.color = 'var(--red)';
+    msg.textContent = e.message || 'No se pudo agregar el amigo';
+  }
+}
+
+async function removeFriendByUsername(username) {
+  if (!confirm(`¿Quitar a ${username} de tus amigos?`)) return;
+  await fetch(`${apiBase()}/api/v1/friends/${encodeURIComponent(username)}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${authToken}` }
+  });
+  await loadFriendsList();
+}
+
+async function blockFriendByUsername(username) {
+  if (!confirm(`¿Bloquear a ${username}? Se eliminará la amistad y no podrá agregarte de nuevo.`)) return;
+  await fetch(`${apiBase()}/api/v1/friends/block`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username }),
+  });
+  await loadFriendsList();
+}
+
+async function openFriendProfile(username) {
+  currentFriendUsername = username;
+  document.getElementById('friend-profile-title').innerHTML = `<i class="ti ti-user"></i> ${username}`;
+  document.getElementById('friend-profile-overlay').classList.add('open');
+  switchFriendTab('library');
+}
+
+function closeFriendProfile() {
+  document.getElementById('friend-profile-overlay').classList.remove('open');
+  currentFriendUsername = null;
+}
+
+function switchFriendTab(tab) {
+  currentFriendTab = tab;
+  document.getElementById('friend-tab-library').style.display  = tab === 'library'  ? '' : 'none';
+  document.getElementById('friend-tab-wishlist').style.display = tab === 'wishlist' ? '' : 'none';
+  document.getElementById('friend-tab-stats').style.display    = tab === 'stats'    ? '' : 'none';
+  ['library','wishlist','stats'].forEach(t => {
+    const btn = document.getElementById(`ftab-${t}`);
+    const active = t === tab;
+    btn.style.color       = active ? 'var(--green)' : 'var(--text2)';
+    btn.style.borderColor = active ? 'var(--green)' : 'var(--border)';
+    btn.style.fontWeight  = active ? '600' : 'normal';
+  });
+  if (tab === 'library') loadFriendLibrary();
+  else if (tab === 'wishlist') loadFriendWishlist();
+  else loadFriendStats();
+}
+
+function friendGameCardHtml(g) {
+  const cover = g.cover_url
+    ? `<img src="${g.cover_url}" alt="${g.name}" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover">`
+    : `<span>🎮</span>`;
+  const color = _statusColorsFriend[g.status] || '#888780';
+  return `<div class="game-card">
+    <div class="game-cover" style="pointer-events:none">${cover}</div>
+    <div>
+      <div class="game-name">${g.name}</div>
+      <div class="game-meta">${platBadge(g.platform)}</div>
+      <div class="game-foot"><span><i class="ti ti-clock" style="font-size:12px"></i>${(g.hours_played||0).toFixed(1)} hs</span>${g.user_rating ? `<span style="margin-left:8px">★ ${g.user_rating}</span>` : ''}</div>
+    </div>
+    <div class="game-status-col">
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:${color}">
+        <div class="sdot" style="background:${color}"></div>${g.status}
+      </div>
+      ${g.genre ? `<div style="font-size:11px;color:var(--text2);margin-top:4px">${g.genre}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+async function loadFriendLibrary() {
+  const list = document.getElementById('friend-library-list');
+  list.innerHTML = `<div class="empty"><i class="ti ti-loader"></i>Cargando...</div>`;
+  const search = document.getElementById('friend-search-library').value.trim();
+  const sort   = document.getElementById('friend-sort-library').value;
+  try {
+    const params = new URLSearchParams({ sort, order: 'asc', per_page: '100' });
+    if (search) params.set('search', search);
+    const res = await fetch(`${apiBase()}/api/v1/friends/${encodeURIComponent(currentFriendUsername)}/backlog?${params}`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error');
+    const games = data.games || [];
+    list.innerHTML = games.length
+      ? games.map(friendGameCardHtml).join('')
+      : `<div class="empty"><i class="ti ti-mood-sad"></i>Sin juegos</div>`;
+  } catch(e) {
+    list.innerHTML = `<div class="empty"><i class="ti ti-alert-triangle"></i>${e.message}</div>`;
+  }
+}
+
+async function loadFriendWishlist() {
+  const list = document.getElementById('friend-wishlist-list');
+  list.innerHTML = `<div class="empty"><i class="ti ti-loader"></i>Cargando...</div>`;
+  const search = document.getElementById('friend-search-wishlist').value.trim();
+  const sort   = document.getElementById('friend-sort-wishlist').value;
+  try {
+    const params = new URLSearchParams({ status: 'Deseados', sort, order: 'asc', per_page: '100' });
+    if (search) params.set('search', search);
+    const res = await fetch(`${apiBase()}/api/v1/friends/${encodeURIComponent(currentFriendUsername)}/backlog?${params}`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error');
+    const games = data.games || [];
+    list.innerHTML = games.length
+      ? games.map(friendGameCardHtml).join('')
+      : `<div class="empty"><i class="ti ti-mood-sad"></i>Sin juegos</div>`;
+  } catch(e) {
+    list.innerHTML = `<div class="empty"><i class="ti ti-alert-triangle"></i>${e.message}</div>`;
+  }
+}
+
+async function loadFriendStats() {
+  const el = document.getElementById('friend-stats-content');
+  el.innerHTML = `<div class="empty"><i class="ti ti-loader"></i>Cargando...</div>`;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/friends/${encodeURIComponent(currentFriendUsername)}/stats`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    const byStatus   = d.by_status   || [];
+    const byPlatform = d.by_platform || [];
+    el.innerHTML = `
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <div class="stat-card" style="flex:1"><div class="stat-label">Biblioteca</div><div class="stat-value">${d.library_count}</div></div>
+        <div class="stat-card" style="flex:1"><div class="stat-label">Deseados</div><div class="stat-value">${d.wishlist_count}</div></div>
+        <div class="stat-card" style="flex:1"><div class="stat-label">Calificados</div><div class="stat-value">${d.rated_count}</div></div>
+      </div>
+      <div style="font-weight:600;margin-bottom:8px">Por estado</div>
+      ${byStatus.map(s => `<div style="display:flex;align-items:center;gap:8px;padding:4px 0">
+        <div class="sdot" style="background:${_statusColorsFriend[s.status]||'#888'}"></div>
+        <div style="flex:1">${s.status}</div>
+        <div style="color:var(--text2);font-size:12px">${s.count} · ${s.hours} hs</div>
+      </div>`).join('')}
+      <div style="font-weight:600;margin:16px 0 8px">Por plataforma</div>
+      ${byPlatform.map(p => `<div style="display:flex;align-items:center;gap:8px;padding:4px 0">
+        <div style="flex:1">${p.platform}</div>
+        <div style="color:var(--text2);font-size:12px">${p.count}</div>
+      </div>`).join('')}
+    `;
+  } catch(e) {
+    el.innerHTML = `<div class="empty"><i class="ti ti-alert-triangle"></i>${e.message}</div>`;
+  }
+}
 
 async function confirmDeleteLibrary() {
   if (!confirm('¿Eliminar toda tu biblioteca? Esta acción no se puede deshacer.')) return;
