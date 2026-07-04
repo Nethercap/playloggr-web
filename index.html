@@ -291,10 +291,7 @@
   <div class="error-banner" id="error-banner"></div>
 
   <!-- Totales globales -->
-  <div class="stats-row" style="align-items:center">
-    <div style="cursor:pointer;width:44px;height:44px;background:var(--bg3);border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none" onclick="openConfigPanel().then(()=>switchConfigTab('avatar'))" title="Personalizar avatar">
-      <svg id="avatar-thumb-svg" viewBox="9 5 182 186" width="36" height="36"></svg>
-    </div>
+  <div class="stats-row">
     <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value" id="g-total">—</div></div>
     <div class="stat-card"><div class="stat-label">Jugando</div><div class="stat-value" id="g-playing">—</div></div>
     <div class="stat-card"><div class="stat-label">Completados</div><div class="stat-value" id="g-completed">—</div></div>
@@ -303,6 +300,9 @@
     <div class="stat-card" style="cursor:pointer;border-color:rgba(239,159,39,0.3)" onclick="setStatus('Deseados')" title="Ver deseados">
       <div class="stat-label">Deseados</div>
       <div class="stat-value" id="g-wishlist" style="color:#EF9F27">—</div>
+    </div>
+    <div class="stat-card" style="cursor:pointer;display:flex;align-items:center;justify-content:center" onclick="openConfigPanel().then(()=>switchConfigTab('avatar'))" title="Personalizar avatar">
+      <svg id="avatar-thumb-svg" viewBox="9 5 182 186" width="64" height="64"></svg>
     </div>
   </div>
   <!-- View selector + filters -->
