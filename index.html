@@ -635,8 +635,15 @@
     <div style="display:flex;gap:8px;margin-bottom:10px">
       <input type="text" id="friend-username-input" placeholder="Nombre de usuario..."
         style="flex:1;padding:8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"
+        oninput="onFriendUsernameInput(this.value)"
         onkeydown="if(event.key==='Enter') addFriendByUsername()" />
       <button class="btn-save" style="white-space:nowrap" onclick="addFriendByUsername()">Agregar</button>
+    </div>
+    <div id="friend-add-preview" style="display:none;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border-radius:8px;margin-bottom:10px">
+      <div style="width:36px;height:36px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
+        <svg id="friend-add-preview-svg" viewBox="9 5 182 186" width="32" height="32"></svg>
+      </div>
+      <div id="friend-add-preview-name" style="font-weight:600;font-size:13px"></div>
     </div>
     <div id="friends-msg" style="font-size:12px;margin-bottom:8px;display:none"></div>
     <div id="friends-list" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:8px;min-height:120px"></div>
@@ -2186,6 +2193,8 @@ const _statusColorsFriend = {
 };
 
 async function openFriendsPanel() {
+  document.getElementById('friend-username-input').value = '';
+  document.getElementById('friend-add-preview').style.display = 'none';
   document.getElementById('friends-overlay').classList.add('open');
   await loadFriendsList();
 }
@@ -2287,6 +2296,27 @@ async function loadFriendsList() {
   }
 }
 
+let _friendAddDebounce = null;
+
+function onFriendUsernameInput(value) {
+  clearTimeout(_friendAddDebounce);
+  const preview = document.getElementById('friend-add-preview');
+  const trimmed = value.trim();
+  if (!trimmed) { preview.style.display = 'none'; return; }
+  _friendAddDebounce = setTimeout(async () => {
+    try {
+      const res = await fetch(`${apiBase()}/api/v1/friends/lookup/${encodeURIComponent(trimmed)}`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+      if (!res.ok) { preview.style.display = 'none'; return; }
+      const data = await res.json();
+      document.getElementById('friend-add-preview-svg').innerHTML = _friendAvatarSvg(data);
+      document.getElementById('friend-add-preview-name').textContent = data.username;
+      preview.style.display = 'flex';
+    } catch(e) { preview.style.display = 'none'; }
+  }, 400);
+}
+
 async function addFriendByUsername() {
   const input = document.getElementById('friend-username-input');
   const username = input.value.trim();
@@ -2301,6 +2331,7 @@ async function addFriendByUsername() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Error');
     input.value = '';
+    document.getElementById('friend-add-preview').style.display = 'none';
     msg.style.display = 'block';
     msg.style.color = 'var(--green)';
     msg.textContent = data.status === 'accepted' ? 'Ya son amigos' : 'Solicitud enviada, esperando confirmación';
