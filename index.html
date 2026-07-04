@@ -201,7 +201,8 @@
         </div>
         <div class="login-group" id="l-username-group" style="display:none">
           <label>Nombre de usuario</label>
-          <input type="text" id="l-username" placeholder="Tu nombre" />
+          <input type="text" id="l-username" placeholder="Tu nombre" maxlength="20"
+            oninput="this.value=this.value.replace(/[^A-Za-z0-9]/g,'')" />
         </div>
         <div class="login-group">
           <label>Contraseña</label>
@@ -696,6 +697,22 @@
 
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeFriendProfile()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Set Username Modal (mandatory, no close) -->
+<div class="modal-overlay" id="set-username-overlay">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-title"><i class="ti ti-user-plus"></i> Elegí tu nombre de usuario</div>
+    <p style="font-size:12px;color:var(--text2);margin:0 0 12px">Solo letras y números, sin espacios ni tildes. Lo van a ver tus amigos.</p>
+    <input type="text" id="set-username-input" placeholder="Nombre de usuario" maxlength="20"
+      style="width:100%;padding:10px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:14px"
+      oninput="this.value=this.value.replace(/[^A-Za-z0-9]/g,'')"
+      onkeydown="if(event.key==='Enter') saveSetUsername()" />
+    <div id="set-username-err" style="font-size:12px;color:var(--red);margin-top:8px;display:none"></div>
+    <div class="modal-actions">
+      <button class="btn-save" onclick="saveSetUsername()">Continuar</button>
     </div>
   </div>
 </div>
@@ -2177,49 +2194,94 @@ function closeFriendsPanel() {
   document.getElementById('friends-overlay').classList.remove('open');
 }
 
+function _friendAvatarSvg(f) {
+  try {
+    const cfg = f.avatar_config ? JSON.parse(f.avatar_config) : null;
+    return cfg ? buildAvatarMarkup(cfg) : '';
+  } catch(e) { return ''; }
+}
+
+function _requestRowHtml(r, trailingHtml, subtitle) {
+  return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px">
+    <div style="width:40px;height:40px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
+      <svg viewBox="9 5 182 186" width="36" height="36">${_friendAvatarSvg(r)}</svg>
+    </div>
+    <div style="flex:1;min-width:0">
+      <div style="font-weight:600;font-size:13px">${r.username}</div>
+      ${subtitle ? `<div style="font-size:11px;color:var(--text2);margin-top:2px">${subtitle}</div>` : ''}
+    </div>
+    ${trailingHtml}
+  </div>`;
+}
+
 async function loadFriendsList() {
   const list = document.getElementById('friends-list');
   list.innerHTML = `<div class="empty"><i class="ti ti-loader"></i>Cargando...</div>`;
   try {
-    const res = await fetch(`${apiBase()}/api/v1/friends`, {
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    });
-    const data = await res.json();
-    const friends = data.friends || [];
-    if (!friends.length) {
+    const [friendsRes, incomingRes, sentRes] = await Promise.all([
+      fetch(`${apiBase()}/api/v1/friends`, { headers: { 'Authorization': `Bearer ${authToken}` } }),
+      fetch(`${apiBase()}/api/v1/friends/requests`, { headers: { 'Authorization': `Bearer ${authToken}` } }),
+      fetch(`${apiBase()}/api/v1/friends/requests/sent`, { headers: { 'Authorization': `Bearer ${authToken}` } }),
+    ]);
+    const friends  = (await friendsRes.json()).friends || [];
+    const incoming = (await incomingRes.json()).requests || [];
+    const sent     = (await sentRes.json()).requests || [];
+
+    if (!friends.length && !incoming.length && !sent.length) {
       list.innerHTML = `<div class="empty"><i class="ti ti-users"></i>Todavía no agregaste amigos</div>`;
       return;
     }
-    list.innerHTML = friends.map(f => {
-      let avatarSvg = '';
-      try {
-        const cfg = f.avatar_config ? JSON.parse(f.avatar_config) : null;
-        avatarSvg = cfg ? buildAvatarMarkup(cfg) : '';
-      } catch(e) {}
-      const sessionBadge = f.in_session
-        ? `<span style="background:#1D9E75;color:#fff;font-size:10px;padding:2px 6px;border-radius:6px;margin-left:6px">En sesión</span>`
-        : '';
-      const subtitle = f.in_session
-        ? `<span style="color:#1D9E75">${f.session_game || ''} · ${f.session_platform || ''}</span>`
-        : `${f.library_count} juegos · ${f.wishlist_count} deseados · ${Math.round(f.total_hours)} hs`;
-      return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px">
-        <div style="width:44px;height:44px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;cursor:pointer" onclick="openFriendProfile('${f.username}')">
-          <svg viewBox="9 5 182 186" width="40" height="40">${avatarSvg}</svg>
-        </div>
-        <div style="flex:1;min-width:0;cursor:pointer" onclick="openFriendProfile('${f.username}')">
-          <div style="font-weight:600;font-size:13px">${f.username}${sessionBadge}</div>
-          <div style="font-size:11px;color:var(--text2);margin-top:2px">${subtitle}</div>
-        </div>
-        <button onclick="removeFriendByUsername('${f.username}')" title="Quitar amigo"
-          style="padding:5px 8px;font-size:11px;border-radius:6px;border:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer">
-          <i class="ti ti-user-minus"></i>
+
+    let html = '';
+    if (incoming.length) {
+      html += `<div style="font-weight:600;font-size:12px;margin-bottom:4px">Solicitudes recibidas</div>`;
+      html += incoming.map(r => _requestRowHtml(r, `
+        <button onclick="acceptFriendRequest('${r.username}')" title="Aceptar"
+          style="padding:5px 8px;font-size:11px;border-radius:6px;border:0.5px solid var(--green);background:transparent;color:var(--green);cursor:pointer">
+          <i class="ti ti-check"></i>
         </button>
-        <button onclick="blockFriendByUsername('${f.username}')" title="Bloquear"
+        <button onclick="removeFriendByUsername('${r.username}')" title="Rechazar"
           style="padding:5px 8px;font-size:11px;border-radius:6px;border:0.5px solid var(--red);background:transparent;color:var(--red);cursor:pointer">
-          <i class="ti ti-ban"></i>
+          <i class="ti ti-x"></i>
         </button>
-      </div>`;
-    }).join('');
+      `)).join('');
+    }
+    if (sent.length) {
+      html += `<div style="font-weight:600;font-size:12px;margin:12px 0 4px">Solicitudes enviadas</div>`;
+      html += sent.map(r => _requestRowHtml(r, `
+        <button onclick="removeFriendByUsername('${r.username}')" title="Cancelar"
+          style="padding:5px 10px;font-size:11px;border-radius:6px;border:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer">Cancelar</button>
+      `, 'Esperando confirmación')).join('');
+    }
+    if (friends.length) {
+      html += `<div style="font-weight:600;font-size:12px;margin:12px 0 4px">Amigos</div>`;
+      html += friends.map(f => {
+        const sessionBadge = f.in_session
+          ? `<span style="background:#1D9E75;color:#fff;font-size:10px;padding:2px 6px;border-radius:6px;margin-left:6px">En sesión</span>`
+          : '';
+        const subtitle = f.in_session
+          ? `<span style="color:#1D9E75">${f.session_game || ''} · ${f.session_platform || ''}</span>`
+          : `${f.library_count} juegos · ${f.wishlist_count} deseados · ${Math.round(f.total_hours)} hs`;
+        return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px">
+          <div style="width:44px;height:44px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;cursor:pointer" onclick="openFriendProfile('${f.username}')">
+            <svg viewBox="9 5 182 186" width="40" height="40">${_friendAvatarSvg(f)}</svg>
+          </div>
+          <div style="flex:1;min-width:0;cursor:pointer" onclick="openFriendProfile('${f.username}')">
+            <div style="font-weight:600;font-size:13px">${f.username}${sessionBadge}</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:2px">${subtitle}</div>
+          </div>
+          <button onclick="removeFriendByUsername('${f.username}')" title="Quitar amigo"
+            style="padding:5px 8px;font-size:11px;border-radius:6px;border:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer">
+            <i class="ti ti-user-minus"></i>
+          </button>
+          <button onclick="blockFriendByUsername('${f.username}')" title="Bloquear"
+            style="padding:5px 8px;font-size:11px;border-radius:6px;border:0.5px solid var(--red);background:transparent;color:var(--red);cursor:pointer">
+            <i class="ti ti-ban"></i>
+          </button>
+        </div>`;
+      }).join('');
+    }
+    list.innerHTML = html;
   } catch(e) {
     list.innerHTML = `<div class="empty"><i class="ti ti-alert-triangle"></i>Error al cargar amigos</div>`;
   }
@@ -2239,13 +2301,23 @@ async function addFriendByUsername() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Error');
     input.value = '';
-    msg.style.display = 'none';
+    msg.style.display = 'block';
+    msg.style.color = 'var(--green)';
+    msg.textContent = data.status === 'accepted' ? 'Ya son amigos' : 'Solicitud enviada, esperando confirmación';
     await loadFriendsList();
   } catch(e) {
     msg.style.display = 'block';
     msg.style.color = 'var(--red)';
     msg.textContent = e.message || 'No se pudo agregar el amigo';
   }
+}
+
+async function acceptFriendRequest(username) {
+  await fetch(`${apiBase()}/api/v1/friends/requests/${encodeURIComponent(username)}/accept`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${authToken}` }
+  });
+  await loadFriendsList();
 }
 
 async function removeFriendByUsername(username) {
@@ -2653,8 +2725,41 @@ function loginWithGoogle() {
     authUser  = e.data.username;
     localStorage.setItem('gb_token', authToken);
     localStorage.setItem('gb_user',  authUser);
-    onLoginSuccess();
+    if (e.data.needs_username) {
+      document.getElementById('set-username-input').value = '';
+      document.getElementById('set-username-err').style.display = 'none';
+      document.getElementById('set-username-overlay').classList.add('open');
+    } else {
+      onLoginSuccess();
+    }
   });
+}
+
+async function saveSetUsername() {
+  const input = document.getElementById('set-username-input');
+  const errEl = document.getElementById('set-username-err');
+  const username = input.value.trim();
+  if (!/^[A-Za-z0-9]{3,20}$/.test(username)) {
+    errEl.textContent = 'El nombre de usuario debe tener 3-20 caracteres, solo letras y números';
+    errEl.style.display = 'block';
+    return;
+  }
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/user/profile`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error');
+    authUser = username;
+    localStorage.setItem('gb_user', authUser);
+    document.getElementById('set-username-overlay').classList.remove('open');
+    onLoginSuccess();
+  } catch(e) {
+    errEl.textContent = e.message || 'No se pudo guardar el nombre de usuario';
+    errEl.style.display = 'block';
+  }
 }
 
 function openWishlistModal() {
@@ -3055,6 +3160,11 @@ async function submitAuth() {
 
   if (!email || !password) { errEl.textContent='Completá email y contraseña'; errEl.style.display='block'; return; }
   if (isRegister && !username) { errEl.textContent='Completá el nombre de usuario'; errEl.style.display='block'; return; }
+  if (isRegister && !/^[A-Za-z0-9]{3,20}$/.test(username)) {
+    errEl.textContent = 'El nombre de usuario debe tener 3-20 caracteres, solo letras y números';
+    errEl.style.display = 'block';
+    return;
+  }
 
   const endpoint = isRegister ? '/api/v1/auth/register' : '/api/v1/auth/login';
   const body     = isRegister ? { email, password, username } : { email, password };
