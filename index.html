@@ -564,12 +564,13 @@
 
     <!-- Avatar tab -->
     <div id="config-avatar" style="display:none">
-      <div style="display:flex;justify-content:center;margin-bottom:16px">
+      <div style="display:flex;justify-content:center;margin-bottom:12px;flex-shrink:0">
         <div id="avatar-preview-box" style="width:180px;height:180px;background:var(--bg3);border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden">
           <div id="avatar-preview-box2" style="width:150px;height:150px;position:relative"></div>
         </div>
       </div>
 
+      <div id="avatar-pickers-scroll" style="max-height:42vh;overflow-y:auto;padding-right:4px">
       <div style="margin-bottom:14px">
         <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px">Raza</label>
         <div id="avatar-race-picker"></div>
@@ -607,6 +608,7 @@
         <div id="avatar-waist-picker"></div>
       </div>
       <div style="font-size:10px;color:var(--text2);text-align:center;margin-top:4px">Avatar art: Intersect-Assets (AscensionGameDev), CC BY 4.0</div>
+      </div>
       <div id="cfg-avatar-msg" style="font-size:12px;margin-top:8px;display:none"></div>
     </div>
 
