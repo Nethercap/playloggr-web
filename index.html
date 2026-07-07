@@ -171,54 +171,55 @@
 </style>
 
 <div id="login-screen">
-  <div class="login-card">
+  <div class="login-card" style="position:relative">
+    <button onclick="toggleLanguage()" id="lang-toggle-btn-login" style="position:absolute;top:0;right:0;padding:5px 10px;font-size:12px;font-weight:600;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" title="Language / Idioma">EN</button>
     <div class="login-title">
       <i class="ti ti-device-gamepad-2" style="color:#1D9E75;font-size:22px"></i>
       Game Backlog
     </div>
-    <div class="login-sub" id="login-subtitle">Iniciá sesión para continuar</div>
+    <div class="login-sub" id="login-subtitle" data-i18n="loginSubtitle">Iniciá sesión para continuar</div>
 
     <div id="login-form">
       <!-- Google login (default) -->
       <div id="google-login-section">
         <button onclick="loginWithGoogle()" style="width:100%;padding:12px;border-radius:var(--radius-md);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px">
           <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-          Continuar con Google
+          <span data-i18n="continueWithGoogle">Continuar con Google</span>
         </button>
         <div style="text-align:center">
-          <a onclick="showEmailLogin()" style="font-size:12px;color:var(--text2);cursor:pointer;text-decoration:underline">Usar email y contraseña</a>
+          <a onclick="showEmailLogin()" style="font-size:12px;color:var(--text2);cursor:pointer;text-decoration:underline" data-i18n="useEmailPassword">Usar email y contraseña</a>
         </div>
       </div>
 
       <!-- Email login (hidden by default) -->
       <div id="email-login-section" style="display:none">
-        <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-md);padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.5">
+        <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-md);padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.5" data-i18n-html="recoveryHint">
           ⚠ Si olvidás tu contraseña, la recuperación es con un <strong style="color:var(--text)">código de 6 dígitos</strong> que generás desde el menú de tu perfil.
         </div>
         <div class="login-group">
-          <label>Email</label>
+          <label data-i18n="email">Email</label>
           <input type="email" id="l-email" placeholder="tu@email.com" />
         </div>
         <div class="login-group" id="l-username-group" style="display:none">
-          <label>Nombre de usuario</label>
+          <label data-i18n="username">Nombre de usuario</label>
           <input type="text" id="l-username" placeholder="Tu nombre" maxlength="20"
             oninput="this.value=this.value.replace(/[^A-Za-z0-9]/g,'')" />
         </div>
         <div class="login-group">
-          <label>Contraseña</label>
+          <label data-i18n="password">Contraseña</label>
           <input type="password" id="l-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')submitAuth()" />
         </div>
         <div class="login-err" id="login-err"></div>
-        <button class="login-btn" onclick="submitAuth()" id="login-btn">Iniciar sesión</button>
+        <button class="login-btn" onclick="submitAuth()" id="login-btn" data-i18n="login">Iniciar sesión</button>
         <div class="login-toggle" style="margin-top:8px">
-          <span id="login-toggle-text">¿No tenés cuenta?</span>
-          <a onclick="toggleAuthMode()"> <span id="login-toggle-link">Registrate</span></a>
+          <span id="login-toggle-text" data-i18n="noAccount">¿No tenés cuenta?</span>
+          <a onclick="toggleAuthMode()"> <span id="login-toggle-link" data-i18n="register">Registrate</span></a>
         </div>
         <div class="login-toggle" style="margin-top:6px">
-          <a onclick="openReset()" style="color:var(--text2);font-size:11px">¿Olvidaste tu contraseña?</a>
+          <a onclick="openReset()" style="color:var(--text2);font-size:11px" data-i18n="forgotPassword">¿Olvidaste tu contraseña?</a>
         </div>
         <div style="text-align:center;margin-top:12px">
-          <a onclick="showGoogleLogin()" style="font-size:12px;color:var(--text2);cursor:pointer;text-decoration:underline">← Volver a Google</a>
+          <a onclick="showGoogleLogin()" style="font-size:12px;color:var(--text2);cursor:pointer;text-decoration:underline" data-i18n="backToGoogle">← Volver a Google</a>
         </div>
       </div>
     </div>
@@ -236,25 +237,27 @@
       <div id="plat-status-row" style="display:flex;gap:6px"></div>
       <input type="hidden" id="api-url" value="https://web-production-270b29.up.railway.app" />
       <button class="sync-btn" id="sync-btn" onclick="syncAll()">
-        <i class="ti ti-refresh"></i> Sincronizar
+        <i class="ti ti-refresh"></i> <span data-i18n="sync">Sincronizar</span>
       </button>
+      <!-- Language toggle -->
+      <button onclick="toggleLanguage()" id="lang-toggle-btn" style="margin-left:4px;padding:5px 10px;font-size:12px;font-weight:600;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" title="Language / Idioma">EN</button>
       <!-- Stats button -->
-      <button onclick="openStatsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" title="Estadísticas">
+      <button onclick="openStatsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="stats" title="Estadísticas">
         <i class="ti ti-chart-bar" style="font-size:14px"></i>
       </button>
 
       <!-- Config button -->
-      <button onclick="openConfigPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" title="Configuración">
+      <button onclick="openConfigPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="config" title="Configuración">
         <i class="ti ti-settings" style="font-size:14px"></i>
       </button>
 
       <!-- Friends button -->
-      <button onclick="openFriendsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" title="Amigos">
+      <button onclick="openFriendsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="friends" title="Amigos">
         <i class="ti ti-users" style="font-size:14px"></i>
       </button>
 
       <!-- Achievements button -->
-      <button onclick="openAchievementsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" title="Logros">
+      <button onclick="openAchievementsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="achievements" title="Logros">
         <i class="ti ti-trophy" style="font-size:14px"></i>
       </button>
 
@@ -267,30 +270,30 @@
           <div id="steam-id-section" style="padding:10px 14px;border-bottom:0.5px solid var(--border)">
             <div style="font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Steam ID</div>
             <div style="display:flex;gap:6px">
-              <input id="steam-id-input" type="text" placeholder="Steam ID o URL..."
+              <input id="steam-id-input" type="text" placeholder="Steam ID o URL..." data-i18n-placeholder="steamId"
                 style="flex:1;padding:5px 8px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);min-width:0"
                 onkeydown="if(event.key==='Enter') saveSteamId()" />
-              <button onclick="saveSteamId()" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;white-space:nowrap">Guardar</button>
+              <button onclick="saveSteamId()" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;white-space:nowrap" data-i18n="save">Guardar</button>
             </div>
             <div id="steam-id-current" style="font-size:10px;color:var(--text2);margin-top:4px"></div>
           </div>
           <!-- Actions -->
           <div style="padding:4px 0">
             <button onclick="syncSteamLibrary()" class="steam-menu-item">
-              <i class="ti ti-library"></i> Sincronizar biblioteca
+              <i class="ti ti-library"></i> <span data-i18n="syncLibrary">Sincronizar biblioteca</span>
             </button>
             <button onclick="syncSteamWishlist()" class="steam-menu-item">
-              <i class="ti ti-star"></i> Sincronizar deseados
+              <i class="ti ti-star"></i> <span data-i18n="syncWishlist">Sincronizar deseados</span>
             </button>
             <button onclick="syncBoth()" class="steam-menu-item">
-              <i class="ti ti-refresh"></i> Sincronizar todo
+              <i class="ti ti-refresh"></i> <span data-i18n="syncAll">Sincronizar todo</span>
             </button>
             <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
             <button onclick="restoreDeletedSteam('library')" class="steam-menu-item">
-              <i class="ti ti-restore"></i> Restablecer biblioteca borrada
+              <i class="ti ti-restore"></i> <span data-i18n="restoreLibrary">Restablecer biblioteca borrada</span>
             </button>
             <button onclick="restoreDeletedSteam('wishlist')" class="steam-menu-item">
-              <i class="ti ti-restore"></i> Restablecer deseados borrados
+              <i class="ti ti-restore"></i> <span data-i18n="restoreWishlist">Restablecer deseados borrados</span>
             </button>
           </div>
         </div>
@@ -303,16 +306,16 @@
 
   <!-- Totales globales -->
   <div class="stats-row">
-    <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value" id="g-total">—</div></div>
-    <div class="stat-card"><div class="stat-label">Jugando</div><div class="stat-value" id="g-playing">—</div></div>
-    <div class="stat-card"><div class="stat-label">Completados</div><div class="stat-value" id="g-completed">—</div></div>
-    <div class="stat-card"><div class="stat-label">Backlog</div><div class="stat-value" id="g-backlog">—</div></div>
-    <div class="stat-card"><div class="stat-label">Horas totales</div><div class="stat-value" id="g-hours">—</div></div>
-    <div class="stat-card" style="cursor:pointer;border-color:rgba(239,159,39,0.3)" onclick="setStatus('Deseados')" title="Ver deseados">
-      <div class="stat-label">Deseados</div>
+    <div class="stat-card"><div class="stat-label" data-i18n="total">Total</div><div class="stat-value" id="g-total">—</div></div>
+    <div class="stat-card"><div class="stat-label" data-i18n="playing">Jugando</div><div class="stat-value" id="g-playing">—</div></div>
+    <div class="stat-card"><div class="stat-label" data-i18n="completed">Completados</div><div class="stat-value" id="g-completed">—</div></div>
+    <div class="stat-card"><div class="stat-label" data-i18n="backlog">Backlog</div><div class="stat-value" id="g-backlog">—</div></div>
+    <div class="stat-card"><div class="stat-label" data-i18n="totalHours">Horas totales</div><div class="stat-value" id="g-hours">—</div></div>
+    <div class="stat-card" style="cursor:pointer;border-color:rgba(239,159,39,0.3)" onclick="setStatus('Deseados')" data-i18n-title="seeWishlist" title="Ver deseados">
+      <div class="stat-label" data-i18n="wishlist">Deseados</div>
       <div class="stat-value" id="g-wishlist" style="color:#EF9F27">—</div>
     </div>
-    <div class="stat-card" style="cursor:pointer;display:flex;align-items:center;justify-content:center" onclick="openConfigPanel().then(()=>switchConfigTab('avatar'))" title="Personalizar avatar">
+    <div class="stat-card" style="cursor:pointer;display:flex;align-items:center;justify-content:center" onclick="openConfigPanel().then(()=>switchConfigTab('avatar'))" data-i18n-title="customizeAvatar" title="Personalizar avatar">
       <div id="avatar-thumb-box" style="width:72px;height:72px;position:relative"></div>
     </div>
   </div>
@@ -322,18 +325,18 @@
     <div style="display:flex;padding:8px 16px;gap:8px;align-items:center">
       <button id="view-library"  onclick="setView('library')"
         style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--green);color:#fff;display:inline-flex;align-items:center;gap:5px">
-        <i class="ti ti-books" style="font-size:14px"></i> Biblioteca
+        <i class="ti ti-books" style="font-size:14px"></i> <span data-i18n="library">Biblioteca</span>
       </button>
       <button id="view-wishlist" onclick="setView('wishlist')"
         style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);color:var(--text2);display:inline-flex;align-items:center;gap:5px">
-        <i class="ti ti-bookmark" style="font-size:14px"></i> Deseados
+        <i class="ti ti-bookmark" style="font-size:14px"></i> <span data-i18n="wishlist">Deseados</span>
       </button>
       <button id="view-stats" onclick="setView('stats')"
         style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);color:var(--text2);display:inline-flex;align-items:center;gap:5px">
-        <i class="ti ti-chart-bar" style="font-size:14px"></i> Estadísticas
+        <i class="ti ti-chart-bar" style="font-size:14px"></i> <span data-i18n="stats">Estadísticas</span>
       </button>
       <span style="margin-left:auto;font-size:12px;color:var(--text2)">
-        Seleccionados: <strong id="s-total">—</strong> &nbsp;·&nbsp; Horas: <strong id="s-hours">—</strong>
+        <span data-i18n="selected">Seleccionados</span>: <strong id="s-total">—</strong> &nbsp;·&nbsp; <span data-i18n="hours">Horas</span>: <strong id="s-hours">—</strong>
       </span>
     </div>
 
@@ -362,16 +365,16 @@
         <!-- Hidden toggle -->
         <button id="btn-hidden" onclick="toggleShowHidden()"
           style="padding:4px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;display:none;align-items:center;gap:4px">
-          <i class="ti ti-eye-off" style="font-size:12px"></i> Ocultos
+          <i class="ti ti-eye-off" style="font-size:12px"></i> <span data-i18n="hidden">Ocultos</span>
         </button>
 
         <!-- Add button -->
         <div id="add-game-btn-wrap" style="margin-left:auto;display:flex;gap:6px;align-items:center">
           <button id="add-game-btn" onclick="openModal()" style="display:none;padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">
-            <i class="ti ti-plus"></i> Agregar juego
+            <i class="ti ti-plus"></i> <span data-i18n="addGame">Agregar juego</span>
           </button>
           <button id="add-wishlist-btn" onclick="openWishlistModal()" style="display:none;padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:#EF9F27;color:#fff;cursor:pointer">
-            <i class="ti ti-star"></i> Agregar juego deseado
+            <i class="ti ti-star"></i> <span data-i18n="addWishlistGame">Agregar juego deseado</span>
           </button>
         </div>
       </div>
@@ -379,39 +382,39 @@
       <!-- Row 2: sort + search -->
       <div style="display:flex;align-items:center;gap:6px">
         <select id="sort-sel" onchange="applyFilters()" style="font-size:12px;padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text)">
-          <option value="name">Nombre</option>
-          <option value="hours">Horas</option>
-          <option value="rating">Calificación</option>
-          <option value="platform">Plataforma</option>
-          <option value="status">Estado</option>
-          <option value="genre">Género</option>
+          <option value="name" data-i18n="name">Nombre</option>
+          <option value="hours" data-i18n="hours">Horas</option>
+          <option value="rating" data-i18n="rating">Calificación</option>
+          <option value="platform" data-i18n="platform">Plataforma</option>
+          <option value="status" data-i18n="status">Estado</option>
+          <option value="genre" data-i18n="genre">Género</option>
         </select>
         <button onclick="toggleSortOrder()" id="sort-dir-btn"
           style="padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">
           ↑
         </button>
-        <input type="text" id="search-input" placeholder="Buscar juego..." oninput="applyFilters()"
+        <input type="text" id="search-input" placeholder="Buscar juego..." data-i18n-placeholder="searchGame" oninput="applyFilters()"
           style="padding:4px 10px;font-size:12px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text);width:160px" />
       </div>
     </div>
 
   <div class="game-list" id="game-list">
-    <div class="empty"><div class="spinner" style="margin:0 auto 12px"></div>Conectando con el backend...</div>
+    <div class="empty"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="connectingBackend">Conectando con el backend...</span></div>
   </div>
 
   <!-- Stats view (full page) -->
   <div id="stats-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
     <div style="display:flex;align-items:center;padding:10px 16px;gap:8px;border-bottom:0.5px solid var(--border);flex-shrink:0">
       <button id="stab-user" onclick="switchStatsTab('user')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--green);background:var(--bg2);color:var(--green);cursor:pointer;border-radius:20px;font-weight:600">Mis stats</button>
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--green);background:var(--bg2);color:var(--green);cursor:pointer;border-radius:20px;font-weight:600" data-i18n="myStats">Mis stats</button>
       <button id="stab-global" onclick="switchStatsTab('global')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px">Global</button>
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px" data-i18n="globalTab">Global</button>
     </div>
     <div id="stats-user-tab" style="padding:16px;max-width:720px;width:100%;margin:0 auto;box-sizing:border-box">
-      <div id="stats-user-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>Cargando...</div></div>
+      <div id="stats-user-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
     </div>
     <div id="stats-global-tab" style="display:none;padding:16px;max-width:720px;width:100%;margin:0 auto;box-sizing:border-box">
-      <div id="stats-global-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>Cargando...</div></div>
+      <div id="stats-global-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
     </div>
   </div>
 
@@ -953,6 +956,93 @@
 </div>
 
 <script>
+// ── i18n ─────────────────────────────────────────────────────────────────
+let currentLang = localStorage.getItem('gb_lang') || 'es';
+
+const I18N = {
+  es: {
+    sync: 'Sincronizar', stats: 'Estadísticas', config: 'Configuración', friends: 'Amigos',
+    achievements: 'Logros', steamMenu: 'Steam', steamId: 'Steam ID', save: 'Guardar',
+    syncLibrary: 'Sincronizar biblioteca', syncWishlist: 'Sincronizar deseados', syncAll: 'Sincronizar todo',
+    restoreLibrary: 'Restablecer biblioteca borrada', restoreWishlist: 'Restablecer deseados borrados',
+    total: 'Total', playing: 'Jugando', completed: 'Completados', backlog: 'Backlog',
+    totalHours: 'Horas totales', wishlist: 'Deseados', seeWishlist: 'Ver deseados',
+    customizeAvatar: 'Personalizar avatar', library: 'Biblioteca', globalTab: 'Global',
+    hidden: 'Ocultos', addGame: 'Agregar juego', addWishlistGame: 'Agregar juego deseado',
+    name: 'Nombre', hours: 'Horas', rating: 'Calificación', platform: 'Plataforma',
+    status: 'Estado', genre: 'Género', searchGame: 'Buscar juego...', connectingBackend: 'Conectando con el backend...',
+    myStats: 'Mis stats', loading: 'Cargando...', folders: 'Carpetas',
+    addToWishlist: 'Agregar a deseados', searchGameLabel: 'Buscar juego', searchYourGame: 'Buscá tu juego...',
+    noGenre: 'Sin género', cancel: 'Cancelar', add: 'Agregar', changeCover: 'Cambiar portada',
+    imageUrl: 'URL de la imagen', preview: 'Vista previa', settings: 'Configuración',
+    profileTab: 'Perfil', avatarTab: 'Avatar', accountTab: 'Cuenta', username: 'Nombre de usuario',
+    usernameFont: 'Fuente de nombre de usuario', language: 'Idioma', profileVisibility: 'Perfil',
+    public: 'Público', private: 'Privado', noAccount: '¿No tenés cuenta?', haveAccount: '¿Ya tenés cuenta?',
+    register: 'Registrate', registerBtn: 'Registrarse', login: 'Iniciar sesión', forgotPassword: '¿Olvidaste tu contraseña?',
+    backToGoogle: '← Volver a Google', email: 'Email', password: 'Contraseña',
+    selected: 'Seleccionados',
+    loginSubtitle: 'Iniciá sesión para continuar', createAccount: 'Creá tu cuenta',
+    continueWithGoogle: 'Continuar con Google', useEmailPassword: 'Usar email y contraseña',
+    recoveryHint: '⚠ Si olvidás tu contraseña, la recuperación es con un <strong style="color:var(--text)">código de 6 dígitos</strong> que generás desde el menú de tu perfil.',
+  },
+  en: {
+    sync: 'Sync', stats: 'Stats', config: 'Settings', friends: 'Friends',
+    achievements: 'Achievements', steamMenu: 'Steam', steamId: 'Steam ID', save: 'Save',
+    syncLibrary: 'Sync library', syncWishlist: 'Sync wishlist', syncAll: 'Sync all',
+    restoreLibrary: 'Restore deleted library', restoreWishlist: 'Restore deleted wishlist',
+    total: 'Total', playing: 'Playing', completed: 'Completed', backlog: 'Backlog',
+    totalHours: 'Total hours', wishlist: 'Wishlist', seeWishlist: 'View wishlist',
+    customizeAvatar: 'Customize avatar', library: 'Library', globalTab: 'Global',
+    hidden: 'Hidden', addGame: 'Add game', addWishlistGame: 'Add wishlist game',
+    name: 'Name', hours: 'Hours', rating: 'Rating', platform: 'Platform',
+    status: 'Status', genre: 'Genre', searchGame: 'Search game...', connectingBackend: 'Connecting to backend...',
+    myStats: 'My stats', loading: 'Loading...', folders: 'Folders',
+    addToWishlist: 'Add to wishlist', searchGameLabel: 'Search game', searchYourGame: 'Search your game...',
+    noGenre: 'No genre', cancel: 'Cancel', add: 'Add', changeCover: 'Change cover',
+    imageUrl: 'Image URL', preview: 'Preview', settings: 'Settings',
+    profileTab: 'Profile', avatarTab: 'Avatar', accountTab: 'Account', username: 'Username',
+    usernameFont: 'Username font', language: 'Language', profileVisibility: 'Profile',
+    public: 'Public', private: 'Private', noAccount: "Don't have an account?", haveAccount: 'Already have an account?',
+    register: 'Sign up', registerBtn: 'Sign up', login: 'Log in', forgotPassword: 'Forgot your password?',
+    backToGoogle: '← Back to Google', email: 'Email', password: 'Password',
+    selected: 'Selected',
+    loginSubtitle: 'Log in to continue', createAccount: 'Create your account',
+    continueWithGoogle: 'Continue with Google', useEmailPassword: 'Use email and password',
+    recoveryHint: '⚠ If you forget your password, recovery is done with a <strong style="color:var(--text)">6-digit code</strong> you generate from your profile menu.',
+  },
+};
+
+function t(key) { return (I18N[currentLang] && I18N[currentLang][key]) || I18N.es[key] || key; }
+
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.getAttribute('data-i18n-html')); });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.getAttribute('data-i18n-title')); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.getAttribute('data-i18n-placeholder')); });
+  document.documentElement.lang = currentLang;
+  ['lang-toggle-btn', 'lang-toggle-btn-login'].forEach(id => {
+    const toggle = document.getElementById(id);
+    if (toggle) toggle.textContent = currentLang === 'es' ? 'EN' : 'ES';
+  });
+}
+
+async function setLanguage(lang) {
+  currentLang = lang;
+  localStorage.setItem('gb_lang', lang);
+  applyI18n();
+  if (authToken) {
+    try {
+      await fetch(`${apiBase()}/api/v1/user/profile`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ language: lang }),
+      });
+    } catch (e) {}
+  }
+}
+
+function toggleLanguage() { setLanguage(currentLang === 'es' ? 'en' : 'es'); }
+
 let allGames = [];
 let statusFilter = '', platformFilter = '', searchQ = '', sortMode = 'name', ratingFilter = '', sortDir = 'asc';
 let currentPage = 1, totalPages = 1, totalGames = 0;
@@ -2064,6 +2154,11 @@ async function saveConfig() {
     if (!res.ok) throw new Error();
     msg.style.color = 'var(--green)';
     msg.textContent = '✓ Guardado correctamente';
+    if (body.language === 'en' || body.language === 'es') {
+      currentLang = body.language;
+      localStorage.setItem('gb_lang', currentLang);
+      applyI18n();
+    }
     // Update username in UI
     if (body.username) {
       document.querySelectorAll('.user-chip').forEach(c => {
@@ -3477,6 +3572,11 @@ async function loadPremiumStatus() {
     userUnlockedFrames = d.unlocked_frames || ['none'];
     userUnlockedFonts  = d.unlocked_fonts || ['default'];
     userTrophy = d.trophy || false;
+    if (d.language === 'en' || d.language === 'es') {
+      currentLang = d.language;
+      localStorage.setItem('gb_lang', currentLang);
+      applyI18n();
+    }
   } catch (e) {}
   applyPremiumUI();
 }
@@ -3576,10 +3676,10 @@ async function selectCosmetic(kind, id) {
 
 function toggleAuthMode() {
   isRegister = !isRegister;
-  document.getElementById('login-subtitle').textContent  = isRegister ? 'Creá tu cuenta' : 'Iniciá sesión para continuar';
-  document.getElementById('login-btn').textContent       = isRegister ? 'Registrarse' : 'Iniciar sesión';
-  document.getElementById('login-toggle-text').textContent = isRegister ? '¿Ya tenés cuenta?' : '¿No tenés cuenta?';
-  document.getElementById('login-toggle-link').textContent = isRegister ? 'Iniciá sesión' : 'Registrate';
+  document.getElementById('login-subtitle').textContent  = isRegister ? t('createAccount') : t('loginSubtitle');
+  document.getElementById('login-btn').textContent       = isRegister ? t('registerBtn') : t('login');
+  document.getElementById('login-toggle-text').textContent = isRegister ? t('haveAccount') : t('noAccount');
+  document.getElementById('login-toggle-link').textContent = isRegister ? t('login') : t('register');
   document.getElementById('l-username-group').style.display = isRegister ? 'flex' : 'none';
   document.getElementById('login-err').style.display = 'none';
 }
@@ -4404,6 +4504,8 @@ window.fetch = function(url, opts={}) {
   }
   return _origFetch(url, opts);
 };
+
+applyI18n();
 
 // Auto-login si hay token guardado
 if (authToken) {
