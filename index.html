@@ -616,8 +616,10 @@
     <div id="config-account" style="display:none">
       <div style="display:flex;flex-direction:column;gap:12px">
         <div style="padding:12px;background:var(--bg3);border-radius:8px;font-size:13px;color:var(--text2)">
-          <div id="cfg-email" style="margin-bottom:4px"></div>
-
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div id="cfg-email"></div>
+            <span id="cfg-premium-badge" style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px"></span>
+          </div>
         </div>
         <button onclick="confirmDeleteLibrary()"
           style="padding:10px;border-radius:8px;border:0.5px solid var(--red);background:transparent;color:var(--red);cursor:pointer;font-size:13px;text-align:left">
@@ -1932,10 +1934,16 @@ async function loadGlobalRankings() {
 
       <div style="border-top:0.5px solid var(--border);padding-top:16px">
         <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--green)">Últimas 2 semanas</div>
+        ${d.recent ? `
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
           <div>${section('Más agregados', rankList(d.recent.most_added, 'count', '', ' usuarios'))}</div>
           <div>${section('Más deseados', rankList(d.recent.most_wished, 'count', '', ' usuarios'))}</div>
         </div>
+        ` : `
+        <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg2);border-radius:8px;color:var(--text2);font-size:12px">
+          <i class="ti ti-lock"></i> Ver estas estadísticas requiere la versión premium
+        </div>
+        `}
       </div>
     `;
   } catch(e) {
@@ -1961,6 +1969,7 @@ async function openConfigPanel() {
     document.querySelector(`input[name="cfg-visibility"][value="${vis}"]`).checked = true;
   } catch(e) {}
 
+  applyPremiumUI();
   await loadAvatarConfig();
   switchConfigTab('profile');
   document.getElementById('config-overlay').classList.add('open');
@@ -2678,7 +2687,7 @@ async function syncSteamLibrary() {
     await syncAll(1);
     loadGlobalStats();
   } catch(e) {
-    showToast('Error al sincronizar biblioteca', true);
+    showToast(e.message || 'Error al sincronizar biblioteca', true);
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="ti ti-brand-steam"></i> Steam ▾';
@@ -2702,7 +2711,7 @@ async function syncSteamWishlist() {
     syncAll(currentPage);
     loadGlobalStats();
   } catch(e) {
-    showToast('Error al sincronizar deseados', true);
+    showToast(e.message || 'Error al sincronizar deseados', true);
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="ti ti-brand-steam"></i> Steam ▾';
@@ -2716,15 +2725,19 @@ async function syncBoth() {
   btn.disabled = true;
   btn.innerHTML = '<i class="ti ti-brand-steam"></i> Sincronizando...';
   try {
-    await Promise.all([
+    const [libRes, wishRes] = await Promise.all([
       fetch(`${apiBase()}/api/v1/steam/sync-library`, { method: 'POST', headers: { 'Authorization': `Bearer ${authToken}` } }),
       fetch(`${apiBase()}/api/v1/wishlist/sync`,      { method: 'POST', headers: { 'Authorization': `Bearer ${authToken}` } }),
     ]);
+    if (!libRes.ok || !wishRes.ok) {
+      const errData = await (!libRes.ok ? libRes : wishRes).json();
+      throw new Error(errData.detail || 'Error');
+    }
     await syncAll(1);
     await loadGlobalStats();
     showToast('✓ Biblioteca y deseados sincronizados');
   } catch(e) {
-    showToast('Error al sincronizar', true);
+    showToast(e.message || 'Error al sincronizar', true);
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="ti ti-brand-steam"></i> Steam ▾';
@@ -2750,7 +2763,7 @@ async function restoreDeletedSteam(section) {
     syncAll(1);
     loadGlobalStats();
   } catch(e) {
-    showToast('Error al restablecer', true);
+    showToast(e.message || 'Error al restablecer', true);
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="ti ti-brand-steam"></i> Steam ▾';
@@ -3232,6 +3245,38 @@ async function fetchPlatform(name) {
 let authToken  = localStorage.getItem('gb_token')  || '';
 let authUser   = localStorage.getItem('gb_user')   || '';
 let isRegister = false;
+let isPremium  = true;
+
+async function loadPremiumStatus() {
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/user/profile`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const d = await res.json();
+    isPremium = d.is_premium !== false;
+  } catch (e) {}
+  applyPremiumUI();
+}
+
+function applyPremiumUI() {
+  const btn = document.getElementById('steam-menu-btn');
+  if (btn) {
+    if (!isPremium) {
+      btn.innerHTML = '<i class="ti ti-brand-steam"></i> Steam <i class="ti ti-lock" style="font-size:11px"></i>';
+      btn.onclick = () => showToast('Sincronizar con Steam requiere la versión premium', true);
+    } else {
+      btn.innerHTML = '<i class="ti ti-brand-steam"></i> Steam ▾';
+      btn.onclick = toggleSteamMenu;
+    }
+  }
+  ['premium-badge', 'cfg-premium-badge'].forEach(id => {
+    const badge = document.getElementById(id);
+    if (!badge) return;
+    badge.textContent = isPremium ? 'Premium' : 'Gratis';
+    badge.style.background = isPremium ? 'rgba(29,158,117,0.15)' : 'rgba(136,135,128,0.25)';
+    badge.style.color      = isPremium ? 'var(--green)' : 'var(--text2)';
+  });
+}
 
 function toggleAuthMode() {
   isRegister = !isRegister;
@@ -3569,12 +3614,15 @@ async function saveFolderCreate() {
       body: JSON.stringify({ name, section }),
     });
     const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error');
     userFolders[section].push(data);
     closeFolderCreate();
     if (activeFolderId === -1) renderFolderList();
     else updateFolderBtn();
     loadAvailableFilters();
-  } catch(e) {}
+  } catch(e) {
+    showToast(e.message || 'No se pudo crear la carpeta', true);
+  }
 }
 
 // Rename folder
@@ -4018,7 +4066,7 @@ async function onLoginSuccess() {
 
   const chip = document.createElement('div');
   chip.className = 'user-chip';
-  chip.innerHTML = `<i class="ti ti-user" style="font-size:14px"></i>${authUser}<button class="logout-btn" onclick="openRecovery()">Código</button><button class="logout-btn" onclick="logout()">Salir</button>`;
+  chip.innerHTML = `<i class="ti ti-user" style="font-size:14px"></i>${authUser}<span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px;margin-left:2px"></span><button class="logout-btn" onclick="openRecovery()">Código</button><button class="logout-btn" onclick="logout()">Salir</button>`;
   document.getElementById('plat-status-row').before(chip);
 
   setTimeout(() => {
@@ -4032,6 +4080,7 @@ async function onLoginSuccess() {
   await Promise.all([
     syncAll(1),
     loadGlobalStats(),
+    loadPremiumStatus(),
   ]);
 
   // Then load secondary data in background
