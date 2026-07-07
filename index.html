@@ -253,6 +253,11 @@
         <i class="ti ti-users" style="font-size:14px"></i>
       </button>
 
+      <!-- Achievements button -->
+      <button onclick="openAchievementsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" title="Logros">
+        <i class="ti ti-trophy" style="font-size:14px"></i>
+      </button>
+
       <div style="position:relative;display:inline-block;margin-left:4px" id="steam-menu-wrap">
         <button class="add-btn" onclick="toggleSteamMenu()" id="steam-menu-btn">
           <i class="ti ti-brand-steam"></i> Steam ▾
@@ -666,6 +671,19 @@
   </div>
 </div>
 
+<!-- Achievements Modal -->
+<div class="modal-overlay" id="achievements-overlay">
+  <div class="modal" style="max-width:520px;max-height:85vh;display:flex;flex-direction:column">
+    <div class="modal-title"><i class="ti ti-trophy"></i> Logros</div>
+    <div id="achievements-content" style="overflow-y:auto;flex:1">
+      <div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>Cargando...</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeAchievementsPanel()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Friend Profile Modal (read-only) -->
 <div class="modal-overlay" id="friend-profile-overlay">
   <div class="modal" style="max-width:640px;max-height:85vh;display:flex;flex-direction:column">
@@ -1070,6 +1088,7 @@ async function setRating(gameId, value) {
       headers:{"Content-Type":"application/json","Authorization":`Bearer ${authToken}`},
       body: JSON.stringify({ user_rating: value })
     });
+    checkAchievements();
   } catch(e) {}
 }
 
@@ -1265,6 +1284,7 @@ async function deleteGame(gameId) {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
+    checkAchievements();
     const card = document.getElementById(`card-${gameId}`);
     if (card) {
       card.classList.add('removing');
@@ -2258,6 +2278,77 @@ const _statusColorsFriend = {
   'Deseados':     '#EF9F27',
 };
 
+async function openAchievementsPanel() {
+  document.getElementById('achievements-overlay').classList.add('open');
+  const el = document.getElementById('achievements-content');
+  el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>Cargando...</div>';
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/achievements`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+
+    const progress = d.xp_for_next ? Math.min(1, (d.xp - d.xp_current_level) / (d.xp_for_next - d.xp_current_level)) : 1;
+    const byCategory = {};
+    d.achievements.forEach(a => { (byCategory[a.category] = byCategory[a.category] || []).push(a); });
+
+    const tileHtml = a => `
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;margin-bottom:8px;border-radius:8px;background:var(--bg3);opacity:${a.unlocked ? '1' : '0.55'}">
+        <i class="ti ${a.unlocked ? 'ti-circle-check' : 'ti-lock'}" style="font-size:18px;color:${a.unlocked ? 'var(--green)' : 'var(--text2)'};margin-top:2px"></i>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-weight:600;font-size:13px">${a.name}</span>
+            ${a.tier === 'P' ? '<span style="font-size:9px;font-weight:600;color:#EF9F27;background:rgba(239,159,39,0.15);padding:2px 6px;border-radius:6px">Premium</span>' : ''}
+          </div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">${a.description}</div>
+          <div style="font-size:10px;color:var(--text2);margin-top:4px">+${a.xp} XP · ${a.global_pct}% de usuarios</div>
+        </div>
+      </div>`;
+
+    const categoriesHtml = Object.entries(byCategory).map(([cat, items]) => `
+      <div style="margin-bottom:16px">
+        <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">${cat}</div>
+        ${items.map(tileHtml).join('')}
+      </div>`).join('');
+
+    el.innerHTML = `
+      <div style="padding:14px;background:var(--bg3);border-radius:10px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0">${d.level}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:700;font-size:14px">Nivel ${d.level}</div>
+            <div style="height:8px;border-radius:4px;background:rgba(136,135,128,0.25);margin-top:6px;overflow:hidden">
+              <div style="height:100%;width:${(progress*100).toFixed(0)}%;background:var(--green)"></div>
+            </div>
+            <div style="font-size:10px;color:var(--text2);margin-top:4px">${d.capped ? 'Nivel máximo alcanzado' : `${d.xp} / ${d.xp_for_next} XP`}</div>
+          </div>
+          ${d.all_completed ? '<i class="ti ti-trophy" style="font-size:26px;color:#EF9F27"></i>' : ''}
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:10px">${d.unlocked_count} de ${d.total_count} logros desbloqueados</div>
+      </div>
+      ${categoriesHtml}
+    `;
+  } catch(e) {
+    el.innerHTML = `<div style="color:var(--red);padding:16px">${e.message || 'Error al cargar logros'}</div>`;
+  }
+}
+
+function closeAchievementsPanel() {
+  document.getElementById('achievements-overlay').classList.remove('open');
+}
+
+async function checkAchievements() {
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/achievements/check`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const d = await res.json();
+    if (res.ok && d.newly_unlocked && d.newly_unlocked.length > 0) {
+      showToast(`🏆 Logros: +${d.newly_unlocked.length}`);
+    }
+  } catch (e) {}
+}
+
 async function openFriendsPanel() {
   document.getElementById('friend-username-input').value = '';
   document.getElementById('friend-add-preview').style.display = 'none';
@@ -2401,6 +2492,7 @@ async function addFriendByUsername() {
     msg.style.display = 'block';
     msg.style.color = 'var(--green)';
     msg.textContent = data.status === 'accepted' ? 'Ya son amigos' : 'Solicitud enviada, esperando confirmación';
+    checkAchievements();
     await loadFriendsList();
   } catch(e) {
     msg.style.display = 'block';
@@ -2414,6 +2506,7 @@ async function acceptFriendRequest(username) {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${authToken}` }
   });
+  checkAchievements();
   await loadFriendsList();
 }
 
@@ -2686,6 +2779,7 @@ async function syncSteamLibrary() {
     showToast(`✓ ${data.message}`);
     await syncAll(1);
     loadGlobalStats();
+    checkAchievements();
   } catch(e) {
     showToast(e.message || 'Error al sincronizar biblioteca', true);
   } finally {
@@ -2710,6 +2804,7 @@ async function syncSteamWishlist() {
     showToast(`✓ Deseados sincronizados: ${data.message || ''}`);
     syncAll(currentPage);
     loadGlobalStats();
+    checkAchievements();
   } catch(e) {
     showToast(e.message || 'Error al sincronizar deseados', true);
   } finally {
@@ -2736,6 +2831,7 @@ async function syncBoth() {
     await syncAll(1);
     await loadGlobalStats();
     showToast('✓ Biblioteca y deseados sincronizados');
+    checkAchievements();
   } catch(e) {
     showToast(e.message || 'Error al sincronizar', true);
   } finally {
@@ -2762,6 +2858,7 @@ async function restoreDeletedSteam(section) {
     showToast(`✓ ${data.message}`);
     syncAll(1);
     loadGlobalStats();
+    checkAchievements();
   } catch(e) {
     showToast(e.message || 'Error al restablecer', true);
   } finally {
@@ -2946,6 +3043,7 @@ async function saveWishlistGame() {
     closeWishlistModal();
     syncAll(currentPage);
     loadGlobalStats();
+    checkAchievements();
   } catch(e) { alert('Error al agregar'); }
 }
 
@@ -3072,6 +3170,7 @@ async function submitGame() {
     closeModal();
     syncAll(currentPage);
     loadGlobalStats();
+    checkAchievements();
   } catch(e) { alert('Error al agregar el juego'); }
 }
 
@@ -3157,6 +3256,7 @@ async function toggleHideGame(gameId, isHidden) {
       method: 'PATCH',
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
+    checkAchievements();
     if (!isHidden) {
    // Ocultar con animación seamless
       const card = document.getElementById(`card-${gameId}`);
@@ -3616,6 +3716,7 @@ async function saveFolderCreate() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Error');
     userFolders[section].push(data);
+    checkAchievements();
     closeFolderCreate();
     if (activeFolderId === -1) renderFolderList();
     else updateFolderBtn();
@@ -4088,6 +4189,7 @@ async function onLoginSuccess() {
   loadFolders();
   checkActiveSession();
   loadAvatarConfig();
+  checkAchievements();
 }
 
 function logout() {
