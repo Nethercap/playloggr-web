@@ -2375,10 +2375,33 @@ function closeFriendsPanel() {
 }
 
 const _badgeTierColors = { bronce: '#CD7F32', plata: '#B0B0B8', oro: '#E0B84C', prisma: '#8E7CE8' };
+
+function _polygonPoints(n, startDeg, outerR, innerR) {
+  const pts = [];
+  for (let i = 0; i < n; i++) {
+    const r = (innerR != null && i % 2 === 1) ? innerR : outerR;
+    const angle = (Math.PI / 180) * (startDeg + (360 / n) * i);
+    pts.push(`${(50 + r * Math.cos(angle)).toFixed(1)}% ${(50 + r * Math.sin(angle)).toFixed(1)}%`);
+  }
+  return pts.join(', ');
+}
+// bronce = circulo (1-50), plata = hexagono (51-100), oro = estrella (101-149), prisma = diamante (150)
+const _badgeClipPaths = {
+  plata:  `polygon(${_polygonPoints(6, -90, 50)})`,
+  oro:    `polygon(${_polygonPoints(10, -90, 50, 22)})`,
+  prisma: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
+};
+
 function levelBadgeHtml(levelInfo, size = 18) {
   if (!levelInfo) return '';
-  const color = _badgeTierColors[levelInfo.badge_tier] || _badgeTierColors.bronce;
-  return `<span style="display:inline-flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;border-radius:50%;background:${color};color:#fff;font-size:${Math.round(size*0.42)}px;font-weight:700;flex-shrink:0;margin-right:6px">${levelInfo.level}</span>`;
+  const tier = levelInfo.badge_tier;
+  const color = _badgeTierColors[tier] || _badgeTierColors.bronce;
+  const clip = _badgeClipPaths[tier];
+  const shapeStyle = clip ? `clip-path:${clip};-webkit-clip-path:${clip}` : 'border-radius:50%';
+  const trophy = levelInfo.trophy
+    ? `<i class="ti ti-trophy" style="position:absolute;top:-4px;right:-6px;font-size:${Math.round(size*0.5)}px;color:#EF9F27"></i>`
+    : '';
+  return `<span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;${shapeStyle};background:${color};color:#fff;font-size:${Math.round(size*0.42)}px;font-weight:700;flex-shrink:0;margin-right:6px">${levelInfo.level}${trophy}</span>`;
 }
 
 const kFrameTiers = [
@@ -3419,6 +3442,7 @@ let userFrame  = 'none';
 let userFont   = 'default';
 let userUnlockedFrames = ['none'];
 let userUnlockedFonts  = ['default'];
+let userTrophy = false;
 
 async function loadPremiumStatus() {
   try {
@@ -3433,6 +3457,7 @@ async function loadPremiumStatus() {
     userFont  = d.selected_font || 'default';
     userUnlockedFrames = d.unlocked_frames || ['none'];
     userUnlockedFonts  = d.unlocked_fonts || ['default'];
+    userTrophy = d.trophy || false;
   } catch (e) {}
   applyPremiumUI();
 }
@@ -3458,7 +3483,7 @@ function applyPremiumUI() {
   ['user-level-badge', 'cfg-level-badge'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.innerHTML = levelBadgeHtml({ level: userLevel, badge_tier: userBadgeTier }, 20);
+    el.innerHTML = levelBadgeHtml({ level: userLevel, badge_tier: userBadgeTier, trophy: userTrophy }, 20);
   });
   const nameSpan = document.getElementById('user-name-span');
   if (nameSpan) nameSpan.setAttribute('style', usernameFontStyle(userFont));
