@@ -2346,8 +2346,23 @@ function closeAchievementsPanel() {
   document.getElementById('achievements-overlay').classList.remove('open');
 }
 
+let _toastQueue = [];
+let _toastBusy = false;
+function queueToast(msg, isError = false) {
+  _toastQueue.push({ msg, isError });
+  _processToastQueue();
+}
+function _processToastQueue() {
+  if (_toastBusy || _toastQueue.length === 0) return;
+  _toastBusy = true;
+  const { msg, isError } = _toastQueue.shift();
+  showToast(msg, isError);
+  setTimeout(() => { _toastBusy = false; _processToastQueue(); }, 2600);
+}
+
 async function checkAchievements() {
   try {
+    const oldLevel = userLevel;
     const res = await fetch(`${apiBase()}/api/v1/achievements/check`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${authToken}` }
@@ -2358,7 +2373,10 @@ async function checkAchievements() {
       userBadgeTier = d.badge_tier || userBadgeTier;
       applyPremiumUI();
       if (d.newly_unlocked && d.newly_unlocked.length > 0) {
-        showToast(`🏆 Logros: +${d.newly_unlocked.length}`);
+        d.newly_unlocked.forEach(a => queueToast(`🏆 ${a.name}  +${a.xp} XP`));
+      }
+      if (userLevel > oldLevel) {
+        queueToast(`🎉 ¡Felicidades! Subiste al nivel ${userLevel}`);
       }
     }
   } catch (e) {}
