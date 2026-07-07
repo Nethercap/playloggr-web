@@ -622,7 +622,7 @@
       <div style="display:flex;flex-direction:column;gap:12px">
         <div style="padding:12px;background:var(--bg3);border-radius:8px;font-size:13px;color:var(--text2)">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-            <div id="cfg-email"></div>
+            <div style="display:flex;align-items:center"><span id="cfg-level-badge"></span><span id="cfg-email"></span></div>
             <span id="cfg-premium-badge" style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px"></span>
           </div>
         </div>
@@ -2343,8 +2343,13 @@ async function checkAchievements() {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
     const d = await res.json();
-    if (res.ok && d.newly_unlocked && d.newly_unlocked.length > 0) {
-      showToast(`🏆 Logros: +${d.newly_unlocked.length}`);
+    if (res.ok) {
+      userLevel = d.level ?? userLevel;
+      userBadgeTier = d.badge_tier || userBadgeTier;
+      applyPremiumUI();
+      if (d.newly_unlocked && d.newly_unlocked.length > 0) {
+        showToast(`🏆 Logros: +${d.newly_unlocked.length}`);
+      }
     }
   } catch (e) {}
 }
@@ -2358,6 +2363,13 @@ async function openFriendsPanel() {
 
 function closeFriendsPanel() {
   document.getElementById('friends-overlay').classList.remove('open');
+}
+
+const _badgeTierColors = { bronce: '#CD7F32', plata: '#B0B0B8', oro: '#E0B84C', prisma: '#8E7CE8' };
+function levelBadgeHtml(levelInfo, size = 18) {
+  if (!levelInfo) return '';
+  const color = _badgeTierColors[levelInfo.badge_tier] || _badgeTierColors.bronce;
+  return `<span style="display:inline-flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;border-radius:50%;background:${color};color:#fff;font-size:${Math.round(size*0.42)}px;font-weight:700;flex-shrink:0;margin-right:6px">${levelInfo.level}</span>`;
 }
 
 function _friendAvatarHtml(f, size) {
@@ -2392,6 +2404,7 @@ async function loadFriendsList() {
     const friends  = (await friendsRes.json()).friends || [];
     const incoming = (await incomingRes.json()).requests || [];
     const sent     = (await sentRes.json()).requests || [];
+    window._friendsCache = friends;
 
     if (!friends.length && !incoming.length && !sent.length) {
       list.innerHTML = `<div class="empty"><i class="ti ti-users"></i>Todavía no agregaste amigos</div>`;
@@ -2433,7 +2446,7 @@ async function loadFriendsList() {
             <div style="width:40px;height:40px;position:relative">${_friendAvatarHtml(f, 40)}</div>
           </div>
           <div style="flex:1;min-width:0;cursor:pointer" onclick="openFriendProfile('${f.username}')">
-            <div style="font-weight:600;font-size:13px">${f.username}${sessionBadge}</div>
+            <div style="font-weight:600;font-size:13px;display:flex;align-items:center">${levelBadgeHtml(f.level_info)}${f.username}${sessionBadge}</div>
             <div style="font-size:11px;color:var(--text2);margin-top:2px">${subtitle}</div>
           </div>
           <button onclick="removeFriendByUsername('${f.username}')" title="Quitar amigo"
@@ -2531,7 +2544,9 @@ async function blockFriendByUsername(username) {
 
 async function openFriendProfile(username) {
   currentFriendUsername = username;
-  document.getElementById('friend-profile-title').innerHTML = `<i class="ti ti-user"></i> ${username}`;
+  const cached = (window._friendsCache || []).find(f => f.username === username);
+  document.getElementById('friend-profile-title').innerHTML =
+    `<i class="ti ti-user"></i> ${levelBadgeHtml(cached && cached.level_info)}${username}`;
   document.getElementById('friend-profile-overlay').classList.add('open');
   switchFriendTab('library');
 }
@@ -3346,6 +3361,8 @@ let authToken  = localStorage.getItem('gb_token')  || '';
 let authUser   = localStorage.getItem('gb_user')   || '';
 let isRegister = false;
 let isPremium  = true;
+let userLevel  = 1;
+let userBadgeTier = 'bronce';
 
 async function loadPremiumStatus() {
   try {
@@ -3354,6 +3371,8 @@ async function loadPremiumStatus() {
     });
     const d = await res.json();
     isPremium = d.is_premium !== false;
+    userLevel = d.level ?? 1;
+    userBadgeTier = d.badge_tier || 'bronce';
   } catch (e) {}
   applyPremiumUI();
 }
@@ -3375,6 +3394,11 @@ function applyPremiumUI() {
     badge.textContent = isPremium ? 'Premium' : 'Gratis';
     badge.style.background = isPremium ? 'rgba(29,158,117,0.15)' : 'rgba(136,135,128,0.25)';
     badge.style.color      = isPremium ? 'var(--green)' : 'var(--text2)';
+  });
+  ['user-level-badge', 'cfg-level-badge'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = levelBadgeHtml({ level: userLevel, badge_tier: userBadgeTier }, 20);
   });
 }
 
@@ -4167,7 +4191,7 @@ async function onLoginSuccess() {
 
   const chip = document.createElement('div');
   chip.className = 'user-chip';
-  chip.innerHTML = `<i class="ti ti-user" style="font-size:14px"></i>${authUser}<span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px;margin-left:2px"></span><button class="logout-btn" onclick="openRecovery()">Código</button><button class="logout-btn" onclick="logout()">Salir</button>`;
+  chip.innerHTML = `<span id="user-level-badge"></span>${authUser}<span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px;margin-left:2px"></span><button class="logout-btn" onclick="openRecovery()">Código</button><button class="logout-btn" onclick="logout()">Salir</button>`;
   document.getElementById('plat-status-row').before(chip);
 
   setTimeout(() => {
