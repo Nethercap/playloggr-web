@@ -430,17 +430,17 @@
 <!-- Wishlist Modal -->
 <div class="modal-overlay" id="wishlist-modal-overlay">
   <div class="modal">
-    <div class="modal-title"><i class="ti ti-star" style="color:#EF9F27"></i> Agregar a deseados</div>
+    <div class="modal-title"><i class="ti ti-star" style="color:#EF9F27"></i> <span data-i18n="addToWishlist">Agregar a deseados</span></div>
     <div class="modal-grid">
       <div class="modal-group full" style="position:relative">
-        <label>Buscar juego</label>
-        <input type="text" id="wm-name" placeholder="Buscá tu juego..." autocomplete="off"
+        <label data-i18n="searchGameLabel">Buscar juego</label>
+        <input type="text" id="wm-name" placeholder="Buscá tu juego..." data-i18n-placeholder="searchYourGame" autocomplete="off"
           oninput="searchSteamCatalogWishlist(this.value)" />
         <div id="wishlist-search-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius-md);z-index:100;max-height:200px;overflow-y:auto"></div>
         <input type="hidden" id="wm-appid" />
       </div>
       <div class="modal-group">
-        <label>Plataforma</label>
+        <label data-i18n="platform">Plataforma</label>
         <select id="wm-platform">
           <option value="Steam">Steam</option>
           <option value="Epic">Epic</option>
@@ -471,9 +471,9 @@
         </select>
       </div>
       <div class="modal-group">
-        <label>Género</label>
-        <select id="wm-genre">
-          <option value="">Sin género</option>
+        <label data-i18n="genre">Género</label>
+        <select id="wm-genre" class="genre-select">
+          <option value="" data-i18n="noGenre">Sin género</option>
           <option value="Acción">Acción</option>
           <option value="Aventura">Aventura</option>
           <option value="RPG">RPG</option>
@@ -496,8 +496,8 @@
       </div>
     </div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeWishlistModal()">Cancelar</button>
-      <button class="btn-save" onclick="saveWishlistGame()">Agregar</button>
+      <button class="btn-cancel" onclick="closeWishlistModal()" data-i18n="cancel">Cancelar</button>
+      <button class="btn-save" onclick="saveWishlistGame()" data-i18n="add">Agregar</button>
     </div>
   </div>
 </div>
@@ -505,20 +505,20 @@
 <!-- Cover Edit Modal -->
 <div class="modal-overlay" id="cover-modal-overlay">
   <div class="modal" style="max-width:360px">
-    <div class="modal-title"><i class="ti ti-photo"></i> Cambiar portada</div>
+    <div class="modal-title"><i class="ti ti-photo"></i> <span data-i18n="changeCover">Cambiar portada</span></div>
     <div class="modal-grid">
       <div class="modal-group full">
-        <label>URL de la imagen</label>
+        <label data-i18n="imageUrl">URL de la imagen</label>
         <input type="text" id="cover-url-input" placeholder="https://..." />
       </div>
       <div class="modal-group full" id="cover-preview-wrap" style="display:none">
-        <label>Vista previa</label>
+        <label data-i18n="preview">Vista previa</label>
         <img id="cover-preview" style="width:80px;height:104px;object-fit:cover;border-radius:6px;border:0.5px solid var(--border2)" />
       </div>
     </div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeCoverEdit()">Cancelar</button>
-      <button class="btn-save" onclick="saveCoverEdit()">Guardar</button>
+      <button class="btn-cancel" onclick="closeCoverEdit()" data-i18n="cancel">Cancelar</button>
+      <button class="btn-save" onclick="saveCoverEdit()" data-i18n="save">Guardar</button>
     </div>
   </div>
 </div>
@@ -527,33 +527,33 @@
 <!-- Config Panel -->
 <div class="modal-overlay" id="config-overlay">
   <div class="modal" style="max-width:480px">
-    <div class="modal-title"><i class="ti ti-settings"></i> Configuración</div>
+    <div class="modal-title"><i class="ti ti-settings"></i> <span data-i18n="settings">Configuración</span></div>
 
     <!-- Tabs -->
     <div style="display:flex;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:0.5px solid var(--border)">
       <button id="tab-profile" onclick="switchConfigTab('profile')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--green);background:var(--bg2);color:var(--green);cursor:pointer;border-radius:20px;margin-right:6px;font-weight:600">Perfil</button>
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--green);background:var(--bg2);color:var(--green);cursor:pointer;border-radius:20px;margin-right:6px;font-weight:600" data-i18n="profileTab">Perfil</button>
       <button id="tab-avatar" onclick="switchConfigTab('avatar')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px">Avatar</button>
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px" data-i18n="avatarTab">Avatar</button>
       <button id="tab-account" onclick="switchConfigTab('account')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px">Cuenta</button>
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px" data-i18n="accountTab">Cuenta</button>
     </div>
 
     <!-- Profile tab -->
     <div id="config-profile">
       <div class="modal-grid">
         <div class="modal-group full">
-          <label>Nombre de usuario</label>
+          <label data-i18n="username">Nombre de usuario</label>
           <input type="text" id="cfg-username" placeholder="Tu nombre de usuario" maxlength="50" />
         </div>
 
         <div class="modal-group full">
-          <label>Fuente de nombre de usuario</label>
+          <label data-i18n="usernameFont">Fuente de nombre de usuario</label>
           <div id="cfg-font-picker" style="margin-top:6px"></div>
         </div>
 
         <div class="modal-group">
-          <label>Idioma</label>
+          <label data-i18n="language">Idioma</label>
           <select id="cfg-language" style="width:100%;padding:8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:13px">
             <option value="es">Español</option>
             <option value="en">English</option>
@@ -561,13 +561,13 @@
           </select>
         </div>
         <div class="modal-group">
-          <label>Perfil</label>
+          <label data-i18n="profileVisibility">Perfil</label>
           <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
             <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px">
-              <input type="radio" name="cfg-visibility" value="public" checked> Público
+              <input type="radio" name="cfg-visibility" value="public" checked> <span data-i18n="public">Público</span>
             </label>
             <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px">
-              <input type="radio" name="cfg-visibility" value="private"> Privado
+              <input type="radio" name="cfg-visibility" value="private"> <span data-i18n="private">Privado</span>
             </label>
           </div>
         </div>
@@ -578,7 +578,7 @@
     <!-- Avatar tab -->
     <div id="config-avatar" style="display:none">
       <div style="margin-bottom:12px">
-        <label style="font-size:12px;color:var(--text2)">Marco de avatar</label>
+        <label style="font-size:12px;color:var(--text2)" data-i18n="avatarFrame">Marco de avatar</label>
         <div id="cfg-frame-picker" style="margin-top:6px"></div>
       </div>
       <div style="display:flex;justify-content:center;margin-bottom:12px;flex-shrink:0">
@@ -589,39 +589,39 @@
 
       <div id="avatar-pickers-scroll" style="max-height:42vh;overflow-y:auto;padding-right:4px">
       <div style="margin-bottom:14px">
-        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px">Raza</label>
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px" data-i18n="race">Raza</label>
         <div id="avatar-race-picker"></div>
       </div>
       <div style="margin-bottom:14px">
-        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px">Pelo</label>
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px" data-i18n="hair">Pelo</label>
         <div id="avatar-hair-picker"></div>
       </div>
       <div style="margin-bottom:14px">
-        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px">Sombrero/Casco</label>
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px" data-i18n="headwear">Sombrero/Casco</label>
         <div id="avatar-headwear-picker"></div>
       </div>
       <div style="margin-bottom:14px">
-        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px">Camisa</label>
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px" data-i18n="shirt">Camisa</label>
         <div id="avatar-shirt-picker"></div>
       </div>
       <div style="margin-bottom:14px">
-        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px">Pantalón</label>
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px" data-i18n="pants">Pantalón</label>
         <div id="avatar-pants-picker"></div>
       </div>
       <div style="margin-bottom:14px">
-        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px">Botas</label>
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px" data-i18n="boots">Botas</label>
         <div id="avatar-boots-picker"></div>
       </div>
       <div style="margin-bottom:14px">
-        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px">Guantes</label>
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px" data-i18n="gloves">Guantes</label>
         <div id="avatar-gloves-picker"></div>
       </div>
       <div style="margin-bottom:14px">
-        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px">Hombreras</label>
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px" data-i18n="shoulders">Hombreras</label>
         <div id="avatar-shoulders-picker"></div>
       </div>
       <div style="margin-bottom:14px">
-        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px">Cinturón</label>
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px" data-i18n="waist">Cinturón</label>
         <div id="avatar-waist-picker"></div>
       </div>
       <div style="font-size:10px;color:var(--text2);text-align:center;margin-top:4px">Avatar art: Intersect-Assets (AscensionGameDev), CC BY 4.0</div>
@@ -640,20 +640,20 @@
         </div>
         <button onclick="confirmDeleteLibrary()"
           style="padding:10px;border-radius:8px;border:0.5px solid var(--red);background:transparent;color:var(--red);cursor:pointer;font-size:13px;text-align:left">
-          <i class="ti ti-trash"></i> Eliminar biblioteca
-          <div style="font-size:11px;color:var(--text2);margin-top:2px">Borra todos los juegos de tu biblioteca y deseados.</div>
+          <i class="ti ti-trash"></i> <span data-i18n="deleteLibrary">Eliminar biblioteca</span>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px" data-i18n="deleteLibrarySubtitle">Borra todos los juegos de tu biblioteca y deseados.</div>
         </button>
         <button onclick="confirmDeleteAccount()"
           style="padding:10px;border-radius:8px;border:0.5px solid var(--red);background:rgba(226,75,74,0.1);color:var(--red);cursor:pointer;font-size:13px;text-align:left">
-          <i class="ti ti-user-x"></i> Eliminar cuenta
-          <div style="font-size:11px;color:var(--text2);margin-top:2px">Elimina permanentemente tu cuenta y todos tus datos.</div>
+          <i class="ti ti-user-x"></i> <span data-i18n="deleteAccount">Eliminar cuenta</span>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px" data-i18n="deleteAccountSubtitle">Elimina permanentemente tu cuenta y todos tus datos.</div>
         </button>
       </div>
     </div>
 
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeConfigPanel()">Cancelar</button>
-      <button class="btn-save" id="cfg-save-btn" onclick="saveConfig()">Guardar</button>
+      <button class="btn-cancel" onclick="closeConfigPanel()" data-i18n="cancel">Cancelar</button>
+      <button class="btn-save" id="cfg-save-btn" onclick="saveConfig()" data-i18n="save">Guardar</button>
     </div>
   </div>
 </div>
@@ -661,13 +661,13 @@
 <!-- Friends Modal -->
 <div class="modal-overlay" id="friends-overlay">
   <div class="modal" style="max-width:520px;max-height:82vh;display:flex;flex-direction:column">
-    <div class="modal-title"><i class="ti ti-users"></i> Amigos</div>
+    <div class="modal-title"><i class="ti ti-users"></i> <span data-i18n="friends">Amigos</span></div>
     <div style="display:flex;gap:8px;margin-bottom:10px">
-      <input type="text" id="friend-username-input" placeholder="Nombre de usuario..."
+      <input type="text" id="friend-username-input" placeholder="Nombre de usuario..." data-i18n-placeholder="username"
         style="flex:1;padding:8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"
         oninput="onFriendUsernameInput(this.value)"
         onkeydown="if(event.key==='Enter') addFriendByUsername()" />
-      <button class="btn-save" style="white-space:nowrap" onclick="addFriendByUsername()">Agregar</button>
+      <button class="btn-save" style="white-space:nowrap" onclick="addFriendByUsername()" data-i18n="add">Agregar</button>
     </div>
     <div id="friend-add-preview" style="display:none;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border-radius:8px;margin-bottom:10px">
       <div style="width:36px;height:36px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
@@ -678,7 +678,7 @@
     <div id="friends-msg" style="font-size:12px;margin-bottom:8px;display:none"></div>
     <div id="friends-list" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:8px;min-height:120px"></div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeFriendsPanel()">Cerrar</button>
+      <button class="btn-cancel" onclick="closeFriendsPanel()" data-i18n="close">Cerrar</button>
     </div>
   </div>
 </div>
@@ -686,12 +686,12 @@
 <!-- Achievements Modal -->
 <div class="modal-overlay" id="achievements-overlay">
   <div class="modal" style="max-width:520px;max-height:85vh;display:flex;flex-direction:column">
-    <div class="modal-title"><i class="ti ti-trophy"></i> Logros</div>
+    <div class="modal-title"><i class="ti ti-trophy"></i> <span data-i18n="achievements">Logros</span></div>
     <div id="achievements-content" style="overflow-y:auto;flex:1">
-      <div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>Cargando...</div>
+      <div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div>
     </div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeAchievementsPanel()">Cerrar</button>
+      <button class="btn-cancel" onclick="closeAchievementsPanel()" data-i18n="close">Cerrar</button>
     </div>
   </div>
 </div>
@@ -702,24 +702,24 @@
     <div class="modal-title" id="friend-profile-title"><i class="ti ti-user"></i> Perfil</div>
     <div style="display:flex;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:0.5px solid var(--border)">
       <button id="ftab-library" onclick="switchFriendTab('library')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--green);background:var(--bg2);color:var(--green);cursor:pointer;border-radius:20px;margin-right:6px;font-weight:600">Biblioteca</button>
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--green);background:var(--bg2);color:var(--green);cursor:pointer;border-radius:20px;margin-right:6px;font-weight:600" data-i18n="library">Biblioteca</button>
       <button id="ftab-wishlist" onclick="switchFriendTab('wishlist')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px">Deseados</button>
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px" data-i18n="wishlist">Deseados</button>
       <button id="ftab-stats" onclick="switchFriendTab('stats')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px">Estadísticas</button>
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px" data-i18n="stats">Estadísticas</button>
     </div>
 
     <div id="friend-tab-library">
       <div style="display:flex;gap:8px;margin-bottom:10px">
-        <input type="text" id="friend-search-library" placeholder="Buscar..."
+        <input type="text" id="friend-search-library" placeholder="Buscar..." data-i18n-placeholder="search"
           style="flex:1;padding:6px 8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:12px"
           onkeydown="if(event.key==='Enter') loadFriendLibrary()" />
         <select id="friend-sort-library" onchange="loadFriendLibrary()"
           style="padding:6px 8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:12px">
-          <option value="name">Nombre</option>
-          <option value="hours">Horas</option>
-          <option value="rating">Calificación</option>
-          <option value="platform">Plataforma</option>
+          <option value="name" data-i18n="name">Nombre</option>
+          <option value="hours" data-i18n="hours">Horas</option>
+          <option value="rating" data-i18n="rating">Calificación</option>
+          <option value="platform" data-i18n="platform">Plataforma</option>
         </select>
       </div>
       <div id="friend-library-list" style="overflow-y:auto;max-height:50vh;display:flex;flex-direction:column;gap:8px"></div>
@@ -727,15 +727,15 @@
 
     <div id="friend-tab-wishlist" style="display:none">
       <div style="display:flex;gap:8px;margin-bottom:10px">
-        <input type="text" id="friend-search-wishlist" placeholder="Buscar..."
+        <input type="text" id="friend-search-wishlist" placeholder="Buscar..." data-i18n-placeholder="search"
           style="flex:1;padding:6px 8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:12px"
           onkeydown="if(event.key==='Enter') loadFriendWishlist()" />
         <select id="friend-sort-wishlist" onchange="loadFriendWishlist()"
           style="padding:6px 8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:12px">
-          <option value="name">Nombre</option>
-          <option value="hours">Horas</option>
-          <option value="rating">Calificación</option>
-          <option value="platform">Plataforma</option>
+          <option value="name" data-i18n="name">Nombre</option>
+          <option value="hours" data-i18n="hours">Horas</option>
+          <option value="rating" data-i18n="rating">Calificación</option>
+          <option value="platform" data-i18n="platform">Plataforma</option>
         </select>
       </div>
       <div id="friend-wishlist-list" style="overflow-y:auto;max-height:50vh;display:flex;flex-direction:column;gap:8px"></div>
@@ -746,7 +746,7 @@
     </div>
 
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeFriendProfile()">Cerrar</button>
+      <button class="btn-cancel" onclick="closeFriendProfile()" data-i18n="close">Cerrar</button>
     </div>
   </div>
 </div>
@@ -754,15 +754,15 @@
 <!-- Set Username Modal (mandatory, no close) -->
 <div class="modal-overlay" id="set-username-overlay">
   <div class="modal" style="max-width:380px">
-    <div class="modal-title"><i class="ti ti-user-plus"></i> Elegí tu nombre de usuario</div>
-    <p style="font-size:12px;color:var(--text2);margin:0 0 12px">Solo letras y números, sin espacios ni tildes. Lo van a ver tus amigos.</p>
+    <div class="modal-title"><i class="ti ti-user-plus"></i> <span data-i18n="chooseUsername">Elegí tu nombre de usuario</span></div>
+    <p style="font-size:12px;color:var(--text2);margin:0 0 12px" data-i18n="usernameHint">Solo letras y números, sin espacios ni tildes. Lo van a ver tus amigos.</p>
     <input type="text" id="set-username-input" placeholder="Nombre de usuario" maxlength="20"
       style="width:100%;padding:10px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:14px"
       oninput="this.value=this.value.replace(/[^A-Za-z0-9]/g,'')"
       onkeydown="if(event.key==='Enter') saveSetUsername()" />
     <div id="set-username-err" style="font-size:12px;color:var(--red);margin-top:8px;display:none"></div>
     <div class="modal-actions">
-      <button class="btn-save" onclick="saveSetUsername()">Continuar</button>
+      <button class="btn-save" onclick="saveSetUsername()" data-i18n="continueBtn">Continuar</button>
     </div>
   </div>
 </div>
@@ -770,17 +770,17 @@
 <!-- Create Folder Modal -->
 <div class="modal-overlay" id="folder-create-overlay">
   <div class="modal" style="max-width:340px">
-    <div class="modal-title"><i class="ti ti-folder-plus"></i> Nueva carpeta</div>
+    <div class="modal-title"><i class="ti ti-folder-plus"></i> <span data-i18n="newFolder">Nueva carpeta</span></div>
     <div class="modal-grid">
       <div class="modal-group full">
-        <label>Nombre</label>
+        <label data-i18n="name">Nombre</label>
         <input type="text" id="folder-name-input" placeholder="Ej: RPGs 2024" maxlength="100"
           onkeydown="if(event.key==='Enter') saveFolderCreate()" />
       </div>
     </div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeFolderCreate()">Cancelar</button>
-      <button class="btn-save" onclick="saveFolderCreate()">Crear</button>
+      <button class="btn-cancel" onclick="closeFolderCreate()" data-i18n="cancel">Cancelar</button>
+      <button class="btn-save" onclick="saveFolderCreate()" data-i18n="create">Crear</button>
     </div>
   </div>
 </div>
@@ -788,10 +788,10 @@
 <!-- Add to Folder Modal -->
 <div class="modal-overlay" id="folder-add-game-overlay">
   <div class="modal" style="max-width:720px;width:90vw;display:flex;flex-direction:column;max-height:85vh">
-    <div class="modal-title"><i class="ti ti-folder-plus"></i> Agregar a carpeta</div>
+    <div class="modal-title"><i class="ti ti-folder-plus"></i> <span data-i18n="addToFolder">Agregar a carpeta</span></div>
     <div id="folder-add-game-list"></div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeFolderAddGame()">Cancelar</button>
+      <button class="btn-cancel" onclick="closeFolderAddGame()" data-i18n="cancel">Cancelar</button>
       <button class="btn-save" onclick="_folderPickerId ? confirmFolderGamePicker() : confirmCardFolderPicker()">OK</button>
     </div>
   </div>
@@ -800,14 +800,14 @@
 <!-- Hours Modal -->
 <div class="modal-overlay" id="hours-overlay">
   <div class="modal" style="max-width:320px">
-    <div class="modal-title"><i class="ti ti-clock" style="color:#1D9E75"></i> Horas jugadas</div>
+    <div class="modal-title"><i class="ti ti-clock" style="color:#1D9E75"></i> <span data-i18n="hoursPlayed">Horas jugadas</span></div>
     <div class="modal-group full" style="margin-top:12px">
       <label id="hours-modal-label">Juego</label>
       <input type="number" id="hours-input" min="0" step="0.1" placeholder="0.0" style="font-size:24px;text-align:center;padding:12px" />
     </div>
     <div class="modal-actions" style="margin-top:16px">
-      <button class="btn-cancel" onclick="closeHoursModal()">Cancelar</button>
-      <button class="btn-save" onclick="saveHoursModal()">Guardar</button>
+      <button class="btn-cancel" onclick="closeHoursModal()" data-i18n="cancel">Cancelar</button>
+      <button class="btn-save" onclick="saveHoursModal()" data-i18n="save">Guardar</button>
     </div>
   </div>
 </div>
@@ -816,19 +816,19 @@
 <div class="modal-overlay" id="recovery-overlay">
   <div class="modal">
     <div id="recovery-generate-view">
-      <div class="modal-title"><i class="ti ti-key" style="color:#1D9E75"></i> Código de recuperación</div>
-      <div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6">
+      <div class="modal-title"><i class="ti ti-key" style="color:#1D9E75"></i> <span data-i18n="recoveryCode">Código de recuperación</span></div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6" data-i18n-html="recoveryCodeHint">
         Generá un código de 6 dígitos para recuperar tu cuenta si olvidás la contraseña.<br>
         <strong style="color:var(--text)">Guardalo en un lugar seguro — solo se muestra una vez.</strong>
       </div>
-      <button class="btn-save" style="width:100%" onclick="generateRecoveryCode()">Generar código</button>
+      <button class="btn-save" style="width:100%" onclick="generateRecoveryCode()" data-i18n="generateCode">Generar código</button>
       <div id="recovery-code-display" style="display:none;margin-top:16px;text-align:center">
-        <div style="font-size:11px;color:var(--text2);margin-bottom:8px">Tu código de recuperación:</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:8px" data-i18n="yourRecoveryCode">Tu código de recuperación:</div>
         <div id="recovery-code-value" style="font-size:32px;font-weight:500;letter-spacing:8px;color:var(--text);font-family:monospace;background:var(--bg2);padding:16px;border-radius:var(--radius-md)"></div>
-        <div style="font-size:11px;color:#E24B4A;margin-top:10px">⚠ Cerrá esta ventana solo cuando lo hayas anotado</div>
+        <div style="font-size:11px;color:#E24B4A;margin-top:10px" data-i18n="recoveryCodeWarning">⚠ Cerrá esta ventana solo cuando lo hayas anotado</div>
       </div>
       <div class="modal-actions" style="margin-top:16px">
-        <button class="btn-cancel" onclick="closeRecovery()">Cerrar</button>
+        <button class="btn-cancel" onclick="closeRecovery()" data-i18n="close">Cerrar</button>
       </div>
     </div>
   </div>
@@ -837,25 +837,25 @@
 <!-- Reset Password Modal -->
 <div class="modal-overlay" id="reset-overlay">
   <div class="modal">
-    <div class="modal-title"><i class="ti ti-lock-open" style="color:#1D9E75"></i> Recuperar contraseña</div>
+    <div class="modal-title"><i class="ti ti-lock-open" style="color:#1D9E75"></i> <span data-i18n="resetPassword">Recuperar contraseña</span></div>
     <div class="modal-grid">
       <div class="modal-group full">
-        <label>Email</label>
+        <label data-i18n="email">Email</label>
         <input type="email" id="r-email" placeholder="tu@email.com" />
       </div>
       <div class="modal-group full">
-        <label>Código de recuperación (6 dígitos)</label>
+        <label data-i18n="recoveryCodeDigits">Código de recuperación (6 dígitos)</label>
         <input type="text" id="r-code" placeholder="123456" maxlength="6" />
       </div>
       <div class="modal-group full">
-        <label>Nueva contraseña</label>
+        <label data-i18n="newPassword">Nueva contraseña</label>
         <input type="password" id="r-newpass" placeholder="••••••••" />
       </div>
     </div>
     <div id="reset-msg" style="font-size:12px;margin-top:10px;display:none"></div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeReset()">Cancelar</button>
-      <button class="btn-save" onclick="submitReset()">Cambiar contraseña</button>
+      <button class="btn-cancel" onclick="closeReset()" data-i18n="cancel">Cancelar</button>
+      <button class="btn-save" onclick="submitReset()" data-i18n="changePassword">Cambiar contraseña</button>
     </div>
   </div>
 </div>
@@ -863,8 +863,8 @@
 <!-- Settings Modal -->
 <div class="modal-overlay" id="settings-overlay">
   <div class="modal">
-    <div class="modal-title"><i class="ti ti-settings" style="color:#1D9E75"></i> Ajustes de Steam</div>
-    <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.6">
+    <div class="modal-title"><i class="ti ti-settings" style="color:#1D9E75"></i> <span data-i18n="steamSettings">Ajustes de Steam</span></div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.6" data-i18n-html="steamSettingsHint">
       Ingresá tu Steam ID para sincronizar tu biblioteca.<br>
       Lo encontrás en <a href="https://www.steamidfinder.com" target="_blank" style="color:#1D9E75">steamidfinder.com</a> — es un número como <code style="background:var(--bg2);padding:1px 5px;border-radius:4px">76561198012345678</code>
     </div>
@@ -876,8 +876,8 @@
     </div>
     <div id="settings-msg" style="font-size:12px;margin-top:10px;display:none"></div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeSettings()">Cancelar</button>
-      <button class="btn-save" onclick="saveSettings()">Guardar</button>
+      <button class="btn-cancel" onclick="closeSettings()" data-i18n="cancel">Cancelar</button>
+      <button class="btn-save" onclick="saveSettings()" data-i18n="save">Guardar</button>
     </div>
   </div>
 </div>
@@ -981,6 +981,22 @@ const I18N = {
     register: 'Registrate', registerBtn: 'Registrarse', login: 'Iniciar sesión', forgotPassword: '¿Olvidaste tu contraseña?',
     backToGoogle: '← Volver a Google', email: 'Email', password: 'Contraseña',
     selected: 'Seleccionados',
+    avatarFrame: 'Marco de avatar', race: 'Raza', hair: 'Pelo', headwear: 'Sombrero/Casco',
+    shirt: 'Camisa', pants: 'Pantalón', boots: 'Botas', gloves: 'Guantes', shoulders: 'Hombreras', waist: 'Cinturón',
+    deleteLibrary: 'Eliminar biblioteca', deleteLibrarySubtitle: 'Borra todos los juegos de tu biblioteca y deseados.',
+    deleteAccount: 'Eliminar cuenta', deleteAccountSubtitle: 'Elimina permanentemente tu cuenta y todos tus datos.',
+    close: 'Cerrar', search: 'Buscar...',
+    chooseUsername: 'Elegí tu nombre de usuario',
+    usernameHint: 'Solo letras y números, sin espacios ni tildes. Lo van a ver tus amigos.',
+    continueBtn: 'Continuar', newFolder: 'Nueva carpeta', create: 'Crear', addToFolder: 'Agregar a carpeta',
+    hoursPlayed: 'Horas jugadas', recoveryCode: 'Código de recuperación',
+    recoveryCodeHint: 'Generá un código de 6 dígitos para recuperar tu cuenta si olvidás la contraseña.<br><strong style="color:var(--text)">Guardalo en un lugar seguro — solo se muestra una vez.</strong>',
+    generateCode: 'Generar código', yourRecoveryCode: 'Tu código de recuperación:',
+    recoveryCodeWarning: '⚠ Cerrá esta ventana solo cuando lo hayas anotado',
+    resetPassword: 'Recuperar contraseña', recoveryCodeDigits: 'Código de recuperación (6 dígitos)',
+    newPassword: 'Nueva contraseña', changePassword: 'Cambiar contraseña',
+    steamSettings: 'Ajustes de Steam',
+    steamSettingsHint: 'Ingresá tu Steam ID para sincronizar tu biblioteca.<br>Lo encontrás en <a href="https://www.steamidfinder.com" target="_blank" style="color:#1D9E75">steamidfinder.com</a> — es un número como <code style="background:var(--bg2);padding:1px 5px;border-radius:4px">76561198012345678</code>',
     loginSubtitle: 'Iniciá sesión para continuar', createAccount: 'Creá tu cuenta',
     continueWithGoogle: 'Continuar con Google', useEmailPassword: 'Usar email y contraseña',
     recoveryHint: '⚠ Si olvidás tu contraseña, la recuperación es con un <strong style="color:var(--text)">código de 6 dígitos</strong> que generás desde el menú de tu perfil.',
@@ -1006,6 +1022,22 @@ const I18N = {
     register: 'Sign up', registerBtn: 'Sign up', login: 'Log in', forgotPassword: 'Forgot your password?',
     backToGoogle: '← Back to Google', email: 'Email', password: 'Password',
     selected: 'Selected',
+    avatarFrame: 'Avatar frame', race: 'Race', hair: 'Hair', headwear: 'Headwear',
+    shirt: 'Shirt', pants: 'Pants', boots: 'Boots', gloves: 'Gloves', shoulders: 'Shoulders', waist: 'Belt',
+    deleteLibrary: 'Delete library', deleteLibrarySubtitle: 'Deletes all games in your library and wishlist.',
+    deleteAccount: 'Delete account', deleteAccountSubtitle: 'Permanently deletes your account and all your data.',
+    close: 'Close', search: 'Search...',
+    chooseUsername: 'Choose your username',
+    usernameHint: 'Letters and numbers only, no spaces or accents. Your friends will see it.',
+    continueBtn: 'Continue', newFolder: 'New folder', create: 'Create', addToFolder: 'Add to folder',
+    hoursPlayed: 'Hours played', recoveryCode: 'Recovery code',
+    recoveryCodeHint: 'Generate a 6-digit code to recover your account if you forget your password.<br><strong style="color:var(--text)">Save it somewhere safe — it\'s only shown once.</strong>',
+    generateCode: 'Generate code', yourRecoveryCode: 'Your recovery code:',
+    recoveryCodeWarning: '⚠ Only close this window once you\'ve written it down',
+    resetPassword: 'Reset password', recoveryCodeDigits: 'Recovery code (6 digits)',
+    newPassword: 'New password', changePassword: 'Change password',
+    steamSettings: 'Steam settings',
+    steamSettingsHint: 'Enter your Steam ID to sync your library.<br>Find it at <a href="https://www.steamidfinder.com" target="_blank" style="color:#1D9E75">steamidfinder.com</a> — it\'s a number like <code style="background:var(--bg2);padding:1px 5px;border-radius:4px">76561198012345678</code>',
     loginSubtitle: 'Log in to continue', createAccount: 'Create your account',
     continueWithGoogle: 'Continue with Google', useEmailPassword: 'Use email and password',
     recoveryHint: '⚠ If you forget your password, recovery is done with a <strong style="color:var(--text)">6-digit code</strong> you generate from your profile menu.',
@@ -1019,6 +1051,11 @@ function applyI18n() {
   document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.getAttribute('data-i18n-html')); });
   document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.getAttribute('data-i18n-title')); });
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.getAttribute('data-i18n-placeholder')); });
+  document.querySelectorAll('.genre-select option[value]:not([value=""])').forEach(opt => {
+    opt.textContent = typeof genreLabel === 'function' ? genreLabel(opt.value) : opt.value;
+  });
+  if (typeof allGames !== 'undefined' && allGames.length && typeof renderGames === 'function') renderGames();
+  if (typeof renderFilterDropdowns === 'function') renderFilterDropdowns();
   document.documentElement.lang = currentLang;
   ['lang-toggle-btn', 'lang-toggle-btn-login'].forEach(id => {
     const toggle = document.getElementById(id);
@@ -1405,12 +1442,20 @@ async function deleteGame(gameId) {
 }
 
 const GENRES = ["Acción", "Aventura", "RPG", "FPS", "Estrategia", "Simulación", "Deportes", "Carreras", "Terror", "Roguelite", "Plataformas", "Puzzle", "Lucha", "Mundo Abierto", "Multijugador", "Indie", "Visual Novel", "Música/Ritmo"];
+const GENRE_LABELS_EN = {
+  'Acción': 'Action', 'Aventura': 'Adventure', 'RPG': 'RPG', 'FPS': 'FPS', 'Estrategia': 'Strategy',
+  'Simulación': 'Simulation', 'Deportes': 'Sports', 'Carreras': 'Racing', 'Terror': 'Horror',
+  'Roguelite': 'Roguelite', 'Plataformas': 'Platformer', 'Puzzle': 'Puzzle', 'Lucha': 'Fighting',
+  'Mundo Abierto': 'Open World', 'Multijugador': 'Multiplayer', 'Indie': 'Indie',
+  'Visual Novel': 'Visual Novel', 'Música/Ritmo': 'Music/Rhythm',
+};
+function genreLabel(g) { return currentLang === 'en' ? (GENRE_LABELS_EN[g] || g) : g; }
 
 function genreOptions(selected) {
-  const opts = ['<option value="">Sin género</option>'];
+  const opts = [`<option value="">${t('noGenre')}</option>`];
   GENRES.forEach(g => {
     const sel = selected === g ? ' selected' : '';
-    opts.push(`<option value="${g}"${sel}>${g}</option>`);
+    opts.push(`<option value="${g}"${sel}>${genreLabel(g)}</option>`);
   });
   return opts.join('');
 }
@@ -1514,15 +1559,15 @@ function renderFilterDropdowns() {
 
   const filters = currentView === 'library'
     ? [
-        { key: 'statuses',  label: 'Estado',     options: availableFilters.library?.statuses  || [] },
-        { key: 'platforms', label: 'Plataforma',  options: availableFilters.library?.platforms || [] },
-        { key: 'genres',    label: 'Género',      options: availableFilters.library?.genres    || [] },
-        { key: 'hours',     label: 'Horas',       options: availableFilters.library?.hours     || [] },
-        { key: 'ratings',   label: 'Calificación',options: availableFilters.library?.ratings   || [] },
+        { key: 'statuses',  label: t('status'),   options: availableFilters.library?.statuses  || [] },
+        { key: 'platforms', label: t('platform'),  options: availableFilters.library?.platforms || [] },
+        { key: 'genres',    label: t('genre'),     options: availableFilters.library?.genres    || [] },
+        { key: 'hours',     label: t('hours'),     options: availableFilters.library?.hours     || [] },
+        { key: 'ratings',   label: t('rating'),    options: availableFilters.library?.ratings   || [] },
       ]
     : [
-        { key: 'platforms', label: 'Plataforma',  options: availableFilters.wishlist?.platforms || [] },
-        { key: 'genres',    label: 'Género',      options: availableFilters.wishlist?.genres    || [] },
+        { key: 'platforms', label: t('platform'),  options: availableFilters.wishlist?.platforms || [] },
+        { key: 'genres',    label: t('genre'),      options: availableFilters.wishlist?.genres    || [] },
       ];
 
   filters.forEach(({ key, label, options }) => {
@@ -1581,9 +1626,10 @@ function toggleFilterDropdown(key, options, wrap, btn) {
       const filterBtn = document.getElementById(`filter-btn-${key}`);
       if (filterBtn) {
         const count = activeFilters[key].size;
+        const filterLabel = key === 'statuses' ? t('status') : key === 'platforms' ? t('platform') : key === 'genres' ? t('genre') : key === 'hours' ? t('hours') : t('rating');
         filterBtn.innerHTML = count > 0
-          ? `${key === 'statuses' ? 'Estado' : key === 'platforms' ? 'Plataforma' : key === 'genres' ? 'Género' : key === 'hours' ? 'Horas' : 'Calificación'} <span style="background:var(--green);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px">${count}</span>`
-          : `${key === 'statuses' ? 'Estado' : key === 'platforms' ? 'Plataforma' : key === 'genres' ? 'Género' : key === 'hours' ? 'Horas' : 'Calificación'} ▾`;
+          ? `${filterLabel} <span style="background:var(--green);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px">${count}</span>`
+          : `${filterLabel} ▾`;
       }
     };
     if (checked) item.style.background = 'rgba(29,158,117,0.1)';
