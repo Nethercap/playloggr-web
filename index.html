@@ -544,6 +544,11 @@
           <input type="text" id="cfg-username" placeholder="Tu nombre de usuario" maxlength="50" />
         </div>
 
+        <div class="modal-group full">
+          <label>Fuente de nombre de usuario</label>
+          <div id="cfg-font-picker" style="margin-top:6px"></div>
+        </div>
+
         <div class="modal-group">
           <label>Idioma</label>
           <select id="cfg-language" style="width:100%;padding:8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:13px">
@@ -569,6 +574,10 @@
 
     <!-- Avatar tab -->
     <div id="config-avatar" style="display:none">
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;color:var(--text2)">Marco de avatar</label>
+        <div id="cfg-frame-picker" style="margin-top:6px"></div>
+      </div>
       <div style="display:flex;justify-content:center;margin-bottom:12px;flex-shrink:0">
         <div id="avatar-preview-box" style="width:180px;height:180px;background:var(--bg3);border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden">
           <div id="avatar-preview-box2" style="width:150px;height:150px;position:relative"></div>
@@ -2372,6 +2381,46 @@ function levelBadgeHtml(levelInfo, size = 18) {
   return `<span style="display:inline-flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;border-radius:50%;background:${color};color:#fff;font-size:${Math.round(size*0.42)}px;font-weight:700;flex-shrink:0;margin-right:6px">${levelInfo.level}</span>`;
 }
 
+const kFrameTiers = [
+  ['none', 1, 'Sin marco'], ['acero', 10, 'Acero'], ['bronce', 20, 'Bronce'],
+  ['esmeralda', 35, 'Esmeralda'], ['zafiro', 50, 'Zafiro'], ['neon', 70, 'Neón'],
+  ['fuego', 90, 'Fuego'], ['amatista', 110, 'Amatista'], ['dorado', 130, 'Dorado'],
+  ['prisma', 150, 'Prisma'],
+];
+const kFontTiers = [
+  ['default', 1, 'Estándar'], ['bold', 15, 'Negrita'], ['italic', 25, 'Cursiva'],
+  ['condensed', 40, 'Condensada'], ['expanded', 55, 'Expandida'], ['monospace', 75, 'Monoespaciada'],
+  ['uppercase', 95, 'Mayúsculas'], ['retro', 115, 'Retro'], ['elegant', 135, 'Elegante'],
+  ['prisma_font', 150, 'Prisma'],
+];
+const _frameColors = {
+  acero: '#9AA0A6', bronce: '#CD7F32', esmeralda: '#2ECC71', zafiro: '#3B82F6',
+  neon: '#00E5FF', fuego: '#FF5722', amatista: '#9C27B0', dorado: '#FFC107', prisma: '#8E7CE8',
+};
+
+/** Wraps innerHtml (an avatar chip) with a border matching the frame id. */
+function frameWrapStyle(frameId) {
+  const color = _frameColors[frameId];
+  if (!color) return '';
+  const thick = (frameId === 'neon' || frameId === 'fuego' || frameId === 'prisma') ? 3 : 2;
+  return `border:${thick}px solid ${color};border-radius:10px;padding:2px;`;
+}
+
+function usernameFontStyle(fontId) {
+  switch (fontId) {
+    case 'bold':        return 'font-weight:800';
+    case 'italic':       return 'font-style:italic';
+    case 'condensed':    return 'letter-spacing:-0.5px';
+    case 'expanded':     return 'letter-spacing:1.5px';
+    case 'monospace':    return 'font-family:monospace';
+    case 'uppercase':    return 'letter-spacing:1.2px;font-weight:700;text-transform:uppercase';
+    case 'retro':        return 'font-family:monospace;font-weight:700;letter-spacing:0.5px';
+    case 'elegant':       return 'font-style:italic;font-family:serif';
+    case 'prisma_font':  return 'font-weight:800;letter-spacing:0.8px;color:#8E7CE8';
+    default:             return '';
+  }
+}
+
 function _friendAvatarHtml(f, size) {
   try {
     const cfg = f.avatar_config ? JSON.parse(f.avatar_config) : null;
@@ -2441,12 +2490,14 @@ async function loadFriendsList() {
         const subtitle = f.in_session
           ? `<span style="color:#1D9E75">${f.session_game || ''} · ${f.session_platform || ''}</span>`
           : `${f.library_count} juegos · ${f.wishlist_count} deseados · ${Math.round(f.total_hours)} hs`;
+        const frameId = f.level_info && f.level_info.frame;
+        const fontId  = f.level_info && f.level_info.font;
         return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px">
-          <div style="width:44px;height:44px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;cursor:pointer" onclick="openFriendProfile('${f.username}')">
+          <div style="width:44px;height:44px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;cursor:pointer;${frameWrapStyle(frameId)}" onclick="openFriendProfile('${f.username}')">
             <div style="width:40px;height:40px;position:relative">${_friendAvatarHtml(f, 40)}</div>
           </div>
           <div style="flex:1;min-width:0;cursor:pointer" onclick="openFriendProfile('${f.username}')">
-            <div style="font-weight:600;font-size:13px;display:flex;align-items:center">${levelBadgeHtml(f.level_info)}${f.username}${sessionBadge}</div>
+            <div style="font-weight:600;font-size:13px;display:flex;align-items:center"><span style="${usernameFontStyle(fontId)}">${levelBadgeHtml(f.level_info)}${f.username}</span>${sessionBadge}</div>
             <div style="font-size:11px;color:var(--text2);margin-top:2px">${subtitle}</div>
           </div>
           <button onclick="removeFriendByUsername('${f.username}')" title="Quitar amigo"
@@ -2545,8 +2596,9 @@ async function blockFriendByUsername(username) {
 async function openFriendProfile(username) {
   currentFriendUsername = username;
   const cached = (window._friendsCache || []).find(f => f.username === username);
+  const li = cached && cached.level_info;
   document.getElementById('friend-profile-title').innerHTML =
-    `<i class="ti ti-user"></i> ${levelBadgeHtml(cached && cached.level_info)}${username}`;
+    `<i class="ti ti-user"></i> ${levelBadgeHtml(li)}<span style="${usernameFontStyle(li && li.font)}">${username}</span>`;
   document.getElementById('friend-profile-overlay').classList.add('open');
   switchFriendTab('library');
 }
@@ -3363,6 +3415,10 @@ let isRegister = false;
 let isPremium  = true;
 let userLevel  = 1;
 let userBadgeTier = 'bronce';
+let userFrame  = 'none';
+let userFont   = 'default';
+let userUnlockedFrames = ['none'];
+let userUnlockedFonts  = ['default'];
 
 async function loadPremiumStatus() {
   try {
@@ -3373,6 +3429,10 @@ async function loadPremiumStatus() {
     isPremium = d.is_premium !== false;
     userLevel = d.level ?? 1;
     userBadgeTier = d.badge_tier || 'bronce';
+    userFrame = d.selected_frame || 'none';
+    userFont  = d.selected_font || 'default';
+    userUnlockedFrames = d.unlocked_frames || ['none'];
+    userUnlockedFonts  = d.unlocked_fonts || ['default'];
   } catch (e) {}
   applyPremiumUI();
 }
@@ -3400,6 +3460,62 @@ function applyPremiumUI() {
     if (!el) return;
     el.innerHTML = levelBadgeHtml({ level: userLevel, badge_tier: userBadgeTier }, 20);
   });
+  const nameSpan = document.getElementById('user-name-span');
+  if (nameSpan) nameSpan.setAttribute('style', usernameFontStyle(userFont));
+  renderCosmeticPickers();
+}
+
+function renderCosmeticPickers() {
+  const frameEl = document.getElementById('cfg-frame-picker');
+  const fontEl  = document.getElementById('cfg-font-picker');
+  if (!frameEl || !fontEl) return;
+
+  if (!isPremium) {
+    const lockedMsg = `<div style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--bg3);border-radius:8px;color:var(--text2);font-size:12px"><i class="ti ti-lock"></i>Requiere la versión premium</div>`;
+    frameEl.innerHTML = lockedMsg;
+    fontEl.innerHTML  = lockedMsg;
+    return;
+  }
+
+  frameEl.innerHTML = kFrameTiers.map(([id, level, name]) => {
+    const unlocked = userUnlockedFrames.includes(id);
+    const selected = userFrame === id;
+    return `<div onclick="${unlocked ? `selectCosmetic('frame','${id}')` : ''}"
+        style="display:inline-flex;flex-direction:column;align-items:center;gap:2px;cursor:${unlocked ? 'pointer' : 'default'};opacity:${unlocked ? 1 : 0.35};margin:0 8px 8px 0">
+      <div style="width:36px;height:36px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;${selected ? 'outline:2px solid var(--green)' : ''};${frameWrapStyle(id)}">
+        ${unlocked ? '' : '<i class="ti ti-lock" style="font-size:12px;color:var(--text2)"></i>'}
+      </div>
+      <span style="font-size:9px;color:var(--text2)">Nv.${level}</span>
+    </div>`;
+  }).join('');
+
+  fontEl.innerHTML = kFontTiers.map(([id, level, name]) => {
+    const unlocked = userUnlockedFonts.includes(id);
+    const selected = userFont === id;
+    return `<div onclick="${unlocked ? `selectCosmetic('font','${id}')` : ''}"
+        style="display:inline-flex;align-items:center;gap:4px;cursor:${unlocked ? 'pointer' : 'default'};opacity:${unlocked ? 1 : 0.4};margin:0 8px 8px 0;padding:6px 10px;background:var(--bg3);border-radius:8px;${selected ? 'outline:2px solid var(--green)' : ''}">
+      ${unlocked ? '' : '<i class="ti ti-lock" style="font-size:11px;color:var(--text2)"></i>'}
+      <span style="${usernameFontStyle(id)};font-size:12px">${name}</span>
+      <span style="font-size:9px;color:var(--text2)">Nv.${level}</span>
+    </div>`;
+  }).join('');
+}
+
+async function selectCosmetic(kind, id) {
+  try {
+    const body = kind === 'frame' ? { frame: id } : { font: id };
+    const res = await fetch(`${apiBase()}/api/v1/user/cosmetics`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    if (kind === 'frame') userFrame = id; else userFont = id;
+    applyPremiumUI();
+  } catch (e) {
+    showToast(e.message || 'No se pudo actualizar', true);
+  }
 }
 
 function toggleAuthMode() {
@@ -4191,7 +4307,7 @@ async function onLoginSuccess() {
 
   const chip = document.createElement('div');
   chip.className = 'user-chip';
-  chip.innerHTML = `<span id="user-level-badge"></span>${authUser}<span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px;margin-left:2px"></span><button class="logout-btn" onclick="openRecovery()">Código</button><button class="logout-btn" onclick="logout()">Salir</button>`;
+  chip.innerHTML = `<span id="user-level-badge"></span><span id="user-name-span">${authUser}</span><span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px;margin-left:2px"></span><button class="logout-btn" onclick="openRecovery()">Código</button><button class="logout-btn" onclick="logout()">Salir</button>`;
   document.getElementById('plat-status-row').before(chip);
 
   setTimeout(() => {
