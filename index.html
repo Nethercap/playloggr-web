@@ -2223,6 +2223,7 @@ function refreshAvatarControls() {
   renderLayerPicker('avatar-shoulders-picker', 'shoulders', AVATAR_SHOULDERS_MAP, true);
   renderLayerPicker('avatar-waist-picker', 'waist', AVATAR_WAIST_MAP, true);
   renderAvatarPreview();
+  applyAvatarFrameUI();
 }
 
 async function loadAvatarConfig() {
@@ -2520,7 +2521,7 @@ async function loadFriendsList() {
             <div style="width:40px;height:40px;position:relative">${_friendAvatarHtml(f, 40)}</div>
           </div>
           <div style="flex:1;min-width:0;cursor:pointer" onclick="openFriendProfile('${f.username}')">
-            <div style="font-weight:600;font-size:13px;display:flex;align-items:center"><span style="${usernameFontStyle(fontId)}">${levelBadgeHtml(f.level_info)}${f.username}</span>${sessionBadge}</div>
+            <div style="font-weight:600;font-size:13px;display:flex;align-items:center"><span style="${usernameFontStyle(fontId)}">${levelBadgeHtml(f.level_info, 24)}${f.username}</span>${sessionBadge}</div>
             <div style="font-size:11px;color:var(--text2);margin-top:2px">${subtitle}</div>
           </div>
           <button onclick="removeFriendByUsername('${f.username}')" title="Quitar amigo"
@@ -3480,14 +3481,28 @@ function applyPremiumUI() {
     badge.style.background = isPremium ? 'rgba(29,158,117,0.15)' : 'rgba(136,135,128,0.25)';
     badge.style.color      = isPremium ? 'var(--green)' : 'var(--text2)';
   });
-  ['user-level-badge', 'cfg-level-badge'].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.innerHTML = levelBadgeHtml({ level: userLevel, badge_tier: userBadgeTier, trophy: userTrophy }, 20);
-  });
+  const homeBadge = document.getElementById('user-level-badge');
+  if (homeBadge) homeBadge.innerHTML = levelBadgeHtml({ level: userLevel, badge_tier: userBadgeTier, trophy: userTrophy }, 28);
+  const cfgBadge = document.getElementById('cfg-level-badge');
+  if (cfgBadge) cfgBadge.innerHTML = levelBadgeHtml({ level: userLevel, badge_tier: userBadgeTier, trophy: userTrophy }, 20);
+
+  applyAvatarFrameUI();
+
   const nameSpan = document.getElementById('user-name-span');
   if (nameSpan) nameSpan.setAttribute('style', usernameFontStyle(userFont));
   renderCosmeticPickers();
+}
+
+function applyAvatarFrameUI() {
+  const avatarBadge = document.getElementById('user-avatar-badge');
+  if (avatarBadge && typeof currentAvatarConfig !== 'undefined' && currentAvatarConfig) {
+    avatarBadge.setAttribute('style', `display:inline-flex;width:26px;height:26px;background:var(--bg2);overflow:hidden;flex-shrink:0;margin-right:6px;align-items:center;justify-content:center;${frameWrapStyle(userFrame)}`);
+    avatarBadge.innerHTML = `<div style="width:22px;height:22px;position:relative">${pixelAvatarHtml(currentAvatarConfig, 22)}</div>`;
+  }
+
+  const previewBox = document.getElementById('avatar-preview-box');
+  if (previewBox) previewBox.setAttribute('style',
+    `width:180px;height:180px;background:var(--bg3);border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;${frameWrapStyle(userFrame)}`);
 }
 
 function renderCosmeticPickers() {
@@ -4332,7 +4347,7 @@ async function onLoginSuccess() {
 
   const chip = document.createElement('div');
   chip.className = 'user-chip';
-  chip.innerHTML = `<span id="user-level-badge"></span><span id="user-name-span">${authUser}</span><span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px;margin-left:2px"></span><button class="logout-btn" onclick="openRecovery()">Código</button><button class="logout-btn" onclick="logout()">Salir</button>`;
+  chip.innerHTML = `<span id="user-avatar-badge" style="display:inline-flex;width:26px;height:26px;background:var(--bg2);border-radius:6px;overflow:hidden;flex-shrink:0;margin-right:6px;align-items:center;justify-content:center"></span><span id="user-level-badge"></span><span id="user-name-span">${authUser}</span><span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px;margin-left:2px"></span><button class="logout-btn" onclick="openRecovery()">Código</button><button class="logout-btn" onclick="logout()">Salir</button>`;
   document.getElementById('plat-status-row').before(chip);
 
   setTimeout(() => {
