@@ -1448,18 +1448,18 @@ async function renderGames() {
           <span id="community-${g.id}" style="display:none;align-items:center;gap:3px;font-size:11px;color:var(--text2)"></span>        </div>
       </div>
       <div class="game-status-col">
-        <select class="genre-sel" data-gid="${g.id}" onchange="changeGenre('${g.id}',this.value)" style="font-size:11px;margin-bottom:4px;width:100%;padding:2px 4px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text2)">
+        <select class="genre-sel genre-select" data-gid="${g.id}" onchange="changeGenre('${g.id}',this.value)" style="font-size:11px;margin-bottom:4px;width:100%;padding:2px 4px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text2)">
           ${genreOptions(g.genre)}
         </select>
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
           <div class="sdot s-${g.status}"></div>
-          <select class="status-sel" onchange="changeStatus('${g.id}',this.value)">
-            <option value="Jugando"      ${g.status==='Jugando'      ?'selected':''}>Jugando</option>
-            <option value="Completado"   ${g.status==='Completado'   ?'selected':''}>Completado</option>
-            <option value="Backlog"      ${g.status==='Backlog'      ?'selected':''}>Backlog</option>
-            <option value="Abandonado"   ${g.status==='Abandonado'   ?'selected':''}>Abandonado</option>
-            <option value="Intermitente" ${g.status==='Intermitente' ?'selected':''}>Intermitente</option>
-            <option value="Deseados"     ${g.status==='Deseados'     ?'selected':''}>Deseados</option>
+          <select class="status-sel status-select" onchange="changeStatus('${g.id}',this.value)">
+            <option value="Jugando"      ${g.status==='Jugando'      ?'selected':''}>${statusLabel('Jugando')}</option>
+            <option value="Completado"   ${g.status==='Completado'   ?'selected':''}>${statusLabel('Completado')}</option>
+            <option value="Backlog"      ${g.status==='Backlog'      ?'selected':''}>${statusLabel('Backlog')}</option>
+            <option value="Abandonado"   ${g.status==='Abandonado'   ?'selected':''}>${statusLabel('Abandonado')}</option>
+            <option value="Intermitente" ${g.status==='Intermitente' ?'selected':''}>${statusLabel('Intermitente')}</option>
+            <option value="Deseados"     ${g.status==='Deseados'     ?'selected':''}>${statusLabel('Deseados')}</option>
           </select>
         </div>
         ${actionBtn(g)}
@@ -2528,6 +2528,165 @@ const CATEGORY_LABELS_EN = {
 };
 function categoryLabel(c) { return currentLang === 'en' ? (CATEGORY_LABELS_EN[c] || c) : c; }
 
+const ACHIEVEMENT_LABELS_EN = {
+  first_session: { name: 'First Session', description: 'Log your first play session' },
+  session_3h: { name: 'Marathon', description: 'Log a session of 3 hours or more' },
+  session_5h: { name: 'Epic Session', description: 'Log a session of 5 hours or more' },
+  sessions_10: { name: 'Steady Player', description: 'Log 10 play sessions' },
+  sessions_50: { name: 'Regular Player', description: 'Log 50 play sessions' },
+  sessions_100: { name: 'Hardcore Player', description: 'Log 100 play sessions' },
+  sessions_5_days: { name: 'Gaming Routine', description: 'Play on 5 different days' },
+  sessions_15_days: { name: 'Solid Habit', description: 'Play on 15 different days' },
+  complete_1: { name: 'First Win', description: 'Complete 1 game' },
+  complete_5: { name: 'Streaker', description: 'Complete 5 games' },
+  complete_10: { name: 'Finisher', description: 'Complete 10 games' },
+  complete_25: { name: 'Backlog Crusher', description: 'Complete 25 games' },
+  complete_50: { name: 'Ending Hunter', description: 'Complete 50 games' },
+  hours_10: { name: 'First Hours', description: 'Log 10 hours played' },
+  hours_50: { name: 'Dedicated Player', description: 'Log 50 hours played' },
+  hours_100: { name: 'Committed Player', description: 'Log 100 hours played' },
+  hours_200: { name: 'Tireless Player', description: 'Log 200 hours played' },
+  hours_350: { name: 'Marathoner', description: 'Log 350 hours played' },
+  hours_500: { name: 'Legend', description: 'Log 500 hours played' },
+  multi_platform_session: { name: 'Multiplatform', description: 'Log sessions on 2 different platforms' },
+  first_game: { name: 'Rookie Collector', description: 'Add your first game' },
+  add_5_games: { name: 'Collector', description: 'Add 5 games to your library' },
+  add_10_games: { name: 'Active Collector', description: 'Add 10 games to your library' },
+  add_20_games: { name: 'Librarian', description: 'Add 20 games to your library' },
+  add_50_games: { name: 'Grand Librarian', description: 'Add 50 games to your library' },
+  library_100: { name: 'Full Library', description: 'Reach 100 games in your library' },
+  library_150: { name: 'Premium Library', description: 'Reach 150 games in your library' },
+  library_250: { name: 'Great Collector', description: 'Reach 250 games in your library' },
+  library_400: { name: 'Living Archive', description: 'Reach 400 games in your library' },
+  library_600: { name: 'Personal Museum', description: 'Reach 600 games in your library' },
+  wishlist_5: { name: 'Wish List', description: 'Add 5 games to your wishlist' },
+  wishlist_10: { name: 'Dreamer', description: 'Add 10 games to your wishlist' },
+  wishlist_25: { name: 'Premium Wishlist', description: 'Add 25 games to your wishlist' },
+  wishlist_50: { name: 'Dream Collector', description: 'Add 50 games to your wishlist' },
+  wishlist_100: { name: 'Infinite Wishlist', description: 'Add 100 games to your wishlist' },
+  hide_1: { name: 'Minimalist', description: 'Hide 1 game' },
+  hide_5: { name: 'Curator', description: 'Hide 5 games' },
+  hide_10: { name: 'Expert Curator', description: 'Hide 10 games' },
+  delete_1: { name: 'Eraser', description: 'Delete 1 game' },
+  delete_5: { name: 'Deep Clean', description: 'Delete 5 games' },
+  folder_creator: { name: 'Organizer', description: 'Create 1 folder' },
+  folders_3: { name: 'Active Organizer', description: 'Create 3 folders' },
+  folders_5: { name: 'Archivist', description: 'Create 5 folders' },
+  folders_10: { name: 'Expert Archivist', description: 'Create 10 folders' },
+  folders_20: { name: 'Master Archivist', description: 'Create 20 folders' },
+  genres_5: { name: 'Genre Explorer', description: 'Have games from at least 5 different genres' },
+  genres_10: { name: 'All-Rounder', description: 'Have games from at least 10 different genres' },
+  platforms_3: { name: 'Total Multiplatform', description: 'Have games on at least 3 different platforms' },
+  covers_1: { name: 'Cover Designer', description: 'Customize the cover of 1 game' },
+  covers_10: { name: 'Visual Curator', description: 'Customize the cover of 10 games' },
+  genre_tagger_10: { name: 'Tagger', description: 'Assign a genre to 10 games' },
+  rate_1: { name: 'Rookie Critic', description: 'Rate 1 game' },
+  rate_5: { name: 'Active Critic', description: 'Rate 5 games' },
+  rate_10: { name: 'Expert Critic', description: 'Rate 10 games' },
+  rate_25: { name: 'Veteran Critic', description: 'Rate 25 games' },
+  rate_50: { name: 'Established Critic', description: 'Rate 50 games' },
+  rate_100: { name: 'Legendary Critic', description: 'Rate 100 games' },
+  reviewer: { name: 'Reviewer', description: 'Rate a community game' },
+  reviewer_5: { name: 'Active Reviewer', description: 'Rate 5 community games' },
+  reviewer_10: { name: 'Expert Reviewer', description: 'Rate 10 community games' },
+  first_friend: { name: 'Sociable', description: 'Add your first friend' },
+  add_3_friends: { name: 'Close Circle', description: 'Add 3 friends' },
+  add_5_friends: { name: 'Social Circle', description: 'Add 5 friends' },
+  add_10_friends: { name: 'Social Network', description: 'Add 10 friends' },
+  add_20_friends: { name: 'Influencer', description: 'Add 20 friends' },
+  popular: { name: 'Popular', description: 'Receive 5 friend requests' },
+  popular_10: { name: 'Very Popular', description: 'Receive 10 friend requests' },
+  steam_sync: { name: 'Connected', description: 'Sync your Steam library' },
+  wishlist_sync: { name: 'Wishlist Connected', description: 'Sync your Steam wishlist' },
+  steam_full_sync: { name: 'Full Sync', description: 'Sync your Steam library and wishlist' },
+  restaurador: { name: 'Restorer', description: 'Restore deleted Steam games' },
+  steam_100_games: { name: 'Steam Library', description: 'Sync 100 or more Steam games' },
+  steam_500_hours: { name: 'Steam Veteran', description: 'Log 500 hours played on Steam games' },
+  community_10: { name: 'Community Contribution', description: 'Add 10 new games to the community' },
+  community_25: { name: 'Active Contributor', description: 'Add 25 new games to the community' },
+  community_50: { name: 'Community Pillar', description: 'Add 50 new games to the community' },
+  avatar_first: { name: 'In Your Image', description: 'Customize your avatar for the first time' },
+  full_outfit: { name: 'Fully Dressed', description: 'Equip every avatar slot at once' },
+  veteran_6mo: { name: 'Veteran', description: 'Have an active account for 6 months' },
+  veteran_1y: { name: 'Veteran+', description: 'Have an active account for 1 year' },
+  veteran_2y: { name: 'Founder', description: 'Have an active account for 2 years' },
+  veteran_3y: { name: 'Pioneer', description: 'Have an active account for 3 years' },
+  profile_public: { name: 'In the Spotlight', description: 'Make your profile public' },
+  playstation_5: { name: 'PlayStation Player', description: 'Have 5 PlayStation games' },
+  playstation_15: { name: 'PlayStation Fan', description: 'Have 15 PlayStation games' },
+  playstation_25: { name: 'PlayStation Collector', description: 'Have 25 PlayStation games' },
+  xbox_5: { name: 'Xbox Player', description: 'Have 5 Xbox games' },
+  xbox_15: { name: 'Xbox Fan', description: 'Have 15 Xbox games' },
+  xbox_25: { name: 'Xbox Collector', description: 'Have 25 Xbox games' },
+  nintendo_5: { name: 'Nintendo Player', description: 'Have 5 Nintendo games' },
+  nintendo_15: { name: 'Nintendo Fan', description: 'Have 15 Nintendo games' },
+  nintendo_25: { name: 'Nintendo Collector', description: 'Have 25 Nintendo games' },
+  pc_5: { name: 'PC Player', description: 'Have 5 PC games' },
+  pc_15: { name: 'PC Fan', description: 'Have 15 PC games' },
+  pc_25: { name: 'PC Collector', description: 'Have 25 PC games' },
+  retro_3: { name: 'Retrogamer', description: 'Have 3 retro games (classic consoles)' },
+  retro_10: { name: 'Expert Retrogamer', description: 'Have 10 retro games (classic consoles)' },
+  vr_gamer: { name: 'Virtual Reality', description: 'Have 1 Meta Quest game' },
+  genre_rpg_5: { name: 'RPG Adventurer', description: 'Have 5 RPG games' },
+  genre_rpg_10: { name: 'RPG Master', description: 'Have 10 RPG games' },
+  genre_terror_5: { name: 'Fearless', description: 'Have 5 Horror games' },
+  genre_terror_10: { name: 'Scare Hunter', description: 'Have 10 Horror games' },
+  genre_estrategia_5: { name: 'Strategist', description: 'Have 5 Strategy games' },
+  genre_estrategia_10: { name: 'Grand Strategist', description: 'Have 10 Strategy games' },
+  genre_deportes_5: { name: 'Athlete', description: 'Have 5 Sports games' },
+  genre_deportes_10: { name: 'Sportsman', description: 'Have 10 Sports games' },
+  genre_indie_5: { name: 'Indie Lover', description: 'Have 5 Indie games' },
+  genre_indie_10: { name: 'Indie Curator', description: 'Have 10 Indie games' },
+  genre_mundoabierto_5: { name: 'Explorer', description: 'Have 5 Open World games' },
+  genre_mundoabierto_10: { name: 'Great Explorer', description: 'Have 10 Open World games' },
+  genre_multijugador_5: { name: 'Social Gamer', description: 'Have 5 Multiplayer games' },
+  genre_multijugador_10: { name: 'Team Player', description: 'Have 10 Multiplayer games' },
+  genre_puzzle_5: { name: 'Solver', description: 'Have 5 Puzzle games' },
+  genre_puzzle_10: { name: 'Puzzle Genius', description: 'Have 10 Puzzle games' },
+  genre_carreras_5: { name: 'Pilot', description: 'Have 5 Racing games' },
+  genre_lucha_5: { name: 'Fighter', description: 'Have 5 Fighting games' },
+  genre_visualnovel_5: { name: 'Reader', description: 'Have 5 Visual Novel games' },
+  genre_ritmo_5: { name: 'In Rhythm', description: 'Have 5 Music/Rhythm games' },
+  perfectionist_5: { name: 'Perfectionist', description: 'Rate 5 games with 5 stars' },
+  perfectionist_15: { name: 'Expert Perfectionist', description: 'Rate 15 games with 5 stars' },
+  honest_critic_3: { name: 'Honest Critic', description: 'Rate 3 games with 1 star' },
+  honest_critic_10: { name: 'Relentless Critic', description: 'Rate 10 games with 1 star' },
+  reviewer_25: { name: 'Legendary Reviewer', description: 'Rate 25 community games' },
+  night_owl: { name: 'Night Owl', description: 'Log a session started between midnight and 5am' },
+  night_owl_5: { name: 'Nocturnal Bird', description: 'Log 5 nighttime sessions' },
+  early_bird: { name: 'Early Bird', description: 'Log a session started between 5am and 8am' },
+  weekend_warrior: { name: 'Weekend Warrior', description: 'Log a session on the weekend' },
+  weekend_warrior_5: { name: 'Full Weekend', description: 'Log 5 weekend sessions' },
+  dedicated_50h: { name: 'Faithful to a Game', description: 'Log 50 hours on a single game' },
+  dedicated_100h: { name: 'Devoted to a Game', description: 'Log 100 hours on a single game' },
+  dedicated_200h: { name: 'Obsessed', description: 'Log 200 hours on a single game' },
+  multi_platform_session_3: { name: 'Digital Nomad', description: 'Log sessions on 3 different platforms' },
+  complete_100: { name: 'Backlog Master', description: 'Complete 100 games' },
+  hours_750: { name: 'Total Dedication', description: 'Log 750 hours played' },
+  hours_1000: { name: 'A Thousand Hours', description: 'Log 1000 hours played' },
+  sessions_250: { name: 'Session After Session', description: 'Log 250 play sessions' },
+  library_800: { name: 'Supreme Collector', description: 'Reach 800 games in your library' },
+  wishlist_150: { name: 'Infinite Wishes', description: 'Add 150 games to your wishlist' },
+  folders_15: { name: 'Dedicated Archivist', description: 'Create 15 folders' },
+  big_folder: { name: 'Big Folder', description: 'Have a folder with 10 or more games' },
+  big_folder_25: { name: 'Huge Folder', description: 'Have a folder with 25 or more games' },
+  organizer_50: { name: 'Organizer', description: 'Organize 50 games into folders' },
+  organizer_100: { name: 'Great Organizer', description: 'Organize 100 games into folders' },
+  add_15_friends: { name: 'Growing Community', description: 'Add 15 friends' },
+  popular_20: { name: 'Celebrity', description: 'Receive 20 friend requests' },
+  steam_wishlist_10: { name: 'Steam Wishlist', description: 'Have 10 games synced in your Steam wishlist' },
+  steam_wishlist_25: { name: 'Big Steam Wishlist', description: 'Have 25 games synced in your Steam wishlist' },
+  steam_3000_hours: { name: 'Steam Legend', description: 'Log 3000 hours played on Steam' },
+  community_75: { name: 'Outstanding Contributor', description: 'Add 75 new games to the community' },
+  community_100: { name: 'Founding Pillar', description: 'Add 100 new games to the community' },
+};
+function achievementInfo(a) {
+  if (currentLang === 'en' && ACHIEVEMENT_LABELS_EN[a.id]) {
+    return { name: ACHIEVEMENT_LABELS_EN[a.id].name, description: ACHIEVEMENT_LABELS_EN[a.id].description };
+  }
+  return { name: a.name, description: a.description };
+}
+
 async function openAchievementsPanel() {
   document.getElementById('achievements-overlay').classList.add('open');
   const el = document.getElementById('achievements-content');
@@ -2541,18 +2700,18 @@ async function openAchievementsPanel() {
     const byCategory = {};
     d.achievements.forEach(a => { (byCategory[a.category] = byCategory[a.category] || []).push(a); });
 
-    const tileHtml = a => `
+    const tileHtml = a => { const info = achievementInfo(a); return `
       <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;margin-bottom:8px;border-radius:8px;background:var(--bg3);opacity:${a.unlocked ? '1' : '0.55'}">
         <i class="ti ${a.unlocked ? 'ti-circle-check' : 'ti-lock'}" style="font-size:18px;color:${a.unlocked ? 'var(--green)' : 'var(--text2)'};margin-top:2px"></i>
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:6px">
-            <span style="font-weight:600;font-size:13px">${a.name}</span>
+            <span style="font-weight:600;font-size:13px">${info.name}</span>
             ${a.tier === 'P' ? `<span style="font-size:9px;font-weight:600;color:#EF9F27;background:rgba(239,159,39,0.15);padding:2px 6px;border-radius:6px">${t('premiumLabel')}</span>` : ''}
           </div>
-          <div style="font-size:11px;color:var(--text2);margin-top:2px">${a.description}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">${info.description}</div>
           <div style="font-size:10px;color:var(--text2);margin-top:4px">+${a.xp} XP · ${a.global_pct}% ${t('ofUsers')}</div>
         </div>
-      </div>`;
+      </div>`; };
 
     const categoriesHtml = Object.entries(byCategory).map(([cat, items]) => `
       <div style="margin-bottom:16px">
