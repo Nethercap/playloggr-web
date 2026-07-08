@@ -4249,10 +4249,18 @@ function renderCosmeticPickers() {
   frameEl.innerHTML = kFrameTiers.map(([id, level, name]) => {
     const unlocked = userUnlockedFrames.includes(id);
     const selected = userFrame === id;
+    // El check de "seleccionado" va como badge en una esquina en vez de un
+    // outline, para no confundirse con el borde de color de los marcos reales.
+    const selectedBadge = selected
+      ? `<div style="position:absolute;top:-4px;left:-4px;width:14px;height:14px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2">
+           <i class="ti ti-check" style="font-size:9px;color:#fff"></i>
+         </div>`
+      : '';
     return `<div onclick="${unlocked ? `selectCosmetic('frame','${id}')` : ''}"
         style="display:inline-flex;flex-direction:column;align-items:center;gap:2px;cursor:${unlocked ? 'pointer' : 'default'};opacity:${unlocked ? 1 : 0.35};margin:0 8px 8px 0">
-      <div style="width:36px;height:36px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;${selected ? 'outline:2px solid var(--green)' : ''};${frameWrapStyle(id)}">
-        ${unlocked ? '' : '<i class="ti ti-lock" style="font-size:12px;color:var(--text2)"></i>'}
+      <div style="width:36px;height:36px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;${frameWrapStyle(id)}">
+        ${unlocked ? frameBadgeHtml(id) : '<i class="ti ti-lock" style="font-size:12px;color:var(--text2)"></i>'}
+        ${selectedBadge}
       </div>
       <span style="font-size:9px;color:var(--text2)">Nv.${level}</span>
     </div>`;
