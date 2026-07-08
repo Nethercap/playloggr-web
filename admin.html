@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Playloggr — Admin</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #1a1a1a; --bg2: #242424; --bg3: #2e2e2e;
+    --text: #f0f0f0; --text2: #999;
+    --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.2);
+    --green: #1D9E75; --red: #E24B4A; --amber: #EF9F27;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 24px; }
+  .container { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 18px; font-weight: 600; display:flex; align-items:center; gap:8px; margin-bottom: 20px; }
+  .card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+  .metric { background: var(--bg3); border-radius: 8px; padding: 12px; }
+  .metric-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .metric-value { font-size: 22px; font-weight: 600; }
+  label { font-size: 12px; color: var(--text2); font-weight: 500; display:block; margin-bottom: 4px; }
+  input { font-size: 13px; padding: 8px 10px; border-radius: 8px; border: 0.5px solid var(--border2); background: var(--bg3); color: var(--text); width: 100%; }
+  button { font-size: 13px; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-weight: 500; }
+  .btn-primary { background: var(--green); color: #fff; }
+  .btn-secondary { background: var(--bg3); color: var(--text2); border: 0.5px solid var(--border2); }
+  .btn-danger { background: var(--red); color: #fff; }
+  .row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+  .row > div { flex: 1; min-width: 160px; }
+  .msg { font-size: 12px; margin-top: 10px; display: none; }
+  .lookup-result { margin-top: 12px; padding: 10px; background: var(--bg3); border-radius: 8px; font-size: 13px; display: none; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 12px; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 0.5px solid var(--border); }
+  th { color: var(--text2); font-weight: 500; text-transform: uppercase; font-size: 10px; letter-spacing: 0.04em; }
+  tr:last-child td { border-bottom: none; }
+  .badge { padding: 2px 7px; border-radius: 20px; font-size: 10px; font-weight: 600; }
+  .badge-premium { background: rgba(239,159,39,0.15); color: var(--amber); }
+  .badge-free { background: rgba(255,255,255,0.08); color: var(--text2); }
+  .icon-btn { background: none; border: none; cursor: pointer; padding: 4px 6px; font-size: 14px; }
+  .pagination { display: flex; align-items: center; gap: 10px; justify-content: center; margin-top: 12px; font-size: 12px; color: var(--text2); }
+  .table-wrap { overflow-x: auto; }
+  #login-screen { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 999; }
+  .login-card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 12px; padding: 28px; width: 320px; }
+  .login-card h2 { font-size: 16px; margin-bottom: 14px; }
+  .spinner { display:inline-block; width:14px; height:14px; border:2px solid var(--border2); border-top-color:var(--text); border-radius:50%; animation:spin .7s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card">
+    <h2>🔒 Panel de administración</h2>
+    <label>Clave admin</label>
+    <input type="password" id="admin-key-input" placeholder="X-Admin-Key" onkeydown="if(event.key==='Enter') tryLogin()" />
+    <div class="msg" id="login-err" style="color: var(--red); display:none">Clave incorrecta</div>
+    <button class="btn-primary" style="width:100%; margin-top:12px" onclick="tryLogin()">Entrar</button>
+  </div>
+</div>
+
+<div class="container" id="app" style="display:none">
+  <h1>🎮 Playloggr — Panel de administración
+    <button class="btn-secondary" style="margin-left:auto; padding:4px 10px; font-size:11px" onclick="logout()">Salir</button>
+  </h1>
+
+  <div class="card">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
+      <strong>Métricas generales</strong>
+      <button class="btn-secondary" style="padding:4px 10px; font-size:11px" onclick="loadMetrics()">↻ Actualizar</button>
+    </div>
+    <div class="metrics-grid" id="metrics-grid">
+      <div style="color:var(--text2); font-size:13px"><div class="spinner"></div> Cargando...</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <strong>Gestión de cuentas</strong>
+    <p style="font-size:11px; color:var(--text2); margin:6px 0 12px">
+      Manual por ahora — se va a reemplazar por Google Play Billing más adelante.
+    </p>
+    <div class="row">
+      <div>
+        <label>Email</label>
+        <input type="email" id="lookup-email" placeholder="usuario@email.com" onkeydown="if(event.key==='Enter') lookupUser()" />
+      </div>
+      <button class="btn-secondary" onclick="lookupUser()">Buscar</button>
+    </div>
+    <div class="lookup-result" id="lookup-result"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn-primary" onclick="setPremium(true)">Marcar Premium</button>
+      <button class="btn-danger" onclick="setPremium(false)">Marcar Gratis</button>
+    </div>
+    <div class="msg" id="premium-msg"></div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
+      <strong>Usuarios totales</strong>
+    </div>
+    <div class="row">
+      <div>
+        <label>Buscar por email o username</label>
+        <input type="text" id="users-search" placeholder="buscar..." onkeydown="if(event.key==='Enter'){usersPage=1; loadUsers();}" />
+      </div>
+      <button class="btn-secondary" onclick="usersPage=1; loadUsers();">Buscar</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Usuario</th><th>Email</th><th>Nivel</th><th></th><th></th></tr>
+        </thead>
+        <tbody id="users-tbody">
+          <tr><td colspan="5" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination" id="users-pagination"></div>
+  </div>
+</div>
+
+<script>
+const API = 'https://web-production-270b29.up.railway.app/api/v1';
+let adminKey = localStorage.getItem('admin_key') || '';
+
+function headers() {
+  return { 'X-Admin-Key': adminKey, 'Content-Type': 'application/json' };
+}
+
+async function tryLogin() {
+  const key = document.getElementById('admin-key-input').value.trim();
+  if (!key) return;
+  adminKey = key;
+  const res = await fetch(`${API}/admin/metrics`, { headers: headers() });
+  if (res.ok) {
+    localStorage.setItem('admin_key', adminKey);
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    renderMetrics(await res.json());
+    loadUsers();
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+  }
+}
+
+function logout() {
+  localStorage.removeItem('admin_key');
+  location.reload();
+}
+
+async function loadMetrics() {
+  const grid = document.getElementById('metrics-grid');
+  grid.innerHTML = '<div style="color:var(--text2); font-size:13px"><div class="spinner"></div> Cargando...</div>';
+  try {
+    const res = await fetch(`${API}/admin/metrics`, { headers: headers() });
+    if (!res.ok) throw new Error();
+    renderMetrics(await res.json());
+  } catch (e) {
+    grid.innerHTML = '<div style="color:var(--red); font-size:13px">Error al cargar métricas</div>';
+  }
+}
+
+function renderMetrics(d) {
+  const items = [
+    ['Usuarios totales', d.total_users],
+    ['Premium', d.premium_users],
+    ['Gratis', d.free_users],
+    ['Juegos totales', d.total_games],
+    ['Logros desbloqueados', d.total_achievement_unlocks],
+    ['Amistades', d.total_accepted_friendships],
+    ['Carpetas', d.total_folders],
+    ['Altas (7 días)', d.signups_7d],
+    ['Altas (30 días)', d.signups_30d],
+  ];
+  document.getElementById('metrics-grid').innerHTML = items.map(([label, value]) => `
+    <div class="metric">
+      <div class="metric-label">${label}</div>
+      <div class="metric-value">${value}</div>
+    </div>
+  `).join('');
+}
+
+async function lookupUser() {
+  const email = document.getElementById('lookup-email').value.trim();
+  const result = document.getElementById('lookup-result');
+  if (!email) return;
+  result.style.display = 'block';
+  result.textContent = 'Buscando...';
+  try {
+    const res = await fetch(`${API}/admin/lookup?email=${encodeURIComponent(email)}`, { headers: headers() });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    result.innerHTML = `
+      <strong>${d.username}</strong> (${d.email})<br>
+      Nivel ${d.level} · ${d.is_premium ? '<span style="color:var(--green)">Premium</span>' : '<span style="color:var(--text2)">Gratis</span>'}<br>
+      Alta: ${new Date(d.created_at).toLocaleDateString('es-AR')}
+    `;
+  } catch (e) {
+    result.textContent = e.message || 'Usuario no encontrado';
+  }
+}
+
+async function setPremium(isPremium) {
+  const email = document.getElementById('lookup-email').value.trim();
+  const msg = document.getElementById('premium-msg');
+  if (!email) { alert('Ingresá un email primero'); return; }
+  msg.style.display = 'block';
+  msg.style.color = 'var(--text2)';
+  msg.textContent = 'Aplicando...';
+  try {
+    const res = await fetch(`${API}/admin/set-premium`, {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ email, is_premium: isPremium }),
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    msg.style.color = 'var(--green)';
+    msg.textContent = `✓ ${d.user_id ? 'Actualizado' : 'OK'}: ${email} → ${isPremium ? 'Premium' : 'Gratis'}`;
+    lookupUser();
+    loadMetrics();
+  } catch (e) {
+    msg.style.color = 'var(--red)';
+    msg.textContent = e.message || 'Error al actualizar';
+  }
+}
+
+let usersPage = 1;
+
+async function loadUsers() {
+  const tbody = document.getElementById('users-tbody');
+  const search = document.getElementById('users-search').value.trim();
+  tbody.innerHTML = '<tr><td colspan="5" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>';
+  try {
+    const url = `${API}/admin/users?page=${usersPage}&search=${encodeURIComponent(search)}`;
+    const res = await fetch(url, { headers: headers() });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    if (d.users.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="color:var(--text2)">Sin resultados</td></tr>';
+    } else {
+      tbody.innerHTML = d.users.map(u => `
+        <tr>
+          <td>${u.username}</td>
+          <td>${u.email}</td>
+          <td>${u.level} · <span class="badge ${u.is_premium ? 'badge-premium' : 'badge-free'}">${u.is_premium ? 'Premium' : 'Gratis'}</span></td>
+          <td><button class="icon-btn" title="Restablecer contraseña" onclick="adminResetPassword('${u.email}')">🔑</button></td>
+          <td><button class="icon-btn" title="Eliminar usuario" onclick="adminDeleteUser('${u.email}')">🗑️</button></td>
+        </tr>
+      `).join('');
+    }
+    document.getElementById('users-pagination').innerHTML = `
+      <button class="btn-secondary" style="padding:4px 10px" ${d.page <= 1 ? 'disabled' : ''} onclick="usersPage=${d.page - 1}; loadUsers();">←</button>
+      <span>Página ${d.page} de ${d.total_pages} (${d.total_count} usuarios)</span>
+      <button class="btn-secondary" style="padding:4px 10px" ${d.page >= d.total_pages ? 'disabled' : ''} onclick="usersPage=${d.page + 1}; loadUsers();">→</button>
+    `;
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="5" style="color:var(--red)">${e.message || 'Error al cargar usuarios'}</td></tr>`;
+  }
+}
+
+async function adminResetPassword(email) {
+  if (!confirm(`¿Restablecer la contraseña de ${email}?`)) return;
+  try {
+    const res = await fetch(`${API}/admin/reset-password`, {
+      method: 'POST', headers: headers(), body: JSON.stringify({ email }),
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    alert(`Nueva contraseña temporal para ${email}:\n\n${d.new_password}\n\nComunicásela al usuario.`);
+  } catch (e) {
+    alert(e.message || 'Error al restablecer contraseña');
+  }
+}
+
+async function adminDeleteUser(email) {
+  if (!confirm(`¿Eliminar PERMANENTEMENTE la cuenta ${email}? Esta acción no se puede deshacer.`)) return;
+  if (!confirm(`Confirmá de nuevo: eliminar ${email}`)) return;
+  try {
+    const res = await fetch(`${API}/admin/user?email=${encodeURIComponent(email)}`, {
+      method: 'DELETE', headers: headers(),
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    loadUsers();
+    loadMetrics();
+  } catch (e) {
+    alert(e.message || 'Error al eliminar usuario');
+  }
+}
+
+// Auto-login if key already saved
+if (adminKey) {
+  fetch(`${API}/admin/metrics`, { headers: headers() }).then(res => {
+    if (res.ok) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      loadUsers();
+      return res.json().then(renderMetrics);
+    } else {
+      localStorage.removeItem('admin_key');
+    }
+  }).catch(() => {});
+}
+</script>
+</body>
+</html>
