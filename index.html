@@ -1191,11 +1191,18 @@ const platIcons = {
   'Meta Quest': {slug:'meta', color:'#0081FB'}
 };
 
+function _hexToRgb(hex) {
+  const h = hex.replace('#','');
+  const n = parseInt(h.length === 3 ? h.split('').map(c=>c+c).join('') : h, 16);
+  return `${(n>>16)&255}, ${(n>>8)&255}, ${n&255}`;
+}
+
 function platBadge(platform) {
   const p = platIcons[platform];
   if (!p) return `<span class="plat-badge">${platform}</span>`;
-  const url = `https://cdn.simpleicons.org/${p.slug}/${p.color.replace('#','')}`;
-  return `<span class="plat-badge" style="display:inline-flex;align-items:center;gap:4px">
+  const url = `https://cdn.simpleicons.org/${p.slug}/ffffff`;
+  const rgb = _hexToRgb(p.color);
+  return `<span class="plat-badge" style="display:inline-flex;align-items:center;gap:5px;background:rgba(${rgb},0.25);border:0.5px solid rgba(${rgb},0.6);border-radius:20px;padding:2px 8px">
     <img src="${url}" style="width:12px;height:12px;object-fit:contain" onerror="this.style.display='none'">
     ${platform}
   </span>`;
