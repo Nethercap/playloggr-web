@@ -1010,6 +1010,23 @@ const I18N = {
     alreadyFriends: 'Ya son amigos', requestSentWaiting: 'Solicitud enviada, esperando confirmación',
     premiumLabel: 'Premium', ofUsers: 'de usuarios', levelLabel: 'Nivel', maxLevelReached: 'Nivel máximo alcanzado',
     of: 'de', achievementsUnlocked: 'logros desbloqueados', errorLoadingAchievements: 'Error al cargar logros',
+    errorDeletingGame: 'Error al eliminar el juego', errorUpdatingCover: 'Error al actualizar portada',
+    confirmRemoveFriend: '¿Quitar a {username} de tus amigos?',
+    confirmBlockFriend: '¿Bloquear a {username}? Se eliminará la amistad y no podrá agregarte de nuevo.',
+    confirmDeleteLibrary: '¿Eliminar toda tu biblioteca? Esta acción no se puede deshacer.',
+    libraryDeleted: 'Biblioteca eliminada', errorDeletingLibrary: 'Error al eliminar biblioteca',
+    confirmDeleteAccount: '¿Eliminar tu cuenta permanentemente? Esto borrará todos tus datos.',
+    typeDeleteToConfirm: 'Escribí "ELIMINAR" para confirmar:', deleteConfirmWord: 'ELIMINAR',
+    accountDeleted: 'Cuenta eliminada', errorDeletingAccount: 'Error al eliminar cuenta',
+    confirmRestoreSteam: '¿Restablecer todos los juegos de Steam borrados de {section}?', restoring: 'Restableciendo...',
+    errorSyncingWishlist: 'Error al sincronizar wishlist', enterGameName: 'Ingresá el nombre del juego',
+    errorAdding: 'Error al agregar', errorAddingGame: 'Error al agregar el juego',
+    errorShowingGame: 'Error al mostrar el juego', errorHidingGame: 'Error al ocultar el juego',
+    confirmDeleteFolder: '¿Eliminar esta carpeta? Los juegos no se borran.',
+    noFoldersInSection: 'No tenés carpetas en esta sección. Creá una primero.',
+    thisGame: 'este juego',
+    confirmDeleteSteamGame: '¿Eliminar "{name}" de tu backlog?\nLos juegos de Steam pueden volver al sincronizar si los querés recuperar.',
+    confirmDeleteGame: '¿Eliminar "{name}" del backlog?', noResults: 'Sin resultados',
     loginSubtitle: 'Iniciá sesión para continuar', createAccount: 'Creá tu cuenta',
     continueWithGoogle: 'Continuar con Google', useEmailPassword: 'Usar email y contraseña',
     recoveryHint: '⚠ Si olvidás tu contraseña, la recuperación es con un <strong style="color:var(--text)">código de 6 dígitos</strong> que generás desde el menú de tu perfil.',
@@ -1064,6 +1081,23 @@ const I18N = {
     alreadyFriends: 'You are already friends', requestSentWaiting: 'Request sent, waiting for confirmation',
     premiumLabel: 'Premium', ofUsers: 'of users', levelLabel: 'Level', maxLevelReached: 'Max level reached',
     of: 'of', achievementsUnlocked: 'achievements unlocked', errorLoadingAchievements: 'Error loading achievements',
+    errorDeletingGame: 'Error deleting game', errorUpdatingCover: 'Error updating cover',
+    confirmRemoveFriend: 'Remove {username} from your friends?',
+    confirmBlockFriend: 'Block {username}? This will end your friendship and they won\'t be able to add you again.',
+    confirmDeleteLibrary: 'Delete your entire library? This action cannot be undone.',
+    libraryDeleted: 'Library deleted', errorDeletingLibrary: 'Error deleting library',
+    confirmDeleteAccount: 'Permanently delete your account? This will erase all your data.',
+    typeDeleteToConfirm: 'Type "DELETE" to confirm:', deleteConfirmWord: 'DELETE',
+    accountDeleted: 'Account deleted', errorDeletingAccount: 'Error deleting account',
+    confirmRestoreSteam: 'Restore all deleted Steam games from {section}?', restoring: 'Restoring...',
+    errorSyncingWishlist: 'Error syncing wishlist', enterGameName: 'Enter the game name',
+    errorAdding: 'Error adding', errorAddingGame: 'Error adding game',
+    errorShowingGame: 'Error showing game', errorHidingGame: 'Error hiding game',
+    confirmDeleteFolder: 'Delete this folder? Games will not be deleted.',
+    noFoldersInSection: "You don't have folders in this section yet. Create one first.",
+    thisGame: 'this game',
+    confirmDeleteSteamGame: 'Delete "{name}" from your backlog?\nSteam games can come back when you sync if you want to recover them.',
+    confirmDeleteGame: 'Delete "{name}" from your backlog?', noResults: 'No results',
     loginSubtitle: 'Log in to continue', createAccount: 'Create your account',
     continueWithGoogle: 'Continue with Google', useEmailPassword: 'Use email and password',
     recoveryHint: '⚠ If you forget your password, recovery is done with a <strong style="color:var(--text)">6-digit code</strong> you generate from your profile menu.',
@@ -1349,10 +1383,10 @@ function sortedFiltered() {
 async function renderGames() {
   const list  = document.getElementById('game-list');
   const items = sortedFiltered();
-  document.getElementById('count-label').textContent = `${items.length} de ${allGames.length} juegos`;
+  document.getElementById('count-label').textContent = `${items.length} ${t('of')} ${allGames.length} ${t('gamesLower')}`;
 
   if (!items.length) {
-    list.innerHTML = `<div class="empty"><i class="ti ti-mood-sad"></i>Sin resultados</div>`;
+    list.innerHTML = `<div class="empty"><i class="ti ti-mood-sad"></i>${t('noResults')}</div>`;
     return;
   }
 
@@ -1436,10 +1470,10 @@ async function renderGames() {
 
 async function deleteGame(gameId) {
   const g    = allGames.find(x => x.id === gameId);
-  const name = g ? g.name : 'este juego';
+  const name = g ? g.name : t('thisGame');
   const msg  = g && !g.id.startsWith('manual_')
-    ? `¿Eliminar "${name}" de tu backlog?\nLos juegos de Steam pueden volver al sincronizar si los querés recuperar.`
-    : `¿Eliminar "${name}" del backlog?`;
+    ? t('confirmDeleteSteamGame').replace('{name}', name)
+    : t('confirmDeleteGame').replace('{name}', name);
   if (!confirm(msg)) return;
   try {
     await fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gameId)}`, {
@@ -1463,7 +1497,7 @@ async function deleteGame(gameId) {
       renderStats(); renderGames();
     }
   } catch(e) {
-    alert('Error al eliminar el juego');
+    alert(t('errorDeletingGame'));
   }
 }
 
@@ -1536,7 +1570,7 @@ async function saveCoverEdit() {
     });
     closeCoverEdit();
     syncAll(currentPage, true);
-  } catch(e) { alert('Error al actualizar portada'); }
+  } catch(e) { alert(t('errorUpdatingCover')); }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -2797,7 +2831,7 @@ async function acceptFriendRequest(username) {
 }
 
 async function removeFriendByUsername(username) {
-  if (!confirm(`¿Quitar a ${username} de tus amigos?`)) return;
+  if (!confirm(t('confirmRemoveFriend').replace('{username}', username))) return;
   await fetch(`${apiBase()}/api/v1/friends/${encodeURIComponent(username)}`, {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${authToken}` }
@@ -2806,7 +2840,7 @@ async function removeFriendByUsername(username) {
 }
 
 async function blockFriendByUsername(username) {
-  if (!confirm(`¿Bloquear a ${username}? Se eliminará la amistad y no podrá agregarte de nuevo.`)) return;
+  if (!confirm(t('confirmBlockFriend').replace('{username}', username))) return;
   await fetch(`${apiBase()}/api/v1/friends/block`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
@@ -2861,7 +2895,7 @@ function friendGameCardHtml(g) {
     </div>
     <div class="game-status-col">
       <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:${color}">
-        <div class="sdot" style="background:${color}"></div>${g.status}
+        <div class="sdot" style="background:${color}"></div>${statusLabel(g.status)}
       </div>
       ${g.genre ? `<div style="font-size:11px;color:var(--text2);margin-top:4px">${g.genre}</div>` : ''}
     </div>
@@ -2914,7 +2948,7 @@ async function loadFriendWishlist() {
 
 async function loadFriendStats() {
   const el = document.getElementById('friend-stats-content');
-  el.innerHTML = `<div class="empty"><i class="ti ti-loader"></i>Cargando...</div>`;
+  el.innerHTML = `<div class="empty"><i class="ti ti-loader"></i>${t('loading')}</div>`;
   try {
     const res = await fetch(`${apiBase()}/api/v1/friends/${encodeURIComponent(currentFriendUsername)}/stats`, {
       headers: { 'Authorization': `Bearer ${authToken}` }
@@ -2925,17 +2959,17 @@ async function loadFriendStats() {
     const byPlatform = d.by_platform || [];
     el.innerHTML = `
       <div style="display:flex;gap:8px;margin-bottom:16px">
-        <div class="stat-card" style="flex:1"><div class="stat-label">Biblioteca</div><div class="stat-value">${d.library_count}</div></div>
-        <div class="stat-card" style="flex:1"><div class="stat-label">Deseados</div><div class="stat-value">${d.wishlist_count}</div></div>
-        <div class="stat-card" style="flex:1"><div class="stat-label">Calificados</div><div class="stat-value">${d.rated_count}</div></div>
+        <div class="stat-card" style="flex:1"><div class="stat-label">${t('library')}</div><div class="stat-value">${d.library_count}</div></div>
+        <div class="stat-card" style="flex:1"><div class="stat-label">${t('wishlist')}</div><div class="stat-value">${d.wishlist_count}</div></div>
+        <div class="stat-card" style="flex:1"><div class="stat-label">${t('rated')}</div><div class="stat-value">${d.rated_count}</div></div>
       </div>
-      <div style="font-weight:600;margin-bottom:8px">Por estado</div>
+      <div style="font-weight:600;margin-bottom:8px">${t('byStatus')}</div>
       ${byStatus.map(s => `<div style="display:flex;align-items:center;gap:8px;padding:4px 0">
         <div class="sdot" style="background:${_statusColorsFriend[s.status]||'#888'}"></div>
-        <div style="flex:1">${s.status}</div>
+        <div style="flex:1">${statusLabel(s.status)}</div>
         <div style="color:var(--text2);font-size:12px">${s.count} · ${s.hours} hs</div>
       </div>`).join('')}
-      <div style="font-weight:600;margin:16px 0 8px">Por plataforma</div>
+      <div style="font-weight:600;margin:16px 0 8px">${t('byPlatform')}</div>
       ${byPlatform.map(p => `<div style="display:flex;align-items:center;gap:8px;padding:4px 0">
         <div style="flex:1">${p.platform}</div>
         <div style="color:var(--text2);font-size:12px">${p.count}</div>
@@ -2947,7 +2981,7 @@ async function loadFriendStats() {
 }
 
 async function confirmDeleteLibrary() {
-  if (!confirm('¿Eliminar toda tu biblioteca? Esta acción no se puede deshacer.')) return;
+  if (!confirm(t('confirmDeleteLibrary'))) return;
   try {
     const res = await fetch(`${apiBase()}/api/v1/user/library`, {
       method:  'DELETE',
@@ -2955,30 +2989,30 @@ async function confirmDeleteLibrary() {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail);
-    showToast('✓ Biblioteca eliminada');
+    showToast(`✓ ${t('libraryDeleted')}`);
     closeConfigPanel();
     syncAll(1);
     loadGlobalStats();
   } catch(e) {
-    showToast('Error al eliminar biblioteca', true);
+    showToast(t('errorDeletingLibrary'), true);
   }
 }
 
 async function confirmDeleteAccount() {
-  const confirm1 = confirm('¿Eliminar tu cuenta permanentemente? Esto borrará todos tus datos.');
+  const confirm1 = confirm(t('confirmDeleteAccount'));
   if (!confirm1) return;
-  const confirm2 = prompt('Escribí "ELIMINAR" para confirmar:');
-  if (confirm2 !== 'ELIMINAR') return;
+  const confirm2 = prompt(t('typeDeleteToConfirm'));
+  if (confirm2 !== t('deleteConfirmWord')) return;
   try {
     const res = await fetch(`${apiBase()}/api/v1/user/account`, {
       method:  'DELETE',
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
     if (!res.ok) throw new Error();
-    showToast('Cuenta eliminada');
+    showToast(t('accountDeleted'));
     setTimeout(logout, 1500);
   } catch(e) {
-    showToast('Error al eliminar cuenta', true);
+    showToast(t('errorDeletingAccount'), true);
   }
 }
 
@@ -3132,11 +3166,11 @@ async function syncBoth() {
 async function restoreDeletedSteam(section) {
   document.getElementById('steam-menu').style.display = 'none';
   _steamMenuOpen = false;
-  const label = section === 'wishlist' ? 'deseados' : 'biblioteca';
-  if (!confirm(`¿Restablecer todos los juegos de Steam borrados de ${label}?`)) return;
+  const label = section === 'wishlist' ? t('wishlistLower') : t('library').toLowerCase();
+  if (!confirm(t('confirmRestoreSteam').replace('{section}', label))) return;
   const btn = document.getElementById('steam-menu-btn');
   btn.disabled = true;
-  btn.innerHTML = '<i class="ti ti-brand-steam"></i> Restableciendo...';
+  btn.innerHTML = `<i class="ti ti-brand-steam"></i> ${t('restoring')}`;
   try {
     const res  = await fetch(`${apiBase()}/api/v1/steam/restore-deleted?section=${section}`, {
       method: 'POST',
@@ -3189,10 +3223,10 @@ async function syncWishlist() {
       loadGlobalStats();
     }
   } catch(e) {
-    alert('Error al sincronizar wishlist');
+    alert(t('errorSyncingWishlist'));
   } finally {
     const btn = document.querySelector('[onclick="syncWishlist()"]');
-    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-star"></i> Wishlist'; }
+    if (btn) { btn.disabled = false; btn.innerHTML = `<i class="ti ti-star"></i> ${t('wishlist')}`; }
   }
 }
 
@@ -3310,7 +3344,7 @@ async function saveWishlistGame() {
   const platform = document.getElementById('wm-platform').value;
   const genre   = document.getElementById('wm-genre').value;
   const appid   = document.getElementById('wm-appid').value;
-  if (!name) { alert('Ingresá el nombre del juego'); return; }
+  if (!name) { alert(t('enterGameName')); return; }
 
   const gameId     = appid ? (platform === 'Steam' ? `steam_${appid}` : `steam_${appid}_${platform.replace(/[^a-z0-9]/gi,'').toLowerCase()}`) : 'manual_' + Date.now();
   const coverDefault = appid ? `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/library_600x900.jpg` : null;
@@ -3333,7 +3367,7 @@ async function saveWishlistGame() {
     syncAll(currentPage);
     loadGlobalStats();
     checkAchievements();
-  } catch(e) { alert('Error al agregar'); }
+  } catch(e) { alert(t('errorAdding')); }
 }
 
 function saveGame() { submitGame(); }
@@ -3433,7 +3467,7 @@ async function submitGame() {
   const hours    = parseFloat(document.getElementById('m-hours').value) || 0;
   const cover    = document.getElementById('m-cover').value.trim();
 
-  if (!name) { alert('Ingresá el nombre del juego'); return; }
+  if (!name) { alert(t('enterGameName')); return; }
 
   const appid    = document.getElementById('m-appid').value;
   // Allow same game on different platform — use steam_{appid}_{platform} for non-Steam platforms
@@ -3460,7 +3494,7 @@ async function submitGame() {
     syncAll(currentPage);
     loadGlobalStats();
     checkAchievements();
-  } catch(e) { alert('Error al agregar el juego'); }
+  } catch(e) { alert(t('errorAddingGame')); }
 }
 
 async function loadCommunityStats(gameIds) {
@@ -3561,7 +3595,7 @@ async function toggleHideGame(gameId, isHidden) {
     }
     await Promise.all([syncAll(currentPage), loadGlobalStats()]);
   } catch(e) {
-    alert('Error al ' + (isHidden ? 'mostrar' : 'ocultar') + ' el juego');
+    alert(isHidden ? t('errorShowingGame') : t('errorHidingGame'));
   }
 }
 
@@ -4128,7 +4162,7 @@ async function openRenameFolder(id, currentName) {
 
 // Delete folder
 async function deleteFolder(id) {
-  if (!confirm('¿Eliminar esta carpeta? Los juegos no se borran.')) return;
+  if (!confirm(t('confirmDeleteFolder'))) return;
   await fetch(`${apiBase()}/api/v1/folders/${id}`, {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${authToken}` }
@@ -4157,7 +4191,7 @@ async function openCardFolderPicker(gameId) {
 
   const folders = currentSectionFolders();
   if (!folders.length) {
-    alert('No tenés carpetas en esta sección. Creá una primero.');
+    alert(t('noFoldersInSection'));
     return;
   }
 
@@ -4273,23 +4307,23 @@ function renderFolderGamePicker() {
 
   list.innerHTML = `
     <div style="padding:6px 12px 8px;border-bottom:0.5px solid var(--border)">
-      <input type="text" placeholder="Buscar juego..." value="${_folderPickerSearch}"
+      <input type="text" placeholder="Buscar juego..." data-i18n-placeholder="searchGame" value="${_folderPickerSearch}"
         oninput="_folderPickerSearch=this.value;renderFolderGamePicker()"
         style="width:100%;box-sizing:border-box;padding:5px 10px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text)" />
     </div>
     <div style="display:table;width:100%;border-bottom:1px solid var(--border);background:var(--bg2)">
       <div style="display:table-row">
         <div style="display:table-cell;padding:6px 16px;width:36px;min-width:36px;max-width:36px"><input type="checkbox" style="visibility:hidden;width:13px;height:13px;margin:0;display:block"></div>
-        <div style="display:table-cell;padding:6px 8px;font-size:11px;color:var(--text2);text-align:left">${col('name','Nombre')}</div>
-        <div style="display:table-cell;width:110px;min-width:110px;max-width:110px;padding:6px 8px;font-size:11px;color:var(--text2)">${col('platform','Plataforma')}</div>
-        <div style="display:table-cell;width:70px;min-width:70px;max-width:70px;padding:6px 8px;font-size:11px;color:var(--text2)">${col('hours_played','Horas')}</div>
+        <div style="display:table-cell;padding:6px 8px;font-size:11px;color:var(--text2);text-align:left">${col('name',t('name'))}</div>
+        <div style="display:table-cell;width:110px;min-width:110px;max-width:110px;padding:6px 8px;font-size:11px;color:var(--text2)">${col('platform',t('platform'))}</div>
+        <div style="display:table-cell;width:70px;min-width:70px;max-width:70px;padding:6px 8px;font-size:11px;color:var(--text2)">${col('hours_played',t('hours'))}</div>
         <div style="display:table-cell;width:50px;min-width:50px;max-width:50px;padding:6px 8px;font-size:11px;color:var(--text2)">${col('user_rating','★')}</div>
-        <div style="display:table-cell;width:90px;min-width:90px;max-width:90px;padding:6px 16px 6px 8px;font-size:11px;color:var(--text2)">${col('genre','Género')}</div>
+        <div style="display:table-cell;width:90px;min-width:90px;max-width:90px;padding:6px 16px 6px 8px;font-size:11px;color:var(--text2)">${col('genre',t('genre'))}</div>
       </div>
     </div>
     <div style="overflow-y:auto;max-height:400px">
       ${!games.length
-        ? '<div style="padding:16px;color:var(--text2);font-size:13px">Sin resultados</div>'
+        ? `<div style="padding:16px;color:var(--text2);font-size:13px">${t('noResults')}</div>`
         : '<div style="display:table;width:100%">' + games.map(g => `
           <div style="display:table-row;cursor:pointer"
             onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
