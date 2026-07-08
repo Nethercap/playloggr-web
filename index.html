@@ -1032,7 +1032,7 @@ const I18N = {
     syncing: 'Sincronizando...', cannotConnectBackend: 'No se pudo conectar con el backend.',
     backendUnavailable: 'Backend no disponible', retry: 'Reintentar',
     errorLoadingGames: 'Error al cargar los juegos', lastSync: 'última sync',
-    code: 'Código', logout: 'Salir', folder: 'Carpeta',
+    code: 'Código', logout: 'Salir', folder: 'Carpeta', clear: 'Limpiar',
     loginSubtitle: 'Iniciá sesión para continuar', createAccount: 'Creá tu cuenta',
     continueWithGoogle: 'Continuar con Google', useEmailPassword: 'Usar email y contraseña',
     recoveryHint: '⚠ Si olvidás tu contraseña, la recuperación es con un <strong style="color:var(--text)">código de 6 dígitos</strong> que generás desde el menú de tu perfil.',
@@ -1109,7 +1109,7 @@ const I18N = {
     syncing: 'Syncing...', cannotConnectBackend: 'Could not connect to the backend.',
     backendUnavailable: 'Backend unavailable', retry: 'Retry',
     errorLoadingGames: 'Error loading games', lastSync: 'last sync',
-    code: 'Code', logout: 'Log out', folder: 'Folder',
+    code: 'Code', logout: 'Log out', folder: 'Folder', clear: 'Clear',
     loginSubtitle: 'Log in to continue', createAccount: 'Create your account',
     continueWithGoogle: 'Continue with Google', useEmailPassword: 'Use email and password',
     recoveryHint: '⚠ If you forget your password, recovery is done with a <strong style="color:var(--text)">6-digit code</strong> you generate from your profile menu.',
@@ -1738,7 +1738,7 @@ function toggleFilterDropdown(key, options, wrap, btn) {
     cb.style.accentColor = 'var(--green)';
     cb.style.pointerEvents = 'none';
     const label = document.createElement('span');
-    label.textContent = opt;
+    label.textContent = key === 'statuses' ? statusLabel(opt) : key === 'genres' ? genreLabel(opt) : opt;
     item.appendChild(cb);
     item.appendChild(label);
     popup.appendChild(item);
@@ -1748,7 +1748,7 @@ function toggleFilterDropdown(key, options, wrap, btn) {
   const footer = document.createElement('div');
   footer.style.cssText = 'padding:6px 10px;border-top:0.5px solid var(--border);display:flex;justify-content:flex-end;gap:6px';
   const clearBtn = document.createElement('button');
-  clearBtn.textContent = 'Limpiar';
+  clearBtn.textContent = t('clear');
   clearBtn.style.cssText = 'font-size:12px;padding:3px 10px;border-radius:5px;border:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer';
   clearBtn.onmousedown = (e) => {
     e.preventDefault();
