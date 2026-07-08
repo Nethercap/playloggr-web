@@ -845,7 +845,12 @@
       </div>
       <div class="modal-group full">
         <label data-i18n="recoveryCodeDigits">Código de recuperación (6 dígitos)</label>
-        <input type="text" id="r-code" placeholder="123456" maxlength="6" />
+        <div style="display:flex;gap:8px">
+          <input type="text" id="r-code" placeholder="123456" maxlength="6" style="flex:1" />
+          <button type="button" onclick="sendResetCode()" id="send-code-btn"
+            style="padding:0 12px;font-size:11px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;white-space:nowrap"
+            data-i18n="sendCode">Enviar código</button>
+        </div>
       </div>
       <div class="modal-group full">
         <label data-i18n="newPassword">Nueva contraseña</label>
@@ -1039,6 +1044,9 @@ const I18N = {
     saveErrorRetry: 'Error al guardar. Intentá de nuevo.', saveError: 'Error al guardar',
     errorLoadingFriends: 'Error al cargar amigos',
     usernameFormatError: 'El nombre de usuario debe tener 3-20 caracteres, solo letras y números',
+    sendCode: 'Enviar código', enterEmailFirst: 'Ingresá tu email primero',
+    codeSentIfExists: 'Si el email existe, te enviamos un código de recuperación.',
+    genericNetworkError: 'Error de conexión. Intentá de nuevo.',
   },
   en: {
     sync: 'Sync', stats: 'Stats', config: 'Settings', friends: 'Friends',
@@ -1119,6 +1127,9 @@ const I18N = {
     saveErrorRetry: 'Error saving. Please try again.', saveError: 'Error saving',
     errorLoadingFriends: 'Error loading friends',
     usernameFormatError: 'Username must be 3-20 characters, letters and numbers only',
+    sendCode: 'Send code', enterEmailFirst: 'Enter your email first',
+    codeSentIfExists: 'If the email exists, we sent a recovery code.',
+    genericNetworkError: 'Connection error. Please try again.',
   },
   pt: {
     sync: 'Sincronizar', stats: 'Estatísticas', config: 'Configurações', friends: 'Amigos',
@@ -1199,6 +1210,9 @@ const I18N = {
     saveErrorRetry: 'Erro ao salvar. Tente novamente.', saveError: 'Erro ao salvar',
     errorLoadingFriends: 'Erro ao carregar amigos',
     usernameFormatError: 'O nome de usuário deve ter 3-20 caracteres, somente letras e números',
+    sendCode: 'Enviar código', enterEmailFirst: 'Digite seu email primeiro',
+    codeSentIfExists: 'Se o email existir, enviamos um código de recuperação.',
+    genericNetworkError: 'Erro de conexão. Tente novamente.',
   },
 };
 
@@ -2062,6 +2076,39 @@ function closeReset() {
 document.getElementById('reset-overlay').addEventListener('click', e => {
   if (e.target === document.getElementById('reset-overlay')) closeReset();
 });
+
+async function sendResetCode() {
+  const email = document.getElementById('r-email').value.trim();
+  const msg   = document.getElementById('reset-msg');
+  const btn   = document.getElementById('send-code-btn');
+  if (!email) {
+    msg.textContent = t('enterEmailFirst');
+    msg.style.color = 'var(--red)';
+    msg.style.display = 'block';
+    return;
+  }
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = '...';
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    msg.textContent = data.message || t('codeSentIfExists');
+    msg.style.color = 'var(--green)';
+    msg.style.display = 'block';
+  } catch (e) {
+    msg.textContent = t('genericNetworkError');
+    msg.style.color = 'var(--red)';
+    msg.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
 
 async function submitReset() {
   const email    = document.getElementById('r-email').value.trim();
