@@ -1218,6 +1218,10 @@ function applyI18n() {
   if (typeof allGames !== 'undefined' && allGames.length && typeof renderGames === 'function') renderGames();
   if (typeof renderFilterDropdowns === 'function') renderFilterDropdowns();
   if (typeof updateFolderBtn === 'function') updateFolderBtn();
+  const statsUserTab = document.getElementById('stats-user-tab');
+  if (statsUserTab && statsUserTab.style.display !== 'none' && typeof loadUserStats === 'function') loadUserStats();
+  const statsGlobalTab = document.getElementById('stats-global-tab');
+  if (statsGlobalTab && statsGlobalTab.style.display !== 'none' && typeof loadGlobalRankings === 'function') loadGlobalRankings();
   document.documentElement.lang = currentLang;
   ['lang-toggle-btn', 'lang-toggle-btn-login'].forEach(id => {
     const toggle = document.getElementById(id);
