@@ -884,16 +884,16 @@
 
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
-    <div class="modal-title"><i class="ti ti-plus" style="color:#1D9E75"></i> Agregar juego</div>
+    <div class="modal-title"><i class="ti ti-plus" style="color:#1D9E75"></i> <span data-i18n="addGame">Agregar juego</span></div>
     <div class="modal-grid">
       <div class="modal-group full" style="position:relative">
-        <label>Nombre del juego</label>
-        <input type="text" id="m-name" placeholder="Buscá tu juego..." autocomplete="off" oninput="searchSteamCatalog(this.value)" />
+        <label data-i18n="gameName">Nombre del juego</label>
+        <input type="text" id="m-name" placeholder="Buscá tu juego..." data-i18n-placeholder="searchYourGame" autocomplete="off" oninput="searchSteamCatalog(this.value)" />
         <div id="steam-search-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius-md);z-index:100;max-height:200px;overflow-y:auto"></div>
         <input type="hidden" id="m-appid" />
       </div>
       <div class="modal-group">
-        <label>Plataforma</label>
+        <label data-i18n="platform">Plataforma</label>
         <select id="m-platform">
           <option value="Steam">Steam</option>
           <option value="Epic">Epic</option>
@@ -924,8 +924,8 @@
         </select>
       </div>
       <div class="modal-group">
-        <label>Estado</label>
-        <select id="m-status">
+        <label data-i18n="status">Estado</label>
+        <select id="m-status" class="status-select">
           <option value="Backlog">Backlog</option>
           <option value="Jugando">Jugando</option>
           <option value="Completado">Completado</option>
@@ -933,24 +933,24 @@
           <option value="Intermitente">Intermitente</option>
         </select>
       </div>
-      
+
       <div class="modal-group">
-        <label>Horas jugadas</label>
+        <label data-i18n="hoursPlayedLabel">Horas jugadas</label>
         <input type="number" id="m-hours" value="0" min="0" step="0.5" />
       </div>
       <div class="modal-group full">
-        <label>Tu calificación</label>
+        <label data-i18n="yourRating">Tu calificación</label>
         <div id="modal-stars" style="display:flex;gap:3px;margin-top:4px"></div>
-        <span id="modal-star-val" style="font-size:12px;color:var(--text2);margin-top:4px;display:block">Sin calificar</span>
+        <span id="modal-star-val" style="font-size:12px;color:var(--text2);margin-top:4px;display:block" data-i18n="unrated">Sin calificar</span>
       </div>
       <div class="modal-group full">
-        <label>URL de portada (opcional)</label>
+        <label data-i18n="coverUrlOptional">URL de portada (opcional)</label>
         <input type="url" id="m-cover" placeholder="https://..." />
       </div>
     </div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
-      <button class="btn-save" onclick="saveGame()">Guardar</button>
+      <button class="btn-cancel" onclick="closeModal()" data-i18n="cancel">Cancelar</button>
+      <button class="btn-save" onclick="saveGame()" data-i18n="save">Guardar</button>
     </div>
   </div>
 </div>
@@ -1027,6 +1027,12 @@ const I18N = {
     thisGame: 'este juego',
     confirmDeleteSteamGame: '¿Eliminar "{name}" de tu backlog?\nLos juegos de Steam pueden volver al sincronizar si los querés recuperar.',
     confirmDeleteGame: '¿Eliminar "{name}" del backlog?', noResults: 'Sin resultados',
+    gameName: 'Nombre del juego', hoursPlayedLabel: 'Horas jugadas', yourRating: 'Tu calificación',
+    unrated: 'Sin calificar', coverUrlOptional: 'URL de portada (opcional)',
+    syncing: 'Sincronizando...', cannotConnectBackend: 'No se pudo conectar con el backend.',
+    backendUnavailable: 'Backend no disponible', retry: 'Reintentar',
+    errorLoadingGames: 'Error al cargar los juegos', lastSync: 'última sync',
+    code: 'Código', logout: 'Salir', folder: 'Carpeta',
     loginSubtitle: 'Iniciá sesión para continuar', createAccount: 'Creá tu cuenta',
     continueWithGoogle: 'Continuar con Google', useEmailPassword: 'Usar email y contraseña',
     recoveryHint: '⚠ Si olvidás tu contraseña, la recuperación es con un <strong style="color:var(--text)">código de 6 dígitos</strong> que generás desde el menú de tu perfil.',
@@ -1098,6 +1104,12 @@ const I18N = {
     thisGame: 'this game',
     confirmDeleteSteamGame: 'Delete "{name}" from your backlog?\nSteam games can come back when you sync if you want to recover them.',
     confirmDeleteGame: 'Delete "{name}" from your backlog?', noResults: 'No results',
+    gameName: 'Game name', hoursPlayedLabel: 'Hours played', yourRating: 'Your rating',
+    unrated: 'Unrated', coverUrlOptional: 'Cover URL (optional)',
+    syncing: 'Syncing...', cannotConnectBackend: 'Could not connect to the backend.',
+    backendUnavailable: 'Backend unavailable', retry: 'Retry',
+    errorLoadingGames: 'Error loading games', lastSync: 'last sync',
+    code: 'Code', logout: 'Log out', folder: 'Folder',
     loginSubtitle: 'Log in to continue', createAccount: 'Create your account',
     continueWithGoogle: 'Continue with Google', useEmailPassword: 'Use email and password',
     recoveryHint: '⚠ If you forget your password, recovery is done with a <strong style="color:var(--text)">6-digit code</strong> you generate from your profile menu.',
@@ -1114,8 +1126,12 @@ function applyI18n() {
   document.querySelectorAll('.genre-select option[value]:not([value=""])').forEach(opt => {
     opt.textContent = typeof genreLabel === 'function' ? genreLabel(opt.value) : opt.value;
   });
+  document.querySelectorAll('.status-select option[value]').forEach(opt => {
+    opt.textContent = typeof statusLabel === 'function' ? statusLabel(opt.value) : opt.value;
+  });
   if (typeof allGames !== 'undefined' && allGames.length && typeof renderGames === 'function') renderGames();
   if (typeof renderFilterDropdowns === 'function') renderFilterDropdowns();
+  if (typeof updateFolderBtn === 'function') updateFolderBtn();
   document.documentElement.lang = currentLang;
   ['lang-toggle-btn', 'lang-toggle-btn-login'].forEach(id => {
     const toggle = document.getElementById(id);
@@ -1189,7 +1205,7 @@ const platSlug  = { Steam:'steam', PSN:'psn', Xbox:'xbox', 'EA Play':'ea' };
 const platStatus = {};
 
 // Steam review score labels
-const steamScoreLabel = {
+const steamScoreLabelES = {
   'Overwhelmingly Positive': { label:'Abrumadoramente positiva', cls:'score-overwhelmingly-positive' },
   'Very Positive':           { label:'Muy positiva',             cls:'score-very-positive' },
   'Mostly Positive':         { label:'Mayormente positiva',      cls:'score-mostly-positive' },
@@ -1198,6 +1214,16 @@ const steamScoreLabel = {
   'Overwhelmingly Negative': { label:'Abrumadoramente negativa', cls:'score-overwhelmingly-negative' },
   'Sin calificaciones':      { label:'Sin calificaciones',       cls:'score-none' },
 };
+const steamScoreLabelEN = {
+  'Overwhelmingly Positive': { label:'Overwhelmingly Positive', cls:'score-overwhelmingly-positive' },
+  'Very Positive':           { label:'Very Positive',           cls:'score-very-positive' },
+  'Mostly Positive':         { label:'Mostly Positive',         cls:'score-mostly-positive' },
+  'Mixed':                   { label:'Mixed',                   cls:'score-mixed' },
+  'Mostly Negative':         { label:'Mostly Negative',         cls:'score-mostly-negative' },
+  'Overwhelmingly Negative': { label:'Overwhelmingly Negative', cls:'score-overwhelmingly-negative' },
+  'Sin calificaciones':      { label:'No reviews',              cls:'score-none' },
+};
+const steamScoreLabel = new Proxy({}, { get: (_, key) => (currentLang === 'en' ? steamScoreLabelEN : steamScoreLabelES)[key] });
 
 // Cache de scores de Steam
 const steamScoreCache = {};
@@ -1255,7 +1281,7 @@ function starPickerHtml(gameId, currentRating) {
     }
     stars.push(`<svg width="18" height="18" viewBox="0 0 24 24" style="cursor:pointer;flex-shrink:0" onclick="starClick('${gameId}',${i},event)">${poly}</svg>`);
   }
-  const label = currentRating > 0 ? currentRating + ' / 5' : 'Sin calificar';
+  const label = currentRating > 0 ? currentRating + ' / 5' : t('unrated');
   return `<span style="display:inline-flex;align-items:center;gap:2px">${stars.join('')}</span>
           <span style="font-size:11px;color:var(--text2);margin-left:5px">${label}</span>`;
 }
@@ -3091,7 +3117,7 @@ async function syncSteamLibrary() {
   _steamMenuOpen = false;
   const btn = document.getElementById('steam-menu-btn');
   btn.disabled = true;
-  btn.innerHTML = '<i class="ti ti-brand-steam"></i> Sincronizando...';
+  btn.innerHTML = `<i class="ti ti-brand-steam"></i> ${t('syncing')}`;
   try {
     const res  = await fetch(`${apiBase()}/api/v1/steam/sync-library`, {
       method: 'POST',
@@ -3108,6 +3134,7 @@ async function syncSteamLibrary() {
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="ti ti-brand-steam"></i> Steam ▾';
+    applyPremiumUI();
   }
 }
 
@@ -3116,7 +3143,7 @@ async function syncSteamWishlist() {
   _steamMenuOpen = false;
   const btn = document.getElementById('steam-menu-btn');
   btn.disabled = true;
-  btn.innerHTML = '<i class="ti ti-brand-steam"></i> Sincronizando...';
+  btn.innerHTML = `<i class="ti ti-brand-steam"></i> ${t('syncing')}`;
   try {
     const res  = await fetch(`${apiBase()}/api/v1/wishlist/sync`, {
       method: 'POST',
@@ -3133,6 +3160,7 @@ async function syncSteamWishlist() {
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="ti ti-brand-steam"></i> Steam ▾';
+    applyPremiumUI();
   }
 }
 
@@ -3141,7 +3169,7 @@ async function syncBoth() {
   _steamMenuOpen = false;
   const btn = document.getElementById('steam-menu-btn');
   btn.disabled = true;
-  btn.innerHTML = '<i class="ti ti-brand-steam"></i> Sincronizando...';
+  btn.innerHTML = `<i class="ti ti-brand-steam"></i> ${t('syncing')}`;
   try {
     const [libRes, wishRes] = await Promise.all([
       fetch(`${apiBase()}/api/v1/steam/sync-library`, { method: 'POST', headers: { 'Authorization': `Bearer ${authToken}` } }),
@@ -3160,6 +3188,7 @@ async function syncBoth() {
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="ti ti-brand-steam"></i> Steam ▾';
+    applyPremiumUI();
   }
 }
 
@@ -3187,6 +3216,7 @@ async function restoreDeletedSteam(section) {
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="ti ti-brand-steam"></i> Steam ▾';
+    applyPremiumUI();
   }
 }
 
@@ -3210,7 +3240,7 @@ async function syncWishlist() {
   try {
     const btn = event.currentTarget;
     btn.disabled = true;
-    btn.innerHTML = '<i class="ti ti-star"></i> Sincronizando...';
+    btn.innerHTML = `<i class="ti ti-star"></i> ${t('syncing')}`;
     const res  = await fetch(`${apiBase()}/api/v1/wishlist/sync`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${authToken}` }
@@ -3457,7 +3487,7 @@ function renderModalStars() {
     container.appendChild(star);
   }
   const val = document.getElementById('modal-star-val');
-  if (val) val.textContent = modalStarVal > 0 ? modalStarVal + ' / 5' : 'Sin calificar';
+  if (val) val.textContent = modalStarVal > 0 ? modalStarVal + ' / 5' : t('unrated');
 }
 
 async function submitGame() {
@@ -3708,6 +3738,7 @@ function applyPremiumUI() {
       btn.onclick = () => showToast('Sincronizar con Steam requiere la versión premium', true);
     } else {
       btn.innerHTML = '<i class="ti ti-brand-steam"></i> Steam ▾';
+    applyPremiumUI();
       btn.onclick = toggleSteamMenu;
     }
   }
@@ -3912,16 +3943,16 @@ function updateFolderBtn() {
   wrap.style.display = 'inline-flex';
 
   if (activeFolderId === -1) {
-    label.textContent = 'Carpetas';
+    label.textContent = t('folders');
     wrap.style.borderColor = 'var(--green)';
     wrap.querySelectorAll('button').forEach(b => b.style.color = 'var(--green)');
   } else if (activeFolderId > 0) {
     const f = folders.find(x => x.id === activeFolderId);
-    label.textContent = f ? f.name : 'Carpeta';
+    label.textContent = f ? f.name : t('folder');
     wrap.style.borderColor = 'var(--green)';
     wrap.querySelectorAll('button').forEach(b => b.style.color = 'var(--green)');
   } else {
-    label.textContent = `Carpetas${folders.length ? ' (' + folders.length + ')' : ''}`;
+    label.textContent = `${t('folders')}${folders.length ? ' (' + folders.length + ')' : ''}`;
     wrap.style.borderColor = 'var(--border)';
     wrap.querySelectorAll('button').forEach(b => b.style.color = 'var(--text2)');
   }
@@ -4582,7 +4613,8 @@ async function onLoginSuccess() {
 
   const chip = document.createElement('div');
   chip.className = 'user-chip';
-  chip.innerHTML = `<span id="user-level-badge"></span><span id="user-name-span">${authUser}</span><span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px;margin-left:2px"></span><button class="logout-btn" onclick="openRecovery()">Código</button><button class="logout-btn" onclick="logout()">Salir</button>`;
+  chip.innerHTML = `<span id="user-level-badge"></span><span id="user-name-span">${authUser}</span><span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px;margin-left:2px"></span><button class="logout-btn" onclick="openRecovery()" data-i18n="code">Código</button><button class="logout-btn" onclick="logout()" data-i18n="logout">Salir</button>`;
+  applyI18n();
   document.getElementById('plat-status-row').before(chip);
 
   setTimeout(() => {
@@ -4644,9 +4676,9 @@ async function syncAll(page = 1, silent = false) {
   const btn = document.getElementById('sync-btn');
   if (!silent) {
     btn.disabled = true;
-    btn.innerHTML = '<i class="ti ti-refresh" style="animation:spin 1s linear infinite"></i> Sincronizando...';
+    btn.innerHTML = `<i class="ti ti-refresh" style="animation:spin 1s linear infinite"></i> ${t('syncing')}`;
     if (page === 1) {
-      document.getElementById('game-list').innerHTML = '<div class="empty"><div class="spinner" style="margin:0 auto 12px"></div>Sincronizando...</div>';
+      document.getElementById('game-list').innerHTML = `<div class="empty"><div class="spinner" style="margin:0 auto 12px"></div>${t('syncing')}</div>`;
     }
   }
 
@@ -4654,16 +4686,16 @@ async function syncAll(page = 1, silent = false) {
   try { const r = await fetch(`${apiBase()}/api/v1/health`); ok = r.ok; } catch(e) {}
 
   if (!ok) {
-    showError('No se pudo conectar con el backend.');
-    document.getElementById('game-list').innerHTML = '<div class="empty"><i class="ti ti-wifi-off"></i>Backend no disponible</div>';
+    showError(t('cannotConnectBackend'));
+    document.getElementById('game-list').innerHTML = `<div class="empty"><i class="ti ti-wifi-off"></i>${t('backendUnavailable')}</div>`;
     platNames.forEach(p => { platStatus[p]='err'; }); renderPlatStatus();
-    btn.disabled=false; btn.innerHTML='<i class="ti ti-refresh"></i> Reintentar';
+    btn.disabled=false; btn.innerHTML = `<i class="ti ti-refresh"></i> ${t('retry')}`;
     return;
   }
 
   const tok = authToken || localStorage.getItem('gb_token') || '';
   if (!tok) {
-    btn.disabled=false; btn.innerHTML='<i class="ti ti-refresh"></i> Sincronizar';
+    btn.disabled=false; btn.innerHTML = `<i class="ti ti-refresh"></i> ${t('sync')}`;
     return;
   }
 
@@ -4725,13 +4757,13 @@ async function syncAll(page = 1, silent = false) {
     loadAvailableFilters();
 
   } catch(e) {
-    showError('Error al cargar los juegos: ' + e.message);
+    showError(t('errorLoadingGames') + ': ' + e.message);
   }
 
   if (!silent) {
-    btn.disabled=false; btn.innerHTML='<i class="ti ti-refresh"></i> Sincronizar';
+    btn.disabled=false; btn.innerHTML = `<i class="ti ti-refresh"></i> ${t('sync')}`;
     const now = new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
-    document.getElementById('count-label').textContent = `${totalGames} juegos — última sync ${now}`;
+    document.getElementById('count-label').textContent = `${totalGames} ${t('gamesLower')} — ${t('lastSync')} ${now}`;
   }
 }
 </script>
