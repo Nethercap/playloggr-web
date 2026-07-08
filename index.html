@@ -1036,6 +1036,9 @@ const I18N = {
     loginSubtitle: 'Iniciá sesión para continuar', createAccount: 'Creá tu cuenta',
     continueWithGoogle: 'Continuar con Google', useEmailPassword: 'Usar email y contraseña',
     recoveryHint: '⚠ Si olvidás tu contraseña, la recuperación es con un <strong style="color:var(--text)">código de 6 dígitos</strong> que generás desde el menú de tu perfil.',
+    saveErrorRetry: 'Error al guardar. Intentá de nuevo.', saveError: 'Error al guardar',
+    errorLoadingFriends: 'Error al cargar amigos',
+    usernameFormatError: 'El nombre de usuario debe tener 3-20 caracteres, solo letras y números',
   },
   en: {
     sync: 'Sync', stats: 'Stats', config: 'Settings', friends: 'Friends',
@@ -1113,6 +1116,9 @@ const I18N = {
     loginSubtitle: 'Log in to continue', createAccount: 'Create your account',
     continueWithGoogle: 'Continue with Google', useEmailPassword: 'Use email and password',
     recoveryHint: '⚠ If you forget your password, recovery is done with a <strong style="color:var(--text)">6-digit code</strong> you generate from your profile menu.',
+    saveErrorRetry: 'Error saving. Please try again.', saveError: 'Error saving',
+    errorLoadingFriends: 'Error loading friends',
+    usernameFormatError: 'Username must be 3-20 characters, letters and numbers only',
   },
   pt: {
     sync: 'Sincronizar', stats: 'Estatísticas', config: 'Configurações', friends: 'Amigos',
@@ -1190,6 +1196,9 @@ const I18N = {
     loginSubtitle: 'Entre para continuar', createAccount: 'Crie sua conta',
     continueWithGoogle: 'Continuar com o Google', useEmailPassword: 'Usar email e senha',
     recoveryHint: '⚠ Se você esquecer sua senha, a recuperação é feita com um <strong style="color:var(--text)">código de 6 dígitos</strong> que você gera no menu do seu perfil.',
+    saveErrorRetry: 'Erro ao salvar. Tente novamente.', saveError: 'Erro ao salvar',
+    errorLoadingFriends: 'Erro ao carregar amigos',
+    usernameFormatError: 'O nome de usuário deve ter 3-20 caracteres, somente letras e números',
   },
 };
 
@@ -1212,7 +1221,7 @@ function applyI18n() {
   document.documentElement.lang = currentLang;
   ['lang-toggle-btn', 'lang-toggle-btn-login'].forEach(id => {
     const toggle = document.getElementById(id);
-    if (toggle) toggle.textContent = { es: 'EN', en: 'PT', pt: 'ES' }[currentLang] || 'EN';
+    if (toggle) toggle.textContent = { es: 'ES', en: 'EN', pt: 'PT' }[currentLang] || 'ES';
   });
 }
 
@@ -2113,7 +2122,7 @@ async function saveSettings() {
     msg.style.display = 'block';
     setTimeout(() => { closeSettings(); syncAll(); }, 1200);
   } catch(e) {
-    msg.textContent = 'Error al guardar. Intentá de nuevo.';
+    msg.textContent = t('saveErrorRetry');
     msg.style.color = 'var(--red)';
     msg.style.display = 'block';
   }
@@ -2420,7 +2429,7 @@ async function saveConfig() {
     setTimeout(closeConfigPanel, 1200);
   } catch(e) {
     msg.style.color = 'var(--red)';
-    msg.textContent = 'Error al guardar';
+    msg.textContent = t('saveError');
   }
 }
 
@@ -2616,7 +2625,7 @@ async function saveAvatarConfig() {
     setTimeout(closeConfigPanel, 1200);
   } catch (e) {
     msg.style.color = 'var(--red)';
-    msg.textContent = 'Error al guardar el avatar';
+    msg.textContent = t('saveError');
   }
 }
 
@@ -3229,7 +3238,7 @@ async function loadFriendsList() {
     }
     list.innerHTML = html;
   } catch(e) {
-    list.innerHTML = `<div class="empty"><i class="ti ti-alert-triangle"></i>Error al cargar amigos</div>`;
+    list.innerHTML = `<div class="empty"><i class="ti ti-alert-triangle"></i>${t('errorLoadingFriends')}</div>`;
   }
 }
 
@@ -3364,7 +3373,7 @@ function friendGameCardHtml(g) {
 
 async function loadFriendLibrary() {
   const list = document.getElementById('friend-library-list');
-  list.innerHTML = `<div class="empty"><i class="ti ti-loader"></i>Cargando...</div>`;
+  list.innerHTML = `<div class="empty"><i class="ti ti-loader"></i>${t('loading')}</div>`;
   const search = document.getElementById('friend-search-library').value.trim();
   const sort   = document.getElementById('friend-sort-library').value;
   try {
@@ -3386,7 +3395,7 @@ async function loadFriendLibrary() {
 
 async function loadFriendWishlist() {
   const list = document.getElementById('friend-wishlist-list');
-  list.innerHTML = `<div class="empty"><i class="ti ti-loader"></i>Cargando...</div>`;
+  list.innerHTML = `<div class="empty"><i class="ti ti-loader"></i>${t('loading')}</div>`;
   const search = document.getElementById('friend-search-wishlist').value.trim();
   const sort   = document.getElementById('friend-sort-wishlist').value;
   try {
@@ -3541,7 +3550,7 @@ async function saveSteamId() {
     cur.style.color = 'var(--green)';
   } catch(e) {
     const cur = document.getElementById('steam-id-current');
-    cur.textContent = 'Error al guardar';
+    cur.textContent = t('saveError');
     cur.style.color = 'var(--red)';
   }
 }
@@ -3727,7 +3736,7 @@ async function saveSetUsername() {
   const errEl = document.getElementById('set-username-err');
   const username = input.value.trim();
   if (!/^[A-Za-z0-9]{3,20}$/.test(username)) {
-    errEl.textContent = 'El nombre de usuario debe tener 3-20 caracteres, solo letras y números';
+    errEl.textContent = t('usernameFormatError');
     errEl.style.display = 'block';
     return;
   }
@@ -4277,7 +4286,7 @@ async function submitAuth() {
   if (!email || !password) { errEl.textContent='Completá email y contraseña'; errEl.style.display='block'; return; }
   if (isRegister && !username) { errEl.textContent='Completá el nombre de usuario'; errEl.style.display='block'; return; }
   if (isRegister && !/^[A-Za-z0-9]{3,20}$/.test(username)) {
-    errEl.textContent = 'El nombre de usuario debe tener 3-20 caracteres, solo letras y números';
+    errEl.textContent = t('usernameFormatError');
     errEl.style.display = 'block';
     return;
   }
