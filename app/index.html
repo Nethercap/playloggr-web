@@ -107,6 +107,8 @@
     .footer-note { font-size:12px; color:var(--text2); }
     .add-btn { font-size:13px; padding:6px 14px; border-radius:var(--radius-md); border:0.5px solid var(--border2); background:transparent; color:var(--text); cursor:pointer; display:flex; align-items:center; gap:5px; }
     .add-btn:hover { background:var(--bg2); }
+    .steam-menu-item { display:flex; align-items:center; gap:8px; width:100%; padding:8px 14px; font-size:12px; border:none; background:transparent; color:var(--green); cursor:pointer; text-align:left; }
+    .steam-menu-item:hover { background:rgba(29,158,117,0.1); }
 
     /* ── Modal ── */
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:100; align-items:center; justify-content:center; }
@@ -1536,6 +1538,8 @@ function sortedFiltered() {
   return items;
 }
 
+const communityStatsCache = {};
+
 async function renderGames() {
   const list  = document.getElementById('game-list');
   const items = sortedFiltered();
@@ -1560,6 +1564,14 @@ async function renderGames() {
       ? `<span class="steam-score ${_score.cls}">${_score.label}</span>`
       : '';
 
+    // Si ya tenemos el promedio de la comunidad en cache (de un render anterior
+    // en esta sesion), mostrarlo de una en vez de arrancar vacio y parpadear.
+    const cs = communityStatsCache[g.id];
+    const communityHtml = cs
+      ? `<i class="ti ti-users" style="font-size:11px"></i> ${cs.avg_rating} (${cs.rating_count})`
+      : '';
+    const communityStyle = cs ? 'display:inline-flex' : 'display:none';
+
     return `<div class="game-card" id="card-${g.id}">
       <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0">
         <div class="game-cover" data-gid="${g.id}" onclick="openCoverEditFromCard(this)" style="cursor:pointer;position:relative" title="Click para cambiar portada">${cover}<div class="cover-edit-hint" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);opacity:0;transition:opacity 0.15s;font-size:18px">✏️</div></div>
@@ -1575,7 +1587,7 @@ async function renderGames() {
         ${g.status !== 'Deseados' ? `<div id="stars-${g.id}" style="margin-bottom:4px">${starPickerHtml(g.id, g.user_rating || 0)}</div>` : ''}
         <div class="game-foot">
           ${g.status !== 'Deseados' ? (g.is_manual ? `<span style="cursor:pointer;text-decoration:underline dotted" data-gameid="${g.id}" data-hours="${g.hours_played}" onclick="editHoursById(this, event)" title="Editar horas"><i class="ti ti-clock" style="font-size:12px"></i>${hours}</span>` : `<span><i class="ti ti-clock" style="font-size:12px"></i>${hours}</span>`) : ''}
-          <span id="community-${g.id}" style="display:none;align-items:center;gap:3px;font-size:11px;color:var(--text2)"></span>        </div>
+          <span id="community-${g.id}" style="${communityStyle};align-items:center;gap:3px;font-size:11px;color:var(--text2)">${communityHtml}</span>        </div>
       </div>
       <div class="game-status-col">
         <select class="genre-sel genre-select" data-gid="${g.id}" onchange="changeGenre('${g.id}',this.value)" style="font-size:11px;margin-bottom:4px;width:100%;padding:2px 4px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text2)">
@@ -4066,16 +4078,21 @@ async function submitGame() {
 }
 
 async function loadCommunityStats(gameIds) {
-  if (!gameIds.length) return;
+  // Solo pedimos lo que todavia no tenemos en cache — evita re-fetch y el
+  // parpadeo de "vacio -> lleno" en cada resync/filtro para juegos que ya
+  // conociamos.
+  const missing = gameIds.filter(id => !communityStatsCache[id]);
+  if (!missing.length) return;
   try {
-    const ids = gameIds.join(',');
+    const ids = missing.join(',');
     const res  = await fetch(`${apiBase()}/api/v1/community/stats/batch?game_ids=${encodeURIComponent(ids)}`);
     if (!res.ok) return;
     const data = await res.json();
     Object.entries(data).forEach(([gameId, stats]) => {
+      if (!stats.avg_rating) return;
+      communityStatsCache[gameId] = stats;
       const el = document.getElementById(`community-${gameId}`);
       if (!el) return;
-      if (!stats.avg_rating) return;
       el.innerHTML = `<i class="ti ti-users" style="font-size:11px"></i> ${stats.avg_rating} (${stats.rating_count})`;
       el.style.display = 'inline-flex';
     });
@@ -4324,6 +4341,8 @@ function applyPremiumUI() {
   });
   const upgradeBtn = document.getElementById('cfg-upgrade-btn');
   if (upgradeBtn) upgradeBtn.style.display = isPremium ? 'none' : 'block';
+  const headerUpgradeBtn = document.getElementById('header-upgrade-btn');
+  if (headerUpgradeBtn) headerUpgradeBtn.style.display = isPremium ? 'none' : 'inline-block';
   const homeBadge = document.getElementById('user-level-badge');
   if (homeBadge) homeBadge.innerHTML = levelBadgeHtml({ level: userLevel, badge_tier: userBadgeTier, trophy: userTrophy }, 28);
   const cfgBadge = document.getElementById('cfg-level-badge');
@@ -5196,7 +5215,7 @@ async function onLoginSuccess() {
 
   const chip = document.createElement('div');
   chip.className = 'user-chip';
-  chip.innerHTML = `<span id="user-level-badge"></span><span id="user-name-span">${authUser}</span><span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px;margin-left:2px"></span><button class="logout-btn" onclick="openRecovery()" data-i18n="code">Código</button><button class="logout-btn" onclick="logout()" data-i18n="logout">Salir</button>`;
+  chip.innerHTML = `<span id="user-level-badge"></span><span id="user-name-span">${authUser}</span><span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px;margin-left:2px"></span><button id="header-upgrade-btn" onclick="startPaddleCheckout()" style="display:none;font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;margin-left:4px;border:none;background:var(--green);color:#fff;cursor:pointer">✨ Hacerse Premium</button><button class="logout-btn" onclick="openRecovery()" data-i18n="code">Código</button><button class="logout-btn" onclick="logout()" data-i18n="logout">Salir</button>`;
   applyI18n();
   document.getElementById('plat-status-row').before(chip);
 
