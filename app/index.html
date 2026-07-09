@@ -6,6 +6,7 @@
   <title>Playloggr</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+  <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -639,6 +640,10 @@
             <span id="cfg-premium-badge" style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px"></span>
           </div>
         </div>
+        <button id="cfg-upgrade-btn" onclick="startPaddleCheckout()" style="display:none;padding:12px;border-radius:8px;border:none;background:var(--green);color:#fff;cursor:pointer;font-size:13px;font-weight:600;text-align:left">
+          <i class="ti ti-crown"></i> Actualizar a Premium — USD 6.99 (pago único)
+          <div style="font-size:11px;color:rgba(255,255,255,0.85);margin-top:2px;font-weight:400">Desbloqueá biblioteca ilimitada, sync de Steam, nivel 150 y más.</div>
+        </button>
         <button onclick="confirmDeleteLibrary()"
           style="padding:10px;border-radius:8px;border:0.5px solid var(--red);background:transparent;color:var(--red);cursor:pointer;font-size:13px;text-align:left">
           <i class="ti ti-trash"></i> <span data-i18n="deleteLibrary">Eliminar biblioteca</span>
@@ -4218,6 +4223,7 @@ let userFont   = 'default';
 let userUnlockedFrames = ['none'];
 let userUnlockedFonts  = ['default'];
 let userTrophy = false;
+let userEmail  = '';
 
 async function loadPremiumStatus() {
   try {
@@ -4233,6 +4239,7 @@ async function loadPremiumStatus() {
     userUnlockedFrames = d.unlocked_frames || ['none'];
     userUnlockedFonts  = d.unlocked_fonts || ['default'];
     userTrophy = d.trophy || false;
+    userEmail  = d.email || '';
     if (d.language === 'en' || d.language === 'es') {
       currentLang = d.language;
       localStorage.setItem('gb_lang', currentLang);
@@ -4240,6 +4247,40 @@ async function loadPremiumStatus() {
     }
   } catch (e) {}
   applyPremiumUI();
+}
+
+const PADDLE_CLIENT_TOKEN = 'live_4294a95e165defc1705c2a13c35';
+const PADDLE_PRICE_ID     = 'pri_01kx4bzvpcrtgqrpv80p2cep89';
+let _paddleReady = false;
+
+function _ensurePaddleReady() {
+  if (_paddleReady || typeof Paddle === 'undefined') return;
+  Paddle.Setup({
+    token: PADDLE_CLIENT_TOKEN,
+    eventCallback: function (event) {
+      if (event.name === 'checkout.completed') {
+        // El webhook es la fuente de verdad; esto solo refresca la UI
+        // mas rapido para que el usuario vea el cambio sin recargar.
+        showToast('¡Pago recibido! Activando premium...', false);
+        setTimeout(loadPremiumStatus, 4000);
+      }
+    },
+  });
+  _paddleReady = true;
+}
+
+function startPaddleCheckout() {
+  _ensurePaddleReady();
+  if (typeof Paddle === 'undefined') {
+    showToast('No se pudo cargar el checkout de pago. Recargá la página e intentá de nuevo.', true);
+    return;
+  }
+  Paddle.Checkout.open({
+    items: [{ priceId: PADDLE_PRICE_ID, quantity: 1 }],
+    customer: userEmail ? { email: userEmail } : undefined,
+    customData: { username: authUser, email: userEmail },
+    settings: { theme: 'dark' },
+  });
 }
 
 function applyPremiumUI() {
@@ -4260,6 +4301,8 @@ function applyPremiumUI() {
     badge.style.background = isPremium ? 'rgba(29,158,117,0.15)' : 'rgba(136,135,128,0.25)';
     badge.style.color      = isPremium ? 'var(--green)' : 'var(--text2)';
   });
+  const upgradeBtn = document.getElementById('cfg-upgrade-btn');
+  if (upgradeBtn) upgradeBtn.style.display = isPremium ? 'none' : 'block';
   const homeBadge = document.getElementById('user-level-badge');
   if (homeBadge) homeBadge.innerHTML = levelBadgeHtml({ level: userLevel, badge_tier: userBadgeTier, trophy: userTrophy }, 28);
   const cfgBadge = document.getElementById('cfg-level-badge');
