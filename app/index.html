@@ -298,6 +298,19 @@
               <i class="ti ti-restore"></i> <span data-i18n="restoreWishlist">Restablecer deseados borrados</span>
             </button>
           </div>
+          <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
+          <!-- Xbox (prueba) -->
+          <div style="padding:10px 14px">
+            <div style="font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px"><i class="ti ti-brand-xbox"></i> Xbox (prueba)</div>
+            <div id="xbox-not-connected">
+              <button onclick="connectXbox()" style="width:100%;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text);cursor:pointer">Conectar cuenta de Xbox</button>
+            </div>
+            <div id="xbox-connected" style="display:none;font-size:11px;color:var(--text2)">
+              Conectado: <strong id="xbox-gamertag" style="color:var(--text)"></strong>
+              <button onclick="debugXboxTitles()" style="display:block;width:100%;margin-top:6px;padding:5px 10px;font-size:11px;border-radius:6px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text);cursor:pointer">Ver datos crudos (debug)</button>
+            </div>
+            <pre id="xbox-debug-output" style="display:none;font-size:9px;background:var(--bg3);padding:8px;border-radius:6px;margin-top:8px;max-height:180px;overflow:auto;white-space:pre-wrap"></pre>
+          </div>
         </div>
       </div>
 
@@ -886,18 +899,6 @@
       </div>
     </div>
     <div id="settings-msg" style="font-size:12px;margin-top:10px;display:none"></div>
-
-    <div style="border-top:0.5px solid var(--border);margin:16px 0 12px;padding-top:14px">
-      <div style="font-size:13px;font-weight:600;margin-bottom:8px"><i class="ti ti-brand-xbox" style="color:#107c10"></i> Xbox <span style="font-size:10px;color:var(--text2);font-weight:400">(prueba)</span></div>
-      <div id="xbox-not-connected">
-        <button class="btn-secondary" onclick="connectXbox()" style="font-size:12px">Conectar cuenta de Xbox</button>
-      </div>
-      <div id="xbox-connected" style="display:none;font-size:12px;color:var(--text2)">
-        Conectado como <strong id="xbox-gamertag" style="color:var(--text)"></strong>
-        <button class="btn-secondary" onclick="debugXboxTitles()" style="font-size:11px;margin-left:8px">Ver datos crudos (debug)</button>
-      </div>
-      <pre id="xbox-debug-output" style="display:none;font-size:10px;background:var(--bg3);padding:10px;border-radius:8px;margin-top:10px;max-height:200px;overflow:auto;white-space:pre-wrap"></pre>
-    </div>
 
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeSettings()" data-i18n="cancel">Cancelar</button>
