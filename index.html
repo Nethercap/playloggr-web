@@ -113,6 +113,13 @@
     display: flex; gap: 16px; overflow-x: auto; padding: 8px 24px 20px;
     scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
   }
+  /* Cuando las cards entran todas en pantalla, centrarlas en vez de
+     dejarlas pegadas a la izquierda. En viewports mas chicos donde
+     desborda, se mantiene el scroll horizontal normal (sin centrar,
+     evita el bug de recorte inicial de Chrome/Firefox con overflow+center). */
+  @media (min-width: 1180px) {
+    .gallery-scroll { justify-content: center; }
+  }
   .gallery-scroll::-webkit-scrollbar { height: 8px; }
   .gallery-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
   .shot {
