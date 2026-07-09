@@ -1053,6 +1053,7 @@ const I18N = {
     sendCode: 'Enviar código', enterEmailFirst: 'Ingresá tu email primero',
     codeSentIfExists: 'Si el email existe, te enviamos un código de recuperación.',
     genericNetworkError: 'Error de conexión. Intentá de nuevo.',
+    globalStatsUpdateNote: 'Se actualiza una vez al día a las 00:00 (hora Argentina, GMT-3) · Última actualización: {time}',
   },
   en: {
     sync: 'Sync', stats: 'Stats', config: 'Settings', friends: 'Friends',
@@ -1136,6 +1137,7 @@ const I18N = {
     sendCode: 'Send code', enterEmailFirst: 'Enter your email first',
     codeSentIfExists: 'If the email exists, we sent a recovery code.',
     genericNetworkError: 'Connection error. Please try again.',
+    globalStatsUpdateNote: 'Updates once a day at 00:00 (Argentina time, GMT-3) · Last updated: {time}',
   },
   pt: {
     sync: 'Sincronizar', stats: 'Estatísticas', config: 'Configurações', friends: 'Amigos',
@@ -1219,6 +1221,7 @@ const I18N = {
     sendCode: 'Enviar código', enterEmailFirst: 'Digite seu email primeiro',
     codeSentIfExists: 'Se o email existir, enviamos um código de recuperação.',
     genericNetworkError: 'Erro de conexão. Tente novamente.',
+    globalStatsUpdateNote: 'Atualiza uma vez por dia às 00:00 (horário de Argentina, GMT-3) · Última atualização: {time}',
   },
 };
 
@@ -1839,6 +1842,11 @@ function toggleFilterDropdown(key, options, wrap, btn) {
   // Close any open dropdown
   document.querySelectorAll('.filter-popup').forEach(p => p.remove());
 
+  // Snapshot del estado al abrir, para no re-sincronizar si el usuario
+  // cierra el dropdown sin cambiar nada.
+  const initialSelection = Array.from(activeFilters[key] || []).sort().join('');
+  const hasChanged = () => Array.from(activeFilters[key] || []).sort().join('') !== initialSelection;
+
   const popup = document.createElement('div');
   popup.className = 'filter-popup';
   popup.style.cssText = 'position:absolute;top:calc(100% + 4px);left:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:200;min-width:180px;padding:4px 0 0;box-shadow:0 4px 16px rgba(0,0,0,0.3)';
@@ -1900,7 +1908,7 @@ function toggleFilterDropdown(key, options, wrap, btn) {
   okBtn.style.cssText = 'font-size:12px;padding:3px 14px;border-radius:5px;border:none;background:var(--green);color:#fff;cursor:pointer';
   okBtn.onmousedown = (e) => {
     e.preventDefault();
-    applyFilters();
+    if (hasChanged()) applyFilters();
     popup.remove();
   };
   footer.appendChild(clearBtn);
@@ -1909,12 +1917,14 @@ function toggleFilterDropdown(key, options, wrap, btn) {
 
   wrap.appendChild(popup);
 
-  // Close on outside click — apply filters
+  // Close on outside click — solo re-sincroniza si realmente cambio algo.
   setTimeout(() => {
     function outsideHandler(e) {
       if (!popup.contains(e.target) && !btn.contains(e.target)) {
-        applyFilters();
-        renderFilterDropdowns();
+        if (hasChanged()) {
+          applyFilters();
+          renderFilterDropdowns();
+        }
         popup.remove();
         document.removeEventListener('mousedown', outsideHandler);
       }
@@ -2194,7 +2204,9 @@ function toggleSortDir() {
 function applyFilters() {
   searchQ  = document.getElementById('search-input')?.value || '';
   sortMode = document.getElementById('sort-sel')?.value || 'name';
-  syncAll(1);
+  // silent=true: evita blanquear la lista y animar el boton de sync para
+  // un cambio de filtro/orden, que deberia sentirse instantaneo/fluido.
+  syncAll(1, true);
 }
 
 function showEmailLogin() {
@@ -2351,7 +2363,15 @@ async function loadGlobalRankings() {
         ${content}
       </div>`;
 
+    const updatedNote = d.updated_at
+      ? t('globalStatsUpdateNote').replace('{time}', new Date(d.updated_at).toLocaleString(
+          currentLang === 'en' ? 'en-US' : currentLang === 'pt' ? 'pt-BR' : 'es-AR',
+          { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }
+        ))
+      : '';
+
     el.innerHTML = `
+      ${updatedNote ? `<div style="font-size:11px;color:var(--text2);margin-bottom:14px;display:flex;align-items:center;gap:6px"><i class="ti ti-clock"></i> ${updatedNote}</div>` : ''}
       <div style="margin-bottom:16px">
         <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--green)">${t('historical')}</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
@@ -4160,7 +4180,7 @@ function renderPagination() {
   prev.textContent = '←';
   prev.className = 'filter-btn';
   prev.disabled = currentPage <= 1;
-  prev.onclick = () => syncAll(currentPage - 1);
+  prev.onclick = () => syncAll(currentPage - 1, true);
 
   const label = document.createElement('span');
   label.style.cssText = 'font-size:13px;color:var(--color-text-secondary)';
@@ -4170,7 +4190,7 @@ function renderPagination() {
   next.textContent = '→';
   next.className = 'filter-btn';
   next.disabled = currentPage >= totalPages;
-  next.onclick = () => syncAll(currentPage + 1);
+  next.onclick = () => syncAll(currentPage + 1, true);
 
   bar.appendChild(prev);
   bar.appendChild(label);
@@ -5244,15 +5264,21 @@ async function syncAll(page = 1, silent = false) {
     }
   }
 
-  let ok = false;
-  try { const r = await fetch(`${apiBase()}/api/v1/health`); ok = r.ok; } catch(e) {}
+  // El chequeo de /health es para la sincronizacion manual (boton
+  // "Sincronizar"); en resyncs silenciosos (filtros, paginacion) ya
+  // sabemos que el backend responde porque la pagina esta cargada, asi
+  // que nos ahorramos ese round-trip extra.
+  if (!silent) {
+    let ok = false;
+    try { const r = await fetch(`${apiBase()}/api/v1/health`); ok = r.ok; } catch(e) {}
 
-  if (!ok) {
-    showError(t('cannotConnectBackend'));
-    document.getElementById('game-list').innerHTML = `<div class="empty"><i class="ti ti-wifi-off"></i>${t('backendUnavailable')}</div>`;
-    platNames.forEach(p => { platStatus[p]='err'; }); renderPlatStatus();
-    btn.disabled=false; btn.innerHTML = `<i class="ti ti-refresh"></i> ${t('retry')}`;
-    return;
+    if (!ok) {
+      showError(t('cannotConnectBackend'));
+      document.getElementById('game-list').innerHTML = `<div class="empty"><i class="ti ti-wifi-off"></i>${t('backendUnavailable')}</div>`;
+      platNames.forEach(p => { platStatus[p]='err'; }); renderPlatStatus();
+      btn.disabled=false; btn.innerHTML = `<i class="ti ti-refresh"></i> ${t('retry')}`;
+      return;
+    }
   }
 
   const tok = authToken || localStorage.getItem('gb_token') || '';
