@@ -298,19 +298,6 @@
               <i class="ti ti-restore"></i> <span data-i18n="restoreWishlist">Restablecer deseados borrados</span>
             </button>
           </div>
-          <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
-          <!-- Xbox (prueba) -->
-          <div style="padding:10px 14px">
-            <div style="font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px"><i class="ti ti-brand-xbox"></i> Xbox (prueba)</div>
-            <div id="xbox-not-connected">
-              <button onclick="connectXbox()" style="width:100%;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text);cursor:pointer">Conectar cuenta de Xbox</button>
-            </div>
-            <div id="xbox-connected" style="display:none;font-size:11px;color:var(--text2)">
-              Conectado: <strong id="xbox-gamertag" style="color:var(--text)"></strong>
-              <button onclick="debugXboxTitles()" style="display:block;width:100%;margin-top:6px;padding:5px 10px;font-size:11px;border-radius:6px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text);cursor:pointer">Ver datos crudos (debug)</button>
-            </div>
-            <pre id="xbox-debug-output" style="display:none;font-size:9px;background:var(--bg3);padding:8px;border-radius:6px;margin-top:8px;max-height:180px;overflow:auto;white-space:pre-wrap"></pre>
-          </div>
         </div>
       </div>
 
@@ -2206,39 +2193,6 @@ async function saveSettings() {
     msg.textContent = t('saveErrorRetry');
     msg.style.color = 'var(--red)';
     msg.style.display = 'block';
-  }
-}
-
-function connectXbox() {
-  const url = `${apiBase()}/api/v1/auth/xbox/login?token=${encodeURIComponent(authToken)}`;
-  const popup = window.open(url, 'xbox-connect', 'width=500,height=700');
-  window.addEventListener('message', function handler(e) {
-    if (e.data && (e.data.xboxConnected || e.data.error)) {
-      window.removeEventListener('message', handler);
-      if (e.data.xboxConnected) {
-        document.getElementById('xbox-not-connected').style.display = 'none';
-        document.getElementById('xbox-connected').style.display = 'block';
-        document.getElementById('xbox-gamertag').textContent = e.data.gamertag || '';
-      } else {
-        showToast('Error al conectar Xbox: ' + e.data.error, true);
-      }
-    }
-  });
-}
-
-async function debugXboxTitles() {
-  const out = document.getElementById('xbox-debug-output');
-  out.style.display = 'block';
-  out.textContent = 'Cargando...';
-  try {
-    const res = await fetch(`${apiBase()}/api/v1/xbox/debug-titles`, {
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    });
-    const d = await res.json();
-    if (!res.ok) throw new Error(d.detail || 'Error');
-    out.textContent = JSON.stringify(d, null, 2);
-  } catch (e) {
-    out.textContent = 'Error: ' + e.message;
   }
 }
 
