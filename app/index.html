@@ -1585,7 +1585,34 @@ function steamCoverHtml(g, extraStyle = '') {
   ].filter((v, i, arr) => arr.indexOf(v) === i); // sin duplicados
   const first = candidates[0];
   const rest  = candidates.slice(1);
-  return `<img src="${first}" alt="${g.name}"${styleAttr} data-fallbacks='${JSON.stringify(rest)}' onerror="handleCoverError(this)">`;
+  return `<img src="${first}" alt="${g.name}"${styleAttr} data-appid="${g.app_id}" data-fallbacks='${JSON.stringify(rest)}' onerror="handleCoverError(this)">`;
+}
+
+// Cuando se agotan todas las rutas de CDN adivinadas, se pide la portada
+// real via appdetails (agrupando varios juegos en un solo request con
+// debounce, en vez de un request por juego).
+let _pendingCoverAppIds = new Map(); // app_id -> [img, ...]
+let _coverBatchTimer = null;
+
+function _flushCoverBatch() {
+  const pending = _pendingCoverAppIds;
+  _pendingCoverAppIds = new Map();
+  _coverBatchTimer = null;
+  if (!pending.size) return;
+  const ids = [...pending.keys()].join(',');
+  fetch(`${apiBase()}/api/v1/steam/cover/batch?app_ids=${encodeURIComponent(ids)}`, {
+    headers: { 'Authorization': `Bearer ${authToken}` }
+  }).then(r => r.ok ? r.json() : {}).then(data => {
+    pending.forEach((imgs, appId) => {
+      const url = data[appId];
+      imgs.forEach(img => {
+        if (url) { img.onerror = () => { img.style.display = 'none'; }; img.src = url; }
+        else img.style.display = 'none';
+      });
+    });
+  }).catch(() => {
+    pending.forEach(imgs => imgs.forEach(img => { img.style.display = 'none'; }));
+  });
 }
 
 function handleCoverError(img) {
@@ -1594,9 +1621,14 @@ function handleCoverError(img) {
   if (fallbacks.length) {
     img.src = fallbacks.shift();
     img.dataset.fallbacks = JSON.stringify(fallbacks);
-  } else {
-    img.style.display = 'none';
+    return;
   }
+  const appId = img.dataset.appid;
+  if (!appId) { img.style.display = 'none'; return; }
+  if (!_pendingCoverAppIds.has(appId)) _pendingCoverAppIds.set(appId, []);
+  _pendingCoverAppIds.get(appId).push(img);
+  clearTimeout(_coverBatchTimer);
+  _coverBatchTimer = setTimeout(_flushCoverBatch, 400);
 }
 
 async function renderGames() {
