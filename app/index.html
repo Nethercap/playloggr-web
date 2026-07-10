@@ -2720,7 +2720,7 @@ function renderAvatarPreview() {
   const box = document.getElementById('avatar-preview-box2');
   if (box) box.innerHTML = pixelAvatarHtml(currentAvatarConfig, 150);
   const thumb = document.getElementById('avatar-thumb-box');
-  if (thumb) thumb.innerHTML = pixelAvatarHtml(currentAvatarConfig, 72);
+  if (thumb) thumb.innerHTML = pixelAvatarHtml(currentAvatarConfig, 48);
 }
 
 function renderRacePicker() {
@@ -4664,7 +4664,7 @@ function applyAvatarFrameUI() {
 
   const thumbWrap = document.getElementById('avatar-thumb-box')?.parentElement;
   if (thumbWrap) thumbWrap.setAttribute('style',
-    `cursor:pointer;display:flex;align-items:center;justify-content:center;${frameWrapStyle(userFrame)}`);
+    `cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 66px;height:66px;box-sizing:border-box;overflow:hidden;${frameWrapStyle(userFrame)}`);
 }
 
 function renderCosmeticPickers() {
