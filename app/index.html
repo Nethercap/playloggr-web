@@ -110,6 +110,15 @@
     .steam-menu-item { display:flex; align-items:center; gap:8px; width:100%; padding:8px 14px; font-size:12px; border:none; background:transparent; color:var(--green); cursor:pointer; text-align:left; }
     .steam-menu-item:hover { background:rgba(29,158,117,0.1); }
 
+    /* ── Onboarding ── */
+    .onboarding-slide { display:flex; flex-direction:column; }
+    .onboarding-slide img { width:100%; height:200px; object-fit:cover; object-position:top; display:block; background:var(--bg2); }
+    .onboarding-slide-text { padding:20px 22px 4px; }
+    .onboarding-slide-text h3 { font-size:16px; font-weight:600; margin-bottom:6px; }
+    .onboarding-slide-text p { font-size:13px; color:var(--text2); line-height:1.5; }
+    .onboarding-dot { width:6px; height:6px; border-radius:50%; background:var(--border2); transition:background .2s; }
+    .onboarding-dot.active { background:var(--green); }
+
     /* ── Modal ── */
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:100; align-items:center; justify-content:center; }
     .modal-overlay.open { display:flex; }
@@ -971,6 +980,20 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="onboarding-overlay">
+  <div class="modal" style="max-width:420px;padding:0;overflow:hidden">
+    <button id="onboarding-skip" onclick="dismissOnboarding()" style="position:absolute;top:10px;right:14px;background:none;border:none;color:var(--text2);font-size:12px;cursor:pointer;z-index:2"></button>
+    <div id="onboarding-slides" style="display:flex;overflow:hidden"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 20px">
+      <div id="onboarding-dots" style="display:flex;gap:6px"></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-cancel" id="onboarding-back" onclick="onboardingStep(-1)" style="display:none"></button>
+        <button class="btn-save" id="onboarding-next" onclick="onboardingStep(1)"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── i18n ─────────────────────────────────────────────────────────────────
 let currentLang = localStorage.getItem('gb_lang') || 'es';
@@ -1059,6 +1082,12 @@ const I18N = {
     codeSentIfExists: 'Si el email existe, te enviamos un código de recuperación.',
     genericNetworkError: 'Error de conexión. Intentá de nuevo.',
     globalStatsUpdateNote: 'Se actualiza una vez al día a las 00:00 (hora Argentina, GMT-3)',
+    onboardTitle1: 'Tu biblioteca, ordenada', onboardBody1: 'Todos tus juegos en un solo lugar: qué estás jugando, qué completaste, qué dejaste y qué te falta arrancar.',
+    onboardTitle2: 'Sincronizá con Steam', onboardBody2: 'Conectá tu cuenta de Steam y traé tu biblioteca y tu lista de deseados automáticamente, con reseñas y portadas incluidas.',
+    onboardTitle3: 'Subí de nivel', onboardBody3: 'Ganás experiencia por cada juego que agregás, calificás o completás. Desbloqueá marcos y fuentes para tu perfil.',
+    onboardTitle4: 'Mirá tus estadísticas', onboardBody4: 'Horas jugadas, géneros favoritos, comparación con el resto de la comunidad y rankings globales.',
+    onboardTitle5: 'Personalizá tu avatar', onboardBody5: 'Armá tu propio personaje pixel art con la ropa y accesorios que vayas desbloqueando.',
+    onboardNext: 'Siguiente', onboardBack: 'Atrás', onboardStart: 'Empezar', onboardSkip: 'Saltar',
   },
   en: {
     sync: 'Sync', stats: 'Stats', config: 'Settings', friends: 'Friends',
@@ -1143,6 +1172,12 @@ const I18N = {
     codeSentIfExists: 'If the email exists, we sent a recovery code.',
     genericNetworkError: 'Connection error. Please try again.',
     globalStatsUpdateNote: 'Updates once a day at 00:00 (Argentina time, GMT-3)',
+    onboardTitle1: 'Your backlog, organized', onboardBody1: 'All your games in one place: what you\'re playing, what you\'ve finished, what you dropped, and what\'s next.',
+    onboardTitle2: 'Sync with Steam', onboardBody2: 'Connect your Steam account to automatically bring in your library and wishlist, reviews and covers included.',
+    onboardTitle3: 'Level up', onboardBody3: 'Earn XP for every game you add, rate or finish. Unlock frames and fonts for your profile.',
+    onboardTitle4: 'Check your stats', onboardBody4: 'Hours played, favorite genres, comparisons with the rest of the community and global rankings.',
+    onboardTitle5: 'Customize your avatar', onboardBody5: 'Build your own pixel-art character with the clothes and accessories you unlock.',
+    onboardNext: 'Next', onboardBack: 'Back', onboardStart: 'Get started', onboardSkip: 'Skip',
   },
   pt: {
     sync: 'Sincronizar', stats: 'Estatísticas', config: 'Configurações', friends: 'Amigos',
@@ -1227,6 +1262,12 @@ const I18N = {
     codeSentIfExists: 'Se o email existir, enviamos um código de recuperação.',
     genericNetworkError: 'Erro de conexão. Tente novamente.',
     globalStatsUpdateNote: 'Atualiza uma vez por dia às 00:00 (horário de Argentina, GMT-3)',
+    onboardTitle1: 'Sua biblioteca, organizada', onboardBody1: 'Todos os seus jogos em um só lugar: o que você está jogando, o que completou, o que abandonou e o que falta começar.',
+    onboardTitle2: 'Sincronize com a Steam', onboardBody2: 'Conecte sua conta da Steam e traga sua biblioteca e lista de desejados automaticamente, com avaliações e capas incluídas.',
+    onboardTitle3: 'Suba de nível', onboardBody3: 'Ganhe experiência por cada jogo que você adiciona, avalia ou completa. Desbloqueie molduras e fontes para o seu perfil.',
+    onboardTitle4: 'Veja suas estatísticas', onboardBody4: 'Horas jogadas, gêneros favoritos, comparação com o resto da comunidade e rankings globais.',
+    onboardTitle5: 'Personalize seu avatar', onboardBody5: 'Monte seu próprio personagem em pixel art com as roupas e acessórios que for desbloqueando.',
+    onboardNext: 'Próximo', onboardBack: 'Voltar', onboardStart: 'Começar', onboardSkip: 'Pular',
   },
 };
 
@@ -4366,6 +4407,9 @@ async function loadPremiumStatus() {
       localStorage.setItem('gb_lang', currentLang);
       applyI18n();
     }
+    if (d.onboarding_web_seen === false) {
+      showOnboarding();
+    }
   } catch (e) {}
   applyPremiumUI();
 }
@@ -4402,6 +4446,72 @@ function startPaddleCheckout() {
     customData: { username: authUser, email: userEmail },
     settings: { theme: 'dark' },
   });
+}
+
+// ── Onboarding (tutorial primera vez) ──────────────────────────────────────
+const ONBOARDING_SLIDES = [
+  { titleKey: 'onboardTitle1', bodyKey: 'onboardBody1', img: '/assets/screenshots/biblioteca.png' },
+  { titleKey: 'onboardTitle2', bodyKey: 'onboardBody2', icon: 'ti-brand-steam' },
+  { titleKey: 'onboardTitle3', bodyKey: 'onboardBody3', img: '/assets/screenshots/logros.png' },
+  { titleKey: 'onboardTitle4', bodyKey: 'onboardBody4', img: '/assets/screenshots/estadisticas.png' },
+  { titleKey: 'onboardTitle5', bodyKey: 'onboardBody5', img: '/assets/screenshots/avatar.png' },
+];
+let _onboardingStep = 0;
+
+function showOnboarding() {
+  _onboardingStep = 0;
+  const slidesEl = document.getElementById('onboarding-slides');
+  const slideBasis = 100 / ONBOARDING_SLIDES.length;
+  slidesEl.innerHTML = ONBOARDING_SLIDES.map(s => `
+    <div class="onboarding-slide" style="flex:0 0 ${slideBasis}%">
+      ${s.img
+        ? `<img src="${s.img}" alt="">`
+        : `<div style="width:100%;height:200px;display:flex;align-items:center;justify-content:center;background:var(--bg2)"><i class="ti ${s.icon}" style="font-size:64px;color:var(--green)"></i></div>`}
+      <div class="onboarding-slide-text">
+        <h3>${t(s.titleKey)}</h3>
+        <p>${t(s.bodyKey)}</p>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('onboarding-dots').innerHTML = ONBOARDING_SLIDES.map((_, i) =>
+    `<span class="onboarding-dot${i === 0 ? ' active' : ''}"></span>`
+  ).join('');
+  document.getElementById('onboarding-skip').textContent = t('onboardSkip');
+  slidesEl.style.width = `${ONBOARDING_SLIDES.length * 100}%`;
+  slidesEl.style.transition = 'transform .25s ease';
+  _renderOnboardingStep();
+  document.getElementById('onboarding-overlay').classList.add('open');
+}
+
+function _renderOnboardingStep() {
+  const pct = 100 / ONBOARDING_SLIDES.length;
+  document.getElementById('onboarding-slides').style.transform = `translateX(-${_onboardingStep * pct}%)`;
+  document.querySelectorAll('#onboarding-dots .onboarding-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === _onboardingStep);
+  });
+  document.getElementById('onboarding-back').style.display = _onboardingStep === 0 ? 'none' : 'inline-block';
+  document.getElementById('onboarding-back').textContent = t('onboardBack');
+  const isLast = _onboardingStep === ONBOARDING_SLIDES.length - 1;
+  document.getElementById('onboarding-next').textContent = isLast ? t('onboardStart') : t('onboardNext');
+}
+
+function onboardingStep(delta) {
+  const next = _onboardingStep + delta;
+  if (next < 0) return;
+  if (next >= ONBOARDING_SLIDES.length) { dismissOnboarding(); return; }
+  _onboardingStep = next;
+  _renderOnboardingStep();
+}
+
+async function dismissOnboarding() {
+  document.getElementById('onboarding-overlay').classList.remove('open');
+  try {
+    await fetch(`${apiBase()}/api/v1/user/onboarding-seen`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ platform: 'web' }),
+    });
+  } catch (e) {}
 }
 
 function applyPremiumUI() {
