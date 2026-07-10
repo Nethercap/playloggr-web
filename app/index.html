@@ -119,6 +119,14 @@
     .onboarding-dot { width:6px; height:6px; border-radius:50%; background:var(--border2); transition:background .2s; }
     .onboarding-dot.active { background:var(--green); }
 
+    /* ── Feature tour (coachmarks) ── */
+    .tour-highlight { position:fixed; border:2px solid var(--green); border-radius:10px; box-shadow:0 0 0 9999px rgba(0,0,0,.6); pointer-events:none; transition:left .25s ease,top .25s ease,width .25s ease,height .25s ease; z-index:500; }
+    .tour-tooltip { position:fixed; background:var(--bg); border:0.5px solid var(--border2); border-radius:10px; padding:14px 16px; width:260px; max-width:calc(100vw - 24px); box-shadow:0 8px 24px rgba(0,0,0,.4); z-index:501; transition:left .25s ease,top .25s ease; }
+    .tour-tooltip h4 { font-size:14px; font-weight:600; margin-bottom:6px; }
+    .tour-tooltip p { font-size:12px; color:var(--text2); line-height:1.45; margin-bottom:12px; }
+    .tour-actions { display:flex; align-items:center; justify-content:space-between; }
+    .tour-actions .tour-count { font-size:11px; color:var(--text2); }
+
     /* ── Modal ── */
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:100; align-items:center; justify-content:center; }
     .modal-overlay.open { display:flex; }
@@ -255,7 +263,7 @@
       <!-- Language toggle -->
       <button onclick="toggleLanguage()" id="lang-toggle-btn" style="margin-left:4px;padding:5px 10px;font-size:12px;font-weight:600;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" title="Language / Idioma">EN</button>
       <!-- Stats button -->
-      <button onclick="openStatsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="stats" title="Estadísticas">
+      <button id="stats-icon-btn" onclick="openStatsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="stats" title="Estadísticas">
         <i class="ti ti-chart-bar" style="font-size:14px"></i>
       </button>
 
@@ -1088,6 +1096,12 @@ const I18N = {
     onboardTitle4: 'Mirá tus estadísticas', onboardBody4: 'Horas jugadas, géneros favoritos, comparación con el resto de la comunidad y rankings globales.',
     onboardTitle5: 'Personalizá tu avatar', onboardBody5: 'Armá tu propio personaje pixel art con la ropa y accesorios que vayas desbloqueando.',
     onboardNext: 'Siguiente', onboardBack: 'Atrás', onboardStart: 'Empezar', onboardSkip: 'Saltar',
+    tourTitleSteam: 'Sincronizá con Steam', tourBodySteam: 'Tocá acá y elegí "Sincronizar todo" para traer tu biblioteca y deseados automáticamente.',
+    tourTitleAdd: 'Agregá juegos', tourBodyAdd: 'Tocá acá para agregar un juego manualmente a tu biblioteca.',
+    tourTitleFolders: 'Organizá con carpetas', tourBodyFolders: 'Creá carpetas para agrupar tus juegos como quieras.',
+    tourTitleStats: 'Mirá tus estadísticas', tourBodyStats: 'Tocá acá para ver tus horas, géneros favoritos y rankings globales.',
+    tourTitleSession: 'Registrá una sesión en vivo', tourBodySession: 'Tocá este botón en cualquier juego para iniciar el cronómetro mientras jugás.',
+    tourDone: 'Listo',
   },
   en: {
     sync: 'Sync', stats: 'Stats', config: 'Settings', friends: 'Friends',
@@ -1178,6 +1192,12 @@ const I18N = {
     onboardTitle4: 'Check your stats', onboardBody4: 'Hours played, favorite genres, comparisons with the rest of the community and global rankings.',
     onboardTitle5: 'Customize your avatar', onboardBody5: 'Build your own pixel-art character with the clothes and accessories you unlock.',
     onboardNext: 'Next', onboardBack: 'Back', onboardStart: 'Get started', onboardSkip: 'Skip',
+    tourTitleSteam: 'Sync with Steam', tourBodySteam: 'Tap here and choose "Sync all" to automatically bring in your library and wishlist.',
+    tourTitleAdd: 'Add games', tourBodyAdd: 'Tap here to manually add a game to your library.',
+    tourTitleFolders: 'Organize with folders', tourBodyFolders: 'Create folders to group your games however you like.',
+    tourTitleStats: 'Check your stats', tourBodyStats: 'Tap here to see your hours, favorite genres and global rankings.',
+    tourTitleSession: 'Log a live session', tourBodySession: 'Tap this button on any game to start the timer while you play.',
+    tourDone: 'Done',
   },
   pt: {
     sync: 'Sincronizar', stats: 'Estatísticas', config: 'Configurações', friends: 'Amigos',
@@ -1268,6 +1288,12 @@ const I18N = {
     onboardTitle4: 'Veja suas estatísticas', onboardBody4: 'Horas jogadas, gêneros favoritos, comparação com o resto da comunidade e rankings globais.',
     onboardTitle5: 'Personalize seu avatar', onboardBody5: 'Monte seu próprio personagem em pixel art com as roupas e acessórios que for desbloqueando.',
     onboardNext: 'Próximo', onboardBack: 'Voltar', onboardStart: 'Começar', onboardSkip: 'Pular',
+    tourTitleSteam: 'Sincronize com a Steam', tourBodySteam: 'Toque aqui e escolha "Sincronizar tudo" para trazer sua biblioteca e desejados automaticamente.',
+    tourTitleAdd: 'Adicione jogos', tourBodyAdd: 'Toque aqui para adicionar um jogo manualmente à sua biblioteca.',
+    tourTitleFolders: 'Organize com pastas', tourBodyFolders: 'Crie pastas para agrupar seus jogos como quiser.',
+    tourTitleStats: 'Veja suas estatísticas', tourBodyStats: 'Toque aqui para ver suas horas, gêneros favoritos e rankings globais.',
+    tourTitleSession: 'Registre uma sessão ao vivo', tourBodySession: 'Toque neste botão em qualquer jogo para iniciar o cronômetro enquanto joga.',
+    tourDone: 'Concluído',
   },
 };
 
@@ -4498,13 +4524,22 @@ function _renderOnboardingStep() {
 function onboardingStep(delta) {
   const next = _onboardingStep + delta;
   if (next < 0) return;
-  if (next >= ONBOARDING_SLIDES.length) { dismissOnboarding(); return; }
+  if (next >= ONBOARDING_SLIDES.length) { finishOnboardingIntro(); return; }
   _onboardingStep = next;
   _renderOnboardingStep();
 }
 
+function finishOnboardingIntro() {
+  document.getElementById('onboarding-overlay').classList.remove('open');
+  setTimeout(startFeatureTour, 350);
+}
+
 async function dismissOnboarding() {
   document.getElementById('onboarding-overlay').classList.remove('open');
+  await markOnboardingSeenApi();
+}
+
+async function markOnboardingSeenApi() {
   try {
     await fetch(`${apiBase()}/api/v1/user/onboarding-seen`, {
       method: 'POST',
@@ -4512,6 +4547,80 @@ async function dismissOnboarding() {
       body: JSON.stringify({ platform: 'web' }),
     });
   } catch (e) {}
+}
+
+// ── Feature tour (coachmarks sobre botones reales) ─────────────────────────
+const FEATURE_TOUR_STEPS = [
+  { selector: '#steam-menu-btn',   titleKey: 'tourTitleSteam',   bodyKey: 'tourBodySteam' },
+  { selector: '#add-game-btn',     titleKey: 'tourTitleAdd',     bodyKey: 'tourBodyAdd' },
+  { selector: '#folder-filter-btn', titleKey: 'tourTitleFolders', bodyKey: 'tourBodyFolders' },
+  { selector: '#stats-icon-btn',   titleKey: 'tourTitleStats',   bodyKey: 'tourBodyStats' },
+  { selector: '.play-btn',         titleKey: 'tourTitleSession', bodyKey: 'tourBodySession' },
+];
+let _tourSteps = [];
+let _tourIndex = 0;
+
+function startFeatureTour() {
+  _tourSteps = FEATURE_TOUR_STEPS.filter(s => {
+    const el = document.querySelector(s.selector);
+    return el && el.offsetParent !== null;
+  });
+  if (!_tourSteps.length) { markOnboardingSeenApi(); return; }
+  _tourIndex = 0;
+  if (!document.getElementById('tour-highlight')) {
+    const hl = document.createElement('div'); hl.id = 'tour-highlight'; hl.className = 'tour-highlight';
+    const tip = document.createElement('div'); tip.id = 'tour-tooltip'; tip.className = 'tour-tooltip';
+    document.body.appendChild(hl); document.body.appendChild(tip);
+  }
+  _renderTourStep();
+}
+
+function _renderTourStep() {
+  const step = _tourSteps[_tourIndex];
+  const el = document.querySelector(step.selector);
+  if (!el) { _tourNext(); return; }
+  const r = el.getBoundingClientRect();
+  const hl = document.getElementById('tour-highlight');
+  hl.style.left = `${r.left - 6}px`;
+  hl.style.top = `${r.top - 6}px`;
+  hl.style.width = `${r.width + 12}px`;
+  hl.style.height = `${r.height + 12}px`;
+
+  const isLast = _tourIndex === _tourSteps.length - 1;
+  const tip = document.getElementById('tour-tooltip');
+  tip.innerHTML = `
+    <h4>${t(step.titleKey)}</h4>
+    <p>${t(step.bodyKey)}</p>
+    <div class="tour-actions">
+      <span class="tour-count">${_tourIndex + 1}/${_tourSteps.length}</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn-cancel" onclick="_endTour()">${t('onboardSkip')}</button>
+        <button class="btn-save" onclick="_tourNext()">${isLast ? t('tourDone') : t('onboardNext')}</button>
+      </div>
+    </div>
+  `;
+  const tipRect = tip.getBoundingClientRect();
+  let top = r.bottom + 14;
+  if (top + tipRect.height > window.innerHeight - 10) top = Math.max(10, r.top - tipRect.height - 14);
+  let left = Math.min(Math.max(r.left, 10), window.innerWidth - tipRect.width - 10);
+  tip.style.top = `${top}px`;
+  tip.style.left = `${left}px`;
+
+  el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
+
+function _tourNext() {
+  if (_tourIndex >= _tourSteps.length - 1) { _endTour(); return; }
+  _tourIndex++;
+  _renderTourStep();
+}
+
+function _endTour() {
+  const hl = document.getElementById('tour-highlight');
+  const tip = document.getElementById('tour-tooltip');
+  if (hl) hl.remove();
+  if (tip) tip.remove();
+  markOnboardingSeenApi();
 }
 
 function applyPremiumUI() {
