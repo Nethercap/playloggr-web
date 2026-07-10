@@ -1058,7 +1058,7 @@ const I18N = {
     sendCode: 'Enviar código', enterEmailFirst: 'Ingresá tu email primero',
     codeSentIfExists: 'Si el email existe, te enviamos un código de recuperación.',
     genericNetworkError: 'Error de conexión. Intentá de nuevo.',
-    globalStatsUpdateNote: 'Se actualiza una vez al día a las 00:00 (hora Argentina, GMT-3) · Última actualización: {time}',
+    globalStatsUpdateNote: 'Se actualiza una vez al día a las 00:00 (hora Argentina, GMT-3)',
   },
   en: {
     sync: 'Sync', stats: 'Stats', config: 'Settings', friends: 'Friends',
@@ -1142,7 +1142,7 @@ const I18N = {
     sendCode: 'Send code', enterEmailFirst: 'Enter your email first',
     codeSentIfExists: 'If the email exists, we sent a recovery code.',
     genericNetworkError: 'Connection error. Please try again.',
-    globalStatsUpdateNote: 'Updates once a day at 00:00 (Argentina time, GMT-3) · Last updated: {time}',
+    globalStatsUpdateNote: 'Updates once a day at 00:00 (Argentina time, GMT-3)',
   },
   pt: {
     sync: 'Sincronizar', stats: 'Estatísticas', config: 'Configurações', friends: 'Amigos',
@@ -1226,7 +1226,7 @@ const I18N = {
     sendCode: 'Enviar código', enterEmailFirst: 'Digite seu email primeiro',
     codeSentIfExists: 'Se o email existir, enviamos um código de recuperação.',
     genericNetworkError: 'Erro de conexão. Tente novamente.',
-    globalStatsUpdateNote: 'Atualiza uma vez por dia às 00:00 (horário de Argentina, GMT-3) · Última atualização: {time}',
+    globalStatsUpdateNote: 'Atualiza uma vez por dia às 00:00 (horário de Argentina, GMT-3)',
   },
 };
 
@@ -2466,12 +2466,7 @@ async function loadGlobalRankings() {
         ${content}
       </div>`;
 
-    const updatedNote = d.updated_at
-      ? t('globalStatsUpdateNote').replace('{time}', new Date(d.updated_at).toLocaleString(
-          currentLang === 'en' ? 'en-US' : currentLang === 'pt' ? 'pt-BR' : 'es-AR',
-          { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }
-        ))
-      : '';
+    const updatedNote = t('globalStatsUpdateNote');
 
     el.innerHTML = `
       ${updatedNote ? `<div style="font-size:11px;color:var(--text2);margin-bottom:14px;display:flex;align-items:center;gap:6px"><i class="ti ti-clock"></i> ${updatedNote}</div>` : ''}
