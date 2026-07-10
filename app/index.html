@@ -214,9 +214,6 @@
 
       <!-- Email login (hidden by default) -->
       <div id="email-login-section" style="display:none">
-        <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-md);padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.5" data-i18n-html="recoveryHint">
-          ⚠ Si olvidás tu contraseña, la recuperación es con un <strong style="color:var(--text)">código de 6 dígitos</strong> que generás desde el menú de tu perfil.
-        </div>
         <div class="login-group">
           <label data-i18n="email">Email</label>
           <input type="email" id="l-email" placeholder="tu@email.com" />
@@ -257,9 +254,6 @@
     <div class="header-right">
       <div id="plat-status-row" style="display:flex;gap:6px"></div>
       <input type="hidden" id="api-url" value="https://web-production-270b29.up.railway.app" />
-      <button class="sync-btn" id="sync-btn" onclick="syncAll()">
-        <i class="ti ti-refresh"></i> <span data-i18n="sync">Sincronizar</span>
-      </button>
       <!-- Language toggle -->
       <button onclick="toggleLanguage()" id="lang-toggle-btn" style="margin-left:4px;padding:5px 10px;font-size:12px;font-weight:600;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" title="Language / Idioma">EN</button>
       <!-- Stats button -->
@@ -839,24 +833,21 @@
   </div>
 </div>
 
-<!-- Recovery Code Modal -->
-<div class="modal-overlay" id="recovery-overlay">
+<!-- Verify Email Modal -->
+<div class="modal-overlay" id="verify-email-overlay">
   <div class="modal">
-    <div id="recovery-generate-view">
-      <div class="modal-title"><i class="ti ti-key" style="color:#1D9E75"></i> <span data-i18n="recoveryCode">Código de recuperación</span></div>
-      <div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6" data-i18n-html="recoveryCodeHint">
-        Generá un código de 6 dígitos para recuperar tu cuenta si olvidás la contraseña.<br>
-        <strong style="color:var(--text)">Guardalo en un lugar seguro — solo se muestra una vez.</strong>
-      </div>
-      <button class="btn-save" style="width:100%" onclick="generateRecoveryCode()" data-i18n="generateCode">Generar código</button>
-      <div id="recovery-code-display" style="display:none;margin-top:16px;text-align:center">
-        <div style="font-size:11px;color:var(--text2);margin-bottom:8px" data-i18n="yourRecoveryCode">Tu código de recuperación:</div>
-        <div id="recovery-code-value" style="font-size:32px;font-weight:500;letter-spacing:8px;color:var(--text);font-family:monospace;background:var(--bg2);padding:16px;border-radius:var(--radius-md)"></div>
-        <div style="font-size:11px;color:#E24B4A;margin-top:10px" data-i18n="recoveryCodeWarning">⚠ Cerrá esta ventana solo cuando lo hayas anotado</div>
-      </div>
-      <div class="modal-actions" style="margin-top:16px">
-        <button class="btn-cancel" onclick="closeRecovery()" data-i18n="close">Cerrar</button>
-      </div>
+    <div class="modal-title"><i class="ti ti-mail-check" style="color:#1D9E75"></i> <span data-i18n="verifyEmailTitle">Confirmá tu cuenta</span></div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6" id="verify-email-hint" data-i18n="verifyEmailHint">
+      Te enviamos un código de 6 dígitos a tu email. Ingresalo para activar tu cuenta.
+    </div>
+    <div class="modal-group full">
+      <label data-i18n="verifyCodeLabel">Código de verificación</label>
+      <input type="text" id="v-code" placeholder="123456" maxlength="6" style="font-size:20px;text-align:center;letter-spacing:6px" onkeydown="if(event.key==='Enter')submitVerifyEmail()" />
+    </div>
+    <div id="verify-email-msg" style="font-size:12px;margin-top:10px;display:none"></div>
+    <div class="modal-actions" style="margin-top:16px">
+      <a onclick="resendVerification()" style="font-size:11px;color:var(--text2);cursor:pointer;align-self:center;margin-right:auto" data-i18n="resendCode">Reenviar código</a>
+      <button class="btn-save" onclick="submitVerifyEmail()" data-i18n="verifyAndContinue">Verificar</button>
     </div>
   </div>
 </div>
@@ -1036,10 +1027,10 @@ const I18N = {
     chooseUsername: 'Elegí tu nombre de usuario',
     usernameHint: 'Solo letras y números, sin espacios ni tildes. Lo van a ver tus amigos.',
     continueBtn: 'Continuar', newFolder: 'Nueva carpeta', create: 'Crear', addToFolder: 'Agregar a carpeta',
-    hoursPlayed: 'Horas jugadas', recoveryCode: 'Código de recuperación',
-    recoveryCodeHint: 'Generá un código de 6 dígitos para recuperar tu cuenta si olvidás la contraseña.<br><strong style="color:var(--text)">Guardalo en un lugar seguro — solo se muestra una vez.</strong>',
-    generateCode: 'Generar código', yourRecoveryCode: 'Tu código de recuperación:',
-    recoveryCodeWarning: '⚠ Cerrá esta ventana solo cuando lo hayas anotado',
+    hoursPlayed: 'Horas jugadas',
+    verifyEmailTitle: 'Confirmá tu cuenta', verifyEmailHint: 'Te enviamos un código de 6 dígitos a tu email. Ingresalo para activar tu cuenta.',
+    verifyCodeLabel: 'Código de verificación', resendCode: 'Reenviar código', verifyAndContinue: 'Verificar',
+    codeResent: 'Te reenviamos el código', support: 'Soporte',
     resetPassword: 'Recuperar contraseña', recoveryCodeDigits: 'Código de recuperación (6 dígitos)',
     newPassword: 'Nueva contraseña', changePassword: 'Cambiar contraseña',
     steamSettings: 'Ajustes de Steam',
@@ -1079,10 +1070,9 @@ const I18N = {
     syncing: 'Sincronizando...', cannotConnectBackend: 'No se pudo conectar con el backend.',
     backendUnavailable: 'Backend no disponible', retry: 'Reintentar',
     errorLoadingGames: 'Error al cargar los juegos', lastSync: 'última sync',
-    code: 'Código', logout: 'Salir', folder: 'Carpeta', clear: 'Limpiar',
+    logout: 'Salir', folder: 'Carpeta', clear: 'Limpiar',
     loginSubtitle: 'Iniciá sesión para continuar', createAccount: 'Creá tu cuenta',
     continueWithGoogle: 'Continuar con Google', useEmailPassword: 'Usar email y contraseña',
-    recoveryHint: '⚠ Si olvidás tu contraseña, la recuperación es con un <strong style="color:var(--text)">código de 6 dígitos</strong> que generás desde el menú de tu perfil.',
     saveErrorRetry: 'Error al guardar. Intentá de nuevo.', saveError: 'Error al guardar',
     errorLoadingFriends: 'Error al cargar amigos',
     usernameFormatError: 'El nombre de usuario debe tener 3-20 caracteres, solo letras y números',
@@ -1132,10 +1122,10 @@ const I18N = {
     chooseUsername: 'Choose your username',
     usernameHint: 'Letters and numbers only, no spaces or accents. Your friends will see it.',
     continueBtn: 'Continue', newFolder: 'New folder', create: 'Create', addToFolder: 'Add to folder',
-    hoursPlayed: 'Hours played', recoveryCode: 'Recovery code',
-    recoveryCodeHint: 'Generate a 6-digit code to recover your account if you forget your password.<br><strong style="color:var(--text)">Save it somewhere safe — it\'s only shown once.</strong>',
-    generateCode: 'Generate code', yourRecoveryCode: 'Your recovery code:',
-    recoveryCodeWarning: '⚠ Only close this window once you\'ve written it down',
+    hoursPlayed: 'Hours played',
+    verifyEmailTitle: 'Confirm your account', verifyEmailHint: 'We sent a 6-digit code to your email. Enter it to activate your account.',
+    verifyCodeLabel: 'Verification code', resendCode: 'Resend code', verifyAndContinue: 'Verify',
+    codeResent: 'We resent the code', support: 'Support',
     resetPassword: 'Reset password', recoveryCodeDigits: 'Recovery code (6 digits)',
     newPassword: 'New password', changePassword: 'Change password',
     steamSettings: 'Steam settings',
@@ -1175,10 +1165,9 @@ const I18N = {
     syncing: 'Syncing...', cannotConnectBackend: 'Could not connect to the backend.',
     backendUnavailable: 'Backend unavailable', retry: 'Retry',
     errorLoadingGames: 'Error loading games', lastSync: 'last sync',
-    code: 'Code', logout: 'Log out', folder: 'Folder', clear: 'Clear',
+    logout: 'Log out', folder: 'Folder', clear: 'Clear',
     loginSubtitle: 'Log in to continue', createAccount: 'Create your account',
     continueWithGoogle: 'Continue with Google', useEmailPassword: 'Use email and password',
-    recoveryHint: '⚠ If you forget your password, recovery is done with a <strong style="color:var(--text)">6-digit code</strong> you generate from your profile menu.',
     saveErrorRetry: 'Error saving. Please try again.', saveError: 'Error saving',
     errorLoadingFriends: 'Error loading friends',
     usernameFormatError: 'Username must be 3-20 characters, letters and numbers only',
@@ -1228,10 +1217,10 @@ const I18N = {
     chooseUsername: 'Escolha seu nome de usuário',
     usernameHint: 'Somente letras e números, sem espaços ou acentos. Seus amigos vão ver.',
     continueBtn: 'Continuar', newFolder: 'Nova pasta', create: 'Criar', addToFolder: 'Adicionar à pasta',
-    hoursPlayed: 'Horas jogadas', recoveryCode: 'Código de recuperação',
-    recoveryCodeHint: 'Gere um código de 6 dígitos para recuperar sua conta caso esqueça a senha.<br><strong style="color:var(--text)">Guarde em um lugar seguro — só aparece uma vez.</strong>',
-    generateCode: 'Gerar código', yourRecoveryCode: 'Seu código de recuperação:',
-    recoveryCodeWarning: '⚠ Só feche esta janela depois de tê-lo anotado',
+    hoursPlayed: 'Horas jogadas',
+    verifyEmailTitle: 'Confirme sua conta', verifyEmailHint: 'Enviamos um código de 6 dígitos para o seu email. Digite-o para ativar sua conta.',
+    verifyCodeLabel: 'Código de verificação', resendCode: 'Reenviar código', verifyAndContinue: 'Verificar',
+    codeResent: 'Reenviamos o código', support: 'Suporte',
     resetPassword: 'Recuperar senha', recoveryCodeDigits: 'Código de recuperação (6 dígitos)',
     newPassword: 'Nova senha', changePassword: 'Alterar senha',
     steamSettings: 'Configurações da Steam',
@@ -1271,10 +1260,9 @@ const I18N = {
     syncing: 'Sincronizando...', cannotConnectBackend: 'Não foi possível conectar ao backend.',
     backendUnavailable: 'Backend indisponível', retry: 'Tentar novamente',
     errorLoadingGames: 'Erro ao carregar os jogos', lastSync: 'última sincronização',
-    code: 'Código', logout: 'Sair', folder: 'Pasta', clear: 'Limpar',
+    logout: 'Sair', folder: 'Pasta', clear: 'Limpar',
     loginSubtitle: 'Entre para continuar', createAccount: 'Crie sua conta',
     continueWithGoogle: 'Continuar com o Google', useEmailPassword: 'Usar email e senha',
-    recoveryHint: '⚠ Se você esquecer sua senha, a recuperação é feita com um <strong style="color:var(--text)">código de 6 dígitos</strong> que você gera no menu do seu perfil.',
     saveErrorRetry: 'Erro ao salvar. Tente novamente.', saveError: 'Erro ao salvar',
     errorLoadingFriends: 'Erro ao carregar amigos',
     usernameFormatError: 'O nome de usuário deve ter 3-20 caracteres, somente letras e números',
@@ -2228,28 +2216,60 @@ async function changeStatus(gameId, newStatus) {
 
 
 
-// ── Recovery ──────────────────────────────────────────────────────
-function openRecovery() {
-  document.getElementById('recovery-code-display').style.display = 'none';
-  document.getElementById('recovery-overlay').classList.add('open');
+// ── Verificación de email ──────────────────────────────────────────
+let _pendingVerifyEmail = '';
+
+function openVerifyEmail(email) {
+  _pendingVerifyEmail = email;
+  document.getElementById('v-code').value = '';
+  document.getElementById('verify-email-msg').style.display = 'none';
+  document.getElementById('verify-email-overlay').classList.add('open');
 }
-function closeRecovery() {
-  document.getElementById('recovery-overlay').classList.remove('open');
+function closeVerifyEmail() {
+  document.getElementById('verify-email-overlay').classList.remove('open');
 }
-document.getElementById('recovery-overlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('recovery-overlay')) closeRecovery();
+document.getElementById('verify-email-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('verify-email-overlay')) closeVerifyEmail();
 });
 
-async function generateRecoveryCode() {
+async function submitVerifyEmail() {
+  const code = document.getElementById('v-code').value.trim();
+  const msgEl = document.getElementById('verify-email-msg');
+  msgEl.style.display = 'none';
+  if (!code) return;
   try {
-    const res  = await fetch(`${apiBase()}/api/v1/auth/recovery-code`, { method: 'POST' });
+    const res = await fetch(`${apiBase()}/api/v1/auth/verify-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: _pendingVerifyEmail, code }),
+    });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.detail);
-    document.getElementById('recovery-code-value').textContent = data.recovery_code;
-    document.getElementById('recovery-code-display').style.display = 'block';
+    if (!res.ok) throw new Error(data.detail || 'Código incorrecto');
+    authToken = data.access_token;
+    authUser  = data.username;
+    localStorage.setItem('gb_token', authToken);
+    localStorage.setItem('gb_user',  authUser);
+    closeVerifyEmail();
+    onLoginSuccess();
   } catch(e) {
-    alert('Error: ' + e.message);
+    msgEl.textContent = (e instanceof Error ? e.message : String(e)) || 'Código incorrecto';
+    msgEl.style.color = '#E24B4A';
+    msgEl.style.display = 'block';
   }
+}
+
+async function resendVerification() {
+  const msgEl = document.getElementById('verify-email-msg');
+  try {
+    await fetch(`${apiBase()}/api/v1/auth/resend-verification`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: _pendingVerifyEmail }),
+    });
+    msgEl.textContent = t('codeResent');
+    msgEl.style.color = 'var(--green)';
+    msgEl.style.display = 'block';
+  } catch(e) {}
 }
 
 function openReset() {
@@ -4764,9 +4784,18 @@ async function submitAuth() {
     });
     const data = await res.json();
     if (!res.ok) {
+      if (res.status === 403 && data.detail && data.detail.error === 'email_not_verified') {
+        openVerifyEmail(data.detail.email || email);
+        return;
+      }
       if (res.status === 409) throw new Error(data.detail || 'Nombre de usuario ya en uso');
       if (res.status === 401) throw new Error('Verificá los datos ingresados');
-      throw new Error(data.detail || 'Error de autenticación');
+      throw new Error((typeof data.detail === 'string' && data.detail) || 'Error de autenticación');
+    }
+
+    if (data.verification_required) {
+      openVerifyEmail(data.email || email);
+      return;
     }
 
     authToken = data.access_token;
@@ -5517,7 +5546,7 @@ async function onLoginSuccess() {
 
   const chip = document.createElement('div');
   chip.className = 'user-chip';
-  chip.innerHTML = `<span id="user-level-badge"></span><span id="user-name-span">${authUser}</span><span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px;margin-left:2px"></span><button id="header-upgrade-btn" onclick="startPaddleCheckout()" style="display:none;font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;margin-left:4px;border:none;background:var(--green);color:#fff;cursor:pointer">✨ Hacerse Premium</button><button class="logout-btn" onclick="openRecovery()" data-i18n="code">Código</button><button class="logout-btn" onclick="logout()" data-i18n="logout">Salir</button>`;
+  chip.innerHTML = `<span id="user-level-badge"></span><span id="user-name-span">${authUser}</span><span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px;margin-left:2px"></span><button id="header-upgrade-btn" onclick="startPaddleCheckout()" style="display:none;font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;margin-left:4px;border:none;background:var(--green);color:#fff;cursor:pointer">✨ Hacerse Premium</button><a class="logout-btn" href="mailto:nether.appdev@gmail.com" style="text-decoration:none;display:inline-flex;align-items:center" data-i18n="support">Soporte</a><button class="logout-btn" onclick="logout()" data-i18n="logout">Salir</button>`;
   applyI18n();
   document.getElementById('plat-status-row').before(chip);
 
@@ -5579,8 +5608,10 @@ async function syncAll(page = 1, silent = false) {
   currentPage = page;
   const btn = document.getElementById('sync-btn');
   if (!silent) {
-    btn.disabled = true;
-    btn.innerHTML = `<i class="ti ti-refresh" style="animation:spin 1s linear infinite"></i> ${t('syncing')}`;
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `<i class="ti ti-refresh" style="animation:spin 1s linear infinite"></i> ${t('syncing')}`;
+    }
     if (page === 1) {
       document.getElementById('game-list').innerHTML = `<div class="empty"><div class="spinner" style="margin:0 auto 12px"></div>${t('syncing')}</div>`;
     }
@@ -5598,14 +5629,14 @@ async function syncAll(page = 1, silent = false) {
       showError(t('cannotConnectBackend'));
       document.getElementById('game-list').innerHTML = `<div class="empty"><i class="ti ti-wifi-off"></i>${t('backendUnavailable')}</div>`;
       platNames.forEach(p => { platStatus[p]='err'; }); renderPlatStatus();
-      btn.disabled=false; btn.innerHTML = `<i class="ti ti-refresh"></i> ${t('retry')}`;
+      if (btn) { btn.disabled=false; btn.innerHTML = `<i class="ti ti-refresh"></i> ${t('retry')}`; }
       return;
     }
   }
 
   const tok = authToken || localStorage.getItem('gb_token') || '';
   if (!tok) {
-    btn.disabled=false; btn.innerHTML = `<i class="ti ti-refresh"></i> ${t('sync')}`;
+    if (btn) { btn.disabled=false; btn.innerHTML = `<i class="ti ti-refresh"></i> ${t('sync')}`; }
     return;
   }
 
@@ -5671,9 +5702,10 @@ async function syncAll(page = 1, silent = false) {
   }
 
   if (!silent) {
-    btn.disabled=false; btn.innerHTML = `<i class="ti ti-refresh"></i> ${t('sync')}`;
+    if (btn) { btn.disabled=false; btn.innerHTML = `<i class="ti ti-refresh"></i> ${t('sync')}`; }
     const now = new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
-    document.getElementById('count-label').textContent = `${totalGames} ${t('gamesLower')} — ${t('lastSync')} ${now}`;
+    const countLabel = document.getElementById('count-label');
+    if (countLabel) countLabel.textContent = `${totalGames} ${t('gamesLower')} — ${t('lastSync')} ${now}`;
   }
 }
 </script>
