@@ -127,6 +127,13 @@
     .tour-actions { display:flex; align-items:center; justify-content:space-between; }
     .tour-actions .tour-count { font-size:11px; color:var(--text2); }
 
+    /* ── Rankings ── */
+    .ranking-tile { position:relative; background:var(--bg2); border:0.5px solid var(--border); border-radius:10px; overflow:hidden; cursor:grab; transition:box-shadow .15s; }
+    .ranking-tile.dragging { opacity:0.4; }
+    .ranking-position { position:absolute; top:6px; left:6px; width:24px; height:24px; border-radius:50%; background:rgba(0,0,0,0.7); color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; z-index:2; }
+    .ranking-remove { position:absolute; top:6px; right:6px; width:22px; height:22px; border-radius:50%; background:rgba(0,0,0,0.6); border:none; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px; z-index:2; }
+    .ranking-remove:hover { background:#E24B4A; }
+
     /* ── Modal ── */
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:100; align-items:center; justify-content:center; }
     .modal-overlay.open { display:flex; }
@@ -352,6 +359,10 @@
         style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);color:var(--text2);display:inline-flex;align-items:center;gap:5px">
         <i class="ti ti-chart-bar" style="font-size:14px"></i> <span data-i18n="stats">Estadísticas</span>
       </button>
+      <button id="view-rankings" onclick="setView('rankings')"
+        style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);color:var(--text2);display:inline-flex;align-items:center;gap:5px">
+        <i class="ti ti-medal" style="font-size:14px"></i> <span data-i18n="rankings">Rankings</span>
+      </button>
       <span style="margin-left:auto;font-size:12px;color:var(--text2)">
         <span data-i18n="selected">Seleccionados</span>: <strong id="s-total">—</strong> &nbsp;·&nbsp; <span data-i18n="hours">Horas</span>: <strong id="s-hours">—</strong>
       </span>
@@ -432,6 +443,45 @@
     </div>
     <div id="stats-global-tab" style="display:none;padding:16px;max-width:720px;width:100%;margin:0 auto;box-sizing:border-box">
       <div id="stats-global-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
+    </div>
+  </div>
+
+  <!-- Rankings view (full page) -->
+  <div id="rankings-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
+    <!-- Rankings list -->
+    <div id="rankings-list-panel" style="padding:16px;max-width:960px;width:100%;margin:0 auto;box-sizing:border-box">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <select id="rankings-sort-sel" onchange="loadRankings()" style="font-size:12px;padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text)">
+          <option value="name" data-i18n="name">Nombre</option>
+          <option value="created_at" data-i18n="date">Fecha</option>
+          <option value="game_count" data-i18n="quantity">Cantidad</option>
+        </select>
+        <button onclick="openRankingCreate()" style="margin-left:auto;padding:6px 14px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">
+          <i class="ti ti-plus"></i> <span data-i18n="newRanking">Nuevo ranking</span>
+        </button>
+      </div>
+      <div id="rankings-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px"></div>
+    </div>
+
+    <!-- Ranking detail (grid of games, draggable) -->
+    <div id="ranking-detail-panel" style="display:none;padding:16px;max-width:960px;width:100%;margin:0 auto;box-sizing:border-box">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <a onclick="closeRankingDetail()" style="font-size:12px;color:var(--text2);cursor:pointer" data-i18n="backToRankings">← Volver a rankings</a>
+        <strong id="ranking-detail-title" style="font-size:16px;margin-left:6px"></strong>
+        <span id="ranking-detail-count" style="font-size:12px;color:var(--text2)"></span>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <button onclick="openRankingRename()" style="padding:6px 12px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer">
+            <i class="ti ti-pencil"></i>
+          </button>
+          <button onclick="confirmDeleteRanking()" style="padding:6px 12px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:#E24B4A;cursor:pointer">
+            <i class="ti ti-trash"></i>
+          </button>
+          <button id="ranking-add-game-btn" onclick="openRankingAddGame()" style="padding:6px 14px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">
+            <i class="ti ti-plus"></i> <span data-i18n="addGame">Agregar juego</span>
+          </button>
+        </div>
+      </div>
+      <div id="ranking-detail-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px"></div>
     </div>
   </div>
 
@@ -806,6 +856,21 @@
   </div>
 </div>
 
+<!-- Add game to Ranking Modal -->
+<div class="modal-overlay" id="ranking-add-game-overlay">
+  <div class="modal" style="max-width:520px;width:90vw;display:flex;flex-direction:column;max-height:80vh">
+    <div class="modal-title"><i class="ti ti-medal"></i> <span data-i18n="addToRanking">Agregar a ranking</span></div>
+    <input type="text" id="ranking-picker-search" placeholder="Buscar juego..." data-i18n-placeholder="searchGame"
+      oninput="_rankingPickerSearch=this.value;renderRankingGamePicker()"
+      style="margin-bottom:8px;padding:6px 10px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text)" />
+    <div id="ranking-picker-list" style="overflow-y:auto;flex:1"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeRankingAddGame()" data-i18n="cancel">Cancelar</button>
+      <button class="btn-save" onclick="confirmRankingAddGame()" data-i18n="add">Agregar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Add to Folder Modal -->
 <div class="modal-overlay" id="folder-add-game-overlay">
   <div class="modal" style="max-width:720px;width:90vw;display:flex;flex-direction:column;max-height:85vh">
@@ -1092,6 +1157,12 @@ const I18N = {
     tourTitleStats: 'Mirá tus estadísticas', tourBodyStats: 'Tocá acá para ver tus horas, géneros favoritos y rankings globales.',
     tourTitleSession: 'Registrá una sesión en vivo', tourBodySession: 'Tocá este botón en cualquier juego para iniciar el cronómetro mientras jugás.',
     tourDone: 'Listo',
+    rankings: 'Rankings', newRanking: 'Nuevo ranking', backToRankings: '← Volver a rankings', addToRanking: 'Agregar a ranking',
+    newRankingPrompt: 'Nombre del ranking:', renameRankingPrompt: 'Nuevo nombre:',
+    confirmDeleteRanking: '¿Eliminar este ranking? Los juegos no se eliminan de tu biblioteca.',
+    noRankingsYet: 'No tenés rankings todavía. Creá uno.', noRankingGamesYet: 'Este ranking está vacío. Agregá juegos.',
+    rankingLimitReached: 'Máximo 25 juegos por ranking', rankingFreeLimitReached: 'Límite de la versión gratis (3 rankings). Actualizá a premium para crear más.',
+    removeFromRanking: 'Quitar del ranking', date: 'Fecha', quantity: 'Cantidad',
   },
   en: {
     sync: 'Sync', stats: 'Stats', config: 'Settings', friends: 'Friends',
@@ -1187,6 +1258,12 @@ const I18N = {
     tourTitleStats: 'Check your stats', tourBodyStats: 'Tap here to see your hours, favorite genres and global rankings.',
     tourTitleSession: 'Log a live session', tourBodySession: 'Tap this button on any game to start the timer while you play.',
     tourDone: 'Done',
+    rankings: 'Rankings', newRanking: 'New ranking', backToRankings: '← Back to rankings', addToRanking: 'Add to ranking',
+    newRankingPrompt: 'Ranking name:', renameRankingPrompt: 'New name:',
+    confirmDeleteRanking: 'Delete this ranking? Games are not removed from your library.',
+    noRankingsYet: "You don't have any rankings yet. Create one.", noRankingGamesYet: 'This ranking is empty. Add games.',
+    rankingLimitReached: 'Maximum 25 games per ranking', rankingFreeLimitReached: 'Free version limit (3 rankings). Upgrade to premium to create more.',
+    removeFromRanking: 'Remove from ranking', date: 'Date', quantity: 'Quantity',
   },
   pt: {
     sync: 'Sincronizar', stats: 'Estatísticas', config: 'Configurações', friends: 'Amigos',
@@ -1282,6 +1359,12 @@ const I18N = {
     tourTitleStats: 'Veja suas estatísticas', tourBodyStats: 'Toque aqui para ver suas horas, gêneros favoritos e rankings globais.',
     tourTitleSession: 'Registre uma sessão ao vivo', tourBodySession: 'Toque neste botão em qualquer jogo para iniciar o cronômetro enquanto joga.',
     tourDone: 'Concluído',
+    rankings: 'Rankings', newRanking: 'Novo ranking', backToRankings: '← Voltar aos rankings', addToRanking: 'Adicionar ao ranking',
+    newRankingPrompt: 'Nome do ranking:', renameRankingPrompt: 'Novo nome:',
+    confirmDeleteRanking: 'Excluir este ranking? Os jogos não são removidos da sua biblioteca.',
+    noRankingsYet: 'Você ainda não tem rankings. Crie um.', noRankingGamesYet: 'Este ranking está vazio. Adicione jogos.',
+    rankingLimitReached: 'Máximo de 25 jogos por ranking', rankingFreeLimitReached: 'Limite da versão gratuita (3 rankings). Atualize para premium para criar mais.',
+    removeFromRanking: 'Remover do ranking', date: 'Data', quantity: 'Quantidade',
   },
 };
 
@@ -1378,6 +1461,16 @@ function platBadge(platform) {
   return `<span class="plat-badge" style="display:inline-flex;align-items:center;gap:5px;background:rgba(${rgb},0.25);border:0.5px solid rgba(${rgb},0.6);border-radius:20px;padding:2px 8px">
     <img src="${url}" style="width:12px;height:12px;object-fit:contain" onerror="this.style.display='none'">
     ${platform}
+  </span>`;
+}
+
+function platIconOnly(platform) {
+  const p = platIcons[platform];
+  if (!p) return '';
+  const url = `https://cdn.simpleicons.org/${p.slug}/ffffff`;
+  const rgb = _hexToRgb(p.color);
+  return `<span title="${platform}" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:rgba(${rgb},0.25);border:0.5px solid rgba(${rgb},0.6)">
+    <img src="${url}" style="width:11px;height:11px;object-fit:contain" onerror="this.style.display='none'">
   </span>`;
 }
 const platNames = [];
@@ -2094,27 +2187,38 @@ function toggleFilterDropdown(key, options, wrap, btn) {
 function setView(view) {
   currentView = view;
 
-  const isStats   = view === 'stats';
-  const gameList  = document.getElementById('game-list');
-  const statsView = document.getElementById('stats-view');
-  const filterBar = document.getElementById('filter-bar');
-  const footer    = document.querySelector('.footer');
-  const pagBar    = document.getElementById('pagination-bar');
-  if (gameList)  gameList.style.display  = isStats ? 'none' : '';
-  if (statsView) statsView.style.display = isStats ? 'flex' : 'none';
-  if (filterBar) filterBar.style.display = isStats ? 'none' : '';
-  if (footer)    footer.style.display    = isStats ? 'none' : '';
-  if (pagBar)    pagBar.style.display    = isStats ? 'none' : '';
+  const isStats    = view === 'stats';
+  const isRankings = view === 'rankings';
+  const hideNormal = isStats || isRankings;
+  const gameList     = document.getElementById('game-list');
+  const statsView    = document.getElementById('stats-view');
+  const rankingsView = document.getElementById('rankings-view');
+  const filterBar  = document.getElementById('filter-bar');
+  const footer     = document.querySelector('.footer');
+  const pagBar     = document.getElementById('pagination-bar');
+  if (gameList)     gameList.style.display     = hideNormal ? 'none' : '';
+  if (statsView)    statsView.style.display    = isStats ? 'flex' : 'none';
+  if (rankingsView) rankingsView.style.display = isRankings ? 'flex' : 'none';
+  if (filterBar)    filterBar.style.display    = hideNormal ? 'none' : '';
+  if (footer)       footer.style.display       = hideNormal ? 'none' : '';
+  if (pagBar)       pagBar.style.display       = hideNormal ? 'none' : '';
 
-  const libBtn   = document.getElementById('view-library');
-  const wishBtn  = document.getElementById('view-wishlist');
-  const statsBtn = document.getElementById('view-stats');
-  if (libBtn)   { libBtn.style.background   = view === 'library'  ? 'var(--green)' : 'var(--bg2)';  libBtn.style.color   = view === 'library'  ? '#fff' : 'var(--text2)'; }
-  if (wishBtn)  { wishBtn.style.background  = view === 'wishlist' ? '#EF9F27'      : 'var(--bg2)';  wishBtn.style.color  = view === 'wishlist' ? '#fff' : 'var(--text2)'; }
-  if (statsBtn) { statsBtn.style.background = isStats             ? 'var(--green)' : 'var(--bg2)';  statsBtn.style.color = isStats             ? '#fff' : 'var(--text2)'; }
+  const libBtn      = document.getElementById('view-library');
+  const wishBtn      = document.getElementById('view-wishlist');
+  const statsBtn     = document.getElementById('view-stats');
+  const rankingsBtn  = document.getElementById('view-rankings');
+  if (libBtn)      { libBtn.style.background      = view === 'library'  ? 'var(--green)' : 'var(--bg2)';  libBtn.style.color      = view === 'library'  ? '#fff' : 'var(--text2)'; }
+  if (wishBtn)     { wishBtn.style.background     = view === 'wishlist' ? '#EF9F27'      : 'var(--bg2)';  wishBtn.style.color     = view === 'wishlist' ? '#fff' : 'var(--text2)'; }
+  if (statsBtn)    { statsBtn.style.background    = isStats             ? 'var(--green)' : 'var(--bg2)';  statsBtn.style.color    = isStats             ? '#fff' : 'var(--text2)'; }
+  if (rankingsBtn) { rankingsBtn.style.background = isRankings          ? 'var(--green)' : 'var(--bg2)';  rankingsBtn.style.color = isRankings          ? '#fff' : 'var(--text2)'; }
 
   if (isStats) {
     switchStatsTab('user');
+    return;
+  }
+  if (isRankings) {
+    activeRankingId = null;
+    loadRankings();
     return;
   }
 
@@ -5370,6 +5474,279 @@ document.addEventListener('DOMContentLoaded', () => {
   if (fco) fco.addEventListener('click', e => { if (e.target === fco) closeFolderCreate(); });
   const fao = document.getElementById('folder-add-game-overlay');
   if (fao) fao.addEventListener('click', e => { if (e.target === fao) closeFolderAddGame(); });
+});
+
+// ── Rankings ─────────────────────────────────────────────────────────────────
+
+const MAX_RANKING_GAMES = 25;
+let currentRankings     = [];
+let activeRankingId     = null;
+let activeRankingGames  = [];
+let _rankingPickerAllGames = [];
+let _rankingPickerSearch  = '';
+let _rankingPickerSelected = new Set();
+
+async function loadRankings() {
+  const sort = document.getElementById('rankings-sort-sel')?.value || 'name';
+  try {
+    const res  = await fetch(`${apiBase()}/api/v1/rankings?sort=${sort}`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    currentRankings = data.rankings || [];
+  } catch(e) { currentRankings = []; }
+  renderRankingsList();
+}
+
+function renderRankingsList() {
+  document.getElementById('rankings-list-panel').style.display = '';
+  document.getElementById('ranking-detail-panel').style.display = 'none';
+  const grid = document.getElementById('rankings-grid');
+  if (!currentRankings.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">${t('noRankingsYet')}</div>`;
+    return;
+  }
+  let list = currentRankings;
+  if (document.getElementById('rankings-sort-sel')?.value === 'game_count') {
+    list = [...list].sort((a, b) => b.game_count - a.game_count);
+  }
+  grid.innerHTML = list.map(r => `
+    <div onclick="openRanking(${r.id})" style="cursor:pointer;background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <i class="ti ti-medal" style="color:var(--green);font-size:18px"></i>
+        <strong style="font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.name}</strong>
+      </div>
+      <div style="font-size:12px;color:var(--text2)">${r.game_count}/${MAX_RANKING_GAMES} ${t('gamesLower')}</div>
+    </div>
+  `).join('');
+}
+
+function openRankingCreate() {
+  if (!isPremium && currentRankings.length >= 3) {
+    showToast(t('rankingFreeLimitReached'), true);
+    return;
+  }
+  const name = prompt(t('newRankingPrompt'));
+  if (!name || !name.trim()) return;
+  createRanking(name.trim());
+}
+
+async function createRanking(name) {
+  try {
+    const res  = await fetch(`${apiBase()}/api/v1/rankings`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error');
+    await loadRankings();
+  } catch(e) {
+    showToast((e instanceof Error ? e.message : String(e)) || 'Error', true);
+  }
+}
+
+async function openRanking(id) {
+  activeRankingId = id;
+  try {
+    const res  = await fetch(`${apiBase()}/api/v1/rankings/${id}/games`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    activeRankingGames = data.games || [];
+    document.getElementById('ranking-detail-title').textContent = data.ranking_name || '';
+  } catch(e) { activeRankingGames = []; }
+  document.getElementById('ranking-detail-count').textContent = `${activeRankingGames.length}/${MAX_RANKING_GAMES}`;
+  const addBtn = document.getElementById('ranking-add-game-btn');
+  if (addBtn) addBtn.style.display = activeRankingGames.length >= MAX_RANKING_GAMES ? 'none' : '';
+  document.getElementById('rankings-list-panel').style.display = 'none';
+  document.getElementById('ranking-detail-panel').style.display = '';
+  renderRankingDetailGrid();
+}
+
+function closeRankingDetail() {
+  activeRankingId = null;
+  loadRankings();
+}
+
+function openRankingRename() {
+  const current = currentRankings.find(r => r.id === activeRankingId);
+  const name = prompt(t('renameRankingPrompt'), current ? current.name : document.getElementById('ranking-detail-title').textContent);
+  if (!name || !name.trim()) return;
+  renameRanking(name.trim());
+}
+
+async function renameRanking(name) {
+  try {
+    await fetch(`${apiBase()}/api/v1/rankings/${activeRankingId}`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    });
+    document.getElementById('ranking-detail-title').textContent = name;
+  } catch(e) {}
+}
+
+async function confirmDeleteRanking() {
+  if (!confirm(t('confirmDeleteRanking'))) return;
+  try {
+    await fetch(`${apiBase()}/api/v1/rankings/${activeRankingId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${authToken}` },
+    });
+  } catch(e) {}
+  activeRankingId = null;
+  loadRankings();
+}
+
+async function openRankingAddGame() {
+  _rankingPickerSearch   = '';
+  _rankingPickerSelected = new Set();
+  const searchEl = document.getElementById('ranking-picker-search');
+  if (searchEl) searchEl.value = '';
+  try {
+    const res  = await fetch(`${apiBase()}/api/v1/rankings/${activeRankingId}/available-games`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    _rankingPickerAllGames = (data.games || []).filter(g => !g.in_ranking);
+  } catch(e) { _rankingPickerAllGames = []; }
+  renderRankingGamePicker();
+  document.getElementById('ranking-add-game-overlay').classList.add('open');
+}
+
+function renderRankingGamePicker() {
+  const list  = document.getElementById('ranking-picker-list');
+  const q     = _rankingPickerSearch.toLowerCase();
+  const games = _rankingPickerAllGames.filter(g => !q || g.name.toLowerCase().includes(q));
+  if (!games.length) {
+    list.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text2);font-size:13px">${t('noResults')}</div>`;
+    return;
+  }
+  list.innerHTML = games.map(g => `
+    <label style="display:flex;align-items:center;gap:10px;padding:8px 4px;cursor:pointer;font-size:13px;border-bottom:0.5px solid var(--border)">
+      <input type="checkbox" data-gid="${g.id}" ${_rankingPickerSelected.has(g.id) ? 'checked' : ''}
+        onchange="toggleRankingPickerGame('${g.id}', this.checked)" style="accent-color:var(--green)">
+      ${platIconOnly(g.platform)}
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${g.name}</span>
+      <span style="font-size:11px;color:var(--text2)">${g.hours_played}h</span>
+    </label>
+  `).join('');
+}
+
+function toggleRankingPickerGame(gid, checked) {
+  const remainingSlots = MAX_RANKING_GAMES - activeRankingGames.length;
+  if (checked) {
+    if (_rankingPickerSelected.size >= remainingSlots) {
+      showToast(t('rankingLimitReached'), true);
+      renderRankingGamePicker();
+      return;
+    }
+    _rankingPickerSelected.add(gid);
+  } else {
+    _rankingPickerSelected.delete(gid);
+  }
+}
+
+async function confirmRankingAddGame() {
+  const ids = [..._rankingPickerSelected];
+  for (const gid of ids) {
+    try {
+      await fetch(`${apiBase()}/api/v1/rankings/${activeRankingId}/games`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ game_id: gid }),
+      });
+    } catch(e) {}
+  }
+  closeRankingAddGame();
+  await openRanking(activeRankingId);
+}
+
+function closeRankingAddGame() {
+  document.getElementById('ranking-add-game-overlay').classList.remove('open');
+}
+
+async function removeGameFromRanking(gameId) {
+  try {
+    await fetch(`${apiBase()}/api/v1/rankings/${activeRankingId}/games/${encodeURIComponent(gameId)}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${authToken}` },
+    });
+  } catch(e) {}
+  activeRankingGames = activeRankingGames.filter(g => g.game_id !== gameId);
+  document.getElementById('ranking-detail-count').textContent = `${activeRankingGames.length}/${MAX_RANKING_GAMES}`;
+  const addBtn = document.getElementById('ranking-add-game-btn');
+  if (addBtn) addBtn.style.display = activeRankingGames.length >= MAX_RANKING_GAMES ? 'none' : '';
+  renderRankingDetailGrid();
+}
+
+function renderRankingDetailGrid() {
+  const grid = document.getElementById('ranking-detail-grid');
+  if (!activeRankingGames.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">${t('noRankingGamesYet')}</div>`;
+    return;
+  }
+  grid.innerHTML = activeRankingGames.map((g, idx) => `
+    <div class="ranking-tile" draggable="true" data-gid="${g.game_id}"
+      ondragstart="rankingDragStart(event)" ondragover="rankingDragOver(event)" ondrop="rankingDrop(event)" ondragend="rankingDragEnd(event)">
+      <div class="ranking-position">${idx + 1}</div>
+      <button class="ranking-remove" onclick="removeGameFromRanking('${g.game_id}')" title="${t('removeFromRanking')}"><i class="ti ti-x"></i></button>
+      <img src="${g.cover_url || ''}" style="width:100%;aspect-ratio:2/3;object-fit:cover;background:var(--bg3);display:block" onerror="this.style.visibility='hidden'" />
+      <div style="padding:8px">
+        <div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${g.name}">${g.name}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:5px">
+          <span style="font-size:11px">${starsHtml(g.user_rating)}</span>
+          ${platIconOnly(g.platform)}
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">${g.hours_played}h</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+let _rankingDragSrc = null;
+function rankingDragStart(e) {
+  _rankingDragSrc = e.currentTarget;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+function rankingDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+}
+function rankingDrop(e) {
+  e.preventDefault();
+  const target = e.currentTarget;
+  if (!_rankingDragSrc || target === _rankingDragSrc) return;
+  const grid     = document.getElementById('ranking-detail-grid');
+  const children = [...grid.children];
+  const srcIdx   = children.indexOf(_rankingDragSrc);
+  const tgtIdx   = children.indexOf(target);
+  if (srcIdx < tgtIdx) target.after(_rankingDragSrc);
+  else target.before(_rankingDragSrc);
+
+  const newOrderIds = [...grid.children].map(el => el.dataset.gid);
+  activeRankingGames.sort((a, b) => newOrderIds.indexOf(a.game_id) - newOrderIds.indexOf(b.game_id));
+  renderRankingDetailGrid();
+  persistRankingOrder();
+}
+function rankingDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+}
+async function persistRankingOrder() {
+  try {
+    await fetch(`${apiBase()}/api/v1/rankings/${activeRankingId}/reorder`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ game_ids: activeRankingGames.map(g => g.game_id) }),
+    });
+  } catch(e) {}
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const rao = document.getElementById('ranking-add-game-overlay');
+  if (rao) rao.addEventListener('click', e => { if (e.target === rao) closeRankingAddGame(); });
 });
 
 // ── Play Session Timer ──────────────────────────────────────────────────────
