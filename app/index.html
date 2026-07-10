@@ -309,8 +309,8 @@
   <div class="error-banner" id="error-banner"></div>
 
   <!-- Totales globales -->
-  <div style="display:flex;gap:10px;margin-bottom:14px;align-items:stretch">
-    <div class="stat-card" style="cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 66px;padding:8px" onclick="openConfigPanel().then(()=>switchConfigTab('avatar'))" data-i18n-title="customizeAvatar" title="Personalizar avatar">
+  <div style="display:flex;gap:10px;margin-bottom:14px;align-items:flex-start">
+    <div class="stat-card" style="cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 66px;height:66px;padding:8px" onclick="openConfigPanel().then(()=>switchConfigTab('avatar'))" data-i18n-title="customizeAvatar" title="Personalizar avatar">
       <div id="avatar-thumb-box" style="width:48px;height:48px;position:relative"></div>
     </div>
     <div class="stats-row" style="flex:1;margin-bottom:0">
@@ -1357,7 +1357,29 @@ const steamScoreLabelPT = {
   'Overwhelmingly Negative': { label:'Excepcionalmente negativa', cls:'score-overwhelmingly-negative' },
   'Sin calificaciones':      { label:'Sem avaliações',            cls:'score-none' },
 };
-const steamScoreLabel = new Proxy({}, { get: (_, key) => ({ es: steamScoreLabelES, en: steamScoreLabelEN, pt: steamScoreLabelPT }[currentLang] || steamScoreLabelES)[key] });
+// Steam devuelve mas categorias de las que mapeamos explicitamente (Positive,
+// Negative, Very Negative) y ademas "No user reviews" / "N user reviews"
+// para juegos con muy pocas reseñas (comun en Deseados con juegos nuevos o
+// no lanzados). El Proxy cubre esos casos genericamente en vez de dejar el
+// badge vacio.
+const _steamScoreGenericLabels = {
+  es: { Positive: 'Positiva', Negative: 'Negativa', 'Very Negative': 'Muy negativa', few: 'Pocas reseñas' },
+  en: { Positive: 'Positive', Negative: 'Negative', 'Very Negative': 'Very Negative', few: 'Few reviews' },
+  pt: { Positive: 'Positiva', Negative: 'Negativa', 'Very Negative': 'Muito negativa', few: 'Poucas avaliações' },
+};
+const steamScoreLabel = new Proxy({}, { get: (_, key) => {
+  const map = { es: steamScoreLabelES, en: steamScoreLabelEN, pt: steamScoreLabelPT }[currentLang] || steamScoreLabelES;
+  if (map[key]) return map[key];
+  if (typeof key !== 'string') return undefined;
+  const generic = _steamScoreGenericLabels[currentLang] || _steamScoreGenericLabels.es;
+  if (generic[key]) {
+    return { label: generic[key], cls: key.includes('Negative') ? 'score-mostly-negative' : 'score-mostly-positive' };
+  }
+  if (/user review/i.test(key)) {
+    return { label: generic.few, cls: 'score-none' };
+  }
+  return undefined;
+} });
 
 // Cache de scores de Steam
 const steamScoreCache = {};
@@ -1542,6 +1564,41 @@ function sortedFiltered() {
 
 const communityStatsCache = {};
 
+/** Portada de Steam con fallback en cadena: muchos juegos nuevos/no
+ * lanzados todavia no tienen el asset "library_600x900" generado, asi
+ * que probamos varios tamaños conocidos antes de rendirnos y mostrar
+ * el placeholder. */
+function steamCoverHtml(g, extraStyle = '') {
+  const styleAttr = extraStyle ? ` style="${extraStyle}"` : '';
+  if (!g.app_id) {
+    return g.cover_url
+      ? `<img src="${g.cover_url}" alt="${g.name}"${styleAttr} onerror="this.style.display='none'">`
+      : `<span>🎮</span>`;
+  }
+  const base = `https://cdn.cloudflare.steamstatic.com/steam/apps/${g.app_id}`;
+  const candidates = [
+    g.cover_url || `${base}/library_600x900.jpg`,
+    `${base}/library_hero.jpg`,
+    `${base}/header.jpg`,
+    `${base}/capsule_616x353.jpg`,
+    `${base}/capsule_231x87.jpg`,
+  ].filter((v, i, arr) => arr.indexOf(v) === i); // sin duplicados
+  const first = candidates[0];
+  const rest  = candidates.slice(1);
+  return `<img src="${first}" alt="${g.name}"${styleAttr} data-fallbacks='${JSON.stringify(rest)}' onerror="handleCoverError(this)">`;
+}
+
+function handleCoverError(img) {
+  let fallbacks = [];
+  try { fallbacks = JSON.parse(img.dataset.fallbacks || '[]'); } catch(e) {}
+  if (fallbacks.length) {
+    img.src = fallbacks.shift();
+    img.dataset.fallbacks = JSON.stringify(fallbacks);
+  } else {
+    img.style.display = 'none';
+  }
+}
+
 async function renderGames() {
   const list  = document.getElementById('game-list');
   const items = sortedFiltered();
@@ -1554,9 +1611,7 @@ async function renderGames() {
 
   list.innerHTML = items.map(g => {
     const hours = g.hours_played != null ? `${parseFloat(g.hours_played).toFixed(1)} hs` : '— hs';
-    const cover = g.cover_url
-      ? `<img src="${g.cover_url}" alt="${g.name}" onerror="this.style.display='none'">`
-      : `<span>🎮</span>`;
+    const cover = steamCoverHtml(g);
     // Resolver el score en vivo contra el idioma actual (steamScoreLabel es
     // un Proxy que depende de currentLang) — nunca cachear el label ya
     // traducido, solo la descripcion cruda, para que el cambio de idioma
@@ -3461,9 +3516,7 @@ function switchFriendTab(tab) {
 }
 
 function friendGameCardHtml(g) {
-  const cover = g.cover_url
-    ? `<img src="${g.cover_url}" alt="${g.name}" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover">`
-    : `<span>🎮</span>`;
+  const cover = steamCoverHtml(g, 'width:100%;height:100%;object-fit:cover');
   const color = _statusColorsFriend[g.status] || '#888780';
   return `<div class="game-card">
     <div class="game-cover" style="pointer-events:none">${cover}</div>
