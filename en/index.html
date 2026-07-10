@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Playloggr — Organizá tu backlog de videojuegos y no vuelvas a perder de vista qué estás jugando</title>
-<meta name="description" content="Playloggr es tu backlog de videojuegos: llevá el registro de qué jugás, qué completaste y qué tenés pendiente. Sincronizá tu biblioteca de Steam, desbloqueá logros, competí con amigos y llevá estadísticas reales de tus horas de juego." />
-<meta name="keywords" content="backlog de videojuegos, gestor de biblioteca de juegos, sincronizar steam, seguimiento de videojuegos, logros gaming, estadisticas de videojuegos, playloggr" />
-<link rel="canonical" href="https://playloggr.com/" />
+<title>Playloggr — Organize your game backlog and never lose track of what you're playing</title>
+<meta name="description" content="Playloggr is your game backlog: track what you're playing, what you finished, and what's next. Sync your Steam library, unlock achievements, compete with friends, and keep real stats on your playtime." />
+<meta name="keywords" content="game backlog, game library manager, steam sync, video game tracker, gaming achievements, video game statistics, playloggr" />
+<link rel="canonical" href="https://playloggr.com/en/" />
 <meta name="robots" content="index, follow" />
 <link rel="alternate" hreflang="es" href="https://playloggr.com/" />
 <link rel="alternate" hreflang="en" href="https://playloggr.com/en/" />
@@ -15,16 +15,16 @@
 
 <!-- Open Graph -->
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://playloggr.com/" />
-<meta property="og:title" content="Playloggr — Tu backlog de videojuegos, organizado" />
-<meta property="og:description" content="Llevá el registro de qué jugás, qué completaste y qué tenés pendiente. Sincronizá Steam, desbloqueá logros y competí con amigos." />
+<meta property="og:url" content="https://playloggr.com/en/" />
+<meta property="og:title" content="Playloggr — Your game backlog, organized" />
+<meta property="og:description" content="Track what you're playing, what you finished, and what's next. Sync Steam, unlock achievements, and compete with friends." />
 <meta property="og:image" content="https://playloggr.com/assets/og-cover.png" />
-<meta property="og:locale" content="es_AR" />
+<meta property="og:locale" content="en_US" />
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Playloggr — Tu backlog de videojuegos, organizado" />
-<meta name="twitter:description" content="Llevá el registro de qué jugás, qué completaste y qué tenés pendiente. Sincronizá Steam, desbloqueá logros y competí con amigos." />
+<meta name="twitter:title" content="Playloggr — Your game backlog, organized" />
+<meta name="twitter:description" content="Track what you're playing, what you finished, and what's next. Sync Steam, unlock achievements, and compete with friends." />
 <meta name="twitter:image" content="https://playloggr.com/assets/og-cover.png" />
 
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -37,10 +37,10 @@
   "applicationCategory": "GameApplication",
   "operatingSystem": "Android, Web",
   "url": "https://playloggr.com",
-  "description": "Playloggr es tu backlog de videojuegos: organizá tu biblioteca, sincronizá Steam, desbloqueá logros y llevá estadísticas de tus partidas.",
+  "description": "Playloggr is your game backlog: organize your library, sync Steam, unlock achievements, and keep stats on your play sessions.",
   "offers": [
-    { "@type": "Offer", "price": "0", "priceCurrency": "USD", "name": "Plan gratuito" },
-    { "@type": "Offer", "name": "Plan premium" }
+    { "@type": "Offer", "price": "0", "priceCurrency": "USD", "name": "Free plan" },
+    { "@type": "Offer", "name": "Premium plan" }
   ]
 }
 </script>
@@ -117,10 +117,6 @@
     display: flex; gap: 16px; overflow-x: auto; padding: 8px 24px 20px;
     scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
   }
-  /* Cuando las cards entran todas en pantalla, centrarlas en vez de
-     dejarlas pegadas a la izquierda. En viewports mas chicos donde
-     desborda, se mantiene el scroll horizontal normal (sin centrar,
-     evita el bug de recorte inicial de Chrome/Firefox con overflow+center). */
   @media (min-width: 1180px) {
     .gallery-scroll { justify-content: center; }
   }
@@ -260,151 +256,151 @@
 <nav>
   <div class="wrap nav-inner">
     <div class="logo"><img src="/favicon.svg" alt="Playloggr" width="28" height="28" style="border-radius:7px" /> Playloggr</div>
-    <button class="nav-toggle" id="nav-toggle" aria-label="Menú">☰</button>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Menu">☰</button>
     <div class="nav-links" id="nav-links">
-      <a href="#que-es">¿Qué es Playloggr?</a>
-      <a href="#funcionalidades">Funcionalidades</a>
-      <a href="#contacto">Contacto</a>
-      <a href="/app/" class="btn-primary">Login / Registro</a>
+      <a href="#que-es">What is Playloggr?</a>
+      <a href="#funcionalidades">Features</a>
+      <a href="#contacto">Contact</a>
+      <a href="/app/" class="btn-primary">Login / Sign up</a>
     </div>
   </div>
 </nav>
 
-<!-- ═══════════════ HERO / ¿QUÉ ES PLAYLOGGR? ═══════════════ -->
+<!-- ═══════════════ HERO / WHAT IS PLAYLOGGR? ═══════════════ -->
 <header class="hero" id="que-es">
   <div class="wrap">
-    <div class="eyebrow">🎮 Tu backlog de videojuegos, por fin bajo control</div>
-    <h1>Dejá de olvidarte qué estabas jugando.<br>Organizá tu <span class="accent">backlog de videojuegos</span> en un solo lugar.</h1>
+    <div class="eyebrow">🎮 Your game backlog, finally under control</div>
+    <h1>Stop forgetting what you were playing.<br>Organize your <span class="accent">game backlog</span> in one place.</h1>
     <p class="hero-sub">
-      Playloggr es la plataforma para gamers que quieren llevar el registro real de su biblioteca: qué están jugando,
-      qué completaron, qué abandonaron y qué tienen pendiente. Sincronizá tu cuenta de Steam, desbloqueá logros,
-      subí de nivel y compará tus estadísticas con tus amigos — todo gratis para empezar.
+      Playloggr is the platform for gamers who want to keep a real record of their library: what they're playing,
+      what they've finished, what they've dropped, and what's still pending. Sync your Steam account, unlock achievements,
+      level up, and compare your stats with friends — all free to start.
     </p>
     <div class="hero-ctas">
-      <a href="/app/" class="btn-primary">Crear cuenta gratis</a>
-      <a href="#funcionalidades" class="btn-secondary">Ver funcionalidades</a>
+      <a href="/app/" class="btn-primary">Create a free account</a>
+      <a href="#funcionalidades" class="btn-secondary">See features</a>
     </div>
 
     <div class="pill-row">
-      <span class="pill">🔄 Sincronización con Steam</span>
-      <span class="pill">🏆 150 logros desbloqueables</span>
-      <span class="pill">📊 Estadísticas en tiempo real</span>
-      <span class="pill">👥 Backlog social con amigos</span>
+      <span class="pill">🔄 Steam sync</span>
+      <span class="pill">🏆 150 unlockable achievements</span>
+      <span class="pill">📊 Real-time statistics</span>
+      <span class="pill">👥 Social backlog with friends</span>
     </div>
   </div>
 </header>
 
-<!-- ═══════════════ GALERÍA ═══════════════ -->
+<!-- ═══════════════ GALLERY ═══════════════ -->
 <section class="gallery-section">
   <div class="gallery-scroll" id="gallery-scroll">
     <div class="shot">
-      <img src="/assets/screenshots/biblioteca.png" alt="Biblioteca de juegos en Playloggr, con filtros por estado, plataforma y género" loading="lazy" />
-      <div class="shot-caption">📚 Tu biblioteca completa, con filtros</div>
+      <img src="/assets/screenshots/biblioteca.png" alt="Game library in Playloggr, with filters by status, platform, and genre" loading="lazy" />
+      <div class="shot-caption">📚 Your whole library, with filters</div>
     </div>
     <div class="shot">
-      <img src="/assets/screenshots/logros.png" alt="Panel de logros y niveles de Playloggr" loading="lazy" />
-      <div class="shot-caption">🏆 150 logros para desbloquear</div>
+      <img src="/assets/screenshots/logros.png" alt="Achievements and level panel in Playloggr" loading="lazy" />
+      <div class="shot-caption">🏆 150 achievements to unlock</div>
     </div>
     <div class="shot">
-      <img src="/assets/screenshots/estadisticas.png" alt="Estadísticas de biblioteca, horas jugadas y calificaciones en Playloggr" loading="lazy" />
-      <div class="shot-caption">📊 Estadísticas reales de tu backlog</div>
+      <img src="/assets/screenshots/estadisticas.png" alt="Library statistics, hours played, and ratings in Playloggr" loading="lazy" />
+      <div class="shot-caption">📊 Real stats on your backlog</div>
     </div>
     <div class="shot">
-      <img src="/assets/screenshots/avatar.png" alt="Personalización de avatar y marcos desbloqueables en Playloggr" loading="lazy" />
-      <div class="shot-caption">🧑‍🎨 Avatar y marcos exclusivos por nivel</div>
+      <img src="/assets/screenshots/avatar.png" alt="Avatar customization and unlockable frames in Playloggr" loading="lazy" />
+      <div class="shot-caption">🧑‍🎨 Avatar and exclusive frames by level</div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════ FUNCIONALIDADES Y PLANES ═══════════════ -->
+<!-- ═══════════════ FEATURES AND PLANS ═══════════════ -->
 <section class="section section-alt" id="funcionalidades">
   <div class="wrap">
     <div class="section-header">
-      <div class="section-eyebrow">Funcionalidades</div>
-      <h2>Todo lo que necesitás para no perder de vista tu backlog</h2>
-      <p>Desde el registro simple de tus juegos hasta estadísticas avanzadas y gamificación.</p>
+      <div class="section-eyebrow">Features</div>
+      <h2>Everything you need to keep track of your backlog</h2>
+      <p>From simple game tracking to advanced statistics and gamification.</p>
     </div>
 
     <div class="feature-grid">
       <div class="feature-card">
         <div class="f-icon">📚</div>
-        <h3>Biblioteca y deseados</h3>
-        <p>Organizá tus juegos por estado (jugando, completado, backlog, abandonado) y llevá una lista de deseados separada.</p>
+        <h3>Library and wishlist</h3>
+        <p>Organize your games by status (playing, completed, backlog, dropped) and keep a separate wishlist.</p>
       </div>
       <div class="feature-card">
         <div class="f-icon">🔄</div>
-        <h3>Sincronización con Steam</h3>
-        <p>Conectá tu cuenta de Steam y sincronizá tu biblioteca, tu wishlist y las reviews de la comunidad automáticamente.</p>
+        <h3>Steam sync</h3>
+        <p>Connect your Steam account and automatically sync your library, your wishlist, and community reviews.</p>
       </div>
       <div class="feature-card">
         <div class="f-icon">🏆</div>
-        <h3>Logros y niveles</h3>
-        <p>150 logros para desbloquear, sistema de XP, niveles, marcos de avatar y fuentes exclusivas a medida que avanzás.</p>
+        <h3>Achievements and levels</h3>
+        <p>150 achievements to unlock, an XP system, levels, avatar frames, and exclusive fonts as you progress.</p>
       </div>
       <div class="feature-card">
         <div class="f-icon">📊</div>
-        <h3>Estadísticas reales</h3>
-        <p>Horas jugadas, calificaciones, distribución por plataforma y género, actividad reciente y rankings globales.</p>
+        <h3>Real statistics</h3>
+        <p>Hours played, ratings, breakdown by platform and genre, recent activity, and global rankings.</p>
       </div>
       <div class="feature-card">
         <div class="f-icon">👥</div>
-        <h3>Backlog social</h3>
-        <p>Agregá amigos, mirá qué están jugando en tiempo real y comparen bibliotecas.</p>
+        <h3>Social backlog</h3>
+        <p>Add friends, see what they're playing in real time, and compare libraries.</p>
       </div>
       <div class="feature-card">
         <div class="f-icon">🗂️</div>
-        <h3>Carpetas personalizadas</h3>
-        <p>Agrupá tus juegos como quieras: por saga, por plataforma, por prioridad — lo que tenga sentido para vos.</p>
+        <h3>Custom folders</h3>
+        <p>Group your games however you like: by series, by platform, by priority — whatever makes sense to you.</p>
       </div>
     </div>
 
     <div class="section-header" style="margin-bottom:32px">
-      <div class="section-eyebrow">Planes</div>
-      <h2>Empezá gratis, subí a premium cuando quieras más</h2>
+      <div class="section-eyebrow">Plans</div>
+      <h2>Start free, go premium whenever you want more</h2>
     </div>
 
     <div class="plans">
       <div class="plan">
-        <div class="plan-name">Gratis</div>
-        <div class="plan-price">USD $0 <span>/ siempre</span></div>
+        <div class="plan-name">Free</div>
+        <div class="plan-price">USD $0 <span>/ forever</span></div>
         <ul class="plan-features">
-          <li><span class="check">✓</span> Hasta <strong>100 juegos</strong> en biblioteca</li>
-          <li><span class="check">✓</span> Hasta <strong>10 juegos</strong> en deseados</li>
-          <li><span class="check">✓</span> Hasta <strong>3 carpetas</strong></li>
-          <li><span class="check">✓</span> Hasta <strong>5 amigos</strong></li>
-          <li><span class="check">✓</span> Logros y nivel hasta el <strong>30</strong></li>
-          <li><span class="check">✓</span> Estadísticas propias</li>
-          <li><span class="cross">✕</span> Sincronización con Steam</li>
-          <li><span class="cross">✕</span> Estadísticas de amigos y rankings</li>
+          <li><span class="check">✓</span> Up to <strong>100 games</strong> in your library</li>
+          <li><span class="check">✓</span> Up to <strong>10 games</strong> in your wishlist</li>
+          <li><span class="check">✓</span> Up to <strong>3 folders</strong></li>
+          <li><span class="check">✓</span> Up to <strong>5 friends</strong></li>
+          <li><span class="check">✓</span> Achievements and level up to <strong>30</strong></li>
+          <li><span class="check">✓</span> Your own statistics</li>
+          <li><span class="cross">✕</span> Steam sync</li>
+          <li><span class="cross">✕</span> Friends' stats and rankings</li>
         </ul>
       </div>
       <div class="plan highlight">
-        <span class="plan-badge">RECOMENDADO</span>
+        <span class="plan-badge">RECOMMENDED</span>
         <div class="plan-name">Premium</div>
-        <div class="plan-price">USD $6.99 <span>pago único</span></div>
+        <div class="plan-price">USD $6.99 <span>one-time payment</span></div>
         <ul class="plan-features">
-          <li><span class="check">✓</span> Biblioteca y deseados <strong>ilimitados</strong></li>
-          <li><span class="check">✓</span> Carpetas y amigos <strong>ilimitados</strong></li>
-          <li><span class="check">✓</span> Nivel <strong>150</strong> + marcos exclusivos</li>
-          <li><span class="check">✓</span> Los <strong>150 logros</strong> disponibles</li>
-          <li><span class="check">✓</span> <strong>Sincronización con Steam</strong></li>
-          <li><span class="check">✓</span> Rankings y stats de amigos</li>
+          <li><span class="check">✓</span> <strong>Unlimited</strong> library and wishlist</li>
+          <li><span class="check">✓</span> <strong>Unlimited</strong> folders and friends</li>
+          <li><span class="check">✓</span> Level <strong>150</strong> + exclusive frames</li>
+          <li><span class="check">✓</span> All <strong>150 achievements</strong> available</li>
+          <li><span class="check">✓</span> <strong>Steam sync</strong></li>
+          <li><span class="check">✓</span> Friends' rankings and stats</li>
         </ul>
       </div>
     </div>
     <p style="text-align:center;font-size:12px;color:var(--text2);margin-top:20px">
-      Precio único de USD $6.99, sin renovación automática. Los impuestos pueden aplicarse y se calculan en el checkout.
+      One-time price of USD $6.99, no auto-renewal. Taxes may apply and are calculated at checkout.
     </p>
   </div>
 </section>
 
-<!-- ═══════════════ CONTACTO ═══════════════ -->
+<!-- ═══════════════ CONTACT ═══════════════ -->
 <section class="section" id="contacto">
   <div class="wrap">
     <div class="contact-box">
       <div class="f-icon" style="margin:0 auto 18px">✉️</div>
-      <h2 style="font-size:22px;font-weight:800;margin-bottom:8px">¿Tenés dudas, sugerencias o encontraste un bug?</h2>
-      <p class="contact-sub">Escribinos, respondemos a todos los mails.</p>
+      <h2 style="font-size:22px;font-weight:800;margin-bottom:8px">Have questions, suggestions, or found a bug?</h2>
+      <p class="contact-sub">Write to us, we reply to every email.</p>
       <a class="contact-mail" href="mailto:nether.appdev@gmail.com">nether.appdev@gmail.com</a>
     </div>
   </div>
@@ -412,31 +408,31 @@
 
 <footer>
   <div class="wrap footer-inner">
-    <div class="footer-copy">© <span id="year"></span> Playloggr. Todos los derechos reservados.</div>
+    <div class="footer-copy">© <span id="year"></span> Playloggr. All rights reserved.</div>
     <div class="footer-links">
-      <a href="/privacy.html">Privacidad</a>
-      <a href="/terms.html">Términos y condiciones</a>
-      <a href="/refunds.html">Reembolsos</a>
-      <a href="/app/">Iniciar sesión</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms and conditions</a>
+      <a href="/refunds.html">Refunds</a>
+      <a href="/app/">Log in</a>
     </div>
   </div>
 </footer>
 
 <!-- ═══════════════ COOKIE BANNER ═══════════════ -->
 <div id="cookie-banner">
-  <p>Usamos cookies para entender cómo se usa el sitio (Google Analytics) y mejorar Playloggr. Podés aceptar o rechazar el análisis — la web funciona igual en ambos casos. Más info en nuestra <a href="/privacy.html" style="color:var(--green)">Política de Privacidad</a>.</p>
+  <p>We use cookies to understand how the site is used (Google Analytics) and to improve Playloggr. You can accept or reject analytics — the site works the same either way. More info in our <a href="/privacy.html" style="color:var(--green)">Privacy Policy</a>.</p>
   <div class="cookie-actions">
-    <button class="btn-cookie-reject" onclick="setCookieConsent(false)">Rechazar</button>
-    <button class="btn-cookie-accept" onclick="setCookieConsent(true)">Aceptar</button>
+    <button class="btn-cookie-reject" onclick="setCookieConsent(false)">Reject</button>
+    <button class="btn-cookie-accept" onclick="setCookieConsent(true)">Accept</button>
   </div>
 </div>
 
 <script>
   document.getElementById('year').textContent = new Date().getFullYear();
 
-  // ── Selector de idioma (primera visita) ──
+  // ── Language picker (first visit) ──
   (function initLangPicker() {
-    const CURRENT_LANG = 'es';
+    const CURRENT_LANG = 'en';
     const bar = document.getElementById('lang-picker-bar');
     const chosen = localStorage.getItem('pl_lang_chosen');
     document.querySelectorAll('.lang-choice-btn').forEach(btn => {
@@ -458,7 +454,7 @@
   navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
   navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
 
-  // ── Google Analytics (GA4) — carga diferida hasta que el usuario acepte cookies ──
+  // ── Google Analytics (GA4) — loaded only after the user accepts cookies ──
   const GA_MEASUREMENT_ID = 'G-G24M6XTDJ1';
 
   function loadGoogleAnalytics() {
@@ -488,7 +484,7 @@
     } else if (consent === null) {
       document.getElementById('cookie-banner').style.display = 'block';
     }
-    // Si es 'rejected', no se muestra el banner de nuevo y no se carga GA.
+    // If 'rejected', the banner won't show again and GA won't load.
   })();
 </script>
 
