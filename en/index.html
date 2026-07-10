@@ -226,6 +226,13 @@
   .lang-choice-btn:hover { border-color: var(--green); color: var(--text); }
   .lang-choice-btn.current { background: var(--green); border-color: var(--green); color: #fff; }
 
+  /* ── Persistent nav language switch ── */
+  .lang-switch { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text2); }
+  .lang-switch a { padding: 3px 6px; border-radius: 6px; color: var(--text2); }
+  .lang-switch a:hover { color: var(--text); }
+  .lang-switch a.current { color: var(--green); font-weight: 700; }
+  .lang-switch .sep { opacity: 0.4; }
+
   @media (max-width: 860px) {
     .feature-grid { grid-template-columns: 1fr 1fr; }
     .plans { grid-template-columns: 1fr; }
@@ -261,6 +268,7 @@
       <a href="#que-es">What is Playloggr?</a>
       <a href="#funcionalidades">Features</a>
       <a href="#contacto">Contact</a>
+      <div class="lang-switch" id="lang-switch"></div>
       <a href="/app/" class="btn-primary">Login / Sign up</a>
     </div>
   </div>
@@ -410,9 +418,9 @@
   <div class="wrap footer-inner">
     <div class="footer-copy">© <span id="year"></span> Playloggr. All rights reserved.</div>
     <div class="footer-links">
-      <a href="/privacy.html">Privacy</a>
-      <a href="/terms.html">Terms and conditions</a>
-      <a href="/refunds.html">Refunds</a>
+      <a href="/en/privacy.html">Privacy</a>
+      <a href="/en/terms.html">Terms and conditions</a>
+      <a href="/en/refunds.html">Refunds</a>
       <a href="/app/">Log in</a>
     </div>
   </div>
@@ -446,6 +454,26 @@
       });
     });
     if (!chosen) bar.style.display = 'block';
+  })();
+
+  // ── Persistent language switch in the nav ──
+  (function initNavLangSwitch() {
+    const CURRENT_LANG = 'en';
+    const codes = { es: 'ES', en: 'EN', pt: 'PT' };
+    function targetUrl(lang) {
+      const rest = window.location.pathname.replace(/^\/(en|pt)\//, '/');
+      return lang === 'es' ? rest : `/${lang}${rest}`;
+    }
+    const el = document.getElementById('lang-switch');
+    if (el) {
+      el.innerHTML = ['es', 'en', 'pt'].map((l, i) =>
+        (i > 0 ? '<span class="sep">·</span>' : '') +
+        `<a href="${targetUrl(l)}" class="${l === CURRENT_LANG ? 'current' : ''}"${l === CURRENT_LANG ? ' aria-current="page"' : ''}>${codes[l]}</a>`
+      ).join('');
+      el.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+        localStorage.setItem('pl_lang_chosen', a.textContent.toLowerCase());
+      }));
+    }
   })();
 
   // Mobile nav toggle

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://playloggr.com/sitemap.xml

@@ -7,6 +7,10 @@
 <meta name="description" content="Términos y condiciones de uso de Playloggr." />
 <meta name="robots" content="index, follow" />
 <link rel="canonical" href="https://playloggr.com/terms.html" />
+<link rel="alternate" hreflang="es" href="https://playloggr.com/terms.html" />
+<link rel="alternate" hreflang="en" href="https://playloggr.com/en/terms.html" />
+<link rel="alternate" hreflang="pt" href="https://playloggr.com/pt/terms.html" />
+<link rel="alternate" hreflang="x-default" href="https://playloggr.com/terms.html" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <style>
   :root { --bg:#111; --bg2:#1a1a1a; --bg3:#1f1f1f; --border:#2a2a2a; --text:#f0f0f0; --text2:#9a9a9a; --green:#1D9E75; }
@@ -21,11 +25,19 @@
   p, li { font-size: 14px; color: #ccc; }
   ul { padding-left: 20px; margin: 8px 0; }
   li { margin-bottom: 4px; }
+  .lang-switch { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text2); }
+  .lang-switch a { padding: 3px 6px; border-radius: 6px; color: var(--text2); }
+  .lang-switch a:hover { color: var(--text); }
+  .lang-switch a.current { color: var(--green); font-weight: 700; }
+  .lang-switch .sep { opacity: 0.4; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <a class="back" href="/">← Volver a Playloggr</a>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+    <a class="back" href="/" style="margin-bottom:0">← Volver a Playloggr</a>
+    <div class="lang-switch" id="lang-switch"></div>
+  </div>
   <h1>Términos y Condiciones</h1>
   <div class="updated">Última actualización: julio de 2026</div>
 
@@ -66,5 +78,25 @@
   <h2>10. Contacto</h2>
   <p>Cualquier consulta: <a href="mailto:nether.appdev@gmail.com">nether.appdev@gmail.com</a></p>
 </div>
+<script>
+  (function initNavLangSwitch() {
+    const CURRENT_LANG = 'es';
+    const codes = { es: 'ES', en: 'EN', pt: 'PT' };
+    function targetUrl(lang) {
+      const rest = window.location.pathname.replace(/^\/(en|pt)\//, '/');
+      return lang === 'es' ? rest : `/${lang}${rest}`;
+    }
+    const el = document.getElementById('lang-switch');
+    if (el) {
+      el.innerHTML = ['es', 'en', 'pt'].map((l, i) =>
+        (i > 0 ? '<span class="sep">·</span>' : '') +
+        `<a href="${targetUrl(l)}" class="${l === CURRENT_LANG ? 'current' : ''}"${l === CURRENT_LANG ? ' aria-current="page"' : ''}>${codes[l]}</a>`
+      ).join('');
+      el.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+        localStorage.setItem('pl_lang_chosen', a.textContent.toLowerCase());
+      }));
+    }
+  })();
+</script>
 </body>
 </html>
