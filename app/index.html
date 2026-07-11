@@ -184,15 +184,19 @@
       50%      { border-color:rgba(255,193,7,.35); box-shadow:none; }
     }
     .frame-rgb-prisma {
+      position:relative;
+      overflow:hidden;
       border-color:transparent !important;
-      background:linear-gradient(var(--bg2),var(--bg2)) padding-box,
-                 linear-gradient(90deg,#ff003c,#ff8c00,#ffee00,#00e676,#00b8ff,#7c4dff,#ff003c) border-box !important;
-      background-size:100% 100%, 300% 100%;
-      animation: frameRgbShift 3s linear infinite;
     }
-    @keyframes frameRgbShift {
-      0%   { background-position:0 0, 0% 50%; }
-      100% { background-position:0 0, 300% 50%; }
+    .frame-rgb-prisma::before {
+      content:'';
+      position:absolute;
+      inset:-60%;
+      background:conic-gradient(#ff003c,#ff8c00,#ffee00,#00e676,#00b8ff,#7c4dff,#ff003c);
+      animation: frameRgbSpin 3s linear infinite;
+    }
+    @keyframes frameRgbSpin {
+      to { transform: rotate(360deg); }
     }
   </style>
 </head>
