@@ -275,12 +275,12 @@
       </button>
 
       <!-- Friends button -->
-      <button onclick="openFriendsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="friends" title="Amigos">
+      <button id="friends-btn" onclick="openFriendsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="friends" title="Amigos">
         <i class="ti ti-users" style="font-size:14px"></i>
       </button>
 
       <!-- Achievements button -->
-      <button onclick="openAchievementsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="achievements" title="Logros">
+      <button id="achievements-btn" onclick="openAchievementsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="achievements" title="Logros">
         <i class="ti ti-trophy" style="font-size:14px"></i>
       </button>
 
@@ -1157,6 +1157,12 @@ const I18N = {
     tourTitleFolders: 'Organizá con carpetas', tourBodyFolders: 'Creá carpetas para agrupar tus juegos como quieras.',
     tourTitleStats: 'Mirá tus estadísticas', tourBodyStats: 'Tocá acá para ver tus horas, géneros favoritos y rankings globales.',
     tourTitleSession: 'Registrá una sesión en vivo', tourBodySession: 'Tocá este botón en cualquier juego para iniciar el cronómetro mientras jugás.',
+    tourTitleFilters: 'Filtrá tu biblioteca', tourBodyFilters: 'Filtrá por estado, plataforma, género, horas y calificación, y buscá por nombre.',
+    tourTitleRankings: 'Armá tus rankings', tourBodyRankings: 'Creá tu propio top de hasta 25 juegos y ordenalos arrastrando las fichas.',
+    tourTitleFriends: 'Agregá amigos', tourBodyFriends: 'Sumá amigos, mirá qué están jugando y comparen bibliotecas.',
+    tourTitleAchievements: 'Desbloqueá logros', tourBodyAchievements: '150 logros para desbloquear, con XP y niveles a medida que jugás.',
+    tourTitleAvatar: 'Personalizá tu avatar', tourBodyAvatar: 'Tocá acá para armar tu personaje pixel art con marcos y fuentes exclusivas.',
+    tourTitleSupport: '¿Tenés dudas?', tourBodySupport: 'Escribinos por acá cuando quieras, respondemos a todos los mails.',
     tourDone: 'Listo',
     rankings: 'Rankings', newRanking: 'Nuevo ranking', backToRankings: '← Volver a rankings', addToRanking: 'Agregar a ranking',
     newRankingPrompt: 'Nombre del ranking:', renameRankingPrompt: 'Nuevo nombre:',
@@ -1258,6 +1264,12 @@ const I18N = {
     tourTitleFolders: 'Organize with folders', tourBodyFolders: 'Create folders to group your games however you like.',
     tourTitleStats: 'Check your stats', tourBodyStats: 'Tap here to see your hours, favorite genres and global rankings.',
     tourTitleSession: 'Log a live session', tourBodySession: 'Tap this button on any game to start the timer while you play.',
+    tourTitleFilters: 'Filter your library', tourBodyFilters: 'Filter by status, platform, genre, hours and rating, and search by name.',
+    tourTitleRankings: 'Build your rankings', tourBodyRankings: 'Create your own top of up to 25 games and reorder them by dragging the tiles.',
+    tourTitleFriends: 'Add friends', tourBodyFriends: 'Add friends, see what they\'re playing and compare libraries.',
+    tourTitleAchievements: 'Unlock achievements', tourBodyAchievements: '150 achievements to unlock, with XP and levels as you play.',
+    tourTitleAvatar: 'Customize your avatar', tourBodyAvatar: 'Tap here to build your pixel-art character with exclusive frames and fonts.',
+    tourTitleSupport: 'Have questions?', tourBodySupport: 'Write to us here anytime, we reply to every email.',
     tourDone: 'Done',
     rankings: 'Rankings', newRanking: 'New ranking', backToRankings: '← Back to rankings', addToRanking: 'Add to ranking',
     newRankingPrompt: 'Ranking name:', renameRankingPrompt: 'New name:',
@@ -1359,6 +1371,12 @@ const I18N = {
     tourTitleFolders: 'Organize com pastas', tourBodyFolders: 'Crie pastas para agrupar seus jogos como quiser.',
     tourTitleStats: 'Veja suas estatísticas', tourBodyStats: 'Toque aqui para ver suas horas, gêneros favoritos e rankings globais.',
     tourTitleSession: 'Registre uma sessão ao vivo', tourBodySession: 'Toque neste botão em qualquer jogo para iniciar o cronômetro enquanto joga.',
+    tourTitleFilters: 'Filtre sua biblioteca', tourBodyFilters: 'Filtre por status, plataforma, gênero, horas e avaliação, e busque por nome.',
+    tourTitleRankings: 'Monte seus rankings', tourBodyRankings: 'Crie seu próprio top de até 25 jogos e reordene arrastando as fichas.',
+    tourTitleFriends: 'Adicione amigos', tourBodyFriends: 'Adicione amigos, veja o que estão jogando e comparem bibliotecas.',
+    tourTitleAchievements: 'Desbloqueie conquistas', tourBodyAchievements: '150 conquistas para desbloquear, com XP e níveis conforme você joga.',
+    tourTitleAvatar: 'Personalize seu avatar', tourBodyAvatar: 'Toque aqui para montar seu personagem em pixel art com molduras e fontes exclusivas.',
+    tourTitleSupport: 'Tem dúvidas?', tourBodySupport: 'Escreva para nós por aqui quando quiser, respondemos a todos os emails.',
     tourDone: 'Concluído',
     rankings: 'Rankings', newRanking: 'Novo ranking', backToRankings: '← Voltar aos rankings', addToRanking: 'Adicionar ao ranking',
     newRankingPrompt: 'Nome do ranking:', renameRankingPrompt: 'Novo nome:',
@@ -4676,11 +4694,16 @@ async function markOnboardingSeenApi() {
 
 // ── Feature tour (coachmarks sobre botones reales) ─────────────────────────
 const FEATURE_TOUR_STEPS = [
-  { selector: '#steam-menu-btn',   titleKey: 'tourTitleSteam',   bodyKey: 'tourBodySteam' },
-  { selector: '#add-game-btn',     titleKey: 'tourTitleAdd',     bodyKey: 'tourBodyAdd' },
-  { selector: '#folder-filter-btn', titleKey: 'tourTitleFolders', bodyKey: 'tourBodyFolders' },
-  { selector: '#stats-icon-btn',   titleKey: 'tourTitleStats',   bodyKey: 'tourBodyStats' },
-  { selector: '.play-btn',         titleKey: 'tourTitleSession', bodyKey: 'tourBodySession' },
+  { selector: '#steam-menu-btn',    titleKey: 'tourTitleSteam',       bodyKey: 'tourBodySteam' },
+  { selector: '#add-game-btn',      titleKey: 'tourTitleAdd',         bodyKey: 'tourBodyAdd' },
+  { selector: '#filter-bar',        titleKey: 'tourTitleFilters',     bodyKey: 'tourBodyFilters' },
+  { selector: '#folder-filter-btn', titleKey: 'tourTitleFolders',     bodyKey: 'tourBodyFolders' },
+  { selector: '#view-rankings',     titleKey: 'tourTitleRankings',    bodyKey: 'tourBodyRankings' },
+  { selector: '#friends-btn',       titleKey: 'tourTitleFriends',     bodyKey: 'tourBodyFriends' },
+  { selector: '#achievements-btn',  titleKey: 'tourTitleAchievements', bodyKey: 'tourBodyAchievements' },
+  { selector: '#avatar-thumb-box',  titleKey: 'tourTitleAvatar',      bodyKey: 'tourBodyAvatar' },
+  { selector: '#support-link',      titleKey: 'tourTitleSupport',     bodyKey: 'tourBodySupport' },
+  { selector: '.play-btn',          titleKey: 'tourTitleSession',     bodyKey: 'tourBodySession' },
 ];
 let _tourSteps = [];
 let _tourIndex = 0;
@@ -5924,7 +5947,7 @@ async function onLoginSuccess() {
 
   const chip = document.createElement('div');
   chip.className = 'user-chip';
-  chip.innerHTML = `<span id="user-level-badge"></span><span id="user-name-span">${authUser}</span><span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px;margin-left:2px"></span><button id="header-upgrade-btn" onclick="startPaddleCheckout()" style="display:none;font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;margin-left:4px;border:none;background:var(--green);color:#fff;cursor:pointer">✨ Hacerse Premium</button><a class="logout-btn" href="mailto:nether.appdev@gmail.com" style="text-decoration:none;display:inline-flex;align-items:center" data-i18n="support">Soporte</a><button class="logout-btn" onclick="logout()" data-i18n="logout">Salir</button>`;
+  chip.innerHTML = `<span id="user-level-badge"></span><span id="user-name-span">${authUser}</span><span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px;margin-left:2px"></span><button id="header-upgrade-btn" onclick="startPaddleCheckout()" style="display:none;font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;margin-left:4px;border:none;background:var(--green);color:#fff;cursor:pointer">✨ Hacerse Premium</button><a id="support-link" class="logout-btn" href="mailto:nether.appdev@gmail.com" style="text-decoration:none;display:inline-flex;align-items:center" data-i18n="support">Soporte</a><button class="logout-btn" onclick="logout()" data-i18n="logout">Salir</button>`;
   applyI18n();
   document.getElementById('plat-status-row').before(chip);
 
