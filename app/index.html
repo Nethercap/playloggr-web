@@ -165,6 +165,35 @@
       .game-card { grid-template-columns:44px minmax(0,1fr); }
       .game-status-col { display:none; }
     }
+
+    /* ── Marcos de avatar animados (los 3 anteriores al ultimo: pulso; el
+       ultimo/mas alto: degrade RGB desplazandose) ── */
+    .frame-pulse-fuego     { animation: framePulseFuego 2s ease-in-out infinite; }
+    .frame-pulse-amatista  { animation: framePulseAmatista 2s ease-in-out infinite; }
+    .frame-pulse-dorado    { animation: framePulseDorado 2s ease-in-out infinite; }
+    @keyframes framePulseFuego {
+      0%, 100% { border-color:#FF5722; box-shadow:0 0 7px 1px rgba(255,87,34,.65); }
+      50%      { border-color:rgba(255,87,34,.35); box-shadow:none; }
+    }
+    @keyframes framePulseAmatista {
+      0%, 100% { border-color:#9C27B0; box-shadow:0 0 7px 1px rgba(156,39,176,.65); }
+      50%      { border-color:rgba(156,39,176,.35); box-shadow:none; }
+    }
+    @keyframes framePulseDorado {
+      0%, 100% { border-color:#FFC107; box-shadow:0 0 7px 1px rgba(255,193,7,.65); }
+      50%      { border-color:rgba(255,193,7,.35); box-shadow:none; }
+    }
+    .frame-rgb-prisma {
+      border-color:transparent !important;
+      background:linear-gradient(var(--bg2),var(--bg2)) padding-box,
+                 linear-gradient(90deg,#ff003c,#ff8c00,#ffee00,#00e676,#00b8ff,#7c4dff,#ff003c) border-box !important;
+      background-size:100% 100%, 300% 100%;
+      animation: frameRgbShift 3s linear infinite;
+    }
+    @keyframes frameRgbShift {
+      0%   { background-position:0 0, 0% 50%; }
+      100% { background-position:0 0, 300% 50%; }
+    }
   </style>
 </head>
 <body>
@@ -3593,10 +3622,12 @@ function levelBadgeHtml(levelInfo, size = 18) {
   const color = _badgeTierColors[tier] || _badgeTierColors.bronce;
   const clip = _badgeClipPaths[tier];
   const shapeStyle = clip ? `clip-path:${clip};-webkit-clip-path:${clip}` : 'border-radius:50%';
+  // El trofeo se muestra al lado del badge (y por lo tanto, al lado del
+  // nombre de usuario donde se renderizan juntos), no superpuesto encima.
   const trophy = levelInfo.trophy
-    ? `<i class="ti ti-trophy" style="position:absolute;top:-4px;right:-6px;font-size:${Math.round(size*0.5)}px;color:#EF9F27"></i>`
+    ? `<i class="ti ti-trophy" style="font-size:${Math.round(size*0.55)}px;color:#EF9F27;margin-right:4px"></i>`
     : '';
-  return `<span style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;${shapeStyle};background:${color};color:#fff;font-size:${Math.round(size*0.42)}px;font-weight:700;flex-shrink:0;margin-right:6px">${levelInfo.level}${trophy}</span>`;
+  return `<span style="display:inline-flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;${shapeStyle};background:${color};color:#fff;font-size:${Math.round(size*0.42)}px;font-weight:700;flex-shrink:0">${levelInfo.level}</span>${trophy}<span style="display:inline-block;width:6px"></span>`;
 }
 
 const kFrameTiers = [
@@ -3624,6 +3655,19 @@ function frameWrapStyle(frameId) {
   return `border:${thick}px solid ${color};border-radius:10px;padding:2px;`;
 }
 
+// Clase de animacion para el marco: los 3 tiers anteriores al ultimo
+// (fuego/amatista/dorado) laten con un fade a un color mas tenue; el
+// ultimo tier (prisma) tiene un degrade RGB que se desplaza.
+function frameAnimClass(frameId) {
+  switch (frameId) {
+    case 'fuego':    return 'frame-pulse-fuego';
+    case 'amatista': return 'frame-pulse-amatista';
+    case 'dorado':   return 'frame-pulse-dorado';
+    case 'prisma':   return 'frame-rgb-prisma';
+    default:         return '';
+  }
+}
+
 /** Small "not unlocked" badge (matches the ti-ban icon used elsewhere for locked items),
  *  shown when the user has no avatar frame (level 1 / 'none' tier). Wrap the avatar
  *  container with position:relative for this to be positioned correctly. */
@@ -3640,9 +3684,9 @@ function usernameFontStyle(fontId) {
     case 'italic':       return 'font-style:italic';
     case 'condensed':    return 'letter-spacing:-0.5px';
     case 'expanded':     return 'letter-spacing:1.5px';
-    case 'monospace':    return 'font-family:monospace';
-    case 'uppercase':    return 'letter-spacing:1.2px;font-weight:700;text-transform:uppercase';
-    case 'retro':        return 'font-family:monospace;font-weight:700;letter-spacing:0.5px';
+    case 'monospace':    return 'font-family:monospace;color:#2ECC71';
+    case 'uppercase':    return 'letter-spacing:1.2px;font-weight:700;text-transform:uppercase;color:#E24B4A';
+    case 'retro':        return 'font-family:monospace;font-weight:700;letter-spacing:0.5px;color:#F5C518';
     case 'elegant':       return 'font-style:italic;font-family:serif';
     case 'prisma_font':  return 'font-weight:800;letter-spacing:0.8px;color:#8E7CE8';
     default:             return '';
@@ -3659,7 +3703,7 @@ function _friendAvatarHtml(f, size) {
 function _requestRowHtml(r, trailingHtml, subtitle) {
   const frameId = r.level_info && r.level_info.frame;
   return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px">
-    <div style="width:40px;height:40px;flex-shrink:0;position:relative;${frameWrapStyle(frameId)}">
+    <div class="${frameAnimClass(frameId)}" style="width:40px;height:40px;flex-shrink:0;position:relative;${frameWrapStyle(frameId)}">
       <div style="width:100%;height:100%;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden">
         <div style="width:36px;height:36px;position:relative">${_friendAvatarHtml(r, 36)}</div>
       </div>
@@ -3725,7 +3769,7 @@ async function loadFriendsList() {
         const frameId = f.level_info && f.level_info.frame;
         const fontId  = f.level_info && f.level_info.font;
         return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px">
-          <div style="width:44px;height:44px;flex-shrink:0;cursor:pointer;position:relative;${frameWrapStyle(frameId)}" onclick="openFriendProfile('${f.username}')">
+          <div class="${frameAnimClass(frameId)}" style="width:44px;height:44px;flex-shrink:0;cursor:pointer;position:relative;${frameWrapStyle(frameId)}" onclick="openFriendProfile('${f.username}')">
             <div style="width:100%;height:100%;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden">
               <div style="width:40px;height:40px;position:relative">${_friendAvatarHtml(f, 40)}</div>
             </div>
@@ -4914,12 +4958,18 @@ function applyPremiumUI() {
 
 function applyAvatarFrameUI() {
   const previewBox = document.getElementById('avatar-preview-box');
-  if (previewBox) previewBox.setAttribute('style',
-    `width:180px;height:180px;background:var(--bg3);border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;${frameWrapStyle(userFrame)}`);
+  if (previewBox) {
+    previewBox.setAttribute('style',
+      `width:180px;height:180px;background:var(--bg3);border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;${frameWrapStyle(userFrame)}`);
+    previewBox.className = frameAnimClass(userFrame);
+  }
 
   const thumbWrap = document.getElementById('avatar-thumb-box')?.parentElement;
-  if (thumbWrap) thumbWrap.setAttribute('style',
-    `cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 66px;height:66px;box-sizing:border-box;overflow:hidden;${frameWrapStyle(userFrame)}`);
+  if (thumbWrap) {
+    thumbWrap.setAttribute('style',
+      `cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 66px;height:66px;box-sizing:border-box;overflow:hidden;${frameWrapStyle(userFrame)}`);
+    thumbWrap.className = frameAnimClass(userFrame);
+  }
 }
 
 function renderCosmeticPickers() {
@@ -4946,7 +4996,7 @@ function renderCosmeticPickers() {
       : '';
     return `<div onclick="${unlocked ? `selectCosmetic('frame','${id}')` : ''}"
         style="display:inline-flex;flex-direction:column;align-items:center;gap:2px;cursor:${unlocked ? 'pointer' : 'default'};opacity:${unlocked ? 1 : 0.35};margin:0 8px 8px 0">
-      <div style="width:36px;height:36px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;${frameWrapStyle(id)}">
+      <div class="${frameAnimClass(id)}" style="width:36px;height:36px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;${frameWrapStyle(id)}">
         ${unlocked ? frameBadgeHtml(id) : '<i class="ti ti-lock" style="font-size:12px;color:var(--text2)"></i>'}
         ${selectedBadge}
       </div>
