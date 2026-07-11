@@ -4727,6 +4727,7 @@ function _renderTourStep() {
   const step = _tourSteps[_tourIndex];
   const el = document.querySelector(step.selector);
   if (!el) { _tourNext(); return; }
+  el.scrollIntoView({ block: 'center', behavior: 'auto' });
   const r = el.getBoundingClientRect();
   const hl = document.getElementById('tour-highlight');
   hl.style.left = `${r.left - 6}px`;
@@ -4753,8 +4754,6 @@ function _renderTourStep() {
   let left = Math.min(Math.max(r.left, 10), window.innerWidth - tipRect.width - 10);
   tip.style.top = `${top}px`;
   tip.style.left = `${left}px`;
-
-  el.scrollIntoView({ block: 'center', behavior: 'smooth' });
 }
 
 function _tourNext() {
