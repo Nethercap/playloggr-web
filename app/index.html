@@ -485,12 +485,17 @@
         style="padding:6px 18px;font-size:12px;border:0.5px solid var(--green);background:var(--bg2);color:var(--green);cursor:pointer;border-radius:20px;font-weight:600" data-i18n="myStats">Mis stats</button>
       <button id="stab-global" onclick="switchStatsTab('global')"
         style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px" data-i18n="globalTab">Global</button>
+      <button id="stab-lastplayed" onclick="switchStatsTab('lastplayed')"
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px" data-i18n="lastPlayed">Última vez jugado</button>
     </div>
     <div id="stats-user-tab" style="padding:16px;max-width:720px;width:100%;margin:0 auto;box-sizing:border-box">
       <div id="stats-user-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
     </div>
     <div id="stats-global-tab" style="display:none;padding:16px;max-width:720px;width:100%;margin:0 auto;box-sizing:border-box">
       <div id="stats-global-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
+    </div>
+    <div id="stats-lastplayed-tab" style="display:none;padding:16px;max-width:720px;width:100%;margin:0 auto;box-sizing:border-box">
+      <div id="stats-lastplayed-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
     </div>
   </div>
 
@@ -1167,7 +1172,7 @@ const I18N = {
     usernameHint: 'Solo letras y números, sin espacios ni tildes. Lo van a ver tus amigos.',
     continueBtn: 'Continuar', newFolder: 'Nueva carpeta', create: 'Crear', addToFolder: 'Agregar a carpeta',
     hoursPlayed: 'Horas jugadas',
-    lastPlayed: 'Última vez jugado', clearDate: 'Borrar fecha',
+    lastPlayed: 'Última vez jugado', clearDate: 'Borrar fecha', noLastPlayedData: 'No hay juegos con fecha cargada en este rango',
     verifyEmailTitle: 'Confirmá tu cuenta', verifyEmailHint: 'Te enviamos un código de 6 dígitos a tu email. Ingresalo para activar tu cuenta.',
     verifyCodeLabel: 'Código de verificación', resendCode: 'Reenviar código', verifyAndContinue: 'Verificar',
     codeResent: 'Te reenviamos el código', support: 'Soporte',
@@ -1277,7 +1282,7 @@ const I18N = {
     usernameHint: 'Letters and numbers only, no spaces or accents. Your friends will see it.',
     continueBtn: 'Continue', newFolder: 'New folder', create: 'Create', addToFolder: 'Add to folder',
     hoursPlayed: 'Hours played',
-    lastPlayed: 'Last played', clearDate: 'Clear date',
+    lastPlayed: 'Last played', clearDate: 'Clear date', noLastPlayedData: 'No games with a date set in this range',
     verifyEmailTitle: 'Confirm your account', verifyEmailHint: 'We sent a 6-digit code to your email. Enter it to activate your account.',
     verifyCodeLabel: 'Verification code', resendCode: 'Resend code', verifyAndContinue: 'Verify',
     codeResent: 'We resent the code', support: 'Support',
@@ -1387,7 +1392,7 @@ const I18N = {
     usernameHint: 'Somente letras e números, sem espaços ou acentos. Seus amigos vão ver.',
     continueBtn: 'Continuar', newFolder: 'Nova pasta', create: 'Criar', addToFolder: 'Adicionar à pasta',
     hoursPlayed: 'Horas jogadas',
-    lastPlayed: 'Última vez jogado', clearDate: 'Apagar data',
+    lastPlayed: 'Última vez jogado', clearDate: 'Apagar data', noLastPlayedData: 'Nenhum jogo com data nesse período',
     verifyEmailTitle: 'Confirme sua conta', verifyEmailHint: 'Enviamos um código de 6 dígitos para o seu email. Digite-o para ativar sua conta.',
     verifyCodeLabel: 'Código de verificação', resendCode: 'Reenviar código', verifyAndContinue: 'Verificar',
     codeResent: 'Reenviamos o código', support: 'Suporte',
@@ -2219,7 +2224,8 @@ let activeFilters   = {}; // { statuses: Set, platforms: Set, genres: Set, hours
 function resetActiveFilters() {
   activeFilters = {
     statuses: new Set(), platforms: new Set(), genres: new Set(),
-    hours: new Set(), ratings: new Set()
+    hours: new Set(), ratings: new Set(),
+    lastPlayedYears: new Set(), lastPlayedMonths: new Set(),
   };
 }
 
@@ -2268,6 +2274,25 @@ function renderFilterDropdowns() {
     wrap.appendChild(btn);
     container.appendChild(wrap);
   });
+
+  // Filtro jerarquico "Última vez jugado" (año > mes) — solo en biblioteca
+  if (currentView === 'library') {
+    const years = availableFilters.library?.last_played_years || [];
+    if (years.length) {
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'position:relative';
+      const yCount = activeFilters.lastPlayedYears?.size || 0;
+      const mCount = activeFilters.lastPlayedMonths?.size || 0;
+      const totalCount = yCount + mCount;
+      const btn = document.createElement('button');
+      btn.id = 'filter-btn-lastPlayed';
+      btn.innerHTML = `${t('lastPlayed')}${totalCount ? ` <span style="background:var(--green);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px">${totalCount}</span>` : ' ▾'}`;
+      btn.style.cssText = `padding:4px 10px;font-size:12px;border-radius:6px;border:0.5px solid ${totalCount ? 'var(--green)' : 'var(--border)'};background:var(--bg2);color:${totalCount ? 'var(--green)' : 'var(--text)'};cursor:pointer`;
+      btn.onclick = (e) => { e.stopPropagation(); toggleLastPlayedFilterDropdown(wrap, btn); };
+      wrap.appendChild(btn);
+      container.appendChild(wrap);
+    }
+  }
 
   // Clear all button
   const totalActive = Object.values(activeFilters).reduce((s, v) => s + v.size, 0);
@@ -2360,6 +2385,153 @@ function toggleFilterDropdown(key, options, wrap, btn) {
   wrap.appendChild(popup);
 
   // Close on outside click — solo re-sincroniza si realmente cambio algo.
+  setTimeout(() => {
+    function outsideHandler(e) {
+      if (!popup.contains(e.target) && !btn.contains(e.target)) {
+        if (hasChanged()) {
+          applyFilters();
+          renderFilterDropdowns();
+        }
+        popup.remove();
+        document.removeEventListener('mousedown', outsideHandler);
+      }
+    }
+    document.addEventListener('mousedown', outsideHandler);
+  }, 10);
+}
+
+const MONTH_NAMES_ES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+/** Filtro jerarquico año > mes para "última vez jugado". El backend solo
+ * acepta un nivel de granularidad a la vez (años O meses, ver /backlog),
+ * asi que tildar un mes limpia los años sueltos y viceversa. */
+function toggleLastPlayedFilterDropdown(wrap, btn) {
+  document.querySelectorAll('.filter-popup').forEach(p => p.remove());
+
+  const years = availableFilters.library?.last_played_years || [];
+  const monthsByYear = availableFilters.library?.last_played_months_by_year || {};
+  const initialSelection = JSON.stringify([[...activeFilters.lastPlayedYears].sort(), [...activeFilters.lastPlayedMonths].sort()]);
+  const hasChanged = () => JSON.stringify([[...activeFilters.lastPlayedYears].sort(), [...activeFilters.lastPlayedMonths].sort()]) !== initialSelection;
+
+  const popup = document.createElement('div');
+  popup.className = 'filter-popup';
+  popup.style.cssText = 'position:absolute;top:calc(100% + 4px);left:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:200;min-width:200px;max-height:320px;overflow-y:auto;padding:4px 0 0;box-shadow:0 4px 16px rgba(0,0,0,0.3)';
+
+  let expandedYear = [...activeFilters.lastPlayedYears][0] || (
+    years.find(y => [...activeFilters.lastPlayedMonths].some(m => m.startsWith(y))) || null
+  );
+
+  function renderList() {
+    popup.querySelectorAll('.lp-row').forEach(r => r.remove());
+    years.forEach(year => {
+      const row = document.createElement('div');
+      row.className = 'lp-row';
+      row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;font-size:13px;user-select:none';
+      const yearChecked = activeFilters.lastPlayedYears.has(year);
+      if (yearChecked) row.style.background = 'rgba(29,158,117,0.1)';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = yearChecked;
+      cb.style.accentColor = 'var(--green)';
+      cb.style.pointerEvents = 'none';
+      const label = document.createElement('span');
+      label.textContent = year;
+      label.style.flex = '1';
+      const chev = document.createElement('i');
+      chev.className = `ti ti-chevron-${expandedYear === year ? 'up' : 'down'}`;
+      chev.style.fontSize = '12px';
+      row.appendChild(cb); row.appendChild(label); row.appendChild(chev);
+      row.onmousedown = (e) => {
+        e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+        expandedYear = expandedYear === year ? null : year;
+        renderList();
+      };
+      // Tildar el checkbox del año (sin expandir) selecciona el año entero
+      cb.onmousedown = (e) => {
+        e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+        if (activeFilters.lastPlayedYears.has(year)) {
+          activeFilters.lastPlayedYears.delete(year);
+        } else {
+          activeFilters.lastPlayedYears.add(year);
+          activeFilters.lastPlayedMonths.clear();
+        }
+        renderList();
+        updateLastPlayedBtn();
+      };
+      row.insertBefore(cb, row.firstChild);
+      popup.appendChild(row);
+
+      if (expandedYear === year) {
+        const months = monthsByYear[year] || [];
+        months.forEach(m => {
+          const key = `${year}-${m}`;
+          const mRow = document.createElement('div');
+          mRow.className = 'lp-row';
+          mRow.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 14px 6px 34px;cursor:pointer;font-size:12px;user-select:none';
+          const checked = activeFilters.lastPlayedMonths.has(key);
+          if (checked) mRow.style.background = 'rgba(29,158,117,0.1)';
+          const mcb = document.createElement('input');
+          mcb.type = 'checkbox';
+          mcb.checked = checked;
+          mcb.style.accentColor = 'var(--green)';
+          mcb.style.pointerEvents = 'none';
+          const mLabel = document.createElement('span');
+          mLabel.textContent = MONTH_NAMES_ES[parseInt(m, 10) - 1] || m;
+          mRow.appendChild(mcb); mRow.appendChild(mLabel);
+          mRow.onmousedown = (e) => {
+            e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+            if (activeFilters.lastPlayedMonths.has(key)) {
+              activeFilters.lastPlayedMonths.delete(key);
+            } else {
+              activeFilters.lastPlayedMonths.add(key);
+              activeFilters.lastPlayedYears.clear();
+            }
+            renderList();
+            updateLastPlayedBtn();
+          };
+          popup.appendChild(mRow);
+        });
+      }
+    });
+  }
+
+  function updateLastPlayedBtn() {
+    const totalCount = activeFilters.lastPlayedYears.size + activeFilters.lastPlayedMonths.size;
+    btn.innerHTML = `${t('lastPlayed')}${totalCount ? ` <span style="background:var(--green);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px">${totalCount}</span>` : ' ▾'}`;
+    btn.style.borderColor = totalCount ? 'var(--green)' : 'var(--border)';
+    btn.style.color = totalCount ? 'var(--green)' : 'var(--text)';
+  }
+
+  renderList();
+
+  const footer = document.createElement('div');
+  footer.style.cssText = 'padding:6px 10px;border-top:0.5px solid var(--border);display:flex;justify-content:flex-end;gap:6px';
+  const clearBtn = document.createElement('button');
+  clearBtn.textContent = t('clear');
+  clearBtn.style.cssText = 'font-size:12px;padding:3px 10px;border-radius:5px;border:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer';
+  clearBtn.onmousedown = (e) => {
+    e.preventDefault();
+    activeFilters.lastPlayedYears.clear();
+    activeFilters.lastPlayedMonths.clear();
+    renderFilterDropdowns();
+    applyFilters();
+    popup.remove();
+  };
+  const okBtn = document.createElement('button');
+  okBtn.textContent = 'OK';
+  okBtn.style.cssText = 'font-size:12px;padding:3px 14px;border-radius:5px;border:none;background:var(--green);color:#fff;cursor:pointer';
+  okBtn.onmousedown = (e) => {
+    e.preventDefault();
+    if (hasChanged()) applyFilters();
+    renderFilterDropdowns();
+    popup.remove();
+  };
+  footer.appendChild(clearBtn);
+  footer.appendChild(okBtn);
+  popup.appendChild(footer);
+
+  wrap.appendChild(popup);
+
   setTimeout(() => {
     function outsideHandler(e) {
       if (!popup.contains(e.target) && !btn.contains(e.target)) {
@@ -2715,17 +2887,177 @@ function closeStatsPanel() {
 }
 
 function switchStatsTab(tab) {
-  document.getElementById('stats-user-tab').style.display    = tab === 'user'   ? '' : 'none';
-  document.getElementById('stats-global-tab').style.display  = tab === 'global' ? '' : 'none';
-  ['user','global'].forEach(t => {
+  document.getElementById('stats-user-tab').style.display       = tab === 'user'       ? '' : 'none';
+  document.getElementById('stats-global-tab').style.display     = tab === 'global'     ? '' : 'none';
+  document.getElementById('stats-lastplayed-tab').style.display  = tab === 'lastplayed' ? '' : 'none';
+  ['user','global','lastplayed'].forEach(t => {
     const btn = document.getElementById(`stab-${t}`);
     if (!btn) return;
     btn.style.color       = t === tab ? 'var(--green)' : 'var(--text2)';
     btn.style.borderColor = t === tab ? 'var(--green)' : 'var(--border)';
     btn.style.fontWeight  = t === tab ? '600' : 'normal';
   });
-  if (tab === 'user')   loadUserStats();
-  if (tab === 'global') loadGlobalRankings();
+  if (tab === 'user')       loadUserStats();
+  if (tab === 'global')     loadGlobalRankings();
+  if (tab === 'lastplayed') loadLastPlayedStats();
+}
+
+// ── Stats: última vez jugado (drill-down año > mes > día) ───────────────────
+
+const lpMonthNames = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+let lpState = { level: 'year', year: null, month: null, groupBy: 'status' };
+
+const lpStatusColors = {
+  'Jugando': '#3B82F6', 'Completado': '#1D9E75', 'Backlog': '#6B7280',
+  'Abandonado': '#E24B4A', 'Intermitente': '#8B5CF6', 'Deseados': '#EF9F27'
+};
+const lpPlatformColors = {
+  'Steam': '#66C0F4', 'Windows': '#00A4EF', 'PlayStation': '#0070D1',
+  'Xbox': '#107C10', 'Nintendo': '#E60012', 'Mobile': '#A4C639', 'Otro': '#8B8B8B'
+};
+const lpRatingColors = {
+  '1': '#E24B4A', '2': '#EF9F27', '3': '#F4C542', '4': '#8BC34A', '5': '#1D9E75',
+  'Sin calificar': '#6B7280'
+};
+
+function lpSegmentColor(groupBy, key) {
+  if (groupBy === 'platform') return lpPlatformColors[key] || '#8B8B8B';
+  if (groupBy === 'rating')   return lpRatingColors[key] || '#6B7280';
+  return lpStatusColors[key] || '#6B7280';
+}
+
+function lpSegmentLabel(groupBy, key) {
+  if (groupBy === 'status') return statusLabel(key);
+  if (groupBy === 'rating') return key === 'Sin calificar' ? t('unrated') : `${key}★`;
+  return key;
+}
+
+function lpBucketLabel(bucket) {
+  if (lpState.level === 'year')  return bucket.label;
+  if (lpState.level === 'month') return lpMonthNames[parseInt(bucket.label, 10) - 1] || bucket.label;
+  return bucket.label; // day
+}
+
+async function loadLastPlayedStats() {
+  const el = document.getElementById('stats-lastplayed-content');
+  el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>${t('loading')}</div>`;
+  try {
+    const params = new URLSearchParams({ level: lpState.level, group_by: lpState.groupBy });
+    if (lpState.year)  params.set('year', lpState.year);
+    if (lpState.month) params.set('month', lpState.month);
+    const res = await fetch(`${apiBase()}/api/v1/stats/last-played?${params}`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const d = await res.json();
+    renderLastPlayedStats(d);
+  } catch (e) {
+    el.innerHTML = `<div class="empty"><i class="ti ti-mood-sad"></i>${t('errorLoadingStats')}</div>`;
+  }
+}
+
+function renderLastPlayedStats(data) {
+  const el = document.getElementById('stats-lastplayed-content');
+  const buckets = data.buckets || [];
+
+  // Breadcrumb
+  const crumbs = [`<a onclick="lpGoTo('year')" style="cursor:pointer;color:var(--green)">2020-2026</a>`];
+  if (lpState.level !== 'year' && lpState.year) {
+    crumbs.push(lpState.level === 'day'
+      ? `<a onclick="lpGoTo('month', '${lpState.year}')" style="cursor:pointer;color:var(--green)">${lpState.year}</a>`
+      : `<span>${lpState.year}</span>`);
+  }
+  if (lpState.level === 'day' && lpState.month) {
+    crumbs.push(`<span>${lpMonthNames[parseInt(lpState.month, 10) - 1]}</span>`);
+  }
+
+  // Group-by selector
+  const groupByOptions = [
+    { key: 'status',   label: t('status') },
+    { key: 'platform', label: t('platform') },
+    { key: 'rating',   label: t('rating') },
+  ];
+  const groupBySel = groupByOptions.map(o =>
+    `<button onclick="lpSetGroupBy('${o.key}')" style="padding:5px 12px;font-size:12px;border-radius:16px;border:0.5px solid ${lpState.groupBy === o.key ? 'var(--green)' : 'var(--border)'};background:var(--bg2);color:${lpState.groupBy === o.key ? 'var(--green)' : 'var(--text2)'};cursor:pointer;font-weight:${lpState.groupBy === o.key ? '600' : 'normal'}">${o.label}</button>`
+  ).join('');
+
+  if (!buckets.length) {
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);margin-bottom:12px">${crumbs.join(' <i class="ti ti-chevron-right" style="font-size:10px"></i> ')}</div>
+      <div style="display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap">${groupBySel}</div>
+      <div class="empty"><i class="ti ti-calendar-off"></i>${t('noLastPlayedData')}</div>`;
+    return;
+  }
+
+  // Union of all segment keys across buckets, in a stable order
+  const allKeys = [];
+  buckets.forEach(b => Object.keys(b.segments).forEach(k => { if (!allKeys.includes(k)) allKeys.push(k); }));
+  if (lpState.groupBy === 'rating') {
+    const order = ['5','4','3','2','1','Sin calificar'];
+    allKeys.sort((a,b) => order.indexOf(a) - order.indexOf(b));
+  }
+
+  const maxTotal = Math.max(...buckets.map(b => Object.values(b.segments).reduce((s,v)=>s+v,0)), 1);
+  const chartH = 220;
+  const barW = Math.min(48, Math.max(20, Math.floor(560 / buckets.length) - 8));
+  const gap = 10;
+  const chartW = buckets.length * (barW + gap) + gap;
+
+  let bars = '';
+  buckets.forEach((b, i) => {
+    const x = gap + i * (barW + gap);
+    let yOffset = chartH;
+    let segsHtml = '';
+    const total = Object.values(b.segments).reduce((s,v)=>s+v,0);
+    allKeys.forEach(k => {
+      const v = b.segments[k];
+      if (!v) return;
+      const h = Math.max(2, (v / maxTotal) * chartH);
+      yOffset -= h;
+      segsHtml += `<rect x="${x}" y="${yOffset}" width="${barW}" height="${h}" fill="${lpSegmentColor(lpState.groupBy, k)}" rx="2">
+        <title>${lpSegmentLabel(lpState.groupBy, k)}: ${v}</title>
+      </rect>`;
+    });
+    const clickable = lpState.level !== 'day';
+    bars += `<g style="cursor:${clickable ? 'pointer' : 'default'}" onclick="${clickable ? `lpDrill('${b.label}')` : ''}">
+      <rect x="${x}" y="0" width="${barW}" height="${chartH}" fill="transparent"></rect>
+      ${segsHtml}
+      <text x="${x + barW/2}" y="${chartH + 16}" text-anchor="middle" font-size="11" fill="var(--text2)">${lpBucketLabel(b)}</text>
+      <text x="${x + barW/2}" y="${yOffset - 6}" text-anchor="middle" font-size="10" fill="var(--text2)">${total}</text>
+    </g>`;
+  });
+
+  const legend = allKeys.map(k =>
+    `<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--text2)"><span style="width:10px;height:10px;border-radius:2px;background:${lpSegmentColor(lpState.groupBy, k)};display:inline-block"></span>${lpSegmentLabel(lpState.groupBy, k)}</span>`
+  ).join('');
+
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);margin-bottom:12px">${crumbs.join(' <i class="ti ti-chevron-right" style="font-size:10px"></i> ')}</div>
+    <div style="display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap">${groupBySel}</div>
+    <div style="overflow-x:auto">
+      <svg width="${Math.max(chartW, 300)}" height="${chartH + 32}" viewBox="0 0 ${Math.max(chartW, 300)} ${chartH + 32}">${bars}</svg>
+    </div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:16px">${legend}</div>
+  `;
+}
+
+function lpSetGroupBy(groupBy) {
+  lpState.groupBy = groupBy;
+  loadLastPlayedStats();
+}
+
+function lpDrill(label) {
+  if (lpState.level === 'year') {
+    lpState = { ...lpState, level: 'month', year: label, month: null };
+  } else if (lpState.level === 'month') {
+    lpState = { ...lpState, level: 'day', month: label };
+  }
+  loadLastPlayedStats();
+}
+
+function lpGoTo(level, year) {
+  if (level === 'year')  lpState = { ...lpState, level: 'year', year: null, month: null };
+  if (level === 'month') lpState = { ...lpState, level: 'month', year: year || lpState.year, month: null };
+  loadLastPlayedStats();
 }
 
 async function loadUserStats() {
@@ -6304,6 +6636,8 @@ async function syncAll(page = 1, silent = false) {
   if (af.genres?.size)    params.set('genres',     [...af.genres].join(','));
   if (af.hours?.size)     params.set('hours_range',[...af.hours].join(','));
   if (af.ratings?.size)   params.set('ratings',    [...af.ratings].join(','));
+  if (af.lastPlayedMonths?.size)      params.set('last_played_months', [...af.lastPlayedMonths].join(','));
+  else if (af.lastPlayedYears?.size)  params.set('last_played_years',  [...af.lastPlayedYears].join(','));
 
   // Sort direction
   params.set('order', sortDir || 'asc');
