@@ -463,6 +463,7 @@
           <option value="platform" data-i18n="platform">Plataforma</option>
           <option value="status" data-i18n="status">Estado</option>
           <option value="genre" data-i18n="genre">Género</option>
+          <option value="last_played" data-i18n="lastPlayed">Última vez jugado</option>
         </select>
         <button onclick="toggleSortOrder()" id="sort-dir-btn"
           style="padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">
@@ -945,6 +946,22 @@
   </div>
 </div>
 
+<!-- Last Played Modal -->
+<div class="modal-overlay" id="lastplayed-overlay">
+  <div class="modal" style="max-width:320px">
+    <div class="modal-title"><i class="ti ti-calendar-event" style="color:#1D9E75"></i> <span data-i18n="lastPlayed">Última vez jugado</span></div>
+    <div class="modal-group full" style="margin-top:12px">
+      <label id="lastplayed-modal-label">Juego</label>
+      <input type="date" id="lastplayed-input" style="font-size:16px;padding:10px" />
+    </div>
+    <div class="modal-actions" style="margin-top:16px">
+      <a onclick="clearLastPlayedModal()" style="font-size:11px;color:var(--text2);cursor:pointer;align-self:center;margin-right:auto" data-i18n="clearDate">Borrar fecha</a>
+      <button class="btn-cancel" onclick="closeLastPlayedModal()" data-i18n="cancel">Cancelar</button>
+      <button class="btn-save" onclick="saveLastPlayedModal()" data-i18n="save">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Game full view (desde la vista de cuadricula) -->
 <div class="modal-overlay" id="game-fullview-overlay">
   <div class="modal" style="max-width:560px;padding:0;background:transparent;border:none;box-shadow:none">
@@ -1150,6 +1167,7 @@ const I18N = {
     usernameHint: 'Solo letras y números, sin espacios ni tildes. Lo van a ver tus amigos.',
     continueBtn: 'Continuar', newFolder: 'Nueva carpeta', create: 'Crear', addToFolder: 'Agregar a carpeta',
     hoursPlayed: 'Horas jugadas',
+    lastPlayed: 'Última vez jugado', clearDate: 'Borrar fecha',
     verifyEmailTitle: 'Confirmá tu cuenta', verifyEmailHint: 'Te enviamos un código de 6 dígitos a tu email. Ingresalo para activar tu cuenta.',
     verifyCodeLabel: 'Código de verificación', resendCode: 'Reenviar código', verifyAndContinue: 'Verificar',
     codeResent: 'Te reenviamos el código', support: 'Soporte',
@@ -1259,6 +1277,7 @@ const I18N = {
     usernameHint: 'Letters and numbers only, no spaces or accents. Your friends will see it.',
     continueBtn: 'Continue', newFolder: 'New folder', create: 'Create', addToFolder: 'Add to folder',
     hoursPlayed: 'Hours played',
+    lastPlayed: 'Last played', clearDate: 'Clear date',
     verifyEmailTitle: 'Confirm your account', verifyEmailHint: 'We sent a 6-digit code to your email. Enter it to activate your account.',
     verifyCodeLabel: 'Verification code', resendCode: 'Resend code', verifyAndContinue: 'Verify',
     codeResent: 'We resent the code', support: 'Support',
@@ -1368,6 +1387,7 @@ const I18N = {
     usernameHint: 'Somente letras e números, sem espaços ou acentos. Seus amigos vão ver.',
     continueBtn: 'Continuar', newFolder: 'Nova pasta', create: 'Criar', addToFolder: 'Adicionar à pasta',
     hoursPlayed: 'Horas jogadas',
+    lastPlayed: 'Última vez jogado', clearDate: 'Apagar data',
     verifyEmailTitle: 'Confirme sua conta', verifyEmailHint: 'Enviamos um código de 6 dígitos para o seu email. Digite-o para ativar sua conta.',
     verifyCodeLabel: 'Código de verificação', resendCode: 'Reenviar código', verifyAndContinue: 'Verificar',
     codeResent: 'Reenviamos o código', support: 'Suporte',
@@ -1860,8 +1880,18 @@ function handleCoverError(img) {
   _coverBatchTimer = setTimeout(_flushCoverBatch, 400);
 }
 
+function lastPlayedDisplay(iso) {
+  if (!iso) return '—';
+  const [y, m, d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+
 function gameCardHtml(g) {
   const hours = g.hours_played != null ? `${parseFloat(g.hours_played).toFixed(1)} hs` : '— hs';
+  const lastPlayedLabel = lastPlayedDisplay(g.last_played);
+  const lastPlayedEl = g.is_manual
+    ? `<span style="cursor:pointer;text-decoration:underline dotted" data-gameid="${g.id}" data-lastplayed="${g.last_played || ''}" onclick="editLastPlayedById(this, event)" title="Editar última vez jugado"><i class="ti ti-calendar-event" style="font-size:12px"></i>${lastPlayedLabel}</span>`
+    : (g.last_played ? `<span title="Última vez jugado"><i class="ti ti-calendar-event" style="font-size:12px"></i>${lastPlayedLabel}</span>` : '');
   const cover = steamCoverHtml(g);
   // Resolver el score en vivo contra el idioma actual (steamScoreLabel es
   // un Proxy que depende de currentLang) — nunca cachear el label ya
@@ -1896,6 +1926,7 @@ function gameCardHtml(g) {
       ${g.status !== 'Deseados' ? `<div id="stars-${g.id}" style="margin-bottom:4px">${starPickerHtml(g.id, g.user_rating || 0)}</div>` : ''}
       <div class="game-foot">
         ${g.status !== 'Deseados' ? (g.is_manual ? `<span style="cursor:pointer;text-decoration:underline dotted" data-gameid="${g.id}" data-hours="${g.hours_played}" onclick="editHoursById(this, event)" title="Editar horas"><i class="ti ti-clock" style="font-size:12px"></i>${hours}</span>` : `<span><i class="ti ti-clock" style="font-size:12px"></i>${hours}</span>`) : ''}
+        ${g.status !== 'Deseados' ? lastPlayedEl : ''}
         <span id="community-${g.id}" style="${communityStyle};align-items:center;gap:3px;font-size:11px;color:var(--text2)">${communityHtml}</span>        </div>
     </div>
     <div class="game-status-col">
@@ -4604,6 +4635,53 @@ document.getElementById('hours-overlay').addEventListener('click', e => {
 document.getElementById('hours-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') saveHoursModal();
   if (e.key === 'Escape') closeHoursModal();
+});
+
+let _lastPlayedGameId = null;
+
+function editLastPlayedById(el, event) {
+  if (event) event.stopPropagation();
+  const gameId = el.getAttribute('data-gameid');
+  const date    = el.getAttribute('data-lastplayed') || '';
+  editLastPlayed(gameId, date);
+}
+
+function editLastPlayed(gameId, currentDate) {
+  _lastPlayedGameId = gameId;
+  const g = allGames.find(x => x.id === gameId);
+  document.getElementById('lastplayed-modal-label').textContent = g ? g.name : 'Juego';
+  document.getElementById('lastplayed-input').value = currentDate || '';
+  document.getElementById('lastplayed-overlay').classList.add('open');
+}
+
+function closeLastPlayedModal() {
+  document.getElementById('lastplayed-overlay').classList.remove('open');
+  _lastPlayedGameId = null;
+}
+
+function clearLastPlayedModal() {
+  document.getElementById('lastplayed-input').value = '';
+  saveLastPlayedModal();
+}
+
+async function saveLastPlayedModal() {
+  const gameId = _lastPlayedGameId;
+  const date = document.getElementById('lastplayed-input').value || null;
+  const g = allGames.find(x => x.id === gameId);
+  if (g) g.last_played = date;
+  closeLastPlayedModal();
+  renderGames();
+  try {
+    await fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gameId)}/last-played`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ date }),
+    });
+  } catch(e) {}
+}
+
+document.getElementById('lastplayed-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('lastplayed-overlay')) closeLastPlayedModal();
 });
 
 async function toggleHideGame(gameId, isHidden) {
