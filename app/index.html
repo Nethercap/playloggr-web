@@ -166,6 +166,61 @@
       .game-status-col { display:none; }
     }
 
+    /* ── Panel de perfil (avatar + nombre + nivel) — mobile y web ── */
+    .profile-panel { display:flex; align-items:center; gap:12px; background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:10px 16px; margin-bottom:14px; }
+    .profile-panel-info { display:flex; flex-direction:column; gap:3px; min-width:0; }
+    .profile-panel-name { font-size:14px; font-weight:600; display:flex; align-items:center; gap:6px; }
+    .profile-panel-sub { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .profile-panel-sub .logout-btn { font-size:11px; color:var(--text2); background:none; border:none; cursor:pointer; padding:0; }
+
+    #header-more-btn { display:none; }
+
+    /* ── Mobile web: emular el orden mas prolijo de la app (distinto del
+       escritorio, donde el header ancho permite todo en una sola fila) ── */
+    @media (max-width:640px) {
+      body { padding:10px; }
+
+      .header { padding:10px 14px; }
+      /* Colapsar idioma/stats/config/amigos/logros en el menu "..." */
+      #lang-toggle-btn, #stats-icon-btn, #achievements-btn,
+      .header-right > button[onclick="openConfigPanel()"],
+      #friends-btn { display:none !important; }
+      #header-more-btn { display:inline-flex !important; }
+
+      .profile-panel { padding:8px 12px; gap:10px; }
+      .profile-panel-name { font-size:13px; }
+
+      .stats-row { gap:6px; }
+      .stat-card { padding:8px 10px; }
+      .stat-label { font-size:10px; }
+      .stat-value { font-size:17px; }
+
+      /* Selector de vista: scroll horizontal, no wrap, como los tabs de la app */
+      #view-selector-row { flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+      #view-selector-row::-webkit-scrollbar { display:none; }
+      #view-library, #view-wishlist, #view-stats, #view-rankings { flex-shrink:0; }
+      #view-selector-row > span { display:none; } /* contador seleccionados/horas, sobra en mobile */
+
+      /* Filtros: scroll horizontal en vez de apilarse */
+      #filter-bar-row1 { flex-wrap:nowrap !important; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; padding-bottom:2px; }
+      #filter-bar-row1::-webkit-scrollbar { display:none; }
+      #filter-dropdowns { flex-wrap:nowrap !important; }
+      #filter-dropdowns > div, #folder-filter-wrap, #view-mode-toggle, #btn-hidden { flex-shrink:0; }
+
+      /* El boton de agregar pasa a ser flotante (FAB), como en la app */
+      #add-game-btn-wrap { display:none !important; }
+      .fab-add-btn { display:flex !important; }
+
+      #search-input { flex:1; width:auto; }
+    }
+
+    .fab-add-btn {
+      display:none; position:fixed; bottom:20px; right:20px; width:56px; height:56px; border-radius:50%;
+      background:var(--green); color:#fff; border:none; align-items:center; justify-content:center;
+      font-size:26px; box-shadow:0 4px 14px rgba(0,0,0,0.35); cursor:pointer; z-index:150;
+    }
+    .fab-add-btn:active { transform:scale(0.94); }
+
     /* ── Marcos de avatar animados (los 3 anteriores al ultimo: pulso; el
        ultimo/mas alto: degrade RGB desplazandose) ── */
     .frame-pulse-fuego     { animation: framePulseFuego 2s ease-in-out infinite; }
@@ -300,7 +355,6 @@
       Playloggr
     </div>
     <div class="header-right">
-      <div id="plat-status-row" style="display:flex;gap:6px"></div>
       <input type="hidden" id="api-url" value="https://web-production-270b29.up.railway.app" />
       <!-- Language toggle -->
       <button onclick="toggleLanguage()" id="lang-toggle-btn" style="margin-left:4px;padding:5px 10px;font-size:12px;font-weight:600;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" title="Language / Idioma">EN</button>
@@ -323,6 +377,20 @@
       <button id="achievements-btn" onclick="openAchievementsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="achievements" title="Logros">
         <i class="ti ti-trophy" style="font-size:14px"></i>
       </button>
+
+      <!-- Menu "..." (mobile): agrupa idioma/stats/config/amigos/logros -->
+      <div style="position:relative;display:inline-block;margin-left:4px" id="header-more-wrap">
+        <button onclick="toggleHeaderMoreMenu()" id="header-more-btn" style="padding:5px 10px;font-size:14px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer">
+          <i class="ti ti-dots-vertical"></i>
+        </button>
+        <div id="header-more-menu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:300;min-width:180px;box-shadow:0 4px 16px rgba(0,0,0,0.3);padding:4px 0">
+          <button onclick="toggleLanguage()" class="steam-menu-item"><i class="ti ti-language" style="font-size:14px"></i> <span id="header-more-lang">EN</span></button>
+          <button onclick="openStatsPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-chart-bar" style="font-size:14px"></i> <span data-i18n="stats">Estadísticas</span></button>
+          <button onclick="openConfigPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-settings" style="font-size:14px"></i> <span data-i18n="config">Configuración</span></button>
+          <button onclick="openFriendsPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-users" style="font-size:14px"></i> <span data-i18n="friends">Amigos</span></button>
+          <button onclick="openAchievementsPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-trophy" style="font-size:14px"></i> <span data-i18n="achievements">Logros</span></button>
+        </div>
+      </div>
 
       <div style="position:relative;display:inline-block;margin-left:4px" id="steam-menu-wrap">
         <button class="add-btn" onclick="toggleSteamMenu()" id="steam-menu-btn">
@@ -367,11 +435,11 @@
 
   <div class="error-banner" id="error-banner"></div>
 
+  <!-- Panel de perfil: avatar + nombre + nivel (mobile y web) -->
+  <div class="profile-panel" id="profile-panel"></div>
+
   <!-- Totales globales -->
   <div style="display:flex;gap:10px;margin-bottom:14px;align-items:flex-start">
-    <div class="stat-card" style="cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 66px;height:66px;padding:8px" onclick="openConfigPanel().then(()=>switchConfigTab('avatar'))" data-i18n-title="customizeAvatar" title="Personalizar avatar">
-      <div id="avatar-thumb-box" style="width:48px;height:48px;position:relative"></div>
-    </div>
     <div class="stats-row" style="flex:1;margin-bottom:0">
       <div class="stat-card"><div class="stat-label" data-i18n="total">Total</div><div class="stat-value" id="g-total">—</div></div>
       <div class="stat-card"><div class="stat-label" data-i18n="playing">Jugando</div><div class="stat-value" id="g-playing">—</div></div>
@@ -387,7 +455,7 @@
   <!-- View selector + filters -->
   <div style="border-bottom:0.5px solid var(--border)">
     <!-- Main selector: Biblioteca / Deseados -->
-    <div style="display:flex;padding:8px 16px;gap:8px;align-items:center">
+    <div id="view-selector-row" style="display:flex;padding:8px 16px;gap:8px;align-items:center">
       <button id="view-library"  onclick="setView('library')"
         style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--green);color:#fff;display:inline-flex;align-items:center;gap:5px">
         <i class="ti ti-books" style="font-size:14px"></i> <span data-i18n="library">Biblioteca</span>
@@ -412,7 +480,7 @@
     <!-- Filter bar -->
     <div id="filter-bar" style="display:flex;flex-direction:column;gap:6px;padding:6px 16px 8px">
       <!-- Row 1: filters + folder + add btn -->
-      <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;row-gap:4px">
+      <div id="filter-bar-row1" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;row-gap:4px">
         <!-- Filter dropdowns injected by JS -->
         <div id="filter-dropdowns" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"></div>
 
@@ -477,6 +545,11 @@
   <div class="game-list" id="game-list">
     <div class="empty"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="connectingBackend">Conectando con el backend...</span></div>
   </div>
+
+  <!-- Boton flotante para agregar (mobile), reemplaza al boton inline -->
+  <button class="fab-add-btn" id="fab-add-btn" onclick="fabAddClick()" data-i18n-title="addGame" title="Agregar juego">
+    <i class="ti ti-plus"></i>
+  </button>
 
   <!-- Stats view (full page) -->
   <div id="stats-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
@@ -1498,7 +1571,7 @@ function applyI18n() {
   const statsGlobalTab = document.getElementById('stats-global-tab');
   if (statsGlobalTab && statsGlobalTab.style.display !== 'none' && typeof loadGlobalRankings === 'function') loadGlobalRankings();
   document.documentElement.lang = currentLang;
-  ['lang-toggle-btn', 'lang-toggle-btn-login'].forEach(id => {
+  ['lang-toggle-btn', 'lang-toggle-btn-login', 'header-more-lang'].forEach(id => {
     const toggle = document.getElementById(id);
     if (toggle) toggle.textContent = { es: 'ES', en: 'EN', pt: 'PT' }[currentLang] || 'ES';
   });
@@ -2568,6 +2641,11 @@ function setView(view) {
   if (filterBar)    filterBar.style.display    = hideNormal ? 'none' : '';
   if (footer)       footer.style.display       = hideNormal ? 'none' : '';
   if (pagBar)       pagBar.style.display       = hideNormal ? 'none' : '';
+  const fab = document.getElementById('fab-add-btn');
+  if (fab) {
+    if (hideNormal) fab.style.setProperty('display', 'none', 'important');
+    else fab.style.removeProperty('display');
+  }
 
   const libBtn      = document.getElementById('view-library');
   const wishBtn      = document.getElementById('view-wishlist');
@@ -4540,6 +4618,24 @@ function _closeSteamMenuOutside(e) {
   }
 }
 
+let _headerMoreOpen = false;
+function toggleHeaderMoreMenu() {
+  const menu = document.getElementById('header-more-menu');
+  _headerMoreOpen = !_headerMoreOpen;
+  menu.style.display = _headerMoreOpen ? 'block' : 'none';
+  if (_headerMoreOpen) {
+    setTimeout(() => document.addEventListener('mousedown', _closeHeaderMoreOutside), 10);
+  }
+}
+
+function _closeHeaderMoreOutside(e) {
+  if (!document.getElementById('header-more-wrap')?.contains(e.target)) {
+    document.getElementById('header-more-menu').style.display = 'none';
+    _headerMoreOpen = false;
+    document.removeEventListener('mousedown', _closeHeaderMoreOutside);
+  }
+}
+
 async function loadSteamIdIntoMenu() {
   try {
     const res  = await fetch(`${apiBase()}/api/v1/settings`, {
@@ -4921,6 +5017,11 @@ document.addEventListener('click', e => {
     document.getElementById('steam-search-results').style.display = 'none';
   }
 });
+
+function fabAddClick() {
+  if (currentView === 'wishlist') openWishlistModal();
+  else openModal();
+}
 
 function openModal() {
   modalStarVal = 0;
@@ -6637,11 +6738,24 @@ async function onLoginSuccess() {
   document.getElementById('login-screen').style.display = 'none';
   resetActiveFilters();
 
-  const chip = document.createElement('div');
-  chip.className = 'user-chip';
-  chip.innerHTML = `<span id="user-level-badge"></span><span id="user-name-span">${authUser}</span><span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px;margin-left:2px"></span><button id="header-upgrade-btn" onclick="startPaddleCheckout()" style="display:none;font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;margin-left:4px;border:none;background:var(--green);color:#fff;cursor:pointer">✨ Hacerse Premium</button><a id="support-link" class="logout-btn" href="mailto:nether.appdev@gmail.com" style="text-decoration:none;display:inline-flex;align-items:center" data-i18n="support">Soporte</a><button class="logout-btn" onclick="logout()" data-i18n="logout">Salir</button>`;
+  const profilePanel = document.getElementById('profile-panel');
+  profilePanel.innerHTML = `
+    <div style="cursor:pointer;flex-shrink:0" onclick="openConfigPanel().then(()=>switchConfigTab('avatar'))" data-i18n-title="customizeAvatar" title="Personalizar avatar">
+      <div id="avatar-thumb-box" style="width:48px;height:48px;position:relative"></div>
+    </div>
+    <div class="profile-panel-info">
+      <div class="profile-panel-name">
+        <span id="user-level-badge"></span><span id="user-name-span">${authUser}</span><span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px"></span>
+      </div>
+      <div class="profile-panel-sub">
+        <button id="header-upgrade-btn" onclick="startPaddleCheckout()" style="display:none;font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">✨ Hacerse Premium</button>
+        <a id="support-link" class="logout-btn" href="mailto:nether.appdev@gmail.com" style="text-decoration:none;display:inline-flex;align-items:center" data-i18n="support">Soporte</a>
+        <button class="logout-btn" onclick="logout()" data-i18n="logout">Salir</button>
+      </div>
+    </div>
+    <div id="plat-status-row" style="display:flex;gap:6px;margin-left:auto"></div>
+  `;
   applyI18n();
-  document.getElementById('plat-status-row').before(chip);
 
   setTimeout(() => {
     const b = document.getElementById('add-game-btn');
