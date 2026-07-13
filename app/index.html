@@ -6925,6 +6925,55 @@ async function syncAll(page = 1, silent = false) {
     if (countLabel) countLabel.textContent = `${totalGames} ${t('gamesLower')} — ${t('lastSync')} ${now}`;
   }
 }
+
+// ── Google Analytics (GA4) — misma property que la landing, carga diferida
+// hasta que el usuario acepte cookies. El consentimiento se comparte con
+// playloggr.com porque localStorage es por origen, no por path.
+const GA_MEASUREMENT_ID = 'G-G24M6XTDJ1';
+
+function loadGoogleAnalytics() {
+  if (window.__gaLoaded) return;
+  window.__gaLoaded = true;
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+  document.head.appendChild(script);
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ window.dataLayer.push(arguments); }
+  window.gtag = gtag;
+  gtag('js', new Date());
+  gtag('config', GA_MEASUREMENT_ID, { anonymize_ip: true });
+}
+
+function setCookieConsent(accepted) {
+  localStorage.setItem('pl_cookie_consent', accepted ? 'accepted' : 'rejected');
+  document.getElementById('cookie-banner').style.display = 'none';
+  if (accepted) loadGoogleAnalytics();
+}
+
+function initCookieBanner() {
+  const consent = localStorage.getItem('pl_cookie_consent');
+  if (consent === 'accepted') {
+    loadGoogleAnalytics();
+  } else if (consent === null) {
+    document.getElementById('cookie-banner').style.display = 'block';
+  }
+  // Si es 'rejected', no se muestra el banner de nuevo y no se carga GA.
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initCookieBanner);
+} else {
+  initCookieBanner();
+}
 </script>
+
+<!-- ═══════════════ COOKIE BANNER ═══════════════ -->
+<div id="cookie-banner" style="display:none;position:fixed;bottom:16px;left:16px;right:16px;max-width:480px;margin:0 auto;background:var(--bg2);border:0.5px solid var(--border2);border-radius:14px;padding:18px 20px;box-shadow:0 12px 40px rgba(0,0,0,0.5);z-index:999">
+  <p style="font-size:12.5px;color:var(--text2);margin-bottom:12px;line-height:1.5">Usamos cookies para entender cómo se usa Playloggr (Google Analytics). Podés aceptar o rechazar el análisis — la app funciona igual en ambos casos. Más info en nuestra <a href="/privacy.html" style="color:var(--green)">Política de Privacidad</a>.</p>
+  <div style="display:flex;gap:8px;justify-content:flex-end">
+    <button onclick="setCookieConsent(false)" style="background:transparent;color:var(--text2);border:0.5px solid var(--border2);padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">Rechazar</button>
+    <button onclick="setCookieConsent(true)" style="background:var(--green);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">Aceptar</button>
+  </div>
+</div>
 </body>
 </html>
