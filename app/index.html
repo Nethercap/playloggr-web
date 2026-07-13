@@ -483,9 +483,6 @@
           <button onclick="toggleFolderDropdown()"
             style="padding:6px 8px;font-size:11px;border:none;border-left:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer">▾</button>
         </div>
-        <div id="folder-dropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:200;min-width:220px;padding:4px 0;box-shadow:0 4px 16px rgba(0,0,0,0.3)">
-          <div id="folder-list-items"></div>
-        </div>
       </div>
 
       <span style="margin-left:auto;font-size:12px;color:var(--text2)">
@@ -1040,6 +1037,17 @@
       <a onclick="clearLastPlayedModal()" style="font-size:11px;color:var(--text2);cursor:pointer;align-self:center;margin-right:auto" data-i18n="clearDate">Borrar fecha</a>
       <button class="btn-cancel" onclick="closeLastPlayedModal()" data-i18n="cancel">Cancelar</button>
       <button class="btn-save" onclick="saveLastPlayedModal()" data-i18n="save">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Selector de carpeta (popup, no dropdown) -->
+<div class="modal-overlay" id="folder-dropdown">
+  <div class="modal" style="max-width:320px;padding:0">
+    <div class="modal-title" style="padding:16px 16px 0"><i class="ti ti-folder" style="color:#1D9E75"></i> <span data-i18n="folders">Carpetas</span></div>
+    <div id="folder-list-items" style="margin-top:8px;max-height:60vh;overflow-y:auto"></div>
+    <div style="padding:10px 16px;text-align:right">
+      <button class="btn-cancel" onclick="toggleFolderDropdown()" data-i18n="close">Cerrar</button>
     </div>
   </div>
 </div>
@@ -5838,20 +5846,18 @@ function clickFolderBtn() {
 function toggleFolderDropdown() {
   const dd = document.getElementById('folder-dropdown');
   if (!dd) return;
-  const isOpen = dd.style.display === 'block';
-  dd.style.display = isOpen ? 'none' : 'block';
-  renderFolderDropdownItems();
-  if (!isOpen) {
-    setTimeout(() => {
-      document.addEventListener('mousedown', function handler(e) {
-        if (!document.getElementById('folder-filter-wrap')?.contains(e.target)) {
-          dd.style.display = 'none';
-          document.removeEventListener('mousedown', handler);
-        }
-      });
-    }, 10);
+  const isOpen = dd.classList.contains('open');
+  if (isOpen) {
+    dd.classList.remove('open');
+  } else {
+    renderFolderDropdownItems();
+    dd.classList.add('open');
   }
 }
+
+document.getElementById('folder-dropdown')?.addEventListener('click', e => {
+  if (e.target === document.getElementById('folder-dropdown')) toggleFolderDropdown();
+});
 
 function renderFolderDropdownItems() {
   const list  = document.getElementById('folder-list-items');
@@ -5896,7 +5902,7 @@ function renderFolderDropdownItems() {
 // Enter a specific folder — filter games list
 function enterFolder(folderId) {
   activeFolderId = folderId;
-  document.getElementById('folder-dropdown').style.display = 'none';
+  document.getElementById('folder-dropdown').classList.remove('open');
   updateFolderBtn();
   showFolderLabel();
   syncAll(1);
@@ -6004,7 +6010,7 @@ function renderFolderList() {
 // Create folder
 function openCreateFolder() {
   document.getElementById('folder-name-input').value = '';
-  document.getElementById('folder-dropdown').style.display = 'none';
+  document.getElementById('folder-dropdown').classList.remove('open');
   document.getElementById('folder-create-overlay').classList.add('open');
   setTimeout(() => document.getElementById('folder-name-input').focus(), 100);
 }
@@ -6286,7 +6292,7 @@ function handleFolderBtnClick() {
     activeFolderId = -1;
     const fb = document.getElementById('filter-bar');
     if (fb) fb.style.display = 'none';
-    document.getElementById('folder-dropdown').style.display = 'none';
+    document.getElementById('folder-dropdown').classList.remove('open');
     showFolderLabel();
     updateFolderBtn();
     renderFolderList();
