@@ -5219,7 +5219,7 @@ async function fetchPlatform(name) {
 let authToken  = localStorage.getItem('gb_token')  || '';
 let authUser   = localStorage.getItem('gb_user')   || '';
 let isRegister = false;
-let isPremium  = true;
+let isPremium  = false;
 let userLevel  = 1;
 let userBadgeTier = 'bronce';
 let userFrame  = 'none';
@@ -5235,7 +5235,13 @@ async function loadPremiumStatus() {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
     const d = await res.json();
-    isPremium = d.is_premium !== false;
+    isPremium = d.is_premium === true;
+    if (d.username) {
+      authUser = d.username;
+      localStorage.setItem('gb_user', authUser);
+      const nameSpan = document.getElementById('user-name-span');
+      if (nameSpan) nameSpan.textContent = authUser;
+    }
     userLevel = d.level ?? 1;
     userBadgeTier = d.badge_tier || 'bronce';
     userFrame = d.selected_frame || 'none';
@@ -5301,6 +5307,14 @@ const ONBOARDING_SLIDES = [
 let _onboardingStep = 0;
 
 function showOnboarding() {
+  // Si el modal de "elegi tu nombre de usuario" todavia esta abierto (primer
+  // login), esperamos a que se cierre antes de arrancar el onboarding —
+  // si no, quedan superpuestos.
+  const usernameModal = document.getElementById('set-username-overlay');
+  if (usernameModal && usernameModal.classList.contains('open')) {
+    setTimeout(showOnboarding, 300);
+    return;
+  }
   _onboardingStep = 0;
   const slidesEl = document.getElementById('onboarding-slides');
   const slideBasis = 100 / ONBOARDING_SLIDES.length;
