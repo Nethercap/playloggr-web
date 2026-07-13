@@ -195,17 +195,17 @@
       .stat-label { font-size:10px; }
       .stat-value { font-size:17px; }
 
-      /* Selector de vista: scroll horizontal, no wrap, como los tabs de la app */
+      /* Selector de vista + carpetas: scroll horizontal, no wrap, como los tabs de la app */
       #view-selector-row { flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
       #view-selector-row::-webkit-scrollbar { display:none; }
       #view-library, #view-wishlist, #view-stats, #view-rankings { flex-shrink:0; }
       #view-selector-row > span { display:none; } /* contador seleccionados/horas, sobra en mobile */
 
-      /* Filtros: scroll horizontal en vez de apilarse */
+      /* Filtros (estado/plataforma/genero/etc): scroll horizontal en vez de apilarse */
       #filter-bar-row1 { flex-wrap:nowrap !important; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; padding-bottom:2px; }
       #filter-bar-row1::-webkit-scrollbar { display:none; }
       #filter-dropdowns { flex-wrap:nowrap !important; }
-      #filter-dropdowns > div, #folder-filter-wrap, #view-mode-toggle, #btn-hidden { flex-shrink:0; }
+      #filter-dropdowns > div { flex-shrink:0; }
 
       /* El boton de agregar pasa a ser flotante (FAB), como en la app */
       #add-game-btn-wrap { display:none !important; }
@@ -472,6 +472,22 @@
         style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);color:var(--text2);display:inline-flex;align-items:center;gap:5px">
         <i class="ti ti-medal" style="font-size:14px"></i> <span data-i18n="rankings">Rankings</span>
       </button>
+
+      <!-- Folder filter — vive en la misma fila swipeable que Biblioteca/Deseados -->
+      <div style="position:relative;flex-shrink:0" id="folder-filter-wrap">
+        <div id="folder-filter-btn" style="display:none;align-items:center;border:0.5px solid var(--border);border-radius:20px;overflow:hidden;background:var(--bg2)">
+          <button onclick="handleFolderBtnClick()"
+            style="padding:6px 10px;font-size:12px;border:none;background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap">
+            <i class="ti ti-folder" style="font-size:12px"></i><span id="folder-btn-label">Carpetas</span>
+          </button>
+          <button onclick="toggleFolderDropdown()"
+            style="padding:6px 8px;font-size:11px;border:none;border-left:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer">▾</button>
+        </div>
+        <div id="folder-dropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:200;min-width:220px;padding:4px 0;box-shadow:0 4px 16px rgba(0,0,0,0.3)">
+          <div id="folder-list-items"></div>
+        </div>
+      </div>
+
       <span style="margin-left:auto;font-size:12px;color:var(--text2)">
         <span data-i18n="selected">Seleccionados</span>: <strong id="s-total">—</strong> &nbsp;·&nbsp; <span data-i18n="hours">Horas</span>: <strong id="s-hours">—</strong>
       </span>
@@ -479,26 +495,24 @@
 
     <!-- Filter bar -->
     <div id="filter-bar" style="display:flex;flex-direction:column;gap:6px;padding:6px 16px 8px">
-      <!-- Row 1: filters + folder + add btn -->
+      <!-- Row 1: filtros (estado/plataforma/genero/etc), swipeable -->
       <div id="filter-bar-row1" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;row-gap:4px">
         <!-- Filter dropdowns injected by JS -->
         <div id="filter-dropdowns" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"></div>
 
-        <!-- Folder filter -->
-        <div style="position:relative" id="folder-filter-wrap">
-          <div id="folder-filter-btn" style="display:none;align-items:center;border:0.5px solid var(--border);border-radius:6px;overflow:hidden;background:var(--bg2)">
-            <button onclick="handleFolderBtnClick()"
-              style="padding:4px 8px;font-size:12px;border:none;background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap">
-              <i class="ti ti-folder" style="font-size:11px"></i><span id="folder-btn-label">Carpetas</span>
-            </button>
-            <button onclick="toggleFolderDropdown()"
-              style="padding:4px 6px;font-size:11px;border:none;border-left:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer">▾</button>
-          </div>
-          <div id="folder-dropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:200;min-width:220px;padding:4px 0;box-shadow:0 4px 16px rgba(0,0,0,0.3)">
-            <div id="folder-list-items"></div>
-          </div>
+        <!-- Add button (desktop; en mobile es el boton flotante) -->
+        <div id="add-game-btn-wrap" style="margin-left:auto;display:flex;gap:6px;align-items:center">
+          <button id="add-game-btn" onclick="openModal()" style="display:none;padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">
+            <i class="ti ti-plus"></i> <span data-i18n="addGame">Agregar juego</span>
+          </button>
+          <button id="add-wishlist-btn" onclick="openWishlistModal()" style="display:none;padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:#EF9F27;color:#fff;cursor:pointer">
+            <i class="ti ti-star"></i> <span data-i18n="addWishlistGame">Agregar juego deseado</span>
+          </button>
         </div>
+      </div>
 
+      <!-- Row 1b: vista lista/cuadricula + ocultos, en su propia linea -->
+      <div id="filter-bar-row1b" style="display:flex;gap:6px;align-items:center">
         <!-- List/Grid view toggle -->
         <div id="view-mode-toggle" style="display:flex;border:0.5px solid var(--border);border-radius:6px;overflow:hidden">
           <button id="view-mode-list" class="view-mode-btn active" onclick="setLibraryViewMode('list')" title="Lista"><i class="ti ti-list" style="font-size:12px"></i></button>
@@ -510,16 +524,6 @@
           style="padding:4px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;display:none;align-items:center;gap:4px">
           <i class="ti ti-eye-off" style="font-size:12px"></i> <span data-i18n="hidden">Ocultos</span>
         </button>
-
-        <!-- Add button -->
-        <div id="add-game-btn-wrap" style="margin-left:auto;display:flex;gap:6px;align-items:center">
-          <button id="add-game-btn" onclick="openModal()" style="display:none;padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">
-            <i class="ti ti-plus"></i> <span data-i18n="addGame">Agregar juego</span>
-          </button>
-          <button id="add-wishlist-btn" onclick="openWishlistModal()" style="display:none;padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:#EF9F27;color:#fff;cursor:pointer">
-            <i class="ti ti-star"></i> <span data-i18n="addWishlistGame">Agregar juego deseado</span>
-          </button>
-        </div>
       </div>
 
       <!-- Row 2: sort + search -->
@@ -3091,9 +3095,13 @@ function renderLastPlayedStats(data) {
   }
 
   const maxTotal = Math.max(...buckets.map(b => allKeys.reduce((s,k)=>s+(b.segments[k]||0),0)), 1);
-  const chartH = 220;
-  const barW = Math.min(48, Math.max(20, Math.floor(560 / buckets.length) - 8));
-  const gap = 10;
+  const chartH  = 200;
+  const topPad  = 22; // espacio arriba para que la etiqueta del total no quede recortada en las barras mas altas
+  const gap = 8;
+  // Ancho disponible real (el contenedor, no un valor fijo) para que las
+  // columnas se adapten a mobile en vez de quedar siempre a tamaño desktop.
+  const availableW = Math.max(el.clientWidth - 20, 240);
+  const barW = Math.min(44, Math.max(18, Math.floor(availableW / buckets.length) - gap));
   const chartW = buckets.length * (barW + gap) + gap;
 
   let bars = '';
@@ -3107,16 +3115,16 @@ function renderLastPlayedStats(data) {
       if (!v) return;
       const h = Math.max(2, (v / maxTotal) * chartH);
       yOffset -= h;
-      segsHtml += `<rect x="${x}" y="${yOffset}" width="${barW}" height="${h}" fill="${lpSegmentColor(lpState.groupBy, k)}" rx="2">
+      segsHtml += `<rect x="${x}" y="${topPad + yOffset}" width="${barW}" height="${h}" fill="${lpSegmentColor(lpState.groupBy, k)}" rx="2">
         <title>${lpSegmentLabel(lpState.groupBy, k)}: ${v}</title>
       </rect>`;
     });
     const clickable = lpState.level !== 'day';
     bars += `<g style="cursor:${clickable ? 'pointer' : 'default'}" onclick="${clickable ? `lpDrill('${b.label}')` : ''}">
-      <rect x="${x}" y="0" width="${barW}" height="${chartH}" fill="transparent"></rect>
+      <rect x="${x}" y="${topPad}" width="${barW}" height="${chartH}" fill="transparent"></rect>
       ${segsHtml}
-      <text x="${x + barW/2}" y="${chartH + 16}" text-anchor="middle" font-size="11" fill="var(--text2)">${lpBucketLabel(b)}</text>
-      <text x="${x + barW/2}" y="${yOffset - 6}" text-anchor="middle" font-size="10" fill="var(--text2)">${total}</text>
+      <text x="${x + barW/2}" y="${topPad + chartH + 16}" text-anchor="middle" font-size="10" fill="var(--text2)">${lpBucketLabel(b)}</text>
+      <text x="${x + barW/2}" y="${topPad + yOffset - 6}" text-anchor="middle" font-size="10" fill="var(--text2)">${total}</text>
     </g>`;
   });
 
@@ -3128,7 +3136,7 @@ function renderLastPlayedStats(data) {
     <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);margin-bottom:12px">${crumbs.join(' <i class="ti ti-chevron-right" style="font-size:10px"></i> ')}</div>
     <div id="lp-groupby-row" style="display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;position:relative">${groupBySel}${segFilterBtn}</div>
     <div style="overflow-x:auto">
-      <svg width="${Math.max(chartW, 300)}" height="${chartH + 32}" viewBox="0 0 ${Math.max(chartW, 300)} ${chartH + 32}">${bars}</svg>
+      <svg width="${Math.max(chartW, 260)}" height="${topPad + chartH + 32}" viewBox="0 0 ${Math.max(chartW, 260)} ${topPad + chartH + 32}">${bars}</svg>
     </div>
     <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:16px">${legend}</div>
   `;
