@@ -1173,6 +1173,7 @@ const I18N = {
     continueBtn: 'Continuar', newFolder: 'Nueva carpeta', create: 'Crear', addToFolder: 'Agregar a carpeta',
     hoursPlayed: 'Horas jugadas',
     lastPlayed: 'Última vez jugado', clearDate: 'Borrar fecha', noLastPlayedData: 'No hay juegos con fecha cargada en este rango',
+    lpClickBarHint: 'Haga click en el grupo de columna para mostrar detalle',
     verifyEmailTitle: 'Confirmá tu cuenta', verifyEmailHint: 'Te enviamos un código de 6 dígitos a tu email. Ingresalo para activar tu cuenta.',
     verifyCodeLabel: 'Código de verificación', resendCode: 'Reenviar código', verifyAndContinue: 'Verificar',
     codeResent: 'Te reenviamos el código', support: 'Soporte',
@@ -1283,6 +1284,7 @@ const I18N = {
     continueBtn: 'Continue', newFolder: 'New folder', create: 'Create', addToFolder: 'Add to folder',
     hoursPlayed: 'Hours played',
     lastPlayed: 'Last played', clearDate: 'Clear date', noLastPlayedData: 'No games with a date set in this range',
+    lpClickBarHint: 'Click a column group to see detail',
     verifyEmailTitle: 'Confirm your account', verifyEmailHint: 'We sent a 6-digit code to your email. Enter it to activate your account.',
     verifyCodeLabel: 'Verification code', resendCode: 'Resend code', verifyAndContinue: 'Verify',
     codeResent: 'We resent the code', support: 'Support',
@@ -1393,6 +1395,7 @@ const I18N = {
     continueBtn: 'Continuar', newFolder: 'Nova pasta', create: 'Criar', addToFolder: 'Adicionar à pasta',
     hoursPlayed: 'Horas jogadas',
     lastPlayed: 'Última vez jogado', clearDate: 'Apagar data', noLastPlayedData: 'Nenhum jogo com data nesse período',
+    lpClickBarHint: 'Clique num grupo de colunas para ver detalhes',
     verifyEmailTitle: 'Confirme sua conta', verifyEmailHint: 'Enviamos um código de 6 dígitos para o seu email. Digite-o para ativar sua conta.',
     verifyCodeLabel: 'Código de verificação', resendCode: 'Reenviar código', verifyAndContinue: 'Verificar',
     codeResent: 'Reenviamos o código', support: 'Suporte',
@@ -2905,7 +2908,8 @@ function switchStatsTab(tab) {
 // ── Stats: última vez jugado (drill-down año > mes > día) ───────────────────
 
 const lpMonthNames = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-let lpState = { level: 'year', year: null, month: null, groupBy: 'status' };
+let lpState = { level: 'year', year: null, month: null, groupBy: 'status', segmentFilters: {} };
+let lpLastData = null;
 
 const lpStatusColors = {
   'Jugando': '#3B82F6', 'Completado': '#1D9E75', 'Backlog': '#6B7280',
@@ -2949,6 +2953,7 @@ async function loadLastPlayedStats() {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
     const d = await res.json();
+    lpLastData = d;
     renderLastPlayedStats(d);
   } catch (e) {
     el.innerHTML = `<div class="empty"><i class="ti ti-mood-sad"></i>${t('errorLoadingStats')}</div>`;
@@ -2960,7 +2965,7 @@ function renderLastPlayedStats(data) {
   const buckets = data.buckets || [];
 
   // Breadcrumb
-  const crumbs = [`<a onclick="lpGoTo('year')" style="cursor:pointer;color:var(--green)">2020-2026</a>`];
+  const crumbs = [`<a onclick="lpGoTo('year')" style="cursor:pointer;color:var(--green)">${t('lpClickBarHint')}</a>`];
   if (lpState.level !== 'year' && lpState.year) {
     crumbs.push(lpState.level === 'day'
       ? `<a onclick="lpGoTo('month', '${lpState.year}')" style="cursor:pointer;color:var(--green)">${lpState.year}</a>`
@@ -2980,23 +2985,34 @@ function renderLastPlayedStats(data) {
     `<button onclick="lpSetGroupBy('${o.key}')" style="padding:5px 12px;font-size:12px;border-radius:16px;border:0.5px solid ${lpState.groupBy === o.key ? 'var(--green)' : 'var(--border)'};background:var(--bg2);color:${lpState.groupBy === o.key ? 'var(--green)' : 'var(--text2)'};cursor:pointer;font-weight:${lpState.groupBy === o.key ? '600' : 'normal'}">${o.label}</button>`
   ).join('');
 
+  // Union of all segment keys across buckets (unfiltered), in a stable order
+  const allKeysRaw = [];
+  buckets.forEach(b => Object.keys(b.segments).forEach(k => { if (!allKeysRaw.includes(k)) allKeysRaw.push(k); }));
+  if (lpState.groupBy === 'rating') {
+    const order = ['5','4','3','2','1','Sin calificar'];
+    allKeysRaw.sort((a,b) => order.indexOf(a) - order.indexOf(b));
+  }
+
+  const activeFilter = lpState.segmentFilters[lpState.groupBy];
+  const allKeys = (activeFilter && activeFilter.size) ? allKeysRaw.filter(k => activeFilter.has(k)) : allKeysRaw;
+
+  const segFilterBtn = allKeysRaw.length ? (() => {
+    const count = activeFilter ? activeFilter.size : 0;
+    const label = lpState.groupBy === 'status' ? t('status') : lpState.groupBy === 'platform' ? t('platform') : t('rating');
+    return `<button onclick="toggleLpSegmentDropdown(event)" style="padding:5px 12px;font-size:12px;border-radius:16px;border:0.5px solid ${count ? 'var(--green)' : 'var(--border)'};background:var(--bg2);color:${count ? 'var(--green)' : 'var(--text2)'};cursor:pointer;position:relative">
+      ${label}${count ? ` <span style="background:var(--green);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px">${count}</span>` : ' ▾'}
+    </button>`;
+  })() : '';
+
   if (!buckets.length) {
     el.innerHTML = `
       <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);margin-bottom:12px">${crumbs.join(' <i class="ti ti-chevron-right" style="font-size:10px"></i> ')}</div>
-      <div style="display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap">${groupBySel}</div>
+      <div style="display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;position:relative">${groupBySel}${segFilterBtn}</div>
       <div class="empty"><i class="ti ti-calendar-off"></i>${t('noLastPlayedData')}</div>`;
     return;
   }
 
-  // Union of all segment keys across buckets, in a stable order
-  const allKeys = [];
-  buckets.forEach(b => Object.keys(b.segments).forEach(k => { if (!allKeys.includes(k)) allKeys.push(k); }));
-  if (lpState.groupBy === 'rating') {
-    const order = ['5','4','3','2','1','Sin calificar'];
-    allKeys.sort((a,b) => order.indexOf(a) - order.indexOf(b));
-  }
-
-  const maxTotal = Math.max(...buckets.map(b => Object.values(b.segments).reduce((s,v)=>s+v,0)), 1);
+  const maxTotal = Math.max(...buckets.map(b => allKeys.reduce((s,k)=>s+(b.segments[k]||0),0)), 1);
   const chartH = 220;
   const barW = Math.min(48, Math.max(20, Math.floor(560 / buckets.length) - 8));
   const gap = 10;
@@ -3007,7 +3023,7 @@ function renderLastPlayedStats(data) {
     const x = gap + i * (barW + gap);
     let yOffset = chartH;
     let segsHtml = '';
-    const total = Object.values(b.segments).reduce((s,v)=>s+v,0);
+    const total = allKeys.reduce((s,k)=>s+(b.segments[k]||0),0);
     allKeys.forEach(k => {
       const v = b.segments[k];
       if (!v) return;
@@ -3032,12 +3048,103 @@ function renderLastPlayedStats(data) {
 
   el.innerHTML = `
     <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);margin-bottom:12px">${crumbs.join(' <i class="ti ti-chevron-right" style="font-size:10px"></i> ')}</div>
-    <div style="display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap">${groupBySel}</div>
+    <div id="lp-groupby-row" style="display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;position:relative">${groupBySel}${segFilterBtn}</div>
     <div style="overflow-x:auto">
       <svg width="${Math.max(chartW, 300)}" height="${chartH + 32}" viewBox="0 0 ${Math.max(chartW, 300)} ${chartH + 32}">${bars}</svg>
     </div>
     <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:16px">${legend}</div>
   `;
+}
+
+function toggleLpSegmentDropdown(event) {
+  event.stopPropagation();
+  document.querySelectorAll('.filter-popup').forEach(p => p.remove());
+  if (!lpLastData) return;
+
+  const buckets = lpLastData.buckets || [];
+  const allKeysRaw = [];
+  buckets.forEach(b => Object.keys(b.segments).forEach(k => { if (!allKeysRaw.includes(k)) allKeysRaw.push(k); }));
+  if (lpState.groupBy === 'rating') {
+    const order = ['5','4','3','2','1','Sin calificar'];
+    allKeysRaw.sort((a,b) => order.indexOf(a) - order.indexOf(b));
+  }
+
+  const btn  = event.currentTarget;
+  const wrap = btn.parentElement;
+  const active = new Set(lpState.segmentFilters[lpState.groupBy] || []);
+  const initialSelection = Array.from(active).sort().join('');
+  const hasChanged = () => Array.from(active).sort().join('') !== initialSelection;
+
+  const popup = document.createElement('div');
+  popup.className = 'filter-popup';
+  popup.style.cssText = 'position:absolute;top:calc(100% + 4px);left:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:200;min-width:180px;padding:4px 0 0;box-shadow:0 4px 16px rgba(0,0,0,0.3)';
+
+  allKeysRaw.forEach(opt => {
+    const item = document.createElement('div');
+    const checked = active.has(opt);
+    item.style.cssText = 'display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;font-size:13px;user-select:none';
+    if (checked) item.style.background = 'rgba(29,158,117,0.1)';
+    item.onmousedown = (e) => {
+      e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+      if (active.has(opt)) active.delete(opt); else active.add(opt);
+      const cb = item.querySelector('input');
+      if (cb) cb.checked = active.has(opt);
+      item.style.background = active.has(opt) ? 'rgba(29,158,117,0.1)' : '';
+    };
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = checked;
+    cb.style.accentColor = 'var(--green)';
+    cb.style.pointerEvents = 'none';
+    const label = document.createElement('span');
+    label.textContent = lpSegmentLabel(lpState.groupBy, opt);
+    item.appendChild(cb);
+    item.appendChild(label);
+    popup.appendChild(item);
+  });
+
+  const footer = document.createElement('div');
+  footer.style.cssText = 'padding:6px 10px;border-top:0.5px solid var(--border);display:flex;justify-content:flex-end;gap:6px';
+  const clearBtn = document.createElement('button');
+  clearBtn.textContent = t('clear');
+  clearBtn.style.cssText = 'font-size:12px;padding:3px 10px;border-radius:5px;border:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer';
+  clearBtn.onmousedown = (e) => {
+    e.preventDefault();
+    active.clear();
+    lpState.segmentFilters[lpState.groupBy] = new Set();
+    renderLastPlayedStats(lpLastData);
+    popup.remove();
+  };
+  const okBtn = document.createElement('button');
+  okBtn.textContent = 'OK';
+  okBtn.style.cssText = 'font-size:12px;padding:3px 14px;border-radius:5px;border:none;background:var(--green);color:#fff;cursor:pointer';
+  okBtn.onmousedown = (e) => {
+    e.preventDefault();
+    if (hasChanged()) {
+      lpState.segmentFilters[lpState.groupBy] = new Set(active);
+      renderLastPlayedStats(lpLastData);
+    }
+    popup.remove();
+  };
+  footer.appendChild(clearBtn);
+  footer.appendChild(okBtn);
+  popup.appendChild(footer);
+
+  wrap.appendChild(popup);
+
+  setTimeout(() => {
+    function outsideHandler(e) {
+      if (!popup.contains(e.target) && !btn.contains(e.target)) {
+        if (hasChanged()) {
+          lpState.segmentFilters[lpState.groupBy] = new Set(active);
+          renderLastPlayedStats(lpLastData);
+        }
+        popup.remove();
+        document.removeEventListener('mousedown', outsideHandler);
+      }
+    }
+    document.addEventListener('mousedown', outsideHandler);
+  }, 10);
 }
 
 function lpSetGroupBy(groupBy) {
