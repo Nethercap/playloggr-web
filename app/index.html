@@ -2402,6 +2402,20 @@ function renderFilterDropdowns() {
   }
 }
 
+/** Posiciona un popup de filtro con position:fixed anclado al boton que lo
+ * abre, en vez de position:absolute relativo a un contenedor — asi no se
+ * rompe cuando el boton esta dentro de una fila con scroll horizontal
+ * (overflow-x:auto), que es el caso en mobile. */
+function _positionFixedPopup(popup, btn) {
+  const rect = btn.getBoundingClientRect();
+  popup.style.position = 'fixed';
+  const popupWidth = Math.max(popup.offsetWidth || 200, 180);
+  let left = rect.left;
+  if (left + popupWidth > window.innerWidth - 8) left = Math.max(8, window.innerWidth - popupWidth - 8);
+  popup.style.left = `${left}px`;
+  popup.style.top  = `${rect.bottom + 4}px`;
+}
+
 function toggleFilterDropdown(key, options, wrap, btn) {
   // Close any open dropdown
   document.querySelectorAll('.filter-popup').forEach(p => p.remove());
@@ -2413,7 +2427,7 @@ function toggleFilterDropdown(key, options, wrap, btn) {
 
   const popup = document.createElement('div');
   popup.className = 'filter-popup';
-  popup.style.cssText = 'position:absolute;top:calc(100% + 4px);left:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:200;min-width:180px;padding:4px 0 0;box-shadow:0 4px 16px rgba(0,0,0,0.3)';
+  popup.style.cssText = 'position:fixed;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:400;min-width:180px;padding:4px 0 0;box-shadow:0 4px 16px rgba(0,0,0,0.3)';
 
   const active = activeFilters[key] || new Set();
   options.forEach(opt => {
@@ -2479,7 +2493,8 @@ function toggleFilterDropdown(key, options, wrap, btn) {
   footer.appendChild(okBtn);
   popup.appendChild(footer);
 
-  wrap.appendChild(popup);
+  document.body.appendChild(popup);
+  _positionFixedPopup(popup, btn);
 
   // Close on outside click — solo re-sincroniza si realmente cambio algo.
   setTimeout(() => {
@@ -2512,7 +2527,7 @@ function toggleLastPlayedFilterDropdown(wrap, btn) {
 
   const popup = document.createElement('div');
   popup.className = 'filter-popup';
-  popup.style.cssText = 'position:absolute;top:calc(100% + 4px);left:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:200;min-width:200px;max-height:320px;overflow-y:auto;padding:4px 0 0;box-shadow:0 4px 16px rgba(0,0,0,0.3)';
+  popup.style.cssText = 'position:fixed;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:400;min-width:200px;max-height:320px;overflow-y:auto;padding:4px 0 0;box-shadow:0 4px 16px rgba(0,0,0,0.3)';
 
   let expandedYear = [...activeFilters.lastPlayedYears][0] || (
     years.find(y => [...activeFilters.lastPlayedMonths].some(m => m.startsWith(y))) || null
@@ -2627,7 +2642,8 @@ function toggleLastPlayedFilterDropdown(wrap, btn) {
   footer.appendChild(okBtn);
   popup.appendChild(footer);
 
-  wrap.appendChild(popup);
+  document.body.appendChild(popup);
+  _positionFixedPopup(popup, btn);
 
   setTimeout(() => {
     function outsideHandler(e) {
@@ -3173,14 +3189,13 @@ function toggleLpSegmentDropdown(event) {
   }
 
   const btn  = event.currentTarget;
-  const wrap = btn.parentElement;
   const active = new Set(lpState.segmentFilters[lpState.groupBy] || []);
   const initialSelection = Array.from(active).sort().join('');
   const hasChanged = () => Array.from(active).sort().join('') !== initialSelection;
 
   const popup = document.createElement('div');
   popup.className = 'filter-popup';
-  popup.style.cssText = 'position:absolute;top:calc(100% + 4px);left:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:200;min-width:180px;padding:4px 0 0;box-shadow:0 4px 16px rgba(0,0,0,0.3)';
+  popup.style.cssText = 'position:fixed;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:400;min-width:180px;padding:4px 0 0;box-shadow:0 4px 16px rgba(0,0,0,0.3)';
 
   allKeysRaw.forEach(opt => {
     const item = document.createElement('div');
@@ -3233,7 +3248,8 @@ function toggleLpSegmentDropdown(event) {
   footer.appendChild(okBtn);
   popup.appendChild(footer);
 
-  wrap.appendChild(popup);
+  document.body.appendChild(popup);
+  _positionFixedPopup(popup, btn);
 
   setTimeout(() => {
     function outsideHandler(e) {
