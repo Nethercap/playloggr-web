@@ -1657,6 +1657,20 @@ const platIcons = {
   'iOS': {slug:'apple', color:'#555555'}
 };
 
+/** Escapa texto libre controlado por el usuario (nombre de juego manual,
+ * carpeta, ranking, etc.) antes de interpolarlo en HTML — sin esto,
+ * un nombre malicioso se ejecuta como XSS en cualquiera que lo vea
+ * (por ejemplo, la biblioteca de un amigo). */
+function esc(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function _hexToRgb(hex) {
   const h = hex.replace('#','');
   const n = parseInt(h.length === 3 ? h.split('').map(c=>c+c).join('') : h, 16);
@@ -1962,7 +1976,7 @@ function steamCoverHtml(g, extraStyle = '') {
   const styleAttr = extraStyle ? ` style="${extraStyle}"` : '';
   if (!g.app_id) {
     return g.cover_url
-      ? `<img src="${g.cover_url}" alt="${g.name}"${styleAttr} onerror="this.style.display='none'">`
+      ? `<img src="${g.cover_url}" alt="${esc(g.name)}"${styleAttr} onerror="this.style.display='none'">`
       : `<span>🎮</span>`;
   }
   const base = `https://cdn.cloudflare.steamstatic.com/steam/apps/${g.app_id}`;
@@ -1975,7 +1989,7 @@ function steamCoverHtml(g, extraStyle = '') {
   ].filter((v, i, arr) => arr.indexOf(v) === i); // sin duplicados
   const first = candidates[0];
   const rest  = candidates.slice(1);
-  return `<img src="${first}" alt="${g.name}"${styleAttr} data-appid="${g.app_id}" data-fallbacks='${JSON.stringify(rest)}' onerror="handleCoverError(this)">`;
+  return `<img src="${first}" alt="${esc(g.name)}"${styleAttr} data-appid="${g.app_id}" data-fallbacks='${JSON.stringify(rest)}' onerror="handleCoverError(this)">`;
 }
 
 // Cuando se agotan todas las rutas de CDN adivinadas, se pide la portada
@@ -2059,7 +2073,7 @@ function gameCardHtml(g) {
         style="width:28px;height:28px;min-width:28px;border-radius:50%;border:1.5px solid #1D9E75;background:transparent;color:#1D9E75;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1;padding:0">▶</button>
     </div>
     <div>
-      <div class="game-name">${g.name}</div>
+      <div class="game-name">${esc(g.name)}</div>
       <div class="game-meta">
         ${platBadge(g.platform)}
         ${scoreEl}
@@ -2170,7 +2184,7 @@ function renderGamesGrid(items) {
           style="position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,0.6);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ti-dots" style="font-size:14px"></i></button>
       </div>
       <div style="padding:8px">
-        <div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${g.name}">${g.name}</div>
+        <div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(g.name)}">${esc(g.name)}</div>
         ${g.status !== 'Deseados' ? `<div id="stars-${g.id}" style="margin:4px 0">${starPickerHtml(g.id, g.user_rating || 0)}</div>` : '<div style="height:8px"></div>'}
         <select class="status-sel status-select" onchange="changeStatus('${g.id}',this.value)" style="width:100%;margin-bottom:6px">
           <option value="Jugando"      ${g.status==='Jugando'      ?'selected':''}>${statusLabel('Jugando')}</option>
@@ -3434,7 +3448,7 @@ async function loadGlobalRankings() {
       return items.slice(0,20).map((g,i) => `
         <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:0.5px solid var(--border);font-size:13px">
           <span style="color:var(--text2);min-width:24px;font-size:11px">${i+1}</span>
-          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${g.name}">${g.name}</span>
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(g.name)}">${esc(g.name)}</span>
           <span style="color:var(--text2);font-size:12px">${g[valueKey]}${valueSuffix}</span>
         </div>
       `).join('');
@@ -4543,7 +4557,7 @@ function friendGameCardHtml(g) {
   return `<div class="game-card">
     <div class="game-cover" style="pointer-events:none">${cover}</div>
     <div>
-      <div class="game-name">${g.name}</div>
+      <div class="game-name">${esc(g.name)}</div>
       <div class="game-meta">${platBadge(g.platform)}</div>
       <div class="game-foot"><span><i class="ti ti-clock" style="font-size:12px"></i>${(g.hours_played||0).toFixed(1)} hs</span>${g.user_rating ? `<span style="margin-left:8px">★ ${g.user_rating}</span>` : ''}</div>
     </div>
@@ -5000,7 +5014,7 @@ async function searchSteamCatalogWishlist(q) {
         return `<div onmousedown="event.preventDefault(); selectWishlistGame('${key}')"
           style="padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:0.5px solid var(--border)"
           onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''"
-        >${r.name}</div>`;
+        >${esc(r.name)}</div>`;
       }).join('');
       results.style.display = 'block';
     } catch(e) {}
@@ -5075,7 +5089,7 @@ async function searchSteamCatalog(q) {
           style="padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:0.5px solid var(--border);display:flex;align-items:center"
           onmouseover="this.style.background='var(--bg3)'"
           onmouseout="this.style.background=''"
-        >${r.name}${badge}</div>`;
+        >${esc(r.name)}${badge}</div>`;
       }).join('');
       results.style.display = 'block';
     } catch(e) {}
@@ -5992,7 +6006,7 @@ function renderFolderDropdownItems() {
           <div onclick="enterFolder(${f.id})" style="flex:1;display:flex;align-items:center;gap:6px">
             <i class="ti ti-folder" style="font-size:14px;color:var(--text2)"></i>
             <div>
-              <div>${f.name}</div>
+              <div>${esc(f.name)}</div>
               <div style="font-size:10px;color:var(--text2)">${f.game_count} juegos · ${new Date(f.created_at).toLocaleDateString('es-AR')}</div>
             </div>
           </div>
@@ -6110,7 +6124,7 @@ function renderFolderList() {
                     style="background:none;border:0.5px solid var(--border);border-radius:4px;color:var(--red);cursor:pointer;padding:2px 6px;font-size:11px">🗑</button>
                 </div>
               </div>
-              <div style="font-size:14px;font-weight:600;margin-bottom:4px">${f.name}</div>
+              <div style="font-size:14px;font-weight:600;margin-bottom:4px">${esc(f.name)}</div>
               <div style="font-size:11px;color:var(--text2)">${f.game_count} juegos · ${new Date(f.created_at).toLocaleDateString('es-AR')}</div>
             </div>
           `).join('')}
@@ -6222,7 +6236,7 @@ async function openCardFolderPicker(gameId) {
         style="accent-color:var(--green)" data-folder="${f.id}" data-was="${inFolders.has(f.id) ? '1' : '0'}"
         onchange="trackCardFolderChange(this)">
       <i class="ti ti-folder" style="font-size:13px;color:var(--text2)"></i>
-      <span style="flex:1">${f.name}</span>
+      <span style="flex:1">${esc(f.name)}</span>
       <span style="font-size:11px;color:var(--text2)">${f.game_count}</span>
     </label>
   `).join('');
@@ -6342,7 +6356,7 @@ function renderFolderGamePicker() {
                 style="accent-color:var(--green);display:block" data-gid="${g.id}" data-was="${g.in_folder ? '1' : '0'}"
                 onchange="trackFolderGameChange(this)">
             </div>
-            <div style="display:table-cell;padding:8px 8px;font-size:12px;max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle" title="${g.name}">${g.name}</div>
+            <div style="display:table-cell;padding:8px 8px;font-size:12px;max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle" title="${esc(g.name)}">${esc(g.name)}</div>
             <div style="display:table-cell;width:110px;padding:8px 8px;font-size:11px;color:var(--text2);vertical-align:middle">${g.platform}</div>
             <div style="display:table-cell;width:65px;padding:8px 8px;font-size:11px;color:var(--text2);vertical-align:middle">${g.hours_played}h</div>
             <div style="display:table-cell;width:50px;padding:8px 8px;font-size:11px;color:var(--text2);vertical-align:middle">${g.user_rating > 0 ? '★'.repeat(Math.floor(g.user_rating)) : '—'}</div>
@@ -6456,7 +6470,7 @@ function renderRankingsList() {
     <div onclick="openRanking(${r.id})" style="cursor:pointer;background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:6px">
       <div style="display:flex;align-items:center;gap:8px">
         <i class="ti ti-medal" style="color:var(--green);font-size:18px"></i>
-        <strong style="font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.name}</strong>
+        <strong style="font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.name)}</strong>
       </div>
       <div style="font-size:12px;color:var(--text2)">${r.game_count}/${MAX_RANKING_GAMES} ${t('gamesLower')}</div>
     </div>
@@ -6570,7 +6584,7 @@ function renderRankingGamePicker() {
       <input type="checkbox" data-gid="${g.id}" ${_rankingPickerSelected.has(g.id) ? 'checked' : ''}
         onchange="toggleRankingPickerGame('${g.id}', this.checked)" style="accent-color:var(--green)">
       ${platIconOnly(g.platform)}
-      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${g.name}</span>
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(g.name)}</span>
       <span style="font-size:11px;color:var(--text2)">${g.hours_played}h</span>
     </label>
   `).join('');
@@ -6636,7 +6650,7 @@ function renderRankingDetailGrid() {
       <button class="ranking-remove" onclick="removeGameFromRanking('${g.game_id}')" title="${t('removeFromRanking')}"><i class="ti ti-x"></i></button>
       <img src="${g.cover_url || ''}" style="width:100%;aspect-ratio:2/3;object-fit:cover;background:var(--bg3);display:block" onerror="this.style.visibility='hidden'" />
       <div style="padding:8px">
-        <div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${g.name}">${g.name}</div>
+        <div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(g.name)}">${esc(g.name)}</div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-top:5px">
           <span style="font-size:11px">${starsHtml(g.user_rating)}</span>
           ${platIconOnly(g.platform)}
