@@ -5590,6 +5590,13 @@ function _renderTourStep() {
   const el = document.querySelector(step.selector);
   if (!el) { _tourNext(); return; }
   el.scrollIntoView({ block: 'center', behavior: 'auto' });
+  // En mobile Safari el scroll puede terminar de aplicarse de forma
+  // asincronica — si medimos la posicion en el mismo tick, el highlight
+  // queda desfasado del elemento real. Esperamos un toque antes de medir.
+  setTimeout(() => _positionTourStep(el, step), 60);
+}
+
+function _positionTourStep(el, step) {
   const r = el.getBoundingClientRect();
   const hl = document.getElementById('tour-highlight');
   hl.style.left = `${r.left - 6}px`;
