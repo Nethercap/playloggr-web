@@ -162,8 +162,13 @@
 
     @media (max-width:600px) {
       .stats-row { grid-template-columns:repeat(2,1fr); }
-      .game-card { grid-template-columns:44px minmax(0,1fr); }
-      .game-status-col { display:none; }
+      .game-card { grid-template-columns:44px minmax(0,1fr) auto; }
+      .game-status-col { min-width:0; align-items:flex-end; }
+      /* En mobile solo mostramos el estado desplegable — género y las
+         acciones (carpeta/ocultar/borrar) quedan afuera para no saturar
+         la card; siguen disponibles desde la vista de detalle. */
+      .game-status-col .genre-select { display:none; }
+      .game-status-col button { display:none; }
     }
 
     /* ── Panel de perfil (avatar + nombre + nivel) — mobile y web ── */
@@ -2141,8 +2146,6 @@ function renderGamesGrid(items) {
         <div style="display:flex;align-items:center;justify-content:space-between">
           ${g.status !== 'Deseados' ? (g.is_manual ? `<span style="font-size:11px;color:var(--text2);cursor:pointer;text-decoration:underline dotted" data-gameid="${g.id}" data-hours="${g.hours_played}" onclick="editHoursById(this, event)" title="Editar horas"><i class="ti ti-clock" style="font-size:11px"></i> ${hours}</span>` : `<span style="font-size:11px;color:var(--text2)"><i class="ti ti-clock" style="font-size:11px"></i> ${hours}</span>`) : '<span></span>'}
           <div style="display:flex;gap:4px">
-            <button class="play-btn" data-gid="${g.id}" onclick="togglePlaySession('${g.id}')" title="Registrar sesión de juego"
-              style="width:24px;height:24px;border-radius:50%;border:1.5px solid #1D9E75;background:transparent;color:#1D9E75;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;padding:0">▶</button>
             <button onclick="toggleHideGame('${g.id}', ${g.hidden})" title="${g.hidden ? t('showGame') : t('hideGame')}"
               style="width:24px;height:24px;border-radius:50%;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ${g.hidden ? 'ti-eye' : 'ti-eye-off'}" style="font-size:12px"></i></button>
             <button onclick="deleteGame('${g.id}')" title="${t('delete')}"
