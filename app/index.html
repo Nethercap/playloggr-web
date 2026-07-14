@@ -254,6 +254,7 @@
       to { transform: rotate(360deg); }
     }
   </style>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
 
@@ -329,6 +330,9 @@
         <div class="login-group">
           <label data-i18n="password">Contraseña</label>
           <input type="password" id="l-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')submitAuth()" />
+        </div>
+        <div id="turnstile-widget-wrap" style="display:none;margin-bottom:12px">
+          <div id="turnstile-widget"></div>
         </div>
         <div class="login-err" id="login-err"></div>
         <button class="login-btn" onclick="submitAuth()" id="login-btn" data-i18n="login">Iniciar sesión</button>
@@ -1315,6 +1319,7 @@ const I18N = {
     saveErrorRetry: 'Error al guardar. Intentá de nuevo.', saveError: 'Error al guardar',
     errorLoadingFriends: 'Error al cargar amigos',
     usernameFormatError: 'El nombre de usuario debe tener 3-20 caracteres, solo letras y números',
+    captchaRequired: 'Completá la verificación antes de continuar',
     sendCode: 'Enviar código', enterEmailFirst: 'Ingresá tu email primero',
     codeSentIfExists: 'Si el email existe, te enviamos un código de recuperación.',
     genericNetworkError: 'Error de conexión. Intentá de nuevo.',
@@ -1426,6 +1431,7 @@ const I18N = {
     saveErrorRetry: 'Error saving. Please try again.', saveError: 'Error saving',
     errorLoadingFriends: 'Error loading friends',
     usernameFormatError: 'Username must be 3-20 characters, letters and numbers only',
+    captchaRequired: 'Please complete the verification before continuing',
     sendCode: 'Send code', enterEmailFirst: 'Enter your email first',
     codeSentIfExists: 'If the email exists, we sent a recovery code.',
     genericNetworkError: 'Connection error. Please try again.',
@@ -1537,6 +1543,7 @@ const I18N = {
     saveErrorRetry: 'Erro ao salvar. Tente novamente.', saveError: 'Erro ao salvar',
     errorLoadingFriends: 'Erro ao carregar amigos',
     usernameFormatError: 'O nome de usuário deve ter 3-20 caracteres, somente letras e números',
+    captchaRequired: 'Complete a verificação antes de continuar',
     sendCode: 'Enviar código', enterEmailFirst: 'Digite seu email primeiro',
     codeSentIfExists: 'Se o email existir, enviamos um código de recuperação.',
     genericNetworkError: 'Erro de conexão. Tente novamente.',
@@ -5750,6 +5757,25 @@ async function selectCosmetic(kind, id) {
   }
 }
 
+const TURNSTILE_SITE_KEY = '0x4AAAAAAD13tL4Za45jML0a';
+let _turnstileWidgetId = null;
+
+function _renderTurnstileWidget() {
+  const wrap = document.getElementById('turnstile-widget-wrap');
+  if (!wrap) return;
+  wrap.style.display = 'block';
+  if (typeof turnstile === 'undefined') {
+    // El script todavia no cargo — reintentar en un momento.
+    setTimeout(_renderTurnstileWidget, 300);
+    return;
+  }
+  if (_turnstileWidgetId !== null) {
+    turnstile.reset(_turnstileWidgetId);
+    return;
+  }
+  _turnstileWidgetId = turnstile.render('#turnstile-widget', { sitekey: TURNSTILE_SITE_KEY });
+}
+
 function toggleAuthMode() {
   isRegister = !isRegister;
   document.getElementById('login-subtitle').textContent  = isRegister ? t('createAccount') : t('loginSubtitle');
@@ -5758,6 +5784,11 @@ function toggleAuthMode() {
   document.getElementById('login-toggle-link').textContent = isRegister ? t('login') : t('register');
   document.getElementById('l-username-group').style.display = isRegister ? 'flex' : 'none';
   document.getElementById('login-err').style.display = 'none';
+  if (isRegister) {
+    _renderTurnstileWidget();
+  } else {
+    document.getElementById('turnstile-widget-wrap').style.display = 'none';
+  }
 }
 
 async function submitAuth() {
@@ -5774,8 +5805,19 @@ async function submitAuth() {
     return;
   }
 
+  let turnstileToken = '';
+  if (isRegister) {
+    turnstileToken = (typeof turnstile !== 'undefined' && _turnstileWidgetId !== null)
+      ? turnstile.getResponse(_turnstileWidgetId) : '';
+    if (!turnstileToken) {
+      errEl.textContent = t('captchaRequired');
+      errEl.style.display = 'block';
+      return;
+    }
+  }
+
   const endpoint = isRegister ? '/api/v1/auth/register' : '/api/v1/auth/login';
-  const body     = isRegister ? { email, password, username } : { email, password };
+  const body     = isRegister ? { email, password, username, turnstile_token: turnstileToken } : { email, password };
 
   document.getElementById('login-btn').textContent = 'Cargando...';
   try {
@@ -5808,6 +5850,10 @@ async function submitAuth() {
   } catch(e) {
     errEl.textContent = (e instanceof Error ? e.message : String(e)) || 'Error de autenticación';
     errEl.style.display = 'block';
+    // Los tokens de Turnstile son de un solo uso — resetear para reintentar.
+    if (isRegister && typeof turnstile !== 'undefined' && _turnstileWidgetId !== null) {
+      turnstile.reset(_turnstileWidgetId);
+    }
   } finally {
     document.getElementById('login-btn').textContent = isRegister ? 'Registrarse' : 'Iniciar sesión';
   }
