@@ -164,11 +164,6 @@
       .stats-row { grid-template-columns:repeat(2,1fr); }
       .game-card { grid-template-columns:44px minmax(0,1fr) auto; }
       .game-status-col { min-width:0; align-items:flex-end; }
-      /* En mobile solo mostramos el estado desplegable — género y las
-         acciones (carpeta/ocultar/borrar) quedan afuera para no saturar
-         la card; siguen disponibles desde la vista de detalle. */
-      .game-status-col .genre-select { display:none; }
-      .game-status-col button { display:none; }
     }
 
     /* ── Panel de perfil (avatar + nombre + nivel) — mobile y web ── */
@@ -1753,12 +1748,44 @@ function renderPlatStatus() {
 }
 
 // ── Star rendering helpers ──────────────────────────────────────────
-function actionBtn(g) {
-  const hideLabel = g.hidden ? '<i class="ti ti-eye"></i> Mostrar' : '<i class="ti ti-eye-off"></i> Ocultar';
-  const hideBtn   = '<button onclick="toggleHideGame(\'' + g.id + '\', ' + g.hidden + ')" style="font-size:11px;padding:2px 8px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;margin-top:4px">' + hideLabel + '</button>';
-  const deleteBtn = '<button onclick="deleteGame(\'' + g.id + '\')" style="font-size:11px;padding:2px 8px;border-radius:6px;border:0.5px solid #E24B4A;background:transparent;color:#E24B4A;cursor:pointer;margin-top:4px">🗑 Borrar</button>';
-  const folderBtn = '<button onclick="openCardFolderPicker(\'' + g.id + '\')" style="font-size:11px;padding:2px 8px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;margin-top:4px" title="Agregar a carpeta"><i class="ti ti-folder-plus" style="font-size:11px"></i></button>';
-  return folderBtn + ' ' + hideBtn + ' ' + deleteBtn;
+
+/** Menu "+" con Ocultar/Mostrar y Borrar, para no saturar la card con
+ * botones sueltos. Usa position:fixed anclado al boton (igual que los
+ * popups de filtro) para no romperse en mobile. */
+function toggleGameActionsMenu(gameId, hidden, event) {
+  event.stopPropagation();
+  document.querySelectorAll('.filter-popup').forEach(p => p.remove());
+
+  const btn = event.currentTarget;
+  const popup = document.createElement('div');
+  popup.className = 'filter-popup';
+  popup.style.cssText = 'position:fixed;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:400;min-width:140px;padding:4px 0;box-shadow:0 4px 16px rgba(0,0,0,0.3)';
+
+  const hideItem = document.createElement('button');
+  hideItem.className = 'steam-menu-item';
+  hideItem.innerHTML = hidden ? '<i class="ti ti-eye" style="font-size:14px"></i> Mostrar' : '<i class="ti ti-eye-off" style="font-size:14px"></i> Ocultar';
+  hideItem.onclick = () => { toggleHideGame(gameId, hidden); popup.remove(); };
+
+  const deleteItem = document.createElement('button');
+  deleteItem.className = 'steam-menu-item';
+  deleteItem.style.color = '#E24B4A';
+  deleteItem.innerHTML = '<i class="ti ti-trash" style="font-size:14px"></i> Borrar';
+  deleteItem.onclick = () => { deleteGame(gameId); popup.remove(); };
+
+  popup.appendChild(hideItem);
+  popup.appendChild(deleteItem);
+  document.body.appendChild(popup);
+  _positionFixedPopup(popup, btn);
+
+  setTimeout(() => {
+    function outsideHandler(e) {
+      if (!popup.contains(e.target) && !btn.contains(e.target)) {
+        popup.remove();
+        document.removeEventListener('mousedown', outsideHandler);
+      }
+    }
+    document.addEventListener('mousedown', outsideHandler);
+  }, 10);
 }
 
 function starsHtml(rating) {
@@ -2037,9 +2064,6 @@ function gameCardHtml(g) {
         <span id="community-${g.id}" style="${communityStyle};align-items:center;gap:3px;font-size:11px;color:var(--text2)">${communityHtml}</span>        </div>
     </div>
     <div class="game-status-col">
-      <select class="genre-sel genre-select" data-gid="${g.id}" onchange="changeGenre('${g.id}',this.value)" style="font-size:11px;margin-bottom:4px;width:100%;padding:2px 4px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text2)">
-        ${genreOptions(g.genre)}
-      </select>
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
         <div class="sdot s-${g.status}"></div>
         <select class="status-sel status-select" onchange="changeStatus('${g.id}',this.value)">
@@ -2051,7 +2075,13 @@ function gameCardHtml(g) {
           <option value="Deseados"     ${g.status==='Deseados'     ?'selected':''}>${statusLabel('Deseados')}</option>
         </select>
       </div>
-      ${actionBtn(g)}
+      <select class="genre-sel genre-select" data-gid="${g.id}" onchange="changeGenre('${g.id}',this.value)" style="font-size:11px;margin-bottom:4px;width:100%;padding:2px 4px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text2)">
+        ${genreOptions(g.genre)}
+      </select>
+      <div style="display:flex;align-items:center;gap:4px">
+        <button onclick="openCardFolderPicker('${g.id}')" title="Agregar a carpeta" style="font-size:11px;padding:2px 8px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer"><i class="ti ti-folder-plus" style="font-size:11px"></i></button>
+        <button onclick="toggleGameActionsMenu('${g.id}', ${g.hidden}, event)" title="Más opciones" style="font-size:12px;padding:2px 8px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-weight:700">+</button>
+      </div>
     </div>
   </div>`;
 }
