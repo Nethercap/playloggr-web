@@ -4212,6 +4212,8 @@ function _processToastQueue() {
   setTimeout(() => { _toastBusy = false; _processToastQueue(); }, 2600);
 }
 
+let _hasCheckedLevelOnce = false;
+
 async function checkAchievements() {
   try {
     const oldLevel = userLevel;
@@ -4227,9 +4229,15 @@ async function checkAchievements() {
       if (d.newly_unlocked && d.newly_unlocked.length > 0) {
         d.newly_unlocked.forEach(a => queueToast(`🏆 ${a.name}  +${a.xp} XP`));
       }
-      if (userLevel > oldLevel) {
+      // Solo mostramos "subiste de nivel" si ya habiamos chequeado el nivel
+      // real al menos una vez en esta carga de pagina — el primer chequeo
+      // despues de cargar/recargar puede correr en paralelo con la carga
+      // del perfil real y comparar contra el userLevel=1 por defecto,
+      // disparando el aviso en cada visita aunque no hubo suba real.
+      if (_hasCheckedLevelOnce && userLevel > oldLevel) {
         queueToast(`🎉 ¡Felicidades! Subiste al nivel ${userLevel}`);
       }
+      _hasCheckedLevelOnce = true;
     }
   } catch (e) {}
 }
