@@ -96,6 +96,27 @@
 
   <div class="card">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
+      <strong>PSN — cuenta de servicio</strong>
+      <button class="btn-secondary" style="padding:4px 10px; font-size:11px" onclick="loadPsnStatus()">↻ Actualizar</button>
+    </div>
+    <p style="font-size:11px; color:var(--text2); margin-bottom:12px">
+      El connector de PSN (experimental) usa una cuenta de servicio propia. El refresh_token vence cada ~2 meses —
+      cuando venza, sacá un NPSSO nuevo logueandote en <a href="https://my.playstation.com/" target="_blank" style="color:var(--text2)">my.playstation.com</a>
+      y visitando después, en el mismo navegador, <a href="https://ca.account.sony.com/api/v1/ssocookie" target="_blank" style="color:var(--text2)">ca.account.sony.com/api/v1/ssocookie</a> (devuelve <code>{"npsso":"..."}</code>).
+    </p>
+    <div id="psn-status" style="font-size:13px; margin-bottom:12px; color:var(--text2)"><div class="spinner"></div> Cargando...</div>
+    <div class="row">
+      <div>
+        <label>NPSSO</label>
+        <input type="password" id="psn-npsso-input" placeholder="Pegá el npsso acá" onkeydown="if(event.key==='Enter') updatePsnToken()" />
+      </div>
+      <button class="btn-primary" onclick="updatePsnToken()">Actualizar</button>
+    </div>
+    <div class="msg" id="psn-msg"></div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
       <strong>Usuarios totales</strong>
     </div>
     <div class="row">
@@ -138,6 +159,7 @@ async function tryLogin() {
     document.getElementById('app').style.display = 'block';
     renderMetrics(await res.json());
     loadUsers();
+    loadPsnStatus();
   } else {
     document.getElementById('login-err').style.display = 'block';
   }
@@ -146,6 +168,63 @@ async function tryLogin() {
 function logout() {
   localStorage.removeItem('admin_key');
   location.reload();
+}
+
+function _fmtPsnDate(iso) {
+  const d = new Date(iso);
+  const now = new Date();
+  const daysLeft = Math.floor((d - now) / (1000 * 60 * 60 * 24));
+  const dateStr = d.toLocaleString('es-AR', { dateStyle: 'medium', timeStyle: 'short' });
+  const color = daysLeft < 3 ? 'var(--red)' : daysLeft < 10 ? 'var(--amber)' : 'var(--text2)';
+  return `<span style="color:${color}">${dateStr} (${daysLeft >= 0 ? `en ${daysLeft}d` : 'vencido'})</span>`;
+}
+
+async function loadPsnStatus() {
+  const box = document.getElementById('psn-status');
+  box.innerHTML = '<div class="spinner"></div> Cargando...';
+  try {
+    const res = await fetch(`${API}/admin/psn/status`, { headers: headers() });
+    if (!res.ok) throw new Error();
+    const d = await res.json();
+    if (!d.configured) {
+      box.innerHTML = '<span style="color:var(--amber)">⚠ No configurado — pegá un NPSSO abajo para activarlo.</span>';
+      return;
+    }
+    box.innerHTML = `
+      <div>Access token vence: ${_fmtPsnDate(d.access_token_expires_at)}</div>
+      <div>Refresh token vence: ${_fmtPsnDate(d.refresh_token_expires_at)}</div>
+      <div style="font-size:11px; margin-top:4px">Última actualización: ${new Date(d.updated_at).toLocaleString('es-AR')}</div>
+    `;
+  } catch (e) {
+    box.innerHTML = '<span style="color:var(--red)">Error al consultar el estado</span>';
+  }
+}
+
+async function updatePsnToken() {
+  const npsso = document.getElementById('psn-npsso-input').value.trim();
+  const msg = document.getElementById('psn-msg');
+  if (!npsso) return;
+  msg.style.display = 'block';
+  msg.style.color = 'var(--text2)';
+  msg.textContent = 'Actualizando...';
+  try {
+    const res = await fetch(`${API}/admin/psn/bootstrap`, {
+      method: 'POST', headers: headers(), body: JSON.stringify({ npsso }),
+    });
+    const d = await res.json();
+    if (res.ok) {
+      msg.style.color = 'var(--green)';
+      msg.textContent = '✓ Tokens de PSN actualizados';
+      document.getElementById('psn-npsso-input').value = '';
+      loadPsnStatus();
+    } else {
+      msg.style.color = 'var(--red)';
+      msg.textContent = d.detail || 'Error al actualizar';
+    }
+  } catch (e) {
+    msg.style.color = 'var(--red)';
+    msg.textContent = 'Error de conexión';
+  }
 }
 
 async function loadMetrics() {
@@ -296,6 +375,7 @@ if (adminKey) {
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('app').style.display = 'block';
       loadUsers();
+      loadPsnStatus();
       return res.json().then(renderMetrics);
     } else {
       localStorage.removeItem('admin_key');
