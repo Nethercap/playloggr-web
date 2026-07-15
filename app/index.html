@@ -1069,6 +1069,16 @@
   </div>
 </div>
 
+<!-- Rating detail modal (calificacion por criterio) -->
+<div class="modal-overlay" id="rating-detail-overlay">
+  <div class="modal" style="max-width:400px">
+    <div id="rating-detail-body"></div>
+    <div style="text-align:right;margin-top:12px">
+      <button class="btn-cancel" onclick="closeRatingDetailModal()" data-i18n="close">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Verify Email Modal -->
 <div class="modal-overlay" id="verify-email-overlay">
   <div class="modal">
@@ -1310,6 +1320,9 @@ const I18N = {
     confirmDeleteGame: '¿Eliminar "{name}" del backlog?', noResults: 'Sin resultados',
     gameName: 'Nombre del juego', hoursPlayedLabel: 'Horas jugadas', yourRating: 'Tu calificación',
     unrated: 'Sin calificar', coverUrlOptional: 'URL de portada (opcional)',
+    rateByCriteria: 'Calificar por criterios', ratingGameplay: 'Jugabilidad', ratingStory: 'Historia',
+    ratingArt: 'Arte', ratingOptimization: 'Optimización', ratingGlobal: 'Global',
+    ratingGlobalHint: 'Esta es la única que se ve en la card — la fijás vos, no es un promedio automático.',
     syncing: 'Sincronizando...', cannotConnectBackend: 'No se pudo conectar con el backend.',
     backendUnavailable: 'Backend no disponible', retry: 'Reintentar',
     errorLoadingGames: 'Error al cargar los juegos', lastSync: 'última sync',
@@ -1422,6 +1435,9 @@ const I18N = {
     confirmDeleteGame: 'Delete "{name}" from your backlog?', noResults: 'No results',
     gameName: 'Game name', hoursPlayedLabel: 'Hours played', yourRating: 'Your rating',
     unrated: 'Unrated', coverUrlOptional: 'Cover URL (optional)',
+    rateByCriteria: 'Rate by criteria', ratingGameplay: 'Gameplay', ratingStory: 'Story',
+    ratingArt: 'Art', ratingOptimization: 'Optimization', ratingGlobal: 'Overall',
+    ratingGlobalHint: 'This is the only one shown on the card — you set it yourself, it\'s not an automatic average.',
     syncing: 'Syncing...', cannotConnectBackend: 'Could not connect to the backend.',
     backendUnavailable: 'Backend unavailable', retry: 'Retry',
     errorLoadingGames: 'Error loading games', lastSync: 'last sync',
@@ -1534,6 +1550,9 @@ const I18N = {
     confirmDeleteGame: 'Excluir "{name}" do backlog?', noResults: 'Sem resultados',
     gameName: 'Nome do jogo', hoursPlayedLabel: 'Horas jogadas', yourRating: 'Sua avaliação',
     unrated: 'Sem avaliação', coverUrlOptional: 'URL da capa (opcional)',
+    rateByCriteria: 'Avaliar por critério', ratingGameplay: 'Jogabilidade', ratingStory: 'História',
+    ratingArt: 'Arte', ratingOptimization: 'Otimização', ratingGlobal: 'Geral',
+    ratingGlobalHint: 'Esta é a única que aparece no card — você define manualmente, não é uma média automática.',
     syncing: 'Sincronizando...', cannotConnectBackend: 'Não foi possível conectar ao backend.',
     backendUnavailable: 'Backend indisponível', retry: 'Tentar novamente',
     errorLoadingGames: 'Erro ao carregar os jogos', lastSync: 'última sincronização',
@@ -1874,6 +1893,120 @@ async function setRating(gameId, value) {
   } catch(e) {}
 }
 
+// ── Calificacion por criterio (jugabilidad/historia/arte/optimizacion) ────
+// Popup con estrellas mas grandes que las de la card. La "global" es la
+// unica que se ve en la card y la fija el usuario a mano (no es un
+// promedio de las demas).
+const _detailRatingFields = {
+  gameplay:     'rating_gameplay',
+  story:        'rating_story',
+  art:          'rating_art',
+  optimization: 'rating_optimization',
+};
+
+function bigStarPickerHtml(gameId, criterion, currentRating) {
+  const stars = [];
+  for (let i = 1; i <= 5; i++) {
+    let fill = 'none';
+    if (currentRating >= i)            fill = 'full';
+    else if (currentRating >= i - 0.5) fill = 'half';
+    const amber = 'var(--amber)';
+    const gray  = '#d4d4d4';
+    let poly;
+    if (fill === 'full') {
+      poly = `<polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="${amber}"/>`;
+    } else if (fill === 'half') {
+      poly = `<defs><linearGradient id="hgd-${criterion}-${gameId}-${i}"><stop offset="50%" stop-color="${amber}"/><stop offset="50%" stop-color="${gray}"/></linearGradient></defs>
+              <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="url(#hgd-${criterion}-${gameId}-${i})"/>`;
+    } else {
+      poly = `<polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="${gray}"/>`;
+    }
+    stars.push(`<svg width="30" height="30" viewBox="0 0 24 24" style="cursor:pointer;flex-shrink:0" onclick="detailStarClick('${gameId}','${criterion}',${i},event)">${poly}</svg>`);
+  }
+  const label = currentRating > 0 ? currentRating + ' / 5' : t('unrated');
+  return `<span style="display:inline-flex;align-items:center;gap:3px">${stars.join('')}</span>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">${label}</div>`;
+}
+
+function ratingDetailModalBody(gameId) {
+  const g = allGames.find(x => x.id === gameId);
+  if (!g) return '';
+  const rows = [
+    ['gameplay',     t('ratingGameplay')     || 'Jugabilidad'],
+    ['story',        t('ratingStory')        || 'Historia'],
+    ['art',          t('ratingArt')          || 'Arte'],
+    ['optimization', t('ratingOptimization') || 'Optimización'],
+  ];
+  const rowsHtml = rows.map(([key, label]) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:14px;font-weight:500">${label}</span>
+      <div id="detail-stars-${key}-${gameId}" style="text-align:right">${bigStarPickerHtml(gameId, key, g[_detailRatingFields[key]] || 0)}</div>
+    </div>`).join('');
+  return `
+    <div style="font-weight:700;font-size:16px;margin-bottom:4px">${esc(g.name)}</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:8px">${t('rateByCriteria') || 'Calificar por criterios'}</div>
+    ${rowsHtml}
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0 4px;margin-top:4px">
+      <span style="font-size:14px;font-weight:700;color:var(--green)">${t('ratingGlobal') || 'Global'}</span>
+      <div id="detail-stars-global-${gameId}" style="text-align:right">${bigStarPickerHtml(gameId, 'global', g.user_rating || 0)}</div>
+    </div>
+    <div style="font-size:11px;color:var(--text2)">${t('ratingGlobalHint') || 'Esta es la única que se ve en la card — la fijás vos, no es un promedio automático.'}</div>`;
+}
+
+function openRatingDetailModal(gameId) {
+  const g = allGames.find(x => x.id === gameId);
+  if (!g) return;
+  document.getElementById('rating-detail-body').innerHTML = ratingDetailModalBody(gameId);
+  document.getElementById('rating-detail-overlay').classList.add('open');
+}
+
+function closeRatingDetailModal() {
+  document.getElementById('rating-detail-overlay').classList.remove('open');
+}
+
+document.getElementById('rating-detail-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('rating-detail-overlay')) closeRatingDetailModal();
+});
+
+function detailStarClick(gameId, criterion, starIndex, event) {
+  const rect  = event.currentTarget.getBoundingClientRect();
+  const value = (event.clientX - rect.left) < rect.width / 2 ? starIndex - 0.5 : starIndex;
+  const g = allGames.find(x => x.id === gameId);
+  if (!g) return;
+
+  if (criterion === 'global') {
+    const newVal = (g.user_rating === value) ? 0 : value;
+    setRating(gameId, newVal);
+    const container = document.getElementById(`detail-stars-global-${gameId}`);
+    if (container) container.innerHTML = bigStarPickerHtml(gameId, 'global', newVal);
+    return;
+  }
+
+  const field  = _detailRatingFields[criterion];
+  const newVal = (g[field] === value) ? 0 : value;
+  g[field] = newVal;
+  const container = document.getElementById(`detail-stars-${criterion}-${gameId}`);
+  if (container) container.innerHTML = bigStarPickerHtml(gameId, criterion, newVal);
+  saveDetailRating(gameId);
+}
+
+async function saveDetailRating(gameId) {
+  const g = allGames.find(x => x.id === gameId);
+  if (!g) return;
+  try {
+    await fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gameId)}/rating-detail`, {
+      method: "PATCH",
+      headers: {"Content-Type":"application/json","Authorization":`Bearer ${authToken}`},
+      body: JSON.stringify({
+        gameplay:     g.rating_gameplay     || 0,
+        story:        g.rating_story        || 0,
+        art:          g.rating_art          || 0,
+        optimization: g.rating_optimization || 0,
+      })
+    });
+  } catch(e) {}
+}
+
 function updateCommunityStatLocally(gameId, oldRating, newRating) {
   const el = document.getElementById(`community-${gameId}`);
   if (!el) return;
@@ -2078,7 +2211,7 @@ function gameCardHtml(g) {
         ${platBadge(g.platform)}
         ${scoreEl}
       </div>
-      ${g.status !== 'Deseados' ? `<div id="stars-${g.id}" style="margin-bottom:4px">${starPickerHtml(g.id, g.user_rating || 0)}</div>` : ''}
+      ${g.status !== 'Deseados' ? `<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px"><div id="stars-${g.id}">${starPickerHtml(g.id, g.user_rating || 0)}</div><button onclick="openRatingDetailModal('${g.id}')" title="${t('rateByCriteria') || 'Calificar por criterios'}" style="width:18px;height:18px;min-width:18px;border-radius:50%;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1;padding:0">+</button></div>` : ''}
       <div class="game-foot">
         ${g.status !== 'Deseados' ? (g.is_manual ? `<span style="cursor:pointer;text-decoration:underline dotted" data-gameid="${g.id}" data-hours="${g.hours_played}" onclick="editHoursById(this, event)" title="Editar horas"><i class="ti ti-clock" style="font-size:12px"></i>${hours}</span>` : `<span><i class="ti ti-clock" style="font-size:12px"></i>${hours}</span>`) : ''}
         ${g.status !== 'Deseados' ? lastPlayedEl : ''}
@@ -2185,7 +2318,7 @@ function renderGamesGrid(items) {
       </div>
       <div style="padding:8px">
         <div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(g.name)}">${esc(g.name)}</div>
-        ${g.status !== 'Deseados' ? `<div id="stars-${g.id}" style="margin:4px 0">${starPickerHtml(g.id, g.user_rating || 0)}</div>` : '<div style="height:8px"></div>'}
+        ${g.status !== 'Deseados' ? `<div style="display:flex;align-items:center;gap:4px;margin:4px 0"><div id="stars-${g.id}">${starPickerHtml(g.id, g.user_rating || 0)}</div><button onclick="openRatingDetailModal('${g.id}')" title="${t('rateByCriteria') || 'Calificar por criterios'}" style="width:16px;height:16px;min-width:16px;border-radius:50%;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;line-height:1;padding:0">+</button></div>` : '<div style="height:8px"></div>'}
         <select class="status-sel status-select" onchange="changeStatus('${g.id}',this.value)" style="width:100%;margin-bottom:6px">
           <option value="Jugando"      ${g.status==='Jugando'      ?'selected':''}>${statusLabel('Jugando')}</option>
           <option value="Completado"   ${g.status==='Completado'   ?'selected':''}>${statusLabel('Completado')}</option>
