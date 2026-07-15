@@ -184,7 +184,7 @@
       /* Colapsar idioma/stats/config/amigos/logros en el menu "..." */
       #lang-toggle-btn, #stats-icon-btn, #achievements-btn,
       .header-right > button[onclick="openConfigPanel()"],
-      #friends-btn { display:none !important; }
+      #friends-btn, #support-link, #logout-btn-header { display:none !important; }
       #header-more-btn { display:inline-flex !important; }
 
       .profile-panel { padding:8px 12px; gap:10px; }
@@ -382,7 +382,17 @@
         <i class="ti ti-trophy" style="font-size:14px"></i>
       </button>
 
-      <!-- Menu "..." (mobile): agrupa idioma/stats/config/amigos/logros -->
+      <!-- Support button -->
+      <a id="support-link" href="mailto:nether.appdev@gmail.com" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center" data-i18n-title="support" title="Soporte">
+        <i class="ti ti-lifebuoy" style="font-size:14px"></i>
+      </a>
+
+      <!-- Logout button -->
+      <button id="logout-btn-header" onclick="logout()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="logout" title="Salir">
+        <i class="ti ti-logout" style="font-size:14px"></i>
+      </button>
+
+      <!-- Menu "..." (mobile): agrupa idioma/stats/config/amigos/logros/soporte/salir -->
       <div style="position:relative;display:inline-block;margin-left:4px" id="header-more-wrap">
         <button onclick="toggleHeaderMoreMenu()" id="header-more-btn" style="padding:5px 10px;font-size:14px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer">
           <i class="ti ti-dots-vertical"></i>
@@ -393,6 +403,9 @@
           <button onclick="openConfigPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-settings" style="font-size:14px"></i> <span data-i18n="config">Configuración</span></button>
           <button onclick="openFriendsPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-users" style="font-size:14px"></i> <span data-i18n="friends">Amigos</span></button>
           <button onclick="openAchievementsPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-trophy" style="font-size:14px"></i> <span data-i18n="achievements">Logros</span></button>
+          <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
+          <a href="mailto:nether.appdev@gmail.com" class="steam-menu-item" style="text-decoration:none"><i class="ti ti-lifebuoy" style="font-size:14px"></i> <span data-i18n="support">Soporte</span></a>
+          <button onclick="logout()" class="steam-menu-item"><i class="ti ti-logout" style="font-size:14px"></i> <span data-i18n="logout">Salir</span></button>
         </div>
       </div>
 
@@ -7029,8 +7042,6 @@ async function onLoginSuccess() {
       </div>
       <div class="profile-panel-sub">
         <button id="header-upgrade-btn" onclick="startPaddleCheckout()" style="display:none;font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">✨ Hacerse Premium</button>
-        <a id="support-link" class="logout-btn" href="mailto:nether.appdev@gmail.com" style="text-decoration:none;display:inline-flex;align-items:center" data-i18n="support">Soporte</a>
-        <button class="logout-btn" onclick="logout()" data-i18n="logout">Salir</button>
       </div>
     </div>
     <div id="plat-status-row" style="display:flex;gap:6px;margin-left:auto"></div>
