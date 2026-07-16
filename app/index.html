@@ -423,6 +423,7 @@
                 onkeydown="if(event.key==='Enter') saveSteamId()" />
               <button onclick="saveSteamId()" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;white-space:nowrap" data-i18n="save">Guardar</button>
             </div>
+            <div style="font-size:10px;color:var(--text2);margin-top:4px">Lo encontrás en la URL de tu perfil de Steam o en "Detalles de la cuenta".</div>
             <div id="steam-id-current" style="font-size:10px;color:var(--text2);margin-top:4px"></div>
           </div>
           <!-- Actions -->
@@ -444,6 +445,36 @@
               <i class="ti ti-restore"></i> <span data-i18n="restoreWishlist">Restablecer deseados borrados</span>
             </button>
           </div>
+          <div style="padding:8px 14px;font-size:10px;color:var(--text2)">⚠ <span data-i18n="steamProfilePublicHint">Tu perfil de Steam debe ser público para sincronizar.</span></div>
+        </div>
+      </div>
+
+      <!-- PSN (beta) -->
+      <div style="position:relative;display:inline-block;margin-left:4px" id="psn-menu-wrap">
+        <button class="add-btn" onclick="togglePsnMenu()" id="psn-menu-btn">
+          <i class="ti ti-device-gamepad-2"></i> PSN ▾
+        </button>
+        <div id="psn-menu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:300;min-width:220px;box-shadow:0 4px 16px rgba(0,0,0,0.3);padding:4px 0">
+          <div id="psn-id-section" style="padding:10px 14px;border-bottom:0.5px solid var(--border)">
+            <div style="font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Online ID</div>
+            <div style="display:flex;gap:6px">
+              <input id="psn-id-input" type="text" placeholder="Tu Online ID de PSN..."
+                style="flex:1;padding:5px 8px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);min-width:0"
+                onkeydown="if(event.key==='Enter') savePsnId()" />
+              <button onclick="savePsnId()" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;white-space:nowrap" data-i18n="save">Guardar</button>
+            </div>
+            <div id="psn-id-current" style="font-size:10px;color:var(--text2);margin-top:4px"></div>
+          </div>
+          <div style="padding:4px 0">
+            <button onclick="syncPsnLibrary()" class="steam-menu-item">
+              <i class="ti ti-library"></i> <span data-i18n="syncLibrary">Sincronizar biblioteca</span>
+            </button>
+            <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
+            <button onclick="restoreDeletedPsn()" class="steam-menu-item">
+              <i class="ti ti-restore"></i> <span data-i18n="restoreLibrary">Restablecer biblioteca borrada</span>
+            </button>
+          </div>
+          <div style="padding:8px 14px;font-size:10px;color:var(--text2)">⚠ <span data-i18n="psnProfilePublicHint">Tu perfil de PSN debe tener "Juegos" visible públicamente.</span></div>
         </div>
       </div>
 
@@ -706,6 +737,7 @@
           <option value="Indie">Indie</option>
           <option value="Visual Novel">Visual Novel</option>
           <option value="Música/Ritmo">Música/Ritmo</option>
+          <option value="Survival">Survival</option>
         </select>
       </div>
     </div>
@@ -2259,7 +2291,22 @@ async function renderGames() {
   document.getElementById('count-label').textContent = `${items.length} ${t('of')} ${allGames.length} ${t('gamesLower')}`;
 
   if (!items.length) {
-    list.innerHTML = `<div class="empty"><i class="ti ti-mood-sad"></i>${t('noResults')}</div>`;
+    if (!allGames.length) {
+      const addFn = currentView === 'wishlist' ? 'openWishlistModal()' : 'openModal()';
+      const syncBtns = currentView === 'wishlist' ? '' : `
+            <button onclick="toggleSteamMenu()" class="add-btn" style="background:transparent;border:0.5px solid var(--border2);color:var(--text)"><i class="ti ti-brand-steam"></i> Sincronizar Steam</button>
+            <button onclick="togglePsnMenu()" class="add-btn" style="background:transparent;border:0.5px solid var(--border2);color:var(--text)"><i class="ti ti-device-gamepad-2"></i> Sincronizar PSN</button>`;
+      list.innerHTML = `
+        <div class="empty">
+          <i class="ti ti-mood-sad" style="font-size:32px;display:block;margin-bottom:10px"></i>
+          <div style="margin-bottom:14px">Agregá un juego o sincronizá Steam / PSN</div>
+          <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+            <button onclick="${addFn}" class="add-btn"><i class="ti ti-plus"></i> Agregar juego</button>${syncBtns}
+          </div>
+        </div>`;
+    } else {
+      list.innerHTML = `<div class="empty"><i class="ti ti-mood-sad"></i>${t('noResults')}</div>`;
+    }
     return;
   }
 
@@ -2400,20 +2447,20 @@ async function deleteGame(gameId) {
   }
 }
 
-const GENRES = ["Acción", "Aventura", "RPG", "FPS", "Estrategia", "Simulación", "Deportes", "Carreras", "Terror", "Roguelite", "Plataformas", "Puzzle", "Lucha", "Mundo Abierto", "Multijugador", "Indie", "Visual Novel", "Música/Ritmo"];
+const GENRES = ["Acción", "Aventura", "RPG", "FPS", "Estrategia", "Simulación", "Deportes", "Carreras", "Terror", "Roguelite", "Plataformas", "Puzzle", "Lucha", "Mundo Abierto", "Multijugador", "Indie", "Visual Novel", "Música/Ritmo", "Survival"];
 const GENRE_LABELS_EN = {
   'Acción': 'Action', 'Aventura': 'Adventure', 'RPG': 'RPG', 'FPS': 'FPS', 'Estrategia': 'Strategy',
   'Simulación': 'Simulation', 'Deportes': 'Sports', 'Carreras': 'Racing', 'Terror': 'Horror',
   'Roguelite': 'Roguelite', 'Plataformas': 'Platformer', 'Puzzle': 'Puzzle', 'Lucha': 'Fighting',
   'Mundo Abierto': 'Open World', 'Multijugador': 'Multiplayer', 'Indie': 'Indie',
-  'Visual Novel': 'Visual Novel', 'Música/Ritmo': 'Music/Rhythm',
+  'Visual Novel': 'Visual Novel', 'Música/Ritmo': 'Music/Rhythm', 'Survival': 'Survival',
 };
 const GENRE_LABELS_PT = {
   'Acción': 'Ação', 'Aventura': 'Aventura', 'RPG': 'RPG', 'FPS': 'FPS', 'Estrategia': 'Estratégia',
   'Simulación': 'Simulação', 'Deportes': 'Esportes', 'Carreras': 'Corrida', 'Terror': 'Terror',
   'Roguelite': 'Roguelite', 'Plataformas': 'Plataforma', 'Puzzle': 'Puzzle', 'Lucha': 'Luta',
   'Mundo Abierto': 'Mundo Aberto', 'Multijugador': 'Multijogador', 'Indie': 'Indie',
-  'Visual Novel': 'Visual Novel', 'Música/Ritmo': 'Música/Ritmo',
+  'Visual Novel': 'Visual Novel', 'Música/Ritmo': 'Música/Ritmo', 'Survival': 'Survival',
 };
 function genreLabel(g) {
   if (currentLang === 'en') return GENRE_LABELS_EN[g] || g;
@@ -4913,7 +4960,7 @@ async function saveSteamId() {
     const res = await fetch(`${apiBase()}/api/v1/settings`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ steam_api_key: '1CB4EDC704B6B23B9E48E84B137E3F66', steam_user_id: steamId }),
+      body: JSON.stringify({ steam_user_id: steamId }),
     });
     if (!res.ok) throw new Error();
     const cur = document.getElementById('steam-id-current');
@@ -5030,6 +5077,118 @@ async function restoreDeletedSteam(section) {
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="ti ti-brand-steam"></i> Steam ▾';
+    applyPremiumUI();
+  }
+}
+
+// ── PSN Menu (beta) ──────────────────────────────────────────────────────────
+
+let _psnMenuOpen = false;
+
+function togglePsnMenu() {
+  const menu = document.getElementById('psn-menu');
+  _psnMenuOpen = !_psnMenuOpen;
+  menu.style.display = _psnMenuOpen ? 'block' : 'none';
+  if (_psnMenuOpen) {
+    loadPsnIdIntoMenu();
+    setTimeout(() => {
+      document.addEventListener('mousedown', _closePsnMenuOutside);
+    }, 10);
+  }
+}
+
+function _closePsnMenuOutside(e) {
+  if (!document.getElementById('psn-menu-wrap')?.contains(e.target)) {
+    document.getElementById('psn-menu').style.display = 'none';
+    _psnMenuOpen = false;
+    document.removeEventListener('mousedown', _closePsnMenuOutside);
+  }
+}
+
+async function loadPsnIdIntoMenu() {
+  try {
+    const res  = await fetch(`${apiBase()}/api/v1/settings`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    const psnId = data.psn_online_id || '';
+    document.getElementById('psn-id-input').value = psnId;
+    const cur = document.getElementById('psn-id-current');
+    cur.textContent = psnId ? `Conectado: ${psnId}` : 'No conectado';
+    cur.style.color = psnId ? 'var(--green)' : 'var(--text2)';
+  } catch(e) {}
+}
+
+async function savePsnId() {
+  const input = document.getElementById('psn-id-input');
+  const id    = input.value.trim();
+  if (!id) return;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/settings`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ psn_online_id: id }),
+    });
+    if (!res.ok) throw new Error();
+    const cur = document.getElementById('psn-id-current');
+    cur.textContent = `✓ Guardado: ${id}`;
+    cur.style.color = 'var(--green)';
+  } catch(e) {
+    const cur = document.getElementById('psn-id-current');
+    cur.textContent = t('saveError');
+    cur.style.color = 'var(--red)';
+  }
+}
+
+async function syncPsnLibrary() {
+  document.getElementById('psn-menu').style.display = 'none';
+  _psnMenuOpen = false;
+  const btn = document.getElementById('psn-menu-btn');
+  btn.disabled = true;
+  btn.innerHTML = `<i class="ti ti-device-gamepad-2"></i> ${t('syncing')}`;
+  try {
+    const res  = await fetch(`${apiBase()}/api/v1/psn/sync-library`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error');
+    showToast(`✓ ${data.message}`);
+    await syncAll(1);
+    loadGlobalStats();
+    checkAchievements();
+  } catch(e) {
+    showToast(e.message || 'Error al sincronizar PSN', true);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-device-gamepad-2"></i> PSN ▾';
+    applyPremiumUI();
+  }
+}
+
+async function restoreDeletedPsn() {
+  document.getElementById('psn-menu').style.display = 'none';
+  _psnMenuOpen = false;
+  if (!confirm('¿Restablecer los juegos de PSN que borraste?')) return;
+  const btn = document.getElementById('psn-menu-btn');
+  btn.disabled = true;
+  btn.innerHTML = `<i class="ti ti-device-gamepad-2"></i> ${t('restoring')}`;
+  try {
+    const res  = await fetch(`${apiBase()}/api/v1/psn/restore-deleted`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error');
+    showToast(`✓ ${data.message}`);
+    syncAll(1);
+    loadGlobalStats();
+    checkAchievements();
+  } catch(e) {
+    showToast(e.message || 'Error al restablecer', true);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-device-gamepad-2"></i> PSN ▾';
     applyPremiumUI();
   }
 }
