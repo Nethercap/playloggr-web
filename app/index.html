@@ -2272,7 +2272,7 @@ function gameCardHtml(g) {
     <div class="game-status-col">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
         <div class="sdot s-${g.status}"></div>
-        <select class="status-sel status-select" onchange="changeStatus('${g.id}',this.value)">
+        <select class="status-sel status-select" onchange="changeStatus('${g.id}',this.value)" style="color:${STATUS_DOT_COLORS[g.status]||''}">
           <option value="Jugando"      ${g.status==='Jugando'      ?'selected':''}>${statusLabel('Jugando')}</option>
           <option value="Completado"   ${g.status==='Completado'   ?'selected':''}>${statusLabel('Completado')}</option>
           <option value="Backlog"      ${g.status==='Backlog'      ?'selected':''}>${statusLabel('Backlog')}</option>
@@ -2386,7 +2386,7 @@ function renderGamesGrid(items) {
       <div style="padding:8px">
         <div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(g.name)}">${esc(g.name)}</div>
         ${g.status !== 'Deseados' ? `<div style="display:flex;align-items:center;gap:4px;margin:4px 0"><div id="stars-${g.id}">${starPickerHtml(g.id, g.user_rating || 0)}</div><button onclick="openRatingDetailModal('${g.id}')" title="${t('rateByCriteria') || 'Calificar por criterios'}" style="width:16px;height:16px;min-width:16px;border-radius:50%;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;line-height:1;padding:0">+</button></div>` : '<div style="height:8px"></div>'}
-        <select class="status-sel status-select" onchange="changeStatus('${g.id}',this.value)" style="width:100%;margin-bottom:6px">
+        <select class="status-sel status-select" onchange="changeStatus('${g.id}',this.value)" style="width:100%;margin-bottom:6px;color:${STATUS_DOT_COLORS[g.status]||''}">
           <option value="Jugando"      ${g.status==='Jugando'      ?'selected':''}>${statusLabel('Jugando')}</option>
           <option value="Completado"   ${g.status==='Completado'   ?'selected':''}>${statusLabel('Completado')}</option>
           <option value="Backlog"      ${g.status==='Backlog'      ?'selected':''}>${statusLabel('Backlog')}</option>
@@ -3017,14 +3017,16 @@ async function changeStatus(gameId, newStatus) {
   const isWishlist  = newStatus === 'Deseados';
   if (g) g.status = newStatus;
 
-  // Update dot color immediately in DOM
-  const card = document.getElementById(`card-${gameId}`);
+  // Update dot + status-select color immediately in DOM (lista o cuadricula)
+  const card = document.getElementById(`card-${gameId}`) || document.getElementById(`gridcard-${gameId}`);
   if (card) {
     const dot = card.querySelector('.sdot');
     if (dot) {
       dot.className = `sdot s-${newStatus}`;
       dot.style.background = STATUS_DOT_COLORS[newStatus] || '#888';
     }
+    const sel = card.querySelector('.status-select');
+    if (sel) sel.style.color = STATUS_DOT_COLORS[newStatus] || '';
   }
 
   // Move card between sections seamlessly
