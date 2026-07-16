@@ -2273,12 +2273,7 @@ function gameCardHtml(g) {
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
         <div class="sdot s-${g.status}"></div>
         <select class="status-sel status-select" onchange="changeStatus('${g.id}',this.value)" style="color:${STATUS_DOT_COLORS[g.status]||''}">
-          <option value="Jugando"      ${g.status==='Jugando'      ?'selected':''}>${statusLabel('Jugando')}</option>
-          <option value="Completado"   ${g.status==='Completado'   ?'selected':''}>${statusLabel('Completado')}</option>
-          <option value="Backlog"      ${g.status==='Backlog'      ?'selected':''}>${statusLabel('Backlog')}</option>
-          <option value="Abandonado"   ${g.status==='Abandonado'   ?'selected':''}>${statusLabel('Abandonado')}</option>
-          <option value="Intermitente" ${g.status==='Intermitente' ?'selected':''}>${statusLabel('Intermitente')}</option>
-          <option value="Deseados"     ${g.status==='Deseados'     ?'selected':''}>${statusLabel('Deseados')}</option>
+          ${statusOptionsHtml(g.status)}
         </select>
       </div>
       <select class="genre-sel genre-select" data-gid="${g.id}" onchange="changeGenre('${g.id}',this.value)" style="font-size:11px;margin-bottom:4px;width:100%;padding:2px 4px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text2)">
@@ -2387,12 +2382,7 @@ function renderGamesGrid(items) {
         <div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(g.name)}">${esc(g.name)}</div>
         ${g.status !== 'Deseados' ? `<div style="display:flex;align-items:center;gap:4px;margin:4px 0"><div id="stars-${g.id}">${starPickerHtml(g.id, g.user_rating || 0)}</div><button onclick="openRatingDetailModal('${g.id}')" title="${t('rateByCriteria') || 'Calificar por criterios'}" style="width:16px;height:16px;min-width:16px;border-radius:50%;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;line-height:1;padding:0">+</button></div>` : '<div style="height:8px"></div>'}
         <select class="status-sel status-select" onchange="changeStatus('${g.id}',this.value)" style="width:100%;margin-bottom:6px;color:${STATUS_DOT_COLORS[g.status]||''}">
-          <option value="Jugando"      ${g.status==='Jugando'      ?'selected':''}>${statusLabel('Jugando')}</option>
-          <option value="Completado"   ${g.status==='Completado'   ?'selected':''}>${statusLabel('Completado')}</option>
-          <option value="Backlog"      ${g.status==='Backlog'      ?'selected':''}>${statusLabel('Backlog')}</option>
-          <option value="Abandonado"   ${g.status==='Abandonado'   ?'selected':''}>${statusLabel('Abandonado')}</option>
-          <option value="Intermitente" ${g.status==='Intermitente' ?'selected':''}>${statusLabel('Intermitente')}</option>
-          <option value="Deseados"     ${g.status==='Deseados'     ?'selected':''}>${statusLabel('Deseados')}</option>
+          ${statusOptionsHtml(g.status)}
         </select>
         <div style="display:flex;align-items:center;justify-content:space-between">
           ${g.status !== 'Deseados' ? (g.is_manual ? `<span style="font-size:11px;color:var(--text2);cursor:pointer;text-decoration:underline dotted" data-gameid="${g.id}" data-hours="${g.hours_played}" onclick="editHoursById(this, event)" title="Editar horas"><i class="ti ti-clock" style="font-size:11px"></i> ${hours}</span>` : `<span style="font-size:11px;color:var(--text2)"><i class="ti ti-clock" style="font-size:11px"></i> ${hours}</span>`) : '<span></span>'}
@@ -3010,6 +3000,14 @@ const STATUS_DOT_COLORS = {
   'Backlog':      '#888780',
   'Deseados':     '#EF9F27',
 };
+
+// Cada <option> con su propio color (no el del status seleccionado, que
+// es lo que hereda el <select> — sin esto todas las opciones del
+// desplegable se veian con el mismo color que el estado actual).
+function statusOptionsHtml(current) {
+  const order = ['Jugando', 'Completado', 'Backlog', 'Abandonado', 'Intermitente', 'Deseados'];
+  return order.map(s => `<option value="${s}" ${current === s ? 'selected' : ''} style="color:${STATUS_DOT_COLORS[s]};background:var(--bg2)">${statusLabel(s)}</option>`).join('');
+}
 
 async function changeStatus(gameId, newStatus) {
   const g = allGames.find(x => x.id === gameId);
