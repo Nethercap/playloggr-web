@@ -610,6 +610,8 @@
         style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px" data-i18n="globalTab">Global</button>
       <button id="stab-lastplayed" onclick="switchStatsTab('lastplayed')"
         style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px" data-i18n="lastPlayed">Última vez jugado</button>
+      <button id="stab-period" onclick="switchStatsTab('period')"
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px" data-i18n="periodTab">Semana/Mes</button>
     </div>
     <div id="stats-user-tab" style="padding:16px;max-width:720px;width:100%;margin:0 auto;box-sizing:border-box">
       <div id="stats-user-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
@@ -619,6 +621,15 @@
     </div>
     <div id="stats-lastplayed-tab" style="display:none;padding:16px;max-width:720px;width:100%;margin:0 auto;box-sizing:border-box">
       <div id="stats-lastplayed-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
+    </div>
+    <div id="stats-period-tab" style="display:none;padding:16px;max-width:720px;width:100%;margin:0 auto;box-sizing:border-box">
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button id="ptab-week" onclick="switchPeriodType('week')"
+          style="padding:5px 14px;font-size:12px;border-radius:16px;border:0.5px solid var(--green);background:var(--bg2);color:var(--green);cursor:pointer;font-weight:600" data-i18n="periodWeek">Semana</button>
+        <button id="ptab-month" onclick="switchPeriodType('month')"
+          style="padding:5px 14px;font-size:12px;border-radius:16px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n="periodMonth">Mes</button>
+      </div>
+      <div id="stats-period-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
     </div>
   </div>
 
@@ -1257,6 +1268,10 @@
         <label data-i18n="hoursPlayedLabel">Horas jugadas</label>
         <input type="number" id="m-hours" value="0" min="0" step="0.5" />
       </div>
+      <div class="modal-group">
+        <label data-i18n="genre">Género</label>
+        <select id="m-genre" class="genre-select"></select>
+      </div>
       <div class="modal-group full">
         <label data-i18n="yourRating">Tu calificación</label>
         <div id="modal-stars" style="display:flex;gap:3px;margin-top:4px"></div>
@@ -1326,6 +1341,12 @@ const I18N = {
     continueBtn: 'Continuar', newFolder: 'Nueva carpeta', create: 'Crear', addToFolder: 'Agregar a carpeta',
     hoursPlayed: 'Horas jugadas',
     lastPlayed: 'Última vez jugado', clearDate: 'Borrar fecha', noLastPlayedData: 'No hay juegos con fecha cargada en este rango',
+    periodTab: 'Semana/Mes', periodWeek: 'Semana', periodMonth: 'Mes',
+    periodLastWeek: 'Última semana', periodLastMonth: 'Último mes',
+    periodNoData: 'Todavía no hay datos para este período', periodNoStatusChanges: 'Sin cambios de estado',
+    periodTotalHours: 'Horas jugadas totales', periodByStatus: 'Cambios de estado',
+    periodByPlatform: 'Horas por plataforma', periodByGame: 'Horas por juego',
+    periodGlobalRanking: 'Más jugados globalmente',
     lpClickBarHint: 'Haga click en el grupo de columna para mostrar detalle',
     verifyEmailTitle: 'Confirmá tu cuenta', verifyEmailHint: 'Te enviamos un código de 6 dígitos a tu email. Ingresalo para activar tu cuenta.',
     verifyCodeLabel: 'Código de verificación', resendCode: 'Reenviar código', verifyAndContinue: 'Verificar',
@@ -1443,6 +1464,12 @@ const I18N = {
     continueBtn: 'Continue', newFolder: 'New folder', create: 'Create', addToFolder: 'Add to folder',
     hoursPlayed: 'Hours played',
     lastPlayed: 'Last played', clearDate: 'Clear date', noLastPlayedData: 'No games with a date set in this range',
+    periodTab: 'Week/Month', periodWeek: 'Week', periodMonth: 'Month',
+    periodLastWeek: 'Last week', periodLastMonth: 'Last month',
+    periodNoData: 'No data yet for this period', periodNoStatusChanges: 'No status changes',
+    periodTotalHours: 'Total hours played', periodByStatus: 'Status changes',
+    periodByPlatform: 'Hours by platform', periodByGame: 'Hours by game',
+    periodGlobalRanking: 'Most played globally',
     lpClickBarHint: 'Click a column group to see detail',
     verifyEmailTitle: 'Confirm your account', verifyEmailHint: 'We sent a 6-digit code to your email. Enter it to activate your account.',
     verifyCodeLabel: 'Verification code', resendCode: 'Resend code', verifyAndContinue: 'Verify',
@@ -1560,6 +1587,12 @@ const I18N = {
     continueBtn: 'Continuar', newFolder: 'Nova pasta', create: 'Criar', addToFolder: 'Adicionar à pasta',
     hoursPlayed: 'Horas jogadas',
     lastPlayed: 'Última vez jogado', clearDate: 'Apagar data', noLastPlayedData: 'Nenhum jogo com data nesse período',
+    periodTab: 'Semana/Mês', periodWeek: 'Semana', periodMonth: 'Mês',
+    periodLastWeek: 'Última semana', periodLastMonth: 'Último mês',
+    periodNoData: 'Ainda não há dados para este período', periodNoStatusChanges: 'Sem mudanças de status',
+    periodTotalHours: 'Horas jogadas totais', periodByStatus: 'Mudanças de status',
+    periodByPlatform: 'Horas por plataforma', periodByGame: 'Horas por jogo',
+    periodGlobalRanking: 'Mais jogados globalmente',
     lpClickBarHint: 'Clique num grupo de colunas para ver detalhes',
     verifyEmailTitle: 'Confirme sua conta', verifyEmailHint: 'Enviamos um código de 6 dígitos para o seu email. Digite-o para ativar sua conta.',
     verifyCodeLabel: 'Código de verificação', resendCode: 'Reenviar código', verifyAndContinue: 'Verificar',
@@ -3262,7 +3295,8 @@ function switchStatsTab(tab) {
   document.getElementById('stats-user-tab').style.display       = tab === 'user'       ? '' : 'none';
   document.getElementById('stats-global-tab').style.display     = tab === 'global'     ? '' : 'none';
   document.getElementById('stats-lastplayed-tab').style.display  = tab === 'lastplayed' ? '' : 'none';
-  ['user','global','lastplayed'].forEach(t => {
+  document.getElementById('stats-period-tab').style.display     = tab === 'period'     ? '' : 'none';
+  ['user','global','lastplayed','period'].forEach(t => {
     const btn = document.getElementById(`stab-${t}`);
     if (!btn) return;
     btn.style.color       = t === tab ? 'var(--green)' : 'var(--text2)';
@@ -3272,6 +3306,111 @@ function switchStatsTab(tab) {
   if (tab === 'user')       loadUserStats();
   if (tab === 'global')     loadGlobalRankings();
   if (tab === 'lastplayed') loadLastPlayedStats();
+  if (tab === 'period')     loadPeriodStats();
+}
+
+// ── Stats: resumen semanal/mensual ──────────────────────────────────────
+let currentPeriodType = 'week';
+
+function switchPeriodType(pt) {
+  currentPeriodType = pt;
+  ['week','month'].forEach(p => {
+    const btn = document.getElementById(`ptab-${p}`);
+    btn.style.color       = p === pt ? 'var(--green)' : 'var(--text2)';
+    btn.style.borderColor = p === pt ? 'var(--green)' : 'var(--border)';
+    btn.style.fontWeight  = p === pt ? '600' : 'normal';
+  });
+  loadPeriodStats();
+}
+
+async function loadPeriodStats() {
+  const el = document.getElementById('stats-period-content');
+  el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>${t('loading')}</div>`;
+  try {
+    const [ownRes, globalRes] = await Promise.all([
+      fetch(`${apiBase()}/api/v1/stats/period-summary?period_type=${currentPeriodType}`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      }),
+      fetch(`${apiBase()}/api/v1/stats/period-global-ranking?period_type=${currentPeriodType}`),
+    ]);
+    const own = await ownRes.json();
+    const glob = await globalRes.json();
+    renderPeriodStats(own, glob);
+  } catch (e) {
+    el.innerHTML = `<div class="empty"><i class="ti ti-mood-sad"></i>${t('errorLoadingStats')}</div>`;
+  }
+}
+
+function renderPeriodStats(own, glob) {
+  const el = document.getElementById('stats-period-content');
+  const periodLabel = currentPeriodType === 'week' ? t('periodLastWeek') : t('periodLastMonth');
+
+  if (!own.has_data) {
+    el.innerHTML = `<div class="empty"><i class="ti ti-calendar-time"></i>${t('periodNoData')}</div>`;
+    return;
+  }
+
+  const range = `${own.period_start} → ${own.period_end}`;
+
+  const statusRows = Object.entries(own.status_changes || {}).map(([k, count]) => {
+    const [from, to] = k.split('->');
+    return `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;font-size:13px">
+      <span style="color:${STATUS_DOT_COLORS[from] || 'var(--text2)'}">${statusLabel(from)}</span>
+      <i class="ti ti-arrow-right" style="color:var(--text2);font-size:12px"></i>
+      <span style="color:${STATUS_DOT_COLORS[to] || 'var(--text2)'}">${statusLabel(to)}</span>
+      <span style="color:var(--text2);margin-left:auto">${count}</span>
+    </div>`;
+  }).join('') || `<div style="color:var(--text2);font-size:13px">${t('periodNoStatusChanges')}</div>`;
+
+  const platformRows = Object.entries(own.hours_by_platform || {})
+    .sort((a, b) => b[1] - a[1])
+    .map(([plat, hrs]) => `<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px">
+      <span>${plat}</span><span style="color:var(--text2)">${hrs}hs</span>
+    </div>`).join('') || `<div style="color:var(--text2);font-size:13px">—</div>`;
+
+  const gameRows = Object.entries(own.hours_by_game || {})
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, hrs]) => `<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px">
+      <span>${name}</span><span style="color:var(--text2)">${hrs}hs</span>
+    </div>`).join('') || `<div style="color:var(--text2);font-size:13px">—</div>`;
+
+  const globalRows = (glob.has_data ? glob.games : []).slice(0, 10).map((g, i) => `
+    <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px">
+      <span>${i + 1}. ${g.name}</span>
+      <span style="color:var(--text2)">${g.total_hours}hs · ${g.players_count} 🎮</span>
+    </div>`).join('') || `<div style="color:var(--text2);font-size:13px">${t('periodNoData')}</div>`;
+
+  el.innerHTML = `
+    <div style="margin-bottom:18px">
+      <div style="font-size:14px;font-weight:600;margin-bottom:2px">${periodLabel}</div>
+      <div style="font-size:12px;color:var(--text2)">${range}</div>
+    </div>
+
+    <div class="stat-card" style="margin-bottom:16px">
+      <div style="font-size:12px;color:var(--text2)" data-i18n="periodTotalHours">Horas jugadas totales</div>
+      <div style="font-size:26px;font-weight:700">${own.total_hours}hs</div>
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:6px" data-i18n="periodByStatus">Cambios de estado</div>
+      ${statusRows}
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:6px" data-i18n="periodByPlatform">Horas por plataforma</div>
+      ${platformRows}
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:6px" data-i18n="periodByGame">Horas por juego</div>
+      ${gameRows}
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:6px" data-i18n="periodGlobalRanking">Más jugados globalmente</div>
+      ${globalRows}
+    </div>
+  `;
 }
 
 // ── Stats: última vez jugado (drill-down año > mes > día) ───────────────────
@@ -5446,6 +5585,7 @@ function openModal() {
   document.getElementById('m-hours').value    = '0';
   document.getElementById('m-cover').value    = '';
   document.getElementById('m-appid').value    = '';
+  document.getElementById('m-genre').innerHTML = genreOptions('');
   document.getElementById('steam-search-results').style.display = 'none';
   const mhg = document.getElementById('m-hours-group'); if (mhg) mhg.style.display = '';
   renderModalStars();
@@ -5481,6 +5621,7 @@ async function submitGame() {
   const status   = document.getElementById('m-status').value;
   const hours    = parseFloat(document.getElementById('m-hours').value) || 0;
   const cover    = document.getElementById('m-cover').value.trim();
+  const genre    = document.getElementById('m-genre').value;
 
   if (!name) { alert(t('enterGameName')); return; }
 
@@ -5496,6 +5637,7 @@ async function submitGame() {
     cover_url: cover || coverDefault,
     user_rating: modalStarVal,
     app_id: appid || null,
+    genre: genre || null,
   };
 
   try {
