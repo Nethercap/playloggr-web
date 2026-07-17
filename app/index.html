@@ -1147,6 +1147,16 @@
 </div>
 
 <!-- Rating detail modal (calificacion por criterio) -->
+<div class="modal-overlay" id="accessible-edit-overlay">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-title" style="font-size:18px"><i class="ti ti-zoom-in" style="color:#1D9E75"></i> <span id="accessible-edit-title"></span></div>
+    <div id="accessible-edit-body" style="font-size:16px"></div>
+    <div style="text-align:right;margin-top:16px">
+      <button class="btn-cancel" onclick="closeAccessibleEditModal()" style="font-size:15px;padding:8px 18px" data-i18n="close">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="rating-detail-overlay">
   <div class="modal" style="max-width:400px">
     <div id="rating-detail-body"></div>
@@ -1377,7 +1387,7 @@ const I18N = {
     periodTotalHours: 'Horas jugadas totales', periodByStatus: 'Cambios de estado',
     periodByPlatform: 'Horas por plataforma', periodByGame: 'Horas por juego',
     periodGlobalRanking: 'Más jugados globalmente',
-    ok: 'Entendido', announcementDefaultTitle: 'Aviso',
+    ok: 'Entendido', announcementDefaultTitle: 'Aviso', accessibleEdit: 'Editar (modo accesible)',
     notifications: 'Notificaciones', markAllRead: 'Marcar como leídas',
     pendingFriendRequests: 'solicitudes de amistad pendientes',
     newPeriodSummaryAvailable: 'Nuevo resumen de período disponible',
@@ -2122,6 +2132,136 @@ function ratingDetailModalBody(gameId) {
     <div style="font-size:11px;color:var(--text2)">${t('ratingGlobalHint') || 'Esta es la única que se ve en la card — la fijás vos, no es un promedio automático.'}</div>`;
 }
 
+// ── Modal accesible de edicion rapida (lupa / doble click-tap) ─────────────
+
+function accessibleEditModalBody(gameId) {
+  const g = allGames.find(x => x.id === gameId);
+  if (!g) return '';
+  const isManual = !!g.is_manual;
+  const disabledAttr = isManual ? '' : 'disabled';
+  const fieldStyle = 'width:100%;font-size:16px;padding:10px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text)';
+  const labelStyle = 'display:block;font-size:14px;color:var(--text2);margin-bottom:6px';
+
+  let html = '';
+  if (g.status !== 'Deseados') {
+    html += `
+      <div style="margin-bottom:16px">
+        <label style="${labelStyle}">${t('hoursPlayedLabel') || 'Horas jugadas'}</label>
+        <input type="number" id="ae-hours" value="${g.hours_played || 0}" min="0" step="0.5" style="${fieldStyle}" ${disabledAttr} />
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="${labelStyle}">${t('lastPlayed') || 'Última vez jugado'}</label>
+        <input type="date" id="ae-lastplayed" value="${g.last_played || ''}" style="${fieldStyle}" ${disabledAttr} />
+      </div>`;
+  }
+  html += `
+    <div style="margin-bottom:16px">
+      <label style="${labelStyle}">${t('platform') || 'Plataforma'}</label>
+      <select id="ae-platform" style="${fieldStyle}" ${disabledAttr}>${platformOptionsHtml(g.platform)}</select>
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="${labelStyle}">${t('genre') || 'Género'}</label>
+      <select id="ae-genre" style="${fieldStyle}">${genreOptions(g.genre)}</select>
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="${labelStyle}">${t('status') || 'Estado'}</label>
+      <select id="ae-status" style="${fieldStyle};color:${STATUS_DOT_COLORS[g.status]||''}">${statusOptionsHtml(g.status)}</select>
+    </div>
+    <button onclick="closeAccessibleEditModal();openCardFolderPicker('${gameId}')"
+      style="width:100%;padding:11px;font-size:15px;border-radius:8px;border:0.5px solid var(--border2);background:transparent;color:var(--text);cursor:pointer;margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:6px">
+      <i class="ti ti-folder-plus"></i> ${t('folder') || 'Carpeta'}
+    </button>
+    <div style="display:flex;gap:10px">
+      <button onclick="toggleHideGame('${gameId}', ${!!g.hidden});closeAccessibleEditModal()"
+        style="flex:1;padding:11px;font-size:15px;border-radius:8px;border:0.5px solid var(--border2);background:transparent;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+        <i class="ti ${g.hidden ? 'ti-eye' : 'ti-eye-off'}"></i> ${g.hidden ? (t('showGame')||'Mostrar') : (t('hideGame')||'Ocultar')}
+      </button>
+      <button onclick="closeAccessibleEditModal();deleteGame('${gameId}')"
+        style="flex:1;padding:11px;font-size:15px;border-radius:8px;border:0.5px solid #E24B4A;background:transparent;color:#E24B4A;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+        <i class="ti ti-trash"></i> ${t('delete') || 'Borrar'}
+      </button>
+    </div>`;
+  return html;
+}
+
+async function aeSaveHours(gameId, hours) {
+  const g = allGames.find(x => x.id === gameId);
+  if (g) g.hours_played = hours;
+  renderGames();
+  try {
+    await fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gameId)}/hours`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hours_played: hours }),
+    });
+    loadGlobalStats();
+  } catch(e) {}
+}
+
+async function aeSaveLastPlayed(gameId, date) {
+  const g = allGames.find(x => x.id === gameId);
+  if (g) g.last_played = date || null;
+  renderGames();
+  try {
+    await fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gameId)}/last-played`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ date: date || null }),
+    });
+  } catch(e) {}
+}
+
+async function aeSavePlatform(gameId, platform) {
+  const g = allGames.find(x => x.id === gameId);
+  if (g) g.platform = platform;
+  renderGames();
+  try {
+    await fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gameId)}/platform`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ platform }),
+    });
+  } catch(e) {}
+}
+
+function handleCardDoubleTap(gameId, event) {
+  // No abrir si el doble click/toque fue sobre un control interactivo
+  // (boton, select, input, link) dentro de la card.
+  if (event.target.closest('button, select, a, input, textarea')) return;
+  openAccessibleEditModal(gameId);
+}
+
+function openAccessibleEditModal(gameId) {
+  const g = allGames.find(x => x.id === gameId);
+  if (!g) return;
+  document.getElementById('accessible-edit-title').textContent = g.name;
+  document.getElementById('accessible-edit-body').innerHTML = accessibleEditModalBody(gameId);
+  document.getElementById('accessible-edit-overlay').classList.add('open');
+
+  const hoursEl = document.getElementById('ae-hours');
+  if (hoursEl && !hoursEl.disabled) hoursEl.addEventListener('change', () => aeSaveHours(gameId, parseFloat(hoursEl.value) || 0));
+
+  const lpEl = document.getElementById('ae-lastplayed');
+  if (lpEl && !lpEl.disabled) lpEl.addEventListener('change', () => aeSaveLastPlayed(gameId, lpEl.value));
+
+  const platEl = document.getElementById('ae-platform');
+  if (platEl && !platEl.disabled) platEl.addEventListener('change', () => aeSavePlatform(gameId, platEl.value));
+
+  const genreEl = document.getElementById('ae-genre');
+  if (genreEl) genreEl.addEventListener('change', () => changeGenre(gameId, genreEl.value));
+
+  const statusEl = document.getElementById('ae-status');
+  if (statusEl) statusEl.addEventListener('change', () => changeStatus(gameId, statusEl.value));
+}
+
+function closeAccessibleEditModal() {
+  document.getElementById('accessible-edit-overlay').classList.remove('open');
+}
+
+document.getElementById('accessible-edit-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('accessible-edit-overlay')) closeAccessibleEditModal();
+});
+
 function openRatingDetailModal(gameId) {
   const g = allGames.find(x => x.id === gameId);
   if (!g) return;
@@ -2369,7 +2509,7 @@ function gameCardHtml(g) {
     : '';
   const communityStyle = cs ? 'display:inline-flex' : 'display:none';
 
-  return `<div class="game-card" id="card-${g.id}">
+  return `<div class="game-card" id="card-${g.id}" ondblclick="handleCardDoubleTap('${g.id}', event)">
     <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0">
       <div class="game-cover" data-gid="${g.id}" onclick="openCoverEditFromCard(this)" style="cursor:pointer;position:relative" title="Click para cambiar portada">${cover}<div class="cover-edit-hint" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);opacity:0;transition:opacity 0.15s;font-size:18px">✏️</div></div>
       <button class="play-btn" data-gid="${g.id}" onclick="togglePlaySession('${g.id}')" title="Registrar sesión de juego"
@@ -2399,6 +2539,7 @@ function gameCardHtml(g) {
       </select>
       <div style="display:flex;align-items:center;gap:4px">
         <button onclick="openCardFolderPicker('${g.id}')" title="Agregar a carpeta" style="font-size:11px;padding:2px 8px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer"><i class="ti ti-folder-plus" style="font-size:11px"></i></button>
+        <button onclick="openAccessibleEditModal('${g.id}')" title="${t('accessibleEdit') || 'Editar (modo accesible)'}" style="font-size:12px;padding:2px 8px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer"><i class="ti ti-zoom-in" style="font-size:12px"></i></button>
         <button onclick="toggleGameActionsMenu('${g.id}', ${g.hidden}, event)" title="Más opciones" style="font-size:12px;padding:2px 8px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-weight:700">+</button>
       </div>
     </div>
@@ -2489,7 +2630,7 @@ function renderGamesGrid(items) {
   list.innerHTML = items.map(g => {
     const hours = g.hours_played != null ? `${parseFloat(g.hours_played).toFixed(1)} hs` : '— hs';
     const cover = steamCoverHtml(g, 'width:100%;height:100%;object-fit:cover');
-    return `<div class="lib-grid-tile" id="gridcard-${g.id}">
+    return `<div class="lib-grid-tile" id="gridcard-${g.id}" ondblclick="handleCardDoubleTap('${g.id}', event)">
       <div style="position:relative">
         <div style="width:100%;aspect-ratio:2/3;background:var(--bg3);overflow:hidden">${cover}</div>
         <div style="position:absolute;top:6px;left:6px">${platIconOnly(g.platform)}</div>
@@ -2595,6 +2736,15 @@ function statusLabel(s) {
   if (currentLang === 'en') return STATUS_LABELS_EN[s] || s;
   if (currentLang === 'pt') return STATUS_LABELS_PT[s] || s;
   return s;
+}
+
+const PLATFORM_LIST = ['Steam','Epic','EA Play','Windows PC','Mac iOS','PlayStation 5','PlayStation 4',
+  'PlayStation 3','PlayStation 2','PlayStation 1','PSP Vita','XBOX X','XBOX S','XBOX PC','XBOX 360','XBOX One',
+  'Nintendo Switch 1','Nintendo Switch 2','Nintendo 3DS','Nintendo 64','Nintendo Gamecube','Game Boy',
+  'Game Boy Advance','SNES','Sega Genesis','Sega Dreamcast','Meta Quest','Android','iOS'];
+
+function platformOptionsHtml(selected) {
+  return PLATFORM_LIST.map(p => `<option value="${p}"${p === selected ? ' selected' : ''}>${p}</option>`).join('');
 }
 
 function genreOptions(selected) {
