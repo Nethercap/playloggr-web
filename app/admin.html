@@ -474,6 +474,7 @@ if (adminKey) {
       document.getElementById('app').style.display = 'block';
       loadUsers();
       loadPsnStatus();
+      loadAnnouncements();
       return res.json().then(renderMetrics);
     } else {
       localStorage.removeItem('admin_key');
