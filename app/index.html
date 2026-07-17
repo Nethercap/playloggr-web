@@ -211,6 +211,8 @@
       /* El boton de agregar pasa a ser flotante (FAB), como en la app */
       #add-game-btn-wrap { display:none !important; }
       .fab-add-btn { display:flex !important; }
+      /* Espacio libre abajo para que el FAB no tape la ultima fila (ocultar/borrar) */
+      #game-list { padding-bottom:76px; }
 
       #search-input { flex:1; width:auto; }
     }
@@ -5104,10 +5106,19 @@ function _closeSteamMenuOutside(e) {
 let _headerMoreOpen = false;
 function toggleHeaderMoreMenu() {
   const menu = document.getElementById('header-more-menu');
+  const btn  = document.getElementById('header-more-btn');
   _headerMoreOpen = !_headerMoreOpen;
-  menu.style.display = _headerMoreOpen ? 'block' : 'none';
   if (_headerMoreOpen) {
+    // El header es horizontalmente scrolleable en mobile — anclar el
+    // dropdown con CSS (position:absolute + right:0) queda mal ubicado
+    // segun el scroll. Se posiciona con coordenadas reales de pantalla,
+    // igual que los demas popups (_positionFixedPopup).
+    menu.style.display = 'block';
+    menu.style.right = 'auto';
+    _positionFixedPopup(menu, btn);
     setTimeout(() => document.addEventListener('mousedown', _closeHeaderMoreOutside), 10);
+  } else {
+    menu.style.display = 'none';
   }
 }
 
