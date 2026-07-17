@@ -117,6 +117,41 @@
 
   <div class="card">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
+      <strong>Anuncios (popup para usuarios)</strong>
+    </div>
+    <p style="font-size:11px; color:var(--text2); margin-bottom:12px">
+      Se muestra como popup en la web y la app a todos los usuarios que todavía no lo vieron. Solo puede haber uno activo — al publicar uno nuevo se desactiva el anterior.
+    </p>
+    <div id="announcement-active-box" style="font-size:12px; color:var(--text2); margin-bottom:12px">
+      <div class="spinner"></div> Cargando...
+    </div>
+    <div class="row">
+      <div>
+        <label>Título (opcional)</label>
+        <input type="text" id="announcement-title" placeholder="Ej: Mantenimiento programado" />
+      </div>
+    </div>
+    <div style="margin-top:8px">
+      <label>Mensaje</label>
+      <textarea id="announcement-message" rows="3" placeholder="Escribí el aviso para los usuarios..."
+        style="font-size:13px; padding:8px 10px; border-radius:8px; border:0.5px solid var(--border2); background:var(--bg3); color:var(--text); width:100%; font-family:inherit; resize:vertical"></textarea>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn-primary" onclick="publishAnnouncement()">Publicar</button>
+    </div>
+    <div class="msg" id="announcement-msg"></div>
+    <div class="table-wrap" style="margin-top:14px">
+      <table>
+        <thead><tr><th>Título</th><th>Mensaje</th><th>Estado</th><th>Fecha</th><th></th></tr></thead>
+        <tbody id="announcements-tbody">
+          <tr><td colspan="5" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
       <strong>Usuarios totales</strong>
     </div>
     <div class="row">
@@ -160,6 +195,7 @@ async function tryLogin() {
     renderMetrics(await res.json());
     loadUsers();
     loadPsnStatus();
+    loadAnnouncements();
   } else {
     document.getElementById('login-err').style.display = 'block';
   }
@@ -301,6 +337,68 @@ async function setPremium(isPremium) {
   } catch (e) {
     msg.style.color = 'var(--red)';
     msg.textContent = e.message || 'Error al actualizar';
+  }
+}
+
+async function loadAnnouncements() {
+  const box = document.getElementById('announcement-active-box');
+  const tbody = document.getElementById('announcements-tbody');
+  try {
+    const res = await fetch(`${API}/admin/announcements`, { headers: headers() });
+    const d = await res.json();
+    if (!res.ok) throw new Error();
+    const active = d.announcements.find(a => a.active);
+    box.innerHTML = active
+      ? `<span style="color:var(--green)">● Activo:</span> ${active.title ? `<strong>${active.title}</strong> — ` : ''}${active.message}`
+      : '<span style="color:var(--text2)">Sin anuncio activo</span>';
+    tbody.innerHTML = d.announcements.length ? d.announcements.map(a => `
+      <tr>
+        <td>${a.title || '—'}</td>
+        <td style="max-width:260px; white-space:normal">${a.message}</td>
+        <td>${a.active ? '<span class="badge badge-premium">Activo</span>' : '<span class="badge badge-free">Inactivo</span>'}</td>
+        <td>${new Date(a.created_at).toLocaleString('es-AR')}</td>
+        <td>${a.active ? `<button class="icon-btn" title="Desactivar" onclick="deactivateAnnouncement(${a.id})">✖</button>` : ''}</td>
+      </tr>
+    `).join('') : '<tr><td colspan="5" style="color:var(--text2)">Todavía no hay anuncios</td></tr>';
+  } catch (e) {
+    box.innerHTML = '<span style="color:var(--red)">Error al cargar</span>';
+    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--red)">Error al cargar</td></tr>';
+  }
+}
+
+async function publishAnnouncement() {
+  const title = document.getElementById('announcement-title').value.trim();
+  const message = document.getElementById('announcement-message').value.trim();
+  const msg = document.getElementById('announcement-msg');
+  if (!message) { alert('Escribí un mensaje'); return; }
+  msg.style.display = 'block';
+  msg.style.color = 'var(--text2)';
+  msg.textContent = 'Publicando...';
+  try {
+    const res = await fetch(`${API}/admin/announcements`, {
+      method: 'POST', headers: headers(), body: JSON.stringify({ title: title || null, message }),
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    msg.style.color = 'var(--green)';
+    msg.textContent = '✓ Anuncio publicado';
+    document.getElementById('announcement-title').value = '';
+    document.getElementById('announcement-message').value = '';
+    loadAnnouncements();
+  } catch (e) {
+    msg.style.color = 'var(--red)';
+    msg.textContent = e.message || 'Error al publicar';
+  }
+}
+
+async function deactivateAnnouncement(id) {
+  if (!confirm('¿Desactivar este anuncio?')) return;
+  try {
+    const res = await fetch(`${API}/admin/announcements/${id}/deactivate`, { method: 'POST', headers: headers() });
+    if (!res.ok) throw new Error();
+    loadAnnouncements();
+  } catch (e) {
+    alert('Error al desactivar');
   }
 }
 

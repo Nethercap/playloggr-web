@@ -1304,6 +1304,16 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="announcement-overlay">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-title"><i class="ti ti-speakerphone" style="color:#1D9E75"></i> <span id="announcement-title-text">Aviso</span></div>
+    <div id="announcement-message-text" style="font-size:14px;line-height:1.5;margin:12px 0;white-space:pre-wrap"></div>
+    <div class="modal-actions">
+      <button class="btn-save" onclick="closeAnnouncementPopup()" data-i18n="ok">Entendido</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="onboarding-overlay">
   <div class="modal" style="max-width:420px;padding:0;overflow:hidden">
     <button id="onboarding-skip" onclick="dismissOnboarding()" style="position:absolute;top:10px;right:14px;background:none;border:none;color:var(--text2);font-size:12px;cursor:pointer;z-index:2"></button>
@@ -1362,6 +1372,7 @@ const I18N = {
     periodTotalHours: 'Horas jugadas totales', periodByStatus: 'Cambios de estado',
     periodByPlatform: 'Horas por plataforma', periodByGame: 'Horas por juego',
     periodGlobalRanking: 'Más jugados globalmente',
+    ok: 'Entendido', announcementDefaultTitle: 'Aviso',
     notifications: 'Notificaciones', markAllRead: 'Marcar como leídas',
     pendingFriendRequests: 'solicitudes de amistad pendientes',
     newPeriodSummaryAvailable: 'Nuevo resumen de período disponible',
@@ -1489,6 +1500,7 @@ const I18N = {
     periodTotalHours: 'Total hours played', periodByStatus: 'Status changes',
     periodByPlatform: 'Hours by platform', periodByGame: 'Hours by game',
     periodGlobalRanking: 'Most played globally',
+    ok: 'Got it', announcementDefaultTitle: 'Announcement',
     notifications: 'Notifications', markAllRead: 'Mark as read',
     pendingFriendRequests: 'pending friend requests',
     newPeriodSummaryAvailable: 'New period summary available',
@@ -1616,6 +1628,7 @@ const I18N = {
     periodTotalHours: 'Horas jogadas totais', periodByStatus: 'Mudanças de status',
     periodByPlatform: 'Horas por plataforma', periodByGame: 'Horas por jogo',
     periodGlobalRanking: 'Mais jogados globalmente',
+    ok: 'Entendi', announcementDefaultTitle: 'Aviso',
     notifications: 'Notificações', markAllRead: 'Marcar como lidas',
     pendingFriendRequests: 'solicitações de amizade pendentes',
     newPeriodSummaryAvailable: 'Novo resumo de período disponível',
@@ -5915,6 +5928,35 @@ let userUnlockedFonts  = ['default'];
 let userTrophy = false;
 let userEmail  = '';
 
+let _currentAnnouncementId = null;
+
+async function checkActiveAnnouncement() {
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/announcements/active`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    if (!res.ok) return;
+    const d = await res.json();
+    if (!d.has_announcement) return;
+    _currentAnnouncementId = d.id;
+    document.getElementById('announcement-title-text').textContent = d.title || t('announcementDefaultTitle');
+    document.getElementById('announcement-message-text').textContent = d.message;
+    document.getElementById('announcement-overlay').classList.add('open');
+  } catch (e) {}
+}
+
+async function closeAnnouncementPopup() {
+  document.getElementById('announcement-overlay').classList.remove('open');
+  if (_currentAnnouncementId == null) return;
+  try {
+    await fetch(`${apiBase()}/api/v1/announcements/${_currentAnnouncementId}/seen`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+  } catch (e) {}
+  _currentAnnouncementId = null;
+}
+
 let notifState = { friend_requests: 0, unseen_period_summary: false };
 
 async function loadNotificationsSummary() {
@@ -7465,6 +7507,7 @@ async function onLoginSuccess() {
     loadPremiumStatus(),
     loadNotificationsSummary(),
   ]);
+  checkActiveAnnouncement();
 
   // Then load secondary data in background
   loadAvailableFilters();
