@@ -1425,7 +1425,7 @@ const I18N = {
     gameName: 'Nombre del juego', hoursPlayedLabel: 'Horas jugadas', yourRating: 'Tu calificación',
     unrated: 'Sin calificar', coverUrlOptional: 'URL de portada (opcional)',
     rateByCriteria: 'Calificar por criterios', ratingGameplay: 'Jugabilidad', ratingStory: 'Historia',
-    ratingArt: 'Arte', ratingOptimization: 'Optimización', ratingGlobal: 'Global',
+    ratingArt: 'Arte', ratingOptimization: 'Optimización', ratingMusic: 'Música/Sonido', ratingGlobal: 'Global',
     ratingGlobalHint: 'Esta es la única que se ve en la card — la fijás vos, no es un promedio automático.',
     syncing: 'Sincronizando...', cannotConnectBackend: 'No se pudo conectar con el backend.',
     backendUnavailable: 'Backend no disponible', retry: 'Reintentar',
@@ -1553,7 +1553,7 @@ const I18N = {
     gameName: 'Game name', hoursPlayedLabel: 'Hours played', yourRating: 'Your rating',
     unrated: 'Unrated', coverUrlOptional: 'Cover URL (optional)',
     rateByCriteria: 'Rate by criteria', ratingGameplay: 'Gameplay', ratingStory: 'Story',
-    ratingArt: 'Art', ratingOptimization: 'Optimization', ratingGlobal: 'Overall',
+    ratingArt: 'Art', ratingOptimization: 'Optimization', ratingMusic: 'Music/Sound', ratingGlobal: 'Overall',
     ratingGlobalHint: 'This is the only one shown on the card — you set it yourself, it\'s not an automatic average.',
     syncing: 'Syncing...', cannotConnectBackend: 'Could not connect to the backend.',
     backendUnavailable: 'Backend unavailable', retry: 'Retry',
@@ -1681,7 +1681,7 @@ const I18N = {
     gameName: 'Nome do jogo', hoursPlayedLabel: 'Horas jogadas', yourRating: 'Sua avaliação',
     unrated: 'Sem avaliação', coverUrlOptional: 'URL da capa (opcional)',
     rateByCriteria: 'Avaliar por critério', ratingGameplay: 'Jogabilidade', ratingStory: 'História',
-    ratingArt: 'Arte', ratingOptimization: 'Otimização', ratingGlobal: 'Geral',
+    ratingArt: 'Arte', ratingOptimization: 'Otimização', ratingMusic: 'Música/Som', ratingGlobal: 'Geral',
     ratingGlobalHint: 'Esta é a única que aparece no card — você define manualmente, não é uma média automática.',
     syncing: 'Sincronizando...', cannotConnectBackend: 'Não foi possível conectar ao backend.',
     backendUnavailable: 'Backend indisponível', retry: 'Tentar novamente',
@@ -1791,14 +1791,14 @@ const platIcons = {
   'XBOX PC': {slug:'xbox', color:'#107c10'},
   'XBOX 360': {slug:'xbox', color:'#107c10'},
   'XBOX One': {slug:'xbox', color:'#107c10'},
-  'Nintendo Switch 1': {slug:'nintendo', color:'#e4000f'},
-  'Nintendo Switch 2': {slug:'nintendo', color:'#e4000f'},
-  'Nintendo 3DS': {slug:'nintendo', color:'#e4000f'},
-  'Nintendo 64': {slug:'nintendo', color:'#e4000f'},
-  'Nintendo Gamecube': {slug:'nintendo', color:'#e4000f'},
-  'Game Boy': {slug:'nintendo', color:'#e4000f'},
-  'Game Boy Advance': {slug:'nintendo', color:'#e4000f'},
-  'SNES': {slug:'nintendo', color:'#e4000f'},
+  'Nintendo Switch 1': {tablerIcon:'device-gamepad-2', color:'#e4000f'},
+  'Nintendo Switch 2': {tablerIcon:'device-gamepad-2', color:'#e4000f'},
+  'Nintendo 3DS': {tablerIcon:'device-gamepad-2', color:'#e4000f'},
+  'Nintendo 64': {tablerIcon:'device-gamepad-2', color:'#e4000f'},
+  'Nintendo Gamecube': {tablerIcon:'device-gamepad-2', color:'#e4000f'},
+  'Game Boy': {tablerIcon:'device-gamepad-2', color:'#e4000f'},
+  'Game Boy Advance': {tablerIcon:'device-gamepad-2', color:'#e4000f'},
+  'SNES': {tablerIcon:'device-gamepad-2', color:'#e4000f'},
   'Sega Genesis': {slug:'sega', color:'#1A50DB'},
   'Sega Dreamcast': {slug:'sega', color:'#1A50DB'},
   'Meta Quest': {slug:'meta', color:'#0081FB'},
@@ -1826,13 +1826,23 @@ function _hexToRgb(hex) {
   return `${(n>>16)&255}, ${(n>>8)&255}, ${n&255}`;
 }
 
+function _platIconImgOrGlyph(p, sizePx) {
+  // Algunas plataformas (Nintendo) no tienen marca disponible en Simple
+  // Icons ni en Tabler — se usa un glyph generico de Tabler en vez de una
+  // imagen externa que siempre daria 404.
+  if (p.tablerIcon) {
+    return `<i class="ti ti-${p.tablerIcon}" style="font-size:${sizePx}px;color:#fff"></i>`;
+  }
+  const url = `https://cdn.simpleicons.org/${p.slug}/ffffff`;
+  return `<img src="${url}" style="width:${sizePx}px;height:${sizePx}px;object-fit:contain" onerror="this.style.display='none'">`;
+}
+
 function platBadge(platform) {
   const p = platIcons[platform];
   if (!p) return `<span class="plat-badge">${platform}</span>`;
-  const url = `https://cdn.simpleicons.org/${p.slug}/ffffff`;
   const rgb = _hexToRgb(p.color);
   return `<span class="plat-badge" style="display:inline-flex;align-items:center;gap:5px;background:rgba(${rgb},0.25);border:0.5px solid rgba(${rgb},0.6);border-radius:20px;padding:2px 8px">
-    <img src="${url}" style="width:12px;height:12px;object-fit:contain" onerror="this.style.display='none'">
+    ${_platIconImgOrGlyph(p, 12)}
     ${platform}
   </span>`;
 }
@@ -1840,10 +1850,9 @@ function platBadge(platform) {
 function platIconOnly(platform) {
   const p = platIcons[platform];
   if (!p) return '';
-  const url = `https://cdn.simpleicons.org/${p.slug}/ffffff`;
   const rgb = _hexToRgb(p.color);
   return `<span title="${platform}" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:rgba(${rgb},0.25);border:0.5px solid rgba(${rgb},0.6)">
-    <img src="${url}" style="width:11px;height:11px;object-fit:contain" onerror="this.style.display='none'">
+    ${_platIconImgOrGlyph(p, 11)}
   </span>`;
 }
 const platNames = [];
@@ -2035,7 +2044,25 @@ const _detailRatingFields = {
   story:        'rating_story',
   art:          'rating_art',
   optimization: 'rating_optimization',
+  music:        'rating_music',
 };
+
+function detailRatingStep(gameId, criterion, delta) {
+  const g = allGames.find(x => x.id === gameId);
+  if (!g) return;
+  const current = criterion === 'global' ? (g.user_rating || 0) : (g[_detailRatingFields[criterion]] || 0);
+  const newVal = Math.max(0, Math.min(5, Math.round((current + delta) * 2) / 2));
+  if (criterion === 'global') {
+    setRating(gameId, newVal);
+    const container = document.getElementById(`detail-stars-global-${gameId}`);
+    if (container) container.innerHTML = bigStarPickerHtml(gameId, 'global', newVal);
+  } else {
+    g[_detailRatingFields[criterion]] = newVal;
+    const container = document.getElementById(`detail-stars-${criterion}-${gameId}`);
+    if (container) container.innerHTML = bigStarPickerHtml(gameId, criterion, newVal);
+    saveDetailRating(gameId);
+  }
+}
 
 function bigStarPickerHtml(gameId, criterion, currentRating) {
   const stars = [];
@@ -2057,8 +2084,16 @@ function bigStarPickerHtml(gameId, criterion, currentRating) {
     stars.push(`<svg width="30" height="30" viewBox="0 0 24 24" style="cursor:pointer;flex-shrink:0" onclick="detailStarClick('${gameId}','${criterion}',${i},event)">${poly}</svg>`);
   }
   const label = currentRating > 0 ? currentRating + ' / 5' : t('unrated');
-  return `<span style="display:inline-flex;align-items:center;gap:3px">${stars.join('')}</span>
-          <div style="font-size:11px;color:var(--text2);margin-top:2px">${label}</div>`;
+  const minusDisabled = currentRating <= 0 ? 'disabled style="opacity:0.35"' : '';
+  const plusDisabled  = currentRating >= 5 ? 'disabled style="opacity:0.35"' : '';
+  return `<div style="display:flex;align-items:center;gap:6px">
+            <button onclick="detailRatingStep('${gameId}','${criterion}',-0.5)" ${minusDisabled}
+              style="width:22px;height:22px;min-width:22px;border-radius:50%;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;line-height:1;padding:0">−</button>
+            <span style="display:inline-flex;align-items:center;gap:3px">${stars.join('')}</span>
+            <button onclick="detailRatingStep('${gameId}','${criterion}',0.5)" ${plusDisabled}
+              style="width:22px;height:22px;min-width:22px;border-radius:50%;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;line-height:1;padding:0">+</button>
+          </div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px;text-align:right">${label}</div>`;
 }
 
 function ratingDetailModalBody(gameId) {
@@ -2069,6 +2104,7 @@ function ratingDetailModalBody(gameId) {
     ['story',        t('ratingStory')        || 'Historia'],
     ['art',          t('ratingArt')          || 'Arte'],
     ['optimization', t('ratingOptimization') || 'Optimización'],
+    ['music',        t('ratingMusic')        || 'Música/Sonido'],
   ];
   const rowsHtml = rows.map(([key, label]) => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
@@ -2135,6 +2171,7 @@ async function saveDetailRating(gameId) {
         story:        g.rating_story        || 0,
         art:          g.rating_art          || 0,
         optimization: g.rating_optimization || 0,
+        music:        g.rating_music        || 0,
       })
     });
   } catch(e) {}
