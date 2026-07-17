@@ -5578,7 +5578,7 @@ async function searchSteamCatalog(q) {
       // Store results in a map to avoid inline string escaping issues
       window._steamResults = {};
       data.results.forEach(r => {
-        window._steamResults[r.appid || r.community_id] = { name: r.name, source: r.source, community_id: r.community_id };
+        window._steamResults[r.appid || r.community_id] = { name: r.name, source: r.source, community_id: r.community_id, cover_url: r.cover_url };
       });
       results.innerHTML = data.results.map(r => {
         const key    = r.appid || r.community_id;
@@ -5602,6 +5602,8 @@ function selectSteamGame(key) {
   document.getElementById('m-name').value  = name;
   // Only set appid for Steam games, not community games
   document.getElementById('m-appid').value = (result && result.source === 'steam') ? key : '';
+  // Precargar portada si el catalogo propio (IGDB) la trae
+  document.getElementById('m-cover').value = (result && result.cover_url) ? result.cover_url : '';
   document.getElementById('steam-search-results').style.display = 'none';
 }
 
