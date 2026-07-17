@@ -197,10 +197,13 @@
       .stat-value { font-size:17px; }
 
       /* Selector de vista + carpetas: scroll horizontal, no wrap, como los tabs de la app */
-      #view-selector-row { flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+      /* Sin padding horizontal — que los botones arranquen pegados al borde,
+         igual que las stat-cards (que no tienen wrapper con padding extra) */
+      #view-selector-row { flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; padding-left:0 !important; padding-right:0 !important; }
       #view-selector-row::-webkit-scrollbar { display:none; }
       #view-library, #view-wishlist, #view-stats, #view-rankings { flex-shrink:0; }
       #view-selector-row > span { display:none; } /* contador seleccionados/horas, sobra en mobile */
+      #filter-bar { padding-left:0 !important; padding-right:0 !important; }
 
       /* Filtros (estado/plataforma/genero/etc): scroll horizontal en vez de apilarse */
       #filter-bar-row1 { flex-wrap:nowrap !important; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; padding-bottom:2px; }
