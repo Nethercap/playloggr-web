@@ -5085,8 +5085,15 @@ let _steamMenuOpen = false;
 
 function toggleSteamMenu() {
   const menu = document.getElementById('steam-menu');
+  const btn  = document.getElementById('steam-menu-btn');
   _steamMenuOpen = !_steamMenuOpen;
-  menu.style.display = _steamMenuOpen ? 'block' : 'none';
+  if (_steamMenuOpen) {
+    menu.style.display = 'block';
+    menu.style.right = 'auto';
+    _positionFixedPopup(menu, btn);
+  } else {
+    menu.style.display = 'none';
+  }
   if (_steamMenuOpen) {
     loadSteamIdIntoMenu();
     setTimeout(() => {
@@ -5285,8 +5292,15 @@ let _psnMenuOpen = false;
 
 function togglePsnMenu() {
   const menu = document.getElementById('psn-menu');
+  const btn  = document.getElementById('psn-menu-btn');
   _psnMenuOpen = !_psnMenuOpen;
-  menu.style.display = _psnMenuOpen ? 'block' : 'none';
+  if (_psnMenuOpen) {
+    menu.style.display = 'block';
+    menu.style.right = 'auto';
+    _positionFixedPopup(menu, btn);
+  } else {
+    menu.style.display = 'none';
+  }
   if (_psnMenuOpen) {
     loadPsnIdIntoMenu();
     setTimeout(() => {
@@ -6006,8 +6020,16 @@ function renderNotifBell() {
 }
 
 function toggleNotifDropdown() {
-  const dd = document.getElementById('notif-dropdown');
-  dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+  const dd  = document.getElementById('notif-dropdown');
+  const btn = document.getElementById('notif-bell-btn');
+  const opening = dd.style.display === 'none' || !dd.style.display;
+  if (opening) {
+    dd.style.display = 'block';
+    dd.style.right = 'auto';
+    _positionFixedPopup(dd, btn);
+  } else {
+    dd.style.display = 'none';
+  }
 }
 
 function closeNotifDropdown() {
