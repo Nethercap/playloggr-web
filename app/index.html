@@ -2171,7 +2171,7 @@ function accessibleEditModalBody(gameId) {
       style="width:100%;padding:11px;font-size:15px;border-radius:8px;border:0.5px solid var(--border2);background:transparent;color:var(--text);cursor:pointer;margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:6px">
       <i class="ti ti-folder-plus"></i> ${t('folder') || 'Carpeta'}
     </button>
-    <div style="display:flex;gap:10px">
+    <div style="display:flex;gap:10px;margin-bottom:20px">
       <button onclick="toggleHideGame('${gameId}', ${!!g.hidden});closeAccessibleEditModal()"
         style="flex:1;padding:11px;font-size:15px;border-radius:8px;border:0.5px solid var(--border2);background:transparent;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
         <i class="ti ${g.hidden ? 'ti-eye' : 'ti-eye-off'}"></i> ${g.hidden ? (t('showGame')||'Mostrar') : (t('hideGame')||'Ocultar')}
@@ -2180,47 +2180,85 @@ function accessibleEditModalBody(gameId) {
         style="flex:1;padding:11px;font-size:15px;border-radius:8px;border:0.5px solid #E24B4A;background:transparent;color:#E24B4A;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
         <i class="ti ti-trash"></i> ${t('delete') || 'Borrar'}
       </button>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button onclick="closeAccessibleEditModal()"
+        style="flex:1;padding:11px;font-size:15px;border-radius:8px;border:0.5px solid var(--border2);background:transparent;color:var(--text);cursor:pointer">
+        ${t('cancel') || 'Cancelar'}
+      </button>
+      <button onclick="aeSaveAll('${gameId}')"
+        style="flex:1;padding:11px;font-size:15px;border-radius:8px;border:none;background:var(--green);color:#fff;cursor:pointer;font-weight:600">
+        ${t('save') || 'Guardar'}
+      </button>
     </div>`;
   return html;
 }
 
-async function aeSaveHours(gameId, hours) {
+async function aeSaveAll(gameId) {
   const g = allGames.find(x => x.id === gameId);
-  if (g) g.hours_played = hours;
-  renderGames();
-  try {
-    await fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gameId)}/hours`, {
+  if (!g) return;
+
+  const hoursEl  = document.getElementById('ae-hours');
+  const lpEl     = document.getElementById('ae-lastplayed');
+  const platEl   = document.getElementById('ae-platform');
+  const genreEl  = document.getElementById('ae-genre');
+  const statusEl = document.getElementById('ae-status');
+
+  const calls = [];
+
+  if (hoursEl && !hoursEl.disabled) {
+    const hours = parseFloat(hoursEl.value) || 0;
+    if (hours !== (g.hours_played || 0)) {
+      g.hours_played = hours;
+      calls.push(fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gameId)}/hours`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hours_played: hours }),
+      }));
+    }
+  }
+  if (lpEl && !lpEl.disabled) {
+    const date = lpEl.value || null;
+    if (date !== (g.last_played || null)) {
+      g.last_played = date;
+      calls.push(fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gameId)}/last-played`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date }),
+      }));
+    }
+  }
+  if (platEl && !platEl.disabled && platEl.value !== g.platform) {
+    g.platform = platEl.value;
+    calls.push(fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gameId)}/platform`, {
       method: 'PATCH',
       headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ hours_played: hours }),
-    });
+      body: JSON.stringify({ platform: platEl.value }),
+    }));
+  }
+  if (genreEl && genreEl.value !== (g.genre || '')) {
+    const genre = genreEl.value || null;
+    g.genre = genre;
+    calls.push(fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gameId)}/genre`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ genre }),
+    }));
+  }
+  if (statusEl && statusEl.value !== g.status) {
+    g.status = statusEl.value;
+    calls.push(fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gameId)}/status?status=${encodeURIComponent(statusEl.value)}`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${authToken}` },
+    }));
+  }
+
+  closeAccessibleEditModal();
+  renderGames();
+  try {
+    await Promise.all(calls);
     loadGlobalStats();
-  } catch(e) {}
-}
-
-async function aeSaveLastPlayed(gameId, date) {
-  const g = allGames.find(x => x.id === gameId);
-  if (g) g.last_played = date || null;
-  renderGames();
-  try {
-    await fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gameId)}/last-played`, {
-      method: 'PATCH',
-      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date: date || null }),
-    });
-  } catch(e) {}
-}
-
-async function aeSavePlatform(gameId, platform) {
-  const g = allGames.find(x => x.id === gameId);
-  if (g) g.platform = platform;
-  renderGames();
-  try {
-    await fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gameId)}/platform`, {
-      method: 'PATCH',
-      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ platform }),
-    });
+    checkAchievements();
   } catch(e) {}
 }
 
@@ -2237,25 +2275,12 @@ function openAccessibleEditModal(gameId) {
   document.getElementById('accessible-edit-title').textContent = g.name;
   document.getElementById('accessible-edit-body').innerHTML = accessibleEditModalBody(gameId);
   document.getElementById('accessible-edit-overlay').classList.add('open');
-
-  const hoursEl = document.getElementById('ae-hours');
-  if (hoursEl && !hoursEl.disabled) hoursEl.addEventListener('change', () => aeSaveHours(gameId, parseFloat(hoursEl.value) || 0));
-
-  const lpEl = document.getElementById('ae-lastplayed');
-  if (lpEl && !lpEl.disabled) lpEl.addEventListener('change', () => aeSaveLastPlayed(gameId, lpEl.value));
-
-  const platEl = document.getElementById('ae-platform');
-  if (platEl && !platEl.disabled) platEl.addEventListener('change', () => aeSavePlatform(gameId, platEl.value));
-
-  const genreEl = document.getElementById('ae-genre');
-  if (genreEl) genreEl.addEventListener('change', () => changeGenre(gameId, genreEl.value));
-
-  const statusEl = document.getElementById('ae-status');
-  if (statusEl) statusEl.addEventListener('change', () => changeStatus(gameId, statusEl.value));
+  document.body.style.overflow = 'hidden';
 }
 
 function closeAccessibleEditModal() {
   document.getElementById('accessible-edit-overlay').classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 document.getElementById('accessible-edit-overlay').addEventListener('click', e => {
