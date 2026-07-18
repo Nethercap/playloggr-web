@@ -2509,7 +2509,8 @@ function lastPlayedDisplay(iso) {
   return `${d}/${m}/${y}`;
 }
 
-function gameCardHtml(g) {
+function gameCardHtml(g, opts) {
+  const hideLupa = opts && opts.hideLupa;
   const hours = g.hours_played != null ? `${parseFloat(g.hours_played).toFixed(1)} hs` : '— hs';
   const lastPlayedLabel = lastPlayedDisplay(g.last_played);
   const lastPlayedEl = g.is_manual
@@ -2564,7 +2565,7 @@ function gameCardHtml(g) {
       </select>
       <div style="display:flex;align-items:center;gap:4px">
         <button onclick="openCardFolderPicker('${g.id}')" title="Agregar a carpeta" style="font-size:11px;padding:2px 8px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer"><i class="ti ti-folder-plus" style="font-size:11px"></i></button>
-        <button onclick="openAccessibleEditModal('${g.id}')" title="${t('accessibleEdit') || 'Editar (modo accesible)'}" style="font-size:12px;padding:2px 8px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer"><i class="ti ti-zoom-in" style="font-size:12px"></i></button>
+        ${hideLupa ? '' : `<button onclick="openAccessibleEditModal('${g.id}')" title="${t('accessibleEdit') || 'Editar (modo accesible)'}" style="font-size:12px;padding:2px 8px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer"><i class="ti ti-zoom-in" style="font-size:12px"></i></button>`}
         <button onclick="toggleGameActionsMenu('${g.id}', ${g.hidden}, event)" title="Más opciones" style="font-size:12px;padding:2px 8px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-weight:700">+</button>
       </div>
     </div>
@@ -2685,7 +2686,7 @@ function renderGamesGrid(items) {
 function openGameFullView(gameId) {
   const g = allGames.find(x => x.id === gameId);
   if (!g) return;
-  document.getElementById('game-fullview-content').innerHTML = gameCardHtml(g);
+  document.getElementById('game-fullview-content').innerHTML = gameCardHtml(g, {hideLupa: true});
   document.getElementById('game-fullview-overlay').classList.add('open');
 }
 function closeGameFullView() {
