@@ -1840,11 +1840,14 @@ function platBadge(platform) {
   </span>`;
 }
 
-function platIconOnly(platform) {
+function platIconOnly(platform, opaque) {
   const p = platIcons[platform];
   if (!p) return '';
   const rgb = _hexToRgb(p.color);
-  return `<span title="${platform}" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:rgba(${rgb},0.25);border:0.5px solid rgba(${rgb},0.6)">
+  // Sobre la portada (vista cuadricula) el fondo translucido se mezclaba con
+  // el arte y quedaba dificil de leer — ahi se pide opaco.
+  const bg = opaque ? `rgb(${rgb})` : `rgba(${rgb},0.25)`;
+  return `<span title="${platform}" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:${bg};border:0.5px solid rgba(${rgb},0.6)">
     ${_platIconImgOrGlyph(p, 11)}
   </span>`;
 }
@@ -2734,7 +2737,7 @@ function renderGamesGrid(items) {
       <div style="position:relative">
         <div style="width:100%;aspect-ratio:2/3;background:var(--bg3);overflow:hidden">${cover}</div>
         <div style="position:absolute;top:6px;left:6px;display:flex;align-items:center;gap:4px;max-width:calc(100% - 36px);overflow:hidden">
-          ${platIconOnly(g.platform)}
+          ${platIconOnly(g.platform, true)}
           ${scoreBadgeHtml(g)}
         </div>
         <button onclick="openAccessibleEditModal('${g.id}')" title="${t('seeAllOptions')}"
