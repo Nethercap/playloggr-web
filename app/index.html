@@ -759,28 +759,7 @@
       </div>
       <div class="modal-group">
         <label data-i18n="genre">Género</label>
-        <select id="wm-genre" class="genre-select">
-          <option value="" data-i18n="noGenre">Sin género</option>
-          <option value="Acción">Acción</option>
-          <option value="Aventura">Aventura</option>
-          <option value="RPG">RPG</option>
-          <option value="FPS">FPS</option>
-          <option value="Estrategia">Estrategia</option>
-          <option value="Simulación">Simulación</option>
-          <option value="Deportes">Deportes</option>
-          <option value="Carreras">Carreras</option>
-          <option value="Terror">Terror</option>
-          <option value="Roguelite">Roguelite</option>
-          <option value="Plataformas">Plataformas</option>
-          <option value="Puzzle">Puzzle</option>
-          <option value="Lucha">Lucha</option>
-          <option value="Mundo Abierto">Mundo Abierto</option>
-          <option value="Multijugador">Multijugador</option>
-          <option value="Indie">Indie</option>
-          <option value="Visual Novel">Visual Novel</option>
-          <option value="Música/Ritmo">Música/Ritmo</option>
-          <option value="Survival">Survival</option>
-        </select>
+        <select id="wm-genre" class="genre-select"></select>
       </div>
     </div>
     <div class="modal-actions">
@@ -2738,25 +2717,40 @@ async function deleteGame(gameId) {
   }
 }
 
-const GENRES = ["Acción", "Aventura", "RPG", "FPS", "Estrategia", "Simulación", "Deportes", "Carreras", "Terror", "Roguelite", "Plataformas", "Puzzle", "Lucha", "Mundo Abierto", "Multijugador", "Indie", "Visual Novel", "Música/Ritmo", "Survival"];
-const GENRE_LABELS_EN = {
-  'Acción': 'Action', 'Aventura': 'Adventure', 'RPG': 'RPG', 'FPS': 'FPS', 'Estrategia': 'Strategy',
-  'Simulación': 'Simulation', 'Deportes': 'Sports', 'Carreras': 'Racing', 'Terror': 'Horror',
-  'Roguelite': 'Roguelite', 'Plataformas': 'Platformer', 'Puzzle': 'Puzzle', 'Lucha': 'Fighting',
-  'Mundo Abierto': 'Open World', 'Multijugador': 'Multiplayer', 'Indie': 'Indie',
-  'Visual Novel': 'Visual Novel', 'Música/Ritmo': 'Music/Rhythm', 'Survival': 'Survival',
+// Generos = el taxonomia fija de IGDB (mismo set que usamos para auto-completar
+// el genero al agregar un juego) — el VALOR guardado es siempre el nombre en
+// ingles de IGDB (para que el matching automatico funcione sin traducir ida y
+// vuelta), la ETIQUETA mostrada se traduce por idioma via genreLabel().
+const GENRES = [
+  "Adventure", "Role-playing (RPG)", "Shooter", "Strategy", "Real Time Strategy (RTS)",
+  "Turn-based strategy (TBS)", "Tactical", "Simulator", "Sport", "Racing", "Fighting",
+  "Platform", "Puzzle", "Hack and slash/Beat 'em up", "Point-and-click", "Pinball",
+  "Arcade", "Indie", "Visual Novel", "Music", "Card & Board Game", "MOBA", "Quiz/Trivia",
+];
+const GENRE_LABELS_ES = {
+  'Adventure': 'Aventura', 'Role-playing (RPG)': 'Rol (RPG)', 'Shooter': 'Disparos',
+  'Strategy': 'Estrategia', 'Real Time Strategy (RTS)': 'Estrategia en tiempo real (RTS)',
+  'Turn-based strategy (TBS)': 'Estrategia por turnos (TBS)', 'Tactical': 'Táctico',
+  'Simulator': 'Simulación', 'Sport': 'Deportes', 'Racing': 'Carreras', 'Fighting': 'Lucha',
+  'Platform': 'Plataformas', 'Puzzle': 'Puzzle', "Hack and slash/Beat 'em up": 'Hack and slash',
+  'Point-and-click': 'Point-and-click', 'Pinball': 'Pinball', 'Arcade': 'Arcade', 'Indie': 'Indie',
+  'Visual Novel': 'Visual Novel', 'Music': 'Música', 'Card & Board Game': 'Cartas y mesa',
+  'MOBA': 'MOBA', 'Quiz/Trivia': 'Preguntas y respuestas',
 };
 const GENRE_LABELS_PT = {
-  'Acción': 'Ação', 'Aventura': 'Aventura', 'RPG': 'RPG', 'FPS': 'FPS', 'Estrategia': 'Estratégia',
-  'Simulación': 'Simulação', 'Deportes': 'Esportes', 'Carreras': 'Corrida', 'Terror': 'Terror',
-  'Roguelite': 'Roguelite', 'Plataformas': 'Plataforma', 'Puzzle': 'Puzzle', 'Lucha': 'Luta',
-  'Mundo Abierto': 'Mundo Aberto', 'Multijugador': 'Multijogador', 'Indie': 'Indie',
-  'Visual Novel': 'Visual Novel', 'Música/Ritmo': 'Música/Ritmo', 'Survival': 'Survival',
+  'Adventure': 'Aventura', 'Role-playing (RPG)': 'RPG', 'Shooter': 'Tiro',
+  'Strategy': 'Estratégia', 'Real Time Strategy (RTS)': 'Estratégia em tempo real (RTS)',
+  'Turn-based strategy (TBS)': 'Estratégia por turnos (TBS)', 'Tactical': 'Tático',
+  'Simulator': 'Simulação', 'Sport': 'Esportes', 'Racing': 'Corrida', 'Fighting': 'Luta',
+  'Platform': 'Plataforma', 'Puzzle': 'Puzzle', "Hack and slash/Beat 'em up": 'Hack and slash',
+  'Point-and-click': 'Apontar e clicar', 'Pinball': 'Pinball', 'Arcade': 'Arcade', 'Indie': 'Indie',
+  'Visual Novel': 'Visual Novel', 'Music': 'Música', 'Card & Board Game': 'Cartas e tabuleiro',
+  'MOBA': 'MOBA', 'Quiz/Trivia': 'Perguntas e respostas',
 };
 function genreLabel(g) {
-  if (currentLang === 'en') return GENRE_LABELS_EN[g] || g;
+  if (currentLang === 'en') return g;
   if (currentLang === 'pt') return GENRE_LABELS_PT[g] || g;
-  return g;
+  return GENRE_LABELS_ES[g] || g;
 }
 
 const STATUS_LABELS_EN = {
@@ -5755,7 +5749,7 @@ async function saveSetUsername() {
 function openWishlistModal() {
   document.getElementById('wm-name').value    = '';
   document.getElementById('wm-platform').value = 'Steam';
-  document.getElementById('wm-genre').value    = '';
+  document.getElementById('wm-genre').innerHTML = genreOptions('');
   document.getElementById('wm-appid').value    = '';
   document.getElementById('wishlist-search-results').style.display = 'none';
   document.getElementById('wishlist-modal-overlay').classList.add('open');
