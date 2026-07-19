@@ -1126,16 +1126,6 @@
   </div>
 </div>
 
-<!-- Game full view (desde la vista de cuadricula) -->
-<div class="modal-overlay" id="game-fullview-overlay">
-  <div class="modal" style="max-width:560px;padding:0;background:transparent;border:none;box-shadow:none">
-    <div id="game-fullview-content"></div>
-    <div style="text-align:right;margin-top:10px">
-      <button class="btn-cancel" onclick="closeGameFullView()" data-i18n="close">Cerrar</button>
-    </div>
-  </div>
-</div>
-
 <!-- Rating detail modal (calificacion por criterio) -->
 <div class="modal-overlay" id="accessible-edit-overlay">
   <div class="modal" style="max-width:420px">
@@ -2670,7 +2660,7 @@ function renderGamesGrid(items) {
       <div style="position:relative">
         <div style="width:100%;aspect-ratio:2/3;background:var(--bg3);overflow:hidden">${cover}</div>
         <div style="position:absolute;top:6px;left:6px">${platIconOnly(g.platform)}</div>
-        <button onclick="openGameFullView('${g.id}')" title="${t('seeAllOptions')}"
+        <button onclick="openAccessibleEditModal('${g.id}')" title="${t('seeAllOptions')}"
           style="position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,0.6);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ti-dots" style="font-size:14px"></i></button>
       </div>
       <div style="padding:8px">
@@ -2692,19 +2682,6 @@ function renderGamesGrid(items) {
     </div>`;
   }).join('');
 }
-
-function openGameFullView(gameId) {
-  const g = allGames.find(x => x.id === gameId);
-  if (!g) return;
-  document.getElementById('game-fullview-content').innerHTML = gameCardHtml(g, {hideLupa: true});
-  document.getElementById('game-fullview-overlay').classList.add('open');
-}
-function closeGameFullView() {
-  document.getElementById('game-fullview-overlay').classList.remove('open');
-}
-document.getElementById('game-fullview-overlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('game-fullview-overlay')) closeGameFullView();
-});
 
 async function deleteGame(gameId) {
   const g    = allGames.find(x => x.id === gameId);
