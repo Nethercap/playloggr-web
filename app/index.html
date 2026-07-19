@@ -6977,6 +6977,16 @@ function renderFolderDropdownItems() {
 }
 
 // Enter a specific folder — filter games list
+// Cambia de seccion DENTRO de la vista de "Carpetas" (biblioteca <-> deseados)
+// sin salir de esa vista — antes la lista de carpetas estaba pegada a
+// cualquier vista (biblioteca/deseados) en la que hubieras estado antes de
+// abrir Carpetas, sin forma de ver la otra seccion sin cerrar y volver a abrir.
+function switchFolderSection(section) {
+  currentView = section;
+  activeFolderId = -1;
+  renderFolderList();
+}
+
 function enterFolder(folderId) {
   activeFolderId = folderId;
   document.getElementById('folder-dropdown').classList.remove('open');
@@ -7040,8 +7050,17 @@ function renderFolderList() {
   const section = currentView === 'wishlist' ? 'wishlist' : 'library';
 
   gameList.innerHTML = `
-    <div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--border)">
-      <span style="font-size:13px;font-weight:600">Carpetas de ${currentView === 'wishlist' ? 'Deseados' : 'Biblioteca'}</span>
+    <div style="padding:12px 16px 0;display:flex;gap:8px">
+      <button onclick="switchFolderSection('library')"
+        style="padding:6px 14px;border-radius:20px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${section==='library'?'var(--green)':'var(--bg2)'};color:${section==='library'?'#fff':'var(--text2)'}">
+        <i class="ti ti-books" style="font-size:13px"></i> Carpetas de Biblioteca
+      </button>
+      <button onclick="switchFolderSection('wishlist')"
+        style="padding:6px 14px;border-radius:20px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${section==='wishlist'?'#EF9F27':'var(--bg2)'};color:${section==='wishlist'?'#fff':'var(--text2)'}">
+        <i class="ti ti-bookmark" style="font-size:13px"></i> Carpetas de Deseados
+      </button>
+    </div>
+    <div style="padding:12px 16px;display:flex;align-items:center;justify-content:flex-end;border-bottom:0.5px solid var(--border)">
       <div style="display:flex;gap:8px;align-items:center">
         <select onchange="folderSort=this.value;setFolderSort(this.value)" id="folder-sort-list"
           style="font-size:12px;padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text)">
@@ -7356,6 +7375,14 @@ async function confirmFolderGamePicker() {
 
 // ── Folder button click (main btn) ────────────────────────────────────────────
 function handleFolderBtnClick() {
+  // Si estabamos en Estadisticas/Rankings, esas vistas ocultan #game-list y
+  // #filter-bar por su cuenta (ver setView) — entrar a Carpetas sin salir de
+  // ahi antes dejaba la lista de carpetas renderizada pero invisible (bug:
+  // "Carpetas" no hacia nada desde Rankings), y salir despues dejaba una
+  // mezcla rara de controles de ambas vistas superpuestos.
+  if (currentView === 'stats' || currentView === 'rankings') {
+    setView('library');
+  }
   if (activeFolderId === -1 || activeFolderId > 0) {
     // Exit folder view — restore normal view
     activeFolderId = null;
