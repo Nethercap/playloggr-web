@@ -191,10 +191,13 @@
       .profile-panel { padding:8px 12px; gap:10px; }
       .profile-panel-name { font-size:13px; }
 
-      .stats-row { gap:6px; }
-      .stat-card { padding:8px 14px; }
-      .stat-label { font-size:10px; }
-      .stat-value { font-size:17px; }
+      /* Stat cards: una sola linea con scroll horizontal, como en la app
+         (en vez de la grilla 2x3/3x2 de escritorio) */
+      .stats-row { display:flex !important; flex-wrap:nowrap; gap:8px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+      .stats-row::-webkit-scrollbar { display:none; }
+      .stat-card { padding:8px 14px; flex:0 0 auto; min-width:84px; }
+      .stat-label { font-size:10px; white-space:nowrap; }
+      .stat-value { font-size:17px; white-space:nowrap; }
 
       /* Selector de vista + carpetas: scroll horizontal, no wrap, como los tabs de la app */
       /* Sin padding horizontal — que los botones arranquen pegados al borde,
@@ -210,6 +213,13 @@
       #filter-bar-row1::-webkit-scrollbar { display:none; }
       #filter-dropdowns { flex-wrap:nowrap !important; }
       #filter-dropdowns > div { flex-shrink:0; }
+
+      /* Vista + ocultos: en mobile suma Carpetas y Rankings (reubicados por JS,
+         ver moveNavForMobile()), asi el renglon superior queda solo con
+         Biblioteca/Deseados/Estadisticas (icono) y no hace falta swipe ahi */
+      #filter-bar-row1b { flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+      #filter-bar-row1b::-webkit-scrollbar { display:none; }
+      #filter-bar-row1b > * { flex-shrink:0; }
 
       /* El boton de agregar pasa a ser flotante (FAB), como en la app */
       #add-game-btn-wrap { display:none !important; }
@@ -533,9 +543,9 @@
         style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);color:var(--text2);display:inline-flex;align-items:center;gap:5px">
         <i class="ti ti-bookmark" style="font-size:14px"></i> <span data-i18n="wishlist">Deseados</span>
       </button>
-      <button id="view-stats" onclick="setView('stats')"
-        style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);color:var(--text2);display:inline-flex;align-items:center;gap:5px">
-        <i class="ti ti-chart-bar" style="font-size:14px"></i> <span data-i18n="stats">Estadísticas</span>
+      <button id="view-stats" onclick="setView('stats')" data-i18n-title="stats" title="Estadísticas"
+        style="padding:6px 12px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);color:var(--text2);display:inline-flex;align-items:center;gap:5px;flex-shrink:0">
+        <i class="ti ti-chart-bar" style="font-size:16px"></i>
       </button>
       <button id="view-rankings" onclick="setView('rankings')"
         style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);color:var(--text2);display:inline-flex;align-items:center;gap:5px">
@@ -2836,6 +2846,29 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === cmo) closeCoverEdit();
   });
 });
+
+// En mobile, "Carpetas" y "Rankings" se mudan al renglon de vista/ocultos
+// (asi el renglon superior queda solo con Biblioteca/Deseados/Estadisticas,
+// como en la app, sin necesitar swipe para llegar a Estadisticas). En
+// escritorio vuelven a su lugar original junto a Biblioteca/Deseados.
+const mobileNavQuery = window.matchMedia('(max-width:640px)');
+function layoutMobileNav() {
+  const rankingsBtn = document.getElementById('view-rankings');
+  const folderWrap  = document.getElementById('folder-filter-wrap');
+  const row1b       = document.getElementById('filter-bar-row1b');
+  const viewStats   = document.getElementById('view-stats');
+  if (!rankingsBtn || !folderWrap || !row1b || !viewStats) return;
+  if (mobileNavQuery.matches) {
+    if (row1b.firstChild !== folderWrap) row1b.insertBefore(folderWrap, row1b.firstChild);
+    if (folderWrap.nextSibling !== rankingsBtn) folderWrap.insertAdjacentElement('afterend', rankingsBtn);
+  } else {
+    if (viewStats.nextSibling !== rankingsBtn) viewStats.insertAdjacentElement('afterend', rankingsBtn);
+    if (rankingsBtn.nextSibling !== folderWrap) rankingsBtn.insertAdjacentElement('afterend', folderWrap);
+  }
+}
+document.addEventListener('DOMContentLoaded', layoutMobileNav);
+mobileNavQuery.addEventListener('change', layoutMobileNav);
+layoutMobileNav();
 
 async function changeGenre(gameId, genre) {
   const g = allGames.find(x => x.id === gameId);
