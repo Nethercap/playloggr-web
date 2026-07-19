@@ -1414,6 +1414,7 @@ const I18N = {
     confirmDeleteGame: '¿Eliminar "{name}" del backlog?', noResults: 'Sin resultados',
     gameName: 'Nombre del juego', hoursPlayedLabel: 'Horas jugadas', yourRating: 'Tu calificación',
     unrated: 'Sin calificar', coverUrlOptional: 'URL de portada (opcional)',
+    inLibraryOf: 'En biblioteca de', inWishlistOf: 'En deseados de',
     rateByCriteria: 'Calificar por criterios', ratingGameplay: 'Jugabilidad', ratingStory: 'Historia',
     ratingArt: 'Arte', ratingOptimization: 'Optimización', ratingMusic: 'Música/Sonido', ratingGlobal: 'Global',
     ratingGlobalHint: 'Esta es la única que se ve en la card — la fijás vos, no es un promedio automático.',
@@ -1542,6 +1543,7 @@ const I18N = {
     confirmDeleteGame: 'Delete "{name}" from your backlog?', noResults: 'No results',
     gameName: 'Game name', hoursPlayedLabel: 'Hours played', yourRating: 'Your rating',
     unrated: 'Unrated', coverUrlOptional: 'Cover URL (optional)',
+    inLibraryOf: 'In the library of', inWishlistOf: 'In the wishlist of',
     rateByCriteria: 'Rate by criteria', ratingGameplay: 'Gameplay', ratingStory: 'Story',
     ratingArt: 'Art', ratingOptimization: 'Optimization', ratingMusic: 'Music/Sound', ratingGlobal: 'Overall',
     ratingGlobalHint: 'This is the only one shown on the card — you set it yourself, it\'s not an automatic average.',
@@ -1670,6 +1672,7 @@ const I18N = {
     confirmDeleteGame: 'Excluir "{name}" do backlog?', noResults: 'Sem resultados',
     gameName: 'Nome do jogo', hoursPlayedLabel: 'Horas jogadas', yourRating: 'Sua avaliação',
     unrated: 'Sem avaliação', coverUrlOptional: 'URL da capa (opcional)',
+    inLibraryOf: 'Na biblioteca de', inWishlistOf: 'Nos desejados de',
     rateByCriteria: 'Avaliar por critério', ratingGameplay: 'Jogabilidade', ratingStory: 'História',
     ratingArt: 'Arte', ratingOptimization: 'Otimização', ratingMusic: 'Música/Som', ratingGlobal: 'Geral',
     ratingGlobalHint: 'Esta é a única que aparece no card — você define manualmente, não é uma média automática.',
@@ -2127,13 +2130,18 @@ function ratingDetailModalBody(gameId) {
     </div>`).join('');
   return `
     <div style="font-weight:700;font-size:16px;margin-bottom:4px">${esc(g.name)}</div>
+    <div id="rating-detail-community-${gameId}" style="font-size:11px;color:var(--text2);margin-bottom:8px">
+      <div>${t('inLibraryOf') || 'En biblioteca de'} — <span data-rdc="lib">…</span></div>
+      <div>${t('inWishlistOf') || 'En deseados de'} — <span data-rdc="wish">…</span></div>
+    </div>
     <div style="font-size:12px;color:var(--text2);margin-bottom:8px">${t('rateByCriteria') || 'Calificar por criterios'}</div>
     ${rowsHtml}
     <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0 4px;margin-top:4px">
       <span style="font-size:14px;font-weight:700;color:var(--green)">${t('ratingGlobal') || 'Global'}</span>
       <div id="detail-stars-global-${gameId}" style="text-align:right">${bigStarPickerHtml(gameId, 'global', g.user_rating || 0)}</div>
     </div>
-    <div style="font-size:11px;color:var(--text2)">${t('ratingGlobalHint') || 'Esta es la única que se ve en la card — la fijás vos, no es un promedio automático.'}</div>`;
+    <div style="font-size:11px;color:var(--text2)">${t('ratingGlobalHint') || 'Esta es la única que se ve en la card — la fijás vos, no es un promedio automático.'}</div>
+    <div id="rating-detail-avg-${gameId}" style="font-size:11px;color:var(--text2);margin-top:4px">…</div>`;
 }
 
 // ── Modal accesible de edicion rapida (lupa / doble click-tap) ─────────────
@@ -2296,6 +2304,30 @@ function openRatingDetailModal(gameId) {
   if (!g) return;
   document.getElementById('rating-detail-body').innerHTML = ratingDetailModalBody(gameId);
   document.getElementById('rating-detail-overlay').classList.add('open');
+  loadRatingDetailCommunityStats(gameId);
+}
+
+async function loadRatingDetailCommunityStats(gameId) {
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/community/stats/${encodeURIComponent(gameId)}`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    if (!res.ok) return;
+    const d = await res.json();
+    const box = document.getElementById(`rating-detail-community-${gameId}`);
+    if (box) {
+      const libEl  = box.querySelector('[data-rdc="lib"]');
+      const wishEl = box.querySelector('[data-rdc="wish"]');
+      if (libEl)  libEl.textContent  = `${d.library_count} ${d.library_count === 1 ? 'usuario' : 'usuarios'}` + (d.library_rank ? ` · #${d.library_rank} del ranking global` : '');
+      if (wishEl) wishEl.textContent = `${d.wishlist_count} ${d.wishlist_count === 1 ? 'usuario' : 'usuarios'}` + (d.wishlist_rank ? ` · #${d.wishlist_rank} del ranking global` : '');
+    }
+    const avgEl = document.getElementById(`rating-detail-avg-${gameId}`);
+    if (avgEl) {
+      avgEl.textContent = d.rating_count > 0
+        ? `Promedio de ${d.avg_rating} sobre un total de ${d.rating_count} ${d.rating_count === 1 ? 'valoración' : 'valoraciones'}`
+        : 'Todavía sin valoraciones de la comunidad';
+    }
+  } catch (e) {}
 }
 
 function closeRatingDetailModal() {
