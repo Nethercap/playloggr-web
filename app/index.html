@@ -2400,12 +2400,8 @@ function updateCommunityStatLocally(gameId, oldRating, newRating) {
     avg   = count > 0 ? (avg * (count + 1) - oldRating) / count : 0;
   }
 
-  if (count > 0) {
-    el.innerHTML = `<i class="ti ti-users" style="font-size:11px"></i> ${avg.toFixed(1)} (${count})`;
-    el.style.display = 'inline-flex';
-  } else {
-    el.style.display = 'none';
-  }
+  el.innerHTML = `<i class="ti ti-users" style="font-size:11px"></i> ${count > 0 ? avg.toFixed(1) : '0.0'} (${count})`;
+  el.style.display = 'inline-flex';
 }
 
 // ── Steam review score ──────────────────────────────────────────────
@@ -2576,13 +2572,14 @@ function gameCardHtml(g, opts) {
   const cover = steamCoverHtml(g);
   const scoreEl = scoreBadgeHtml(g);
 
-  // Si ya tenemos el promedio de la comunidad en cache (de un render anterior
-  // en esta sesion), mostrarlo de una en vez de arrancar vacio y parpadear.
+  // Promedio general + cantidad de calificaciones — siempre visible al lado
+  // de las estrellas (no solo cuando ya hay alguna), para que se note que
+  // arrancan en 0 y van subiendo. Si ya tenemos el dato en cache (de un
+  // render anterior en esta sesion) lo mostramos de una en vez de arrancar
+  // en "…" y parpadear.
   const cs = communityStatsCache[g.id];
-  const communityHtml = cs
-    ? `<i class="ti ti-users" style="font-size:11px"></i> ${cs.avg_rating} (${cs.rating_count})`
-    : '';
-  const communityStyle = cs ? 'display:inline-flex' : 'display:none';
+  const communityHtml = `<i class="ti ti-users" style="font-size:11px"></i> ${cs ? `${cs.avg_rating} (${cs.rating_count})` : '…'}`;
+  const communityStyle = 'display:inline-flex';
 
   return `<div class="game-card" id="card-${g.id}" ondblclick="handleCardDoubleTap('${g.id}', event)">
     <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0">
@@ -6054,12 +6051,16 @@ async function loadCommunityStats(gameIds) {
     const res  = await fetch(`${apiBase()}/api/v1/community/stats/batch?game_ids=${encodeURIComponent(ids)}`);
     if (!res.ok) return;
     const data = await res.json();
-    Object.entries(data).forEach(([gameId, stats]) => {
-      if (!stats.avg_rating) return;
+    // El backend no devuelve entrada para juegos sin ningun game_states
+    // todavia (nadie los toco nunca) — se completan en 0/0 igual, para que
+    // el promedio+cantidad siempre se muestre en vez de quedar en "…".
+    missing.forEach(gameId => {
+      const stats = data[gameId] || { avg_rating: null, rating_count: 0 };
       communityStatsCache[gameId] = stats;
       const el = document.getElementById(`community-${gameId}`);
       if (!el) return;
-      el.innerHTML = `<i class="ti ti-users" style="font-size:11px"></i> ${stats.avg_rating} (${stats.rating_count})`;
+      const avgText = stats.avg_rating ? stats.avg_rating : '0.0';
+      el.innerHTML = `<i class="ti ti-users" style="font-size:11px"></i> ${avgText} (${stats.rating_count || 0})`;
       el.style.display = 'inline-flex';
     });
   } catch(e) {}
