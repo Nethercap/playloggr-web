@@ -195,8 +195,8 @@
          app (en vez de la grilla 2x3/3x2 de escritorio) — se van
          achicando parejo (flex:1) hasta entrar todos. */
       .stats-row { display:flex !important; flex-wrap:nowrap; gap:4px; }
-      .stat-card { padding:6px 4px; flex:1 1 0; min-width:0; text-align:center; }
-      .stat-label { font-size:8.5px; white-space:normal; line-height:1.15; }
+      .stat-card { padding:6px 3px; flex:1 1 0; min-width:0; text-align:center; overflow:hidden; }
+      .stat-label { font-size:8px; white-space:normal; line-height:1.15; letter-spacing:0; overflow-wrap:break-word; word-break:break-word; }
       .stat-value { font-size:15px; white-space:nowrap; }
 
       /* Selector de vista + carpetas: scroll horizontal, no wrap, como los tabs de la app */
