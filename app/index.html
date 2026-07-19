@@ -191,13 +191,13 @@
       .profile-panel { padding:8px 12px; gap:10px; }
       .profile-panel-name { font-size:13px; }
 
-      /* Stat cards: una sola linea con scroll horizontal, como en la app
-         (en vez de la grilla 2x3/3x2 de escritorio) */
-      .stats-row { display:flex !important; flex-wrap:nowrap; gap:8px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
-      .stats-row::-webkit-scrollbar { display:none; }
-      .stat-card { padding:8px 14px; flex:0 0 auto; min-width:84px; }
-      .stat-label { font-size:10px; white-space:nowrap; }
-      .stat-value { font-size:17px; white-space:nowrap; }
+      /* Stat cards: los 6 entran en una sola linea sin scroll, como en la
+         app (en vez de la grilla 2x3/3x2 de escritorio) — se van
+         achicando parejo (flex:1) hasta entrar todos. */
+      .stats-row { display:flex !important; flex-wrap:nowrap; gap:4px; }
+      .stat-card { padding:6px 4px; flex:1 1 0; min-width:0; text-align:center; }
+      .stat-label { font-size:8.5px; white-space:normal; line-height:1.15; }
+      .stat-value { font-size:15px; white-space:nowrap; }
 
       /* Selector de vista + carpetas: scroll horizontal, no wrap, como los tabs de la app */
       /* Sin padding horizontal — que los botones arranquen pegados al borde,
