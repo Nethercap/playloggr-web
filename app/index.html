@@ -1904,6 +1904,17 @@ const steamScoreLabel = new Proxy({}, { get: (_, key) => {
 // Cache de scores de Steam
 const steamScoreCache = {};
 
+// Clase de color para el puntaje de IGDB (0-100), mismos umbrales de estilo
+// que usa Steam para sus categorias de reseña.
+function igdbScoreClass(pct) {
+  if (pct >= 95) return 'score-overwhelmingly-positive';
+  if (pct >= 80) return 'score-very-positive';
+  if (pct >= 70) return 'score-mostly-positive';
+  if (pct >= 40) return 'score-mixed';
+  if (pct >= 20) return 'score-mostly-negative';
+  return 'score-overwhelmingly-negative';
+}
+
 function apiBase() { return (document.getElementById('api-url').value || 'http://localhost:8000').replace(/\/$/, ''); }
 function showError(m) { const b=document.getElementById('error-banner'); b.textContent=m; b.style.display='block'; }
 function hideError() { document.getElementById('error-banner').style.display='none'; }
@@ -2520,9 +2531,15 @@ function gameCardHtml(g, opts) {
   // el texto descriptivo) — cae al texto ("Pocas reseñas"/"Sin calificaciones")
   // cuando Steam no da un total de reseñas util para calcular %.
   const scoreText = (_score && g._steamScorePct != null) ? `${g._steamScorePct}%` : (_score ? _score.label : null);
+  // Si no hay reseña de Steam (juego de otra plataforma, manual, o Steam sin
+  // reviews todavia), mostrar el puntaje combinado de IGDB como respaldo —
+  // se completa en background, ver el fetch de "igdbRating" mas abajo.
+  const igdbPct = g._igdbRatingPct;
   const scoreEl = (_score && g.platform === 'Steam')
     ? `<span id="score-${g.id}" class="steam-score ${_score.cls}" title="${esc(_score.label)}">${scoreText}</span>`
-    : (g.platform === 'Steam' ? `<span id="score-${g.id}"></span>` : '');
+    : (igdbPct != null
+        ? `<span id="score-${g.id}" class="steam-score ${igdbScoreClass(igdbPct)}" title="Puntaje IGDB (crítica + comunidad)">${igdbPct}%</span>`
+        : `<span id="score-${g.id}"></span>`);
 
   // Si ya tenemos el promedio de la comunidad en cache (de un render anterior
   // en esta sesion), mostrarlo de una en vez de arrancar vacio y parpadear.
@@ -2623,6 +2640,31 @@ async function renderGames() {
           const text = g._steamScorePct != null ? `${g._steamScorePct}%` : info.label;
           const el = document.getElementById(`score-${g.id}`);
           if (el) el.outerHTML = `<span id="score-${g.id}" class="steam-score ${info.cls}" title="${esc(info.label)}">${text}</span>`;
+        });
+      }
+    } catch(e) {}
+  }
+
+  // Puntaje de IGDB como respaldo para los que se quedaron sin reseña de
+  // Steam (otra plataforma, manual, o Steam sin reviews todavia).
+  const toFetchIgdb = items.filter(g => {
+    const hasSteamScore = g.platform === 'Steam' && (g._steamScoreRaw || g.steam_score);
+    return !hasSteamScore && g._igdbRatingPct == null;
+  });
+  if (toFetchIgdb.length > 0) {
+    const names = toFetchIgdb.map(g => g.name).join(',');
+    try {
+      const res = await fetch(`${apiBase()}/api/v1/igdb/rating/batch?names=${encodeURIComponent(names)}`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+      if (res.ok) {
+        const ratings = await res.json();
+        toFetchIgdb.forEach(g => {
+          const pct = ratings[g.name];
+          if (pct == null) return;
+          g._igdbRatingPct = pct;
+          const el = document.getElementById(`score-${g.id}`);
+          if (el) el.outerHTML = `<span id="score-${g.id}" class="steam-score ${igdbScoreClass(pct)}" title="Puntaje IGDB (crítica + comunidad)">${pct}%</span>`;
         });
       }
     } catch(e) {}
