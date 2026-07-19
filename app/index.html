@@ -60,6 +60,8 @@
     }
     .game-card { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:11px 14px; display:grid; grid-template-columns:54px minmax(0,1fr) auto; gap:12px; align-items:center; }
     .game-card:hover { border-color:var(--border2); }
+    .game-card-grid { display:grid; grid-template-columns:1fr auto; gap:7px 10px; align-items:center; margin-top:4px; }
+    .game-status-col { display:flex; flex-direction:column; align-items:flex-end; gap:7px; min-width:0; }
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .game-card.removing { opacity:0; transform:scaleY(0); transition:opacity 0.2s, transform 0.2s; overflow:hidden; max-height:0 !important; margin:0 !important; padding:0 !important; }
     .game-cover { width:54px; height:70px; border-radius:6px; background:var(--bg2); display:flex; align-items:center; justify-content:center; font-size:20px; overflow:hidden; flex-shrink:0; }
@@ -95,8 +97,7 @@
     .star-rating .stars-interactive label.active { color:var(--amber); }
     .star-val { font-size:12px; color:var(--text2); min-width:24px; }
 
-    .game-status-col { display:flex; flex-direction:column; align-items:flex-end; gap:7px; min-width:0; }
-    .status-sel { font-size:12px; padding:4px 7px; border-radius:var(--radius-md); border:0.5px solid var(--border2); background:var(--bg2); color:var(--text); cursor:pointer; width:115px; }
+    .status-sel { font-size:12px; padding:4px 7px; border-radius:var(--radius-md); border:0.5px solid var(--border2); background:var(--bg2); color:var(--text); cursor:pointer; width:auto; max-width:140px; }
     .slabel { display:flex; align-items:center; gap:4px; font-size:11px; color:var(--text2); }
     .sdot { width:8px; height:8px; border-radius:50%; display:inline-block; flex-shrink:0; }
     .s-Completado   { background:#1D9E75; }
@@ -1930,28 +1931,42 @@ function renderPlatStatus() {
 /** Menu "+" con Ocultar/Mostrar y Borrar, para no saturar la card con
  * botones sueltos. Usa position:fixed anclado al boton (igual que los
  * popups de filtro) para no romperse en mobile. */
-function toggleGameActionsMenu(gameId, hidden, event) {
+function toggleGameActionsMenu(gameId, hidden, event, hideLupa) {
   event.stopPropagation();
   document.querySelectorAll('.filter-popup').forEach(p => p.remove());
 
   const btn = event.currentTarget;
   const popup = document.createElement('div');
   popup.className = 'filter-popup';
-  popup.style.cssText = 'position:fixed;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:400;min-width:140px;padding:4px 0;box-shadow:0 4px 16px rgba(0,0,0,0.3)';
+  popup.style.cssText = 'position:fixed;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:400;min-width:170px;padding:4px 0;box-shadow:0 4px 16px rgba(0,0,0,0.3)';
+
+  if (!hideLupa) {
+    const editItem = document.createElement('button');
+    editItem.className = 'steam-menu-item';
+    editItem.innerHTML = `<i class="ti ti-zoom-in" style="font-size:14px"></i> ${t('accessibleEdit') || 'Editar'}`;
+    editItem.onclick = () => { openAccessibleEditModal(gameId); popup.remove(); };
+    popup.appendChild(editItem);
+  }
+
+  const folderItem = document.createElement('button');
+  folderItem.className = 'steam-menu-item';
+  folderItem.innerHTML = '<i class="ti ti-folder-plus" style="font-size:14px"></i> ' + (t('addToFolder') || 'Agregar a carpeta');
+  folderItem.onclick = () => { openCardFolderPicker(gameId); popup.remove(); };
+  popup.appendChild(folderItem);
 
   const hideItem = document.createElement('button');
   hideItem.className = 'steam-menu-item';
   hideItem.innerHTML = hidden ? '<i class="ti ti-eye" style="font-size:14px"></i> Mostrar' : '<i class="ti ti-eye-off" style="font-size:14px"></i> Ocultar';
   hideItem.onclick = () => { toggleHideGame(gameId, hidden); popup.remove(); };
+  popup.appendChild(hideItem);
 
   const deleteItem = document.createElement('button');
   deleteItem.className = 'steam-menu-item';
   deleteItem.style.color = '#E24B4A';
   deleteItem.innerHTML = '<i class="ti ti-trash" style="font-size:14px"></i> Borrar';
   deleteItem.onclick = () => { deleteGame(gameId); popup.remove(); };
-
-  popup.appendChild(hideItem);
   popup.appendChild(deleteItem);
+
   document.body.appendChild(popup);
   _positionFixedPopup(popup, btn);
 
@@ -2511,8 +2526,12 @@ function gameCardHtml(g, opts) {
   // se refleje al instante sin re-fetch.
   const rawScore = g._steamScoreRaw || g.steam_score;
   let _score = rawScore ? steamScoreLabel[rawScore] : null;
+  // Mostrar el % exacto de reseñas positivas si lo tenemos (mas compacto que
+  // el texto descriptivo) — cae al texto ("Pocas reseñas"/"Sin calificaciones")
+  // cuando Steam no da un total de reseñas util para calcular %.
+  const scoreText = (_score && g._steamScorePct != null) ? `${g._steamScorePct}%` : (_score ? _score.label : null);
   const scoreEl = (_score && g.platform === 'Steam')
-    ? `<span id="score-${g.id}" class="steam-score ${_score.cls}">${_score.label}</span>`
+    ? `<span id="score-${g.id}" class="steam-score ${_score.cls}" title="${esc(_score.label)}">${scoreText}</span>`
     : (g.platform === 'Steam' ? `<span id="score-${g.id}"></span>` : '');
 
   // Si ya tenemos el promedio de la comunidad en cache (de un render anterior
@@ -2531,30 +2550,31 @@ function gameCardHtml(g, opts) {
     </div>
     <div>
       <div class="game-name">${esc(g.name)}</div>
-      <div class="game-meta">
-        ${platBadge(g.platform)}
-        ${scoreEl}
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-        <div class="sdot s-${g.status}"></div>
-        <select class="status-sel status-select" onchange="changeStatus('${g.id}',this.value)" style="color:${STATUS_DOT_COLORS[g.status]||''}">
-          ${statusOptionsHtml(g.status)}
+      <div class="game-card-grid">
+        <div class="game-meta">
+          ${platBadge(g.platform)}
+          ${scoreEl}
+        </div>
+        <div></div>
+
+        <select class="genre-sel genre-select" data-gid="${g.id}" onchange="changeGenre('${g.id}',this.value)" style="font-size:11px;width:auto;max-width:100%;padding:2px 4px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text2)">
+          ${genreOptions(g.genre)}
         </select>
-      </div>
-      ${g.status !== 'Deseados' ? `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap"><div id="stars-${g.id}">${starPickerHtml(g.id, g.user_rating || 0)}</div><span id="community-${g.id}" style="${communityStyle};align-items:center;gap:3px;font-size:11px;color:var(--text2)">${communityHtml}</span></div>` : ''}
-      <div class="game-foot">
-        ${g.status !== 'Deseados' ? (g.is_manual ? `<span style="cursor:pointer;text-decoration:underline dotted" data-gameid="${g.id}" data-hours="${g.hours_played}" onclick="editHoursById(this, event)" title="Editar horas"><i class="ti ti-clock" style="font-size:12px"></i>${hours}</span>` : `<span><i class="ti ti-clock" style="font-size:12px"></i>${hours}</span>`) : ''}
-        ${g.status !== 'Deseados' ? lastPlayedEl : ''}
-      </div>
-    </div>
-    <div class="game-status-col">
-      <select class="genre-sel genre-select" data-gid="${g.id}" onchange="changeGenre('${g.id}',this.value)" style="font-size:11px;margin-bottom:4px;width:auto;max-width:100%;padding:2px 4px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text2)">
-        ${genreOptions(g.genre)}
-      </select>
-      <div style="display:flex;align-items:center;gap:4px">
-        <button onclick="openCardFolderPicker('${g.id}')" title="Agregar a carpeta" style="font-size:11px;padding:2px 8px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer"><i class="ti ti-folder-plus" style="font-size:11px"></i></button>
-        ${hideLupa ? '' : `<button onclick="openAccessibleEditModal('${g.id}')" title="${t('accessibleEdit') || 'Editar (modo accesible)'}" style="font-size:12px;padding:2px 8px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer"><i class="ti ti-zoom-in" style="font-size:12px"></i></button>`}
-        <button onclick="toggleGameActionsMenu('${g.id}', ${g.hidden}, event)" title="Más opciones" style="font-size:12px;padding:2px 8px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-weight:700">+</button>
+        <div style="display:flex;align-items:center;gap:6px;justify-self:end">
+          <div class="sdot s-${g.status}"></div>
+          <select class="status-sel status-select" onchange="changeStatus('${g.id}',this.value)" style="color:${STATUS_DOT_COLORS[g.status]||''}">
+            ${statusOptionsHtml(g.status)}
+          </select>
+        </div>
+
+        ${g.status !== 'Deseados' ? `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><div id="stars-${g.id}">${starPickerHtml(g.id, g.user_rating || 0)}</div><span id="community-${g.id}" style="${communityStyle};align-items:center;gap:3px;font-size:11px;color:var(--text2)">${communityHtml}</span></div>` : '<div></div>'}
+        <div></div>
+
+        <div class="game-foot">
+          ${g.status !== 'Deseados' ? (g.is_manual ? `<span style="cursor:pointer;text-decoration:underline dotted" data-gameid="${g.id}" data-hours="${g.hours_played}" onclick="editHoursById(this, event)" title="Editar horas"><i class="ti ti-clock" style="font-size:12px"></i>${hours}</span>` : `<span><i class="ti ti-clock" style="font-size:12px"></i>${hours}</span>`) : ''}
+          ${g.status !== 'Deseados' ? lastPlayedEl : ''}
+        </div>
+        <button onclick="toggleGameActionsMenu('${g.id}', ${g.hidden}, event, ${hideLupa ? 'true' : 'false'})" title="Más opciones" style="justify-self:end;font-size:12px;padding:2px 10px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-weight:700">•••</button>
       </div>
     </div>
   </div>`;
@@ -2609,8 +2629,10 @@ async function renderGames() {
           const info = steamScoreLabel[score.review_score_desc];
           if (!info) return;
           g._steamScoreRaw = score.review_score_desc;
+          g._steamScorePct = score.total_reviews > 0 ? Math.round(100 * score.total_positive / score.total_reviews) : null;
+          const text = g._steamScorePct != null ? `${g._steamScorePct}%` : info.label;
           const el = document.getElementById(`score-${g.id}`);
-          if (el) el.outerHTML = `<span id="score-${g.id}" class="steam-score ${info.cls}">${info.label}</span>`;
+          if (el) el.outerHTML = `<span id="score-${g.id}" class="steam-score ${info.cls}" title="${esc(info.label)}">${text}</span>`;
         });
       }
     } catch(e) {}
