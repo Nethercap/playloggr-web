@@ -524,7 +524,7 @@
       <div class="stat-card" style="border-color:rgba(55,138,221,0.3)"><div class="stat-label" data-i18n="playing" style="color:var(--blue)">Jugando</div><div class="stat-value" id="g-playing" style="color:var(--blue)">—</div></div>
       <div class="stat-card" style="border-color:rgba(29,158,117,0.3)"><div class="stat-label" data-i18n="completed" style="color:var(--green)">Completados</div><div class="stat-value" id="g-completed" style="color:var(--green)">—</div></div>
       <div class="stat-card"><div class="stat-label" data-i18n="backlog" style="color:var(--gray)">Backlog</div><div class="stat-value" id="g-backlog" style="color:var(--gray)">—</div></div>
-      <div class="stat-card"><div class="stat-label" data-i18n="totalHours">Horas totales</div><div class="stat-value" id="g-hours">—</div></div>
+      <div class="stat-card"><div class="stat-label" data-i18n="hours">Horas</div><div class="stat-value" id="g-hours">—</div></div>
       <div class="stat-card" style="cursor:pointer;border-color:rgba(239,159,39,0.3)" onclick="setStatus('Deseados')" data-i18n-title="seeWishlist" title="Ver deseados">
         <div class="stat-label" data-i18n="wishlist" style="color:var(--amber)">Deseados</div>
         <div class="stat-value" id="g-wishlist" style="color:var(--amber)">—</div>
@@ -570,7 +570,7 @@
     </div>
 
     <!-- Filter bar -->
-    <div id="filter-bar" style="display:flex;flex-direction:column;gap:20px;padding:10px 0 12px">
+    <div id="filter-bar" style="display:flex;flex-direction:column;gap:8px;padding:10px 0 12px">
       <!-- Row 1: filtros (estado/plataforma/genero/etc), swipeable -->
       <div id="filter-bar-row1" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;row-gap:4px">
         <!-- Filter dropdowns injected by JS -->
@@ -588,7 +588,7 @@
       </div>
 
       <!-- Row 1b: vista lista/cuadricula + ocultos, en su propia linea -->
-      <div id="filter-bar-row1b" style="display:flex;gap:6px;align-items:center">
+      <div id="filter-bar-row1b" style="display:flex;gap:6px;align-items:center;margin-top:18px;padding-top:14px;border-top:0.5px solid var(--border)">
         <!-- List/Grid view toggle -->
         <div id="view-mode-toggle" style="display:flex;border:0.5px solid var(--border);border-radius:6px;overflow:hidden">
           <button id="view-mode-list" class="view-mode-btn active" onclick="setLibraryViewMode('list')" title="Lista"><i class="ti ti-list" style="font-size:12px"></i></button>
@@ -603,7 +603,7 @@
       </div>
 
       <!-- Row 2: sort + search -->
-      <div style="display:flex;align-items:center;gap:6px">
+      <div id="filter-bar-row2" style="display:flex;align-items:center;gap:6px;margin-top:18px;padding-top:14px;border-top:0.5px solid var(--border)">
         <select id="sort-sel" onchange="applyFilters()" style="font-size:12px;padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text)">
           <option value="name" data-i18n="name">Nombre</option>
           <option value="hours" data-i18n="hours">Horas</option>
