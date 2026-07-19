@@ -2545,6 +2545,24 @@ function lastPlayedDisplay(iso) {
   return `${d}/${m}/${y}`;
 }
 
+// Reseña (Steam en % si es de Steam, sino puntaje combinado de IGDB como
+// respaldo) — usado tanto en la card de lista como en el tile de cuadricula.
+// Resuelve el label en vivo contra el idioma actual (steamScoreLabel es un
+// Proxy que depende de currentLang) — nunca cachea el label ya traducido,
+// solo la descripcion cruda, para que el cambio de idioma se refleje al
+// instante sin re-fetch.
+function scoreBadgeHtml(g) {
+  const rawScore = g._steamScoreRaw || g.steam_score;
+  let _score = rawScore ? steamScoreLabel[rawScore] : null;
+  const scoreText = (_score && g._steamScorePct != null) ? `${g._steamScorePct}%` : (_score ? _score.label : null);
+  const igdbPct = g._igdbRatingPct;
+  return (_score && g.platform === 'Steam')
+    ? `<span id="score-${g.id}" class="steam-score ${_score.cls}" title="${esc(_score.label)}">${scoreText}</span>`
+    : (igdbPct != null
+        ? `<span id="score-${g.id}" class="steam-score ${igdbScoreClass(igdbPct)}" title="Puntaje IGDB (crítica + comunidad)">${igdbPct}%</span>`
+        : `<span id="score-${g.id}"></span>`);
+}
+
 function gameCardHtml(g, opts) {
   const hideLupa = opts && opts.hideLupa;
   const hours = g.hours_played != null ? `${parseFloat(g.hours_played).toFixed(1)} hs` : '— hs';
@@ -2553,25 +2571,7 @@ function gameCardHtml(g, opts) {
     ? `<span style="cursor:pointer;text-decoration:underline dotted" data-gameid="${g.id}" data-lastplayed="${g.last_played || ''}" onclick="editLastPlayedById(this, event)" title="Editar última vez jugado"><i class="ti ti-calendar-event" style="font-size:12px"></i>${lastPlayedLabel}</span>`
     : (g.last_played ? `<span title="Última vez jugado"><i class="ti ti-calendar-event" style="font-size:12px"></i>${lastPlayedLabel}</span>` : '');
   const cover = steamCoverHtml(g);
-  // Resolver el score en vivo contra el idioma actual (steamScoreLabel es
-  // un Proxy que depende de currentLang) — nunca cachear el label ya
-  // traducido, solo la descripcion cruda, para que el cambio de idioma
-  // se refleje al instante sin re-fetch.
-  const rawScore = g._steamScoreRaw || g.steam_score;
-  let _score = rawScore ? steamScoreLabel[rawScore] : null;
-  // Mostrar el % exacto de reseñas positivas si lo tenemos (mas compacto que
-  // el texto descriptivo) — cae al texto ("Pocas reseñas"/"Sin calificaciones")
-  // cuando Steam no da un total de reseñas util para calcular %.
-  const scoreText = (_score && g._steamScorePct != null) ? `${g._steamScorePct}%` : (_score ? _score.label : null);
-  // Si no hay reseña de Steam (juego de otra plataforma, manual, o Steam sin
-  // reviews todavia), mostrar el puntaje combinado de IGDB como respaldo —
-  // se completa en background, ver el fetch de "igdbRating" mas abajo.
-  const igdbPct = g._igdbRatingPct;
-  const scoreEl = (_score && g.platform === 'Steam')
-    ? `<span id="score-${g.id}" class="steam-score ${_score.cls}" title="${esc(_score.label)}">${scoreText}</span>`
-    : (igdbPct != null
-        ? `<span id="score-${g.id}" class="steam-score ${igdbScoreClass(igdbPct)}" title="Puntaje IGDB (crítica + comunidad)">${igdbPct}%</span>`
-        : `<span id="score-${g.id}"></span>`);
+  const scoreEl = scoreBadgeHtml(g);
 
   // Si ya tenemos el promedio de la comunidad en cache (de un render anterior
   // en esta sesion), mostrarlo de una en vez de arrancar vacio y parpadear.
@@ -2733,7 +2733,10 @@ function renderGamesGrid(items) {
     return `<div class="lib-grid-tile" id="gridcard-${g.id}" ondblclick="handleCardDoubleTap('${g.id}', event)">
       <div style="position:relative">
         <div style="width:100%;aspect-ratio:2/3;background:var(--bg3);overflow:hidden">${cover}</div>
-        <div style="position:absolute;top:6px;left:6px">${platIconOnly(g.platform)}</div>
+        <div style="position:absolute;top:6px;left:6px;display:flex;align-items:center;gap:4px;max-width:calc(100% - 36px);overflow:hidden">
+          ${platIconOnly(g.platform)}
+          ${scoreBadgeHtml(g)}
+        </div>
         <button onclick="openAccessibleEditModal('${g.id}')" title="${t('seeAllOptions')}"
           style="position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,0.6);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ti-dots" style="font-size:14px"></i></button>
       </div>
