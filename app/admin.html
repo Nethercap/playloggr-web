@@ -21,7 +21,7 @@
   .metric-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
   .metric-value { font-size: 22px; font-weight: 600; }
   label { font-size: 12px; color: var(--text2); font-weight: 500; display:block; margin-bottom: 4px; }
-  input { font-size: 13px; padding: 8px 10px; border-radius: 8px; border: 0.5px solid var(--border2); background: var(--bg3); color: var(--text); width: 100%; }
+  input, select { font-size: 13px; padding: 8px 10px; border-radius: 8px; border: 0.5px solid var(--border2); background: var(--bg3); color: var(--text); width: 100%; }
   button { font-size: 13px; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-weight: 500; }
   .btn-primary { background: var(--green); color: #fff; }
   .btn-secondary { background: var(--bg3); color: var(--text2); border: 0.5px solid var(--border2); }
@@ -158,6 +158,15 @@
       <div>
         <label>Buscar por email o username</label>
         <input type="text" id="users-search" placeholder="buscar..." onkeydown="if(event.key==='Enter'){usersPage=1; loadUsers();}" />
+      </div>
+      <div>
+        <label>Ordenar por</label>
+        <select id="users-sort" onchange="usersPage=1; loadUsers();">
+          <option value="id_desc">Más nuevos primero</option>
+          <option value="id_asc">Más antiguos primero</option>
+          <option value="last_seen_desc">Última vez: más reciente</option>
+          <option value="last_seen_asc">Última vez: más antigua</option>
+        </select>
       </div>
       <button class="btn-secondary" onclick="usersPage=1; loadUsers();">Buscar</button>
     </div>
@@ -409,7 +418,8 @@ async function loadUsers() {
   const search = document.getElementById('users-search').value.trim();
   tbody.innerHTML = '<tr><td colspan="6" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>';
   try {
-    const url = `${API}/admin/users?page=${usersPage}&search=${encodeURIComponent(search)}`;
+    const sort = document.getElementById('users-sort').value;
+    const url = `${API}/admin/users?page=${usersPage}&search=${encodeURIComponent(search)}&sort=${sort}`;
     const res = await fetch(url, { headers: headers() });
     const d = await res.json();
     if (!res.ok) throw new Error(d.detail || 'Error');
