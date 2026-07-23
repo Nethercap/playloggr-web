@@ -88,26 +88,6 @@
   </div>
 
   <div class="card">
-    <strong>Gestión de cuentas</strong>
-    <p style="font-size:11px; color:var(--text2); margin:6px 0 12px">
-      Manual por ahora — se va a reemplazar por Google Play Billing más adelante.
-    </p>
-    <div class="row">
-      <div>
-        <label>Email</label>
-        <input type="email" id="lookup-email" placeholder="usuario@email.com" onkeydown="if(event.key==='Enter') lookupUser()" />
-      </div>
-      <button class="btn-secondary" onclick="lookupUser()">Buscar</button>
-    </div>
-    <div class="lookup-result" id="lookup-result"></div>
-    <div class="row" style="margin-top:12px">
-      <button class="btn-primary" onclick="setPremium(true)">Marcar Premium</button>
-      <button class="btn-danger" onclick="setPremium(false)">Marcar Gratis</button>
-    </div>
-    <div class="msg" id="premium-msg"></div>
-  </div>
-
-  <div class="card">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
       <strong>PSN — cuenta de servicio</strong>
       <button class="btn-secondary" style="padding:4px 10px; font-size:11px" onclick="loadPsnStatus()">↻ Actualizar</button>
@@ -229,10 +209,10 @@
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>Usuario</th><th>Email</th><th>Nivel</th><th>Última vez</th><th></th><th></th></tr>
+          <tr><th>Usuario</th><th>Email</th><th>Nivel</th><th>Última vez</th><th></th><th></th><th></th></tr>
         </thead>
         <tbody id="users-tbody">
-          <tr><td colspan="6" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>
+          <tr><td colspan="7" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>
         </tbody>
       </table>
     </div>
@@ -246,6 +226,18 @@ let adminKey = localStorage.getItem('admin_key') || '';
 
 function headers() {
   return { 'X-Admin-Key': adminKey, 'Content-Type': 'application/json' };
+}
+
+// fetch con timeout — evita que un spinner quede colgado para siempre si
+// el request se cuelga (deploy en curso, red lenta, etc.)
+async function fetchTimeout(url, options = {}, ms = 15000) {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), ms);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(t);
+  }
 }
 
 async function tryLogin() {
@@ -292,7 +284,7 @@ async function loadServicesHealth() {
   const box = document.getElementById('services-health-list');
   box.innerHTML = '<div style="color:var(--text2); font-size:13px"><div class="spinner"></div> Verificando...</div>';
   try {
-    const res = await fetch(`${API}/admin/services-health`, { headers: headers() });
+    const res = await fetchTimeout(`${API}/admin/services-health`, { headers: headers() }, 20000);
     if (!res.ok) throw new Error();
     const d = await res.json();
     box.innerHTML = d.services.map(s => {
@@ -313,7 +305,7 @@ async function loadServicesHealth() {
         </div>`;
     }).join('');
   } catch (e) {
-    box.innerHTML = '<span style="color:var(--red)">Error al verificar los servicios</span>';
+    box.innerHTML = `<span style="color:var(--red)">${e.name === 'AbortError' ? 'Tardó demasiado (timeout) — probá de nuevo' : 'Error al verificar los servicios'}</span>`;
   }
 }
 
@@ -382,12 +374,9 @@ function renderMetrics(d) {
     ['Usuarios totales', d.total_users],
     ['Premium', d.premium_users],
     ['Gratis', d.free_users],
-    ['Juegos totales', d.total_games],
-    ['Logros desbloqueados', d.total_achievement_unlocks],
-    ['Amistades', d.total_accepted_friendships],
-    ['Carpetas', d.total_folders],
-    ['Altas (7 días)', d.signups_7d],
-    ['Altas (30 días)', d.signups_30d],
+    ['Juegos en biblioteca', d.library_games_total],
+    ['Juegos en deseados', d.wishlist_games_total],
+    ['Horas totales', d.total_hours_all],
   ];
   document.getElementById('metrics-grid').innerHTML = items.map(([label, value]) => `
     <div class="metric">
@@ -397,33 +386,8 @@ function renderMetrics(d) {
   `).join('');
 }
 
-async function lookupUser() {
-  const email = document.getElementById('lookup-email').value.trim();
-  const result = document.getElementById('lookup-result');
-  if (!email) return;
-  result.style.display = 'block';
-  result.textContent = 'Buscando...';
-  try {
-    const res = await fetch(`${API}/admin/lookup?email=${encodeURIComponent(email)}`, { headers: headers() });
-    const d = await res.json();
-    if (!res.ok) throw new Error(d.detail || 'Error');
-    result.innerHTML = `
-      <strong>${d.username}</strong> (${d.email})<br>
-      Nivel ${d.level} · ${d.is_premium ? '<span style="color:var(--green)">Premium</span>' : '<span style="color:var(--text2)">Gratis</span>'}<br>
-      Alta: ${new Date(d.created_at).toLocaleDateString('es-AR')}
-    `;
-  } catch (e) {
-    result.textContent = e.message || 'Usuario no encontrado';
-  }
-}
-
-async function setPremium(isPremium) {
-  const email = document.getElementById('lookup-email').value.trim();
-  const msg = document.getElementById('premium-msg');
-  if (!email) { alert('Ingresá un email primero'); return; }
-  msg.style.display = 'block';
-  msg.style.color = 'var(--text2)';
-  msg.textContent = 'Aplicando...';
+async function adminTogglePremium(email, isPremium) {
+  if (!confirm(`¿Marcar ${email} como ${isPremium ? 'Premium' : 'Gratis'}?`)) return;
   try {
     const res = await fetch(`${API}/admin/set-premium`, {
       method: 'POST',
@@ -432,13 +396,10 @@ async function setPremium(isPremium) {
     });
     const d = await res.json();
     if (!res.ok) throw new Error(d.detail || 'Error');
-    msg.style.color = 'var(--green)';
-    msg.textContent = `✓ ${d.user_id ? 'Actualizado' : 'OK'}: ${email} → ${isPremium ? 'Premium' : 'Gratis'}`;
-    lookupUser();
+    loadUsers();
     loadMetrics();
   } catch (e) {
-    msg.style.color = 'var(--red)';
-    msg.textContent = e.message || 'Error al actualizar';
+    alert(e.message || 'Error al actualizar');
   }
 }
 
@@ -459,7 +420,7 @@ function _fmtPushDate(iso) {
 async function loadPushStatus() {
   const tbody = document.getElementById('push-status-tbody');
   try {
-    const res = await fetch(`${API}/admin/push/status`, { headers: headers() });
+    const res = await fetchTimeout(`${API}/admin/push/status`, { headers: headers() });
     const d = await res.json();
     if (!res.ok) throw new Error();
     tbody.innerHTML = d.pushes.map(p => `
@@ -472,7 +433,7 @@ async function loadPushStatus() {
       </tr>
     `).join('');
   } catch (e) {
-    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--red)">Error al cargar</td></tr>';
+    tbody.innerHTML = `<tr><td colspan="5" style="color:var(--red)">${e.name === 'AbortError' ? 'Tardó demasiado (timeout) — probá de nuevo' : 'Error al cargar'}</td></tr>`;
   }
 }
 
@@ -587,7 +548,7 @@ let usersPage = 1;
 async function loadUsers() {
   const tbody = document.getElementById('users-tbody');
   const search = document.getElementById('users-search').value.trim();
-  tbody.innerHTML = '<tr><td colspan="6" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="7" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>';
   try {
     const sort = document.getElementById('users-sort').value;
     const url = `${API}/admin/users?page=${usersPage}&search=${encodeURIComponent(search)}&sort=${sort}`;
@@ -595,7 +556,7 @@ async function loadUsers() {
     const d = await res.json();
     if (!res.ok) throw new Error(d.detail || 'Error');
     if (d.users.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" style="color:var(--text2)">Sin resultados</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="color:var(--text2)">Sin resultados</td></tr>';
     } else {
       tbody.innerHTML = d.users.map(u => `
         <tr>
@@ -603,6 +564,7 @@ async function loadUsers() {
           <td>${u.email}</td>
           <td>${u.level} · <span class="badge ${u.is_premium ? 'badge-premium' : 'badge-free'}">${u.is_premium ? 'Premium' : 'Gratis'}</span></td>
           <td>${formatLastSeen(u.last_seen_at)}</td>
+          <td><button class="btn-secondary" style="padding:4px 8px; font-size:11px" onclick="adminTogglePremium('${u.email}', ${!u.is_premium})">${u.is_premium ? 'Marcar Gratis' : 'Marcar Premium'}</button></td>
           <td><button class="icon-btn" title="Restablecer contraseña" onclick="adminResetPassword('${u.email}')">🔑</button></td>
           <td><button class="icon-btn" title="Eliminar usuario" onclick="adminDeleteUser('${u.email}')">🗑️</button></td>
         </tr>
@@ -614,7 +576,7 @@ async function loadUsers() {
       <button class="btn-secondary" style="padding:4px 10px" ${d.page >= d.total_pages ? 'disabled' : ''} onclick="usersPage=${d.page + 1}; loadUsers();">→</button>
     `;
   } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="6" style="color:var(--red)">${e.message || 'Error al cargar usuarios'}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="color:var(--red)">${e.message || 'Error al cargar usuarios'}</td></tr>`;
   }
 }
 
