@@ -152,6 +152,49 @@
 
   <div class="card">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
+      <strong>Novedades — push automático</strong>
+      <button class="btn-secondary" style="padding:4px 10px; font-size:11px" onclick="loadPushStatus()">↻ Actualizar</button>
+    </div>
+    <p style="font-size:11px; color:var(--text2); margin-bottom:12px">
+      Cada uno corre solo cuando corresponde según su cadencia (el cron externo dispara todos los días/el día que toque, el backend decide si ya es hora). "Disparar ahora" siempre fuerza el envío, ignorando la cadencia — útil para probar.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Novedad</th><th>Última corrida</th><th>Resultado</th><th>Notificados</th><th></th></tr></thead>
+        <tbody id="push-status-tbody">
+          <tr><td colspan="5" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="msg" id="push-trigger-msg"></div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
+      <strong>Push personalizado</strong>
+    </div>
+    <p style="font-size:11px; color:var(--text2); margin-bottom:12px">
+      Manda una notificación con título y texto libre a todos los usuarios con la app instalada. Al tocarla, simplemente abre la app.
+    </p>
+    <div class="row">
+      <div>
+        <label>Título</label>
+        <input type="text" id="custom-push-title" placeholder="Ej: ¡Nueva función!" />
+      </div>
+    </div>
+    <div style="margin-top:8px">
+      <label>Texto</label>
+      <textarea id="custom-push-body" rows="2" placeholder="Escribí el mensaje..."
+        style="font-size:13px; padding:8px 10px; border-radius:8px; border:0.5px solid var(--border2); background:var(--bg3); color:var(--text); width:100%; font-family:inherit; resize:vertical"></textarea>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn-primary" onclick="sendCustomPush()">Enviar a todos</button>
+    </div>
+    <div class="msg" id="custom-push-msg"></div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
       <strong>Usuarios totales</strong>
     </div>
     <div class="row">
@@ -205,6 +248,7 @@ async function tryLogin() {
     loadUsers();
     loadPsnStatus();
     loadAnnouncements();
+    loadPushStatus();
   } else {
     document.getElementById('login-err').style.display = 'block';
   }
@@ -346,6 +390,84 @@ async function setPremium(isPremium) {
   } catch (e) {
     msg.style.color = 'var(--red)';
     msg.textContent = e.message || 'Error al actualizar';
+  }
+}
+
+const PUSH_LABELS = {
+  friends_playing:  'Amigos jugando esto',
+  popular_wishlist: 'Popular en Deseados',
+  most_hours:       'Más horas (3 días)',
+  new_releases:     'Nuevos lanzamientos',
+  period_week:      'Resumen semanal',
+  period_month:     'Resumen mensual',
+};
+
+function _fmtPushDate(iso) {
+  if (!iso) return 'Nunca';
+  return new Date(iso).toLocaleString('es-AR');
+}
+
+async function loadPushStatus() {
+  const tbody = document.getElementById('push-status-tbody');
+  try {
+    const res = await fetch(`${API}/admin/push/status`, { headers: headers() });
+    const d = await res.json();
+    if (!res.ok) throw new Error();
+    tbody.innerHTML = d.pushes.map(p => `
+      <tr>
+        <td><strong>${PUSH_LABELS[p.push_type] || p.push_type}</strong><br><span style="font-size:10px;color:var(--text2)">${p.description}</span></td>
+        <td>${_fmtPushDate(p.last_run_at)}</td>
+        <td>${p.last_status === 'ok' ? '<span class="badge badge-premium">OK</span>' : p.last_status === 'error' ? '<span class="badge" style="background:var(--red);color:#fff">Error</span>' : '<span class="badge badge-free">Sin corridas</span>'}</td>
+        <td>${p.users_notified ?? 0}</td>
+        <td><button class="btn-secondary" style="padding:4px 10px; font-size:11px" onclick="triggerPush('${p.push_type}')">Disparar ahora</button></td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--red)">Error al cargar</td></tr>';
+  }
+}
+
+async function triggerPush(pushType) {
+  const msg = document.getElementById('push-trigger-msg');
+  msg.style.display = 'block';
+  msg.style.color = 'var(--text2)';
+  msg.textContent = `Disparando ${PUSH_LABELS[pushType] || pushType}...`;
+  try {
+    const res = await fetch(`${API}/admin/push/trigger?push_type=${encodeURIComponent(pushType)}`, {
+      method: 'POST', headers: headers(),
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    msg.style.color = 'var(--green)';
+    msg.textContent = `Listo — ${d.users_notified ?? 0} usuarios notificados.`;
+    loadPushStatus();
+  } catch (e) {
+    msg.style.color = 'var(--red)';
+    msg.textContent = e.message || 'No se pudo disparar';
+  }
+}
+
+async function sendCustomPush() {
+  const title = document.getElementById('custom-push-title').value.trim();
+  const body  = document.getElementById('custom-push-body').value.trim();
+  const msg   = document.getElementById('custom-push-msg');
+  if (!title || !body) { alert('Completá título y texto'); return; }
+  msg.style.display = 'block';
+  msg.style.color = 'var(--text2)';
+  msg.textContent = 'Enviando...';
+  try {
+    const res = await fetch(`${API}/admin/push/custom`, {
+      method: 'POST', headers: headers(), body: JSON.stringify({ title, body }),
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    msg.style.color = 'var(--green)';
+    msg.textContent = `Enviado a ${d.users_notified} usuarios.`;
+    document.getElementById('custom-push-title').value = '';
+    document.getElementById('custom-push-body').value = '';
+  } catch (e) {
+    msg.style.color = 'var(--red)';
+    msg.textContent = e.message || 'No se pudo enviar';
   }
 }
 
