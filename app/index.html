@@ -431,6 +431,7 @@
         </button>
         <div id="header-more-menu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:300;min-width:180px;box-shadow:0 4px 16px rgba(0,0,0,0.3);padding:4px 0">
           <button onclick="toggleLanguage()" class="steam-menu-item"><i class="ti ti-language" style="font-size:14px"></i> <span id="header-more-lang">EN</span></button>
+          <button onclick="openNovedadesPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-sparkles" style="font-size:14px"></i> <span data-i18n="novedades">Novedades</span></button>
           <button onclick="openStatsPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-chart-bar" style="font-size:14px"></i> <span data-i18n="stats">Estadísticas</span></button>
           <button onclick="openConfigPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-settings" style="font-size:14px"></i> <span data-i18n="config">Configuración</span></button>
           <button onclick="openFriendsPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-users" style="font-size:14px"></i> <span data-i18n="friends">Amigos</span></button>
@@ -968,6 +969,74 @@
   </div>
 </div>
 
+<!-- Novedades Modal -->
+<div class="modal-overlay" id="novedades-overlay">
+  <div class="modal" style="max-width:640px;max-height:85vh;display:flex;flex-direction:column">
+    <div class="modal-title"><i class="ti ti-sparkles"></i> <span data-i18n="novedades">Novedades</span></div>
+    <div id="novedades-content" style="overflow-y:auto;flex:1">
+      <div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeNovedadesPanel()" data-i18n="close">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Novedades: agregar juego desde un lanzamiento -->
+<div class="modal-overlay" id="novedades-add-overlay">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-title"><i class="ti ti-plus" style="color:#1D9E75"></i> <span id="novedades-add-name">-</span></div>
+    <div class="modal-grid">
+      <div class="modal-group full">
+        <label data-i18n="choosePlatform">Elegí la plataforma</label>
+        <select id="novedades-add-platform">
+          <option value="Steam">Steam</option>
+          <option value="Epic">Epic</option>
+          <option value="EA Play">EA Play</option>
+          <option value="Windows PC">Windows PC</option>
+          <option value="Mac iOS">Mac iOS</option>
+          <option value="PlayStation 5">PlayStation 5</option>
+          <option value="PlayStation 4">PlayStation 4</option>
+          <option value="PlayStation 3">PlayStation 3</option>
+          <option value="PlayStation 2">PlayStation 2</option>
+          <option value="PlayStation 1">PlayStation 1</option>
+          <option value="PSP Vita">PSP Vita</option>
+          <option value="XBOX X">XBOX X</option>
+          <option value="XBOX S">XBOX S</option>
+          <option value="XBOX PC">XBOX PC</option>
+          <option value="XBOX 360">XBOX 360</option>
+          <option value="XBOX One">XBOX One</option>
+          <option value="Nintendo Switch 1">Nintendo Switch 1</option>
+          <option value="Nintendo Switch 2">Nintendo Switch 2</option>
+          <option value="Nintendo 3DS">Nintendo 3DS</option>
+          <option value="Nintendo 64">Nintendo 64</option>
+          <option value="Nintendo Gamecube">Nintendo Gamecube</option>
+          <option value="Game Boy">Game Boy</option>
+          <option value="Game Boy Advance">Game Boy Advance</option>
+          <option value="SNES">SNES</option>
+          <option value="Sega Genesis">Sega Genesis</option>
+          <option value="Sega Dreamcast">Sega Dreamcast</option>
+          <option value="Meta Quest">Meta Quest</option>
+          <option value="Android">Android</option>
+          <option value="iOS">iOS</option>
+        </select>
+      </div>
+      <div class="modal-group full" style="display:flex;gap:8px">
+        <button id="novedades-add-lib-btn" onclick="setNovedadesAddTarget(false)" style="flex:1;padding:8px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px">
+          <i class="ti ti-books" style="font-size:14px"></i> <span data-i18n="library">Biblioteca</span>
+        </button>
+        <button id="novedades-add-wish-btn" onclick="setNovedadesAddTarget(true)" style="flex:1;padding:8px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px">
+          <i class="ti ti-bookmark" style="font-size:14px"></i> <span data-i18n="wishlist">Deseados</span>
+        </button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeNovedadesAddModal()" data-i18n="cancel">Cancelar</button>
+      <button class="btn-save" onclick="submitNovedadesAdd()" data-i18n="addGame">Agregar juego</button>
+    </div>
+  </div>
+</div>
+
 <!-- Friend Profile Modal (read-only) -->
 <div class="modal-overlay" id="friend-profile-overlay">
   <div class="modal" style="max-width:640px;max-height:85vh;display:flex;flex-direction:column">
@@ -1456,6 +1525,12 @@ const I18N = {
     noRankingsYet: 'No tenés rankings todavía. Creá uno.', noRankingGamesYet: 'Este ranking está vacío. Agregá juegos.',
     rankingLimitReached: 'Máximo 25 juegos por ranking', rankingFreeLimitReached: 'Límite de la versión gratis (3 rankings). Actualizá a premium para crear más.',
     removeFromRanking: 'Quitar del ranking', date: 'Fecha', quantity: 'Cantidad',
+    novedades: 'Novedades', novedadesError: 'No se pudo cargar Novedades', novedadesEmpty: 'Todavía no hay novedades para mostrar',
+    novedadesFriendsPlaying: 'Amigos jugando esto', novedadesPopularWishlist: 'Popular en Deseados',
+    novedadesMostHours: 'Más jugado', novedadesPlayers: 'jugadores',
+    novedadesRecentReleases: 'Recién salió', novedadesUpcomingReleases: 'Próximamente',
+    gameAddedToLibrary: 'Juego agregado a biblioteca', gameAddedToWishlist: 'Juego agregado a deseados',
+    choosePlatform: 'Elegí la plataforma',
   },
   en: {
     sync: 'Sync', stats: 'Stats', config: 'Settings', friends: 'Friends',
@@ -1585,6 +1660,12 @@ const I18N = {
     noRankingsYet: "You don't have any rankings yet. Create one.", noRankingGamesYet: 'This ranking is empty. Add games.',
     rankingLimitReached: 'Maximum 25 games per ranking', rankingFreeLimitReached: 'Free version limit (3 rankings). Upgrade to premium to create more.',
     removeFromRanking: 'Remove from ranking', date: 'Date', quantity: 'Quantity',
+    novedades: 'News', novedadesError: 'Could not load News', novedadesEmpty: 'No news to show yet',
+    novedadesFriendsPlaying: 'Friends playing this', novedadesPopularWishlist: 'Popular in Wishlist',
+    novedadesMostHours: 'Most played', novedadesPlayers: 'players',
+    novedadesRecentReleases: 'Just released', novedadesUpcomingReleases: 'Coming soon',
+    gameAddedToLibrary: 'Game added to library', gameAddedToWishlist: 'Game added to wishlist',
+    choosePlatform: 'Choose the platform',
   },
   pt: {
     sync: 'Sincronizar', stats: 'Estatísticas', config: 'Configurações', friends: 'Amigos',
@@ -1714,6 +1795,12 @@ const I18N = {
     noRankingsYet: 'Você ainda não tem rankings. Crie um.', noRankingGamesYet: 'Este ranking está vazio. Adicione jogos.',
     rankingLimitReached: 'Máximo de 25 jogos por ranking', rankingFreeLimitReached: 'Limite da versão gratuita (3 rankings). Atualize para premium para criar mais.',
     removeFromRanking: 'Remover do ranking', date: 'Data', quantity: 'Quantidade',
+    novedades: 'Novidades', novedadesError: 'Não foi possível carregar Novidades', novedadesEmpty: 'Ainda não há novidades para mostrar',
+    novedadesFriendsPlaying: 'Amigos jogando isso', novedadesPopularWishlist: 'Popular nos Desejados',
+    novedadesMostHours: 'Mais jogado', novedadesPlayers: 'jogadores',
+    novedadesRecentReleases: 'Lançou agora', novedadesUpcomingReleases: 'Em breve',
+    gameAddedToLibrary: 'Jogo adicionado à biblioteca', gameAddedToWishlist: 'Jogo adicionado aos desejados',
+    choosePlatform: 'Escolha a plataforma',
   },
 };
 
@@ -4896,6 +4983,222 @@ async function openAchievementsPanel() {
 function closeAchievementsPanel() {
   document.getElementById('achievements-overlay').classList.remove('open');
 }
+
+// ── Novedades ────────────────────────────────────────────────────────
+
+let _novedadesData = null;
+let _novedadesAddedIgdbIds = new Set();
+
+function _formatReleaseDate(iso) {
+  if (!iso || iso.length < 10) return '';
+  const meses = { es: ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'],
+                  en: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+                  pt: ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'] };
+  const arr = meses[currentLang] || meses.es;
+  const parts = iso.substring(0, 10).split('-');
+  if (parts.length !== 3) return '';
+  const month = parseInt(parts[1], 10);
+  if (!month || month < 1 || month > 12) return '';
+  return `${parts[2]} ${arr[month - 1]} ${parts[0]}`;
+}
+
+function _novedadesOwnedPillHtml(owned, platform) {
+  if (!owned) return '';
+  const isWishlist = owned === 'wishlist';
+  const color = isWishlist ? '#EF9F27' : 'var(--green)';
+  const label = isWishlist ? t('wishlist') : t('library');
+  const icon = isWishlist ? 'ti-bookmark' : 'ti-books';
+  return `
+    <div style="display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:20px;background:${color}26;margin-top:3px">
+      <i class="ti ${icon}" style="font-size:10px;color:${color}"></i>
+      <span style="font-size:9px;font-weight:600;color:${color}">${label}</span>
+    </div>
+    ${platform ? `<div style="font-size:9px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${platform}</div>` : ''}
+  `;
+}
+
+function _novedadesCoverRowHtml(games) {
+  if (!games.length) return '';
+  return `<div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:4px">
+    ${games.map(g => {
+      const added = _novedadesAddedIgdbIds.has(g.igdb_id) || !!g.owned;
+      const rating = g.total_rating;
+      const releaseDate = _formatReleaseDate(g.first_release_date);
+      const btnColor = g.owned === 'wishlist' ? '#EF9F27' : (added ? 'var(--green)' : 'rgba(0,0,0,0.55)');
+      return `
+      <div style="width:96px;flex-shrink:0">
+        <div style="position:relative;width:96px;height:118px;border-radius:8px;overflow:hidden;background:var(--bg3)">
+          <img src="${g.cover_url || ''}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'" />
+          ${rating != null ? `<div style="position:absolute;top:4px;left:4px;padding:1px 5px;border-radius:20px;background:${_ratingColor(rating)};color:#fff;font-size:9px;font-weight:600">${rating}%</div>` : ''}
+          <div onclick='${added ? '' : `openNovedadesAddModal(${JSON.stringify(g).replace(/'/g, "&apos;")})`}'
+               style="position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:${btnColor};border:1.5px solid #fff;display:flex;align-items:center;justify-content:center;cursor:${added ? 'default' : 'pointer'}">
+            <i class="ti ${added ? 'ti-check' : 'ti-plus'}" style="font-size:14px;color:#fff"></i>
+          </div>
+        </div>
+        <div style="font-size:11px;line-height:1.2;margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${g.name || ''}</div>
+        ${releaseDate ? `<div style="font-size:9.5px;color:var(--text2);margin-top:1px">${releaseDate}</div>` : ''}
+        ${_novedadesOwnedPillHtml(g.owned, g.platform)}
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function _ratingColor(pct) {
+  if (pct >= 95) return '#1D9E75';
+  if (pct >= 80) return '#4CAF50';
+  if (pct >= 70) return '#8BC34A';
+  if (pct >= 40) return '#EF9F27';
+  if (pct >= 20) return '#FF5722';
+  return '#E24B4A';
+}
+
+function _novedadesSimpleTileHtml(title, subtitle, trailing) {
+  return `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:6px;border-radius:8px;background:var(--bg3)">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;line-height:1.3;overflow-wrap:break-word">${title}</div>
+        ${subtitle ? `<div style="font-size:11px;color:var(--text2);margin-top:2px">${subtitle}</div>` : ''}
+      </div>
+      <div style="font-weight:600;color:var(--green);flex-shrink:0">${trailing}</div>
+    </div>`;
+}
+
+function _novedadesSectionHtml(icon, title, innerHtml) {
+  return `
+    <div style="margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <i class="ti ${icon}" style="font-size:16px;color:var(--green)"></i>
+        <span style="font-size:14px;font-weight:700">${title}</span>
+      </div>
+      ${innerHtml}
+    </div>`;
+}
+
+async function openNovedadesPanel() {
+  document.getElementById('novedades-overlay').classList.add('open');
+  const el = document.getElementById('novedades-content');
+  el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>${t('loading')}</div>`;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/novedades`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    _novedadesData = d;
+    _novedadesAddedIgdbIds = new Set();
+    ['recent', 'upcoming'].forEach(k => (d.releases[k] || []).forEach(g => { if (g.owned) _novedadesAddedIgdbIds.add(g.igdb_id); }));
+    _renderNovedades();
+  } catch (e) {
+    el.innerHTML = `<div style="color:var(--red);padding:16px">${e.message || t('novedadesError')}</div>`;
+  }
+}
+
+function _renderNovedades() {
+  const el = document.getElementById('novedades-content');
+  const d = _novedadesData;
+  if (!d) return;
+  const friendsPlaying = d.friends_playing || [];
+  const popularWishlist = d.popular_wishlist || [];
+  const mostHours = d.most_hours || [];
+  const recent = (d.releases && d.releases.recent) || [];
+  const upcoming = (d.releases && d.releases.upcoming) || [];
+
+  if (!friendsPlaying.length && !popularWishlist.length && !mostHours.length && !recent.length && !upcoming.length) {
+    el.innerHTML = `<div style="text-align:center;padding:40px 16px;color:var(--text2)"><i class="ti ti-sparkles" style="font-size:32px"></i><div style="margin-top:10px">${t('novedadesEmpty')}</div></div>`;
+    return;
+  }
+
+  let html = '';
+  if (friendsPlaying.length) {
+    html += _novedadesSectionHtml('ti-users', t('novedadesFriendsPlaying'),
+      friendsPlaying.map(g => _novedadesSimpleTileHtml(g.name, (g.friend_usernames || []).join(', '), g.friend_count)).join(''));
+  }
+  if (popularWishlist.length) {
+    html += _novedadesSectionHtml('ti-bookmark', t('novedadesPopularWishlist'),
+      popularWishlist.map(g => _novedadesSimpleTileHtml(g.name, '', g.user_count)).join(''));
+  }
+  if (mostHours.length) {
+    html += _novedadesSectionHtml('ti-clock', t('novedadesMostHours'),
+      mostHours.map(g => _novedadesSimpleTileHtml(g.name, `${g.players} ${t('novedadesPlayers')}`, `${g.hours}h`)).join(''));
+  }
+  if (recent.length) html += _novedadesSectionHtml('ti-sparkles', t('novedadesRecentReleases'), _novedadesCoverRowHtml(recent));
+  if (upcoming.length) html += _novedadesSectionHtml('ti-calendar-event', t('novedadesUpcomingReleases'), _novedadesCoverRowHtml(upcoming));
+  el.innerHTML = html;
+}
+
+function closeNovedadesPanel() {
+  document.getElementById('novedades-overlay').classList.remove('open');
+}
+
+let _novedadesAddRelease = null;
+let _novedadesAddToWishlist = false;
+
+function openNovedadesAddModal(release) {
+  _novedadesAddRelease = release;
+  _novedadesAddToWishlist = false;
+  document.getElementById('novedades-add-name').textContent = release.name || '';
+  document.getElementById('novedades-add-platform').value = 'Steam';
+  _updateNovedadesAddTargetUI();
+  document.getElementById('novedades-add-overlay').classList.add('open');
+}
+
+function setNovedadesAddTarget(toWishlist) {
+  _novedadesAddToWishlist = toWishlist;
+  _updateNovedadesAddTargetUI();
+}
+
+function _updateNovedadesAddTargetUI() {
+  const libBtn = document.getElementById('novedades-add-lib-btn');
+  const wishBtn = document.getElementById('novedades-add-wish-btn');
+  if (libBtn) {
+    libBtn.style.background = !_novedadesAddToWishlist ? 'rgba(29,158,117,0.15)' : 'transparent';
+    libBtn.style.border = !_novedadesAddToWishlist ? '1px solid var(--green)' : '1px solid var(--border2)';
+    libBtn.style.color = !_novedadesAddToWishlist ? 'var(--green)' : 'var(--text2)';
+  }
+  if (wishBtn) {
+    wishBtn.style.background = _novedadesAddToWishlist ? 'rgba(239,159,39,0.15)' : 'transparent';
+    wishBtn.style.border = _novedadesAddToWishlist ? '1px solid #EF9F27' : '1px solid var(--border2)';
+    wishBtn.style.color = _novedadesAddToWishlist ? '#EF9F27' : 'var(--text2)';
+  }
+}
+
+function closeNovedadesAddModal() {
+  document.getElementById('novedades-add-overlay').classList.remove('open');
+}
+
+async function submitNovedadesAdd() {
+  const release = _novedadesAddRelease;
+  if (!release) return;
+  const platform = document.getElementById('novedades-add-platform').value;
+  const body = {
+    id: `manual_igdb_${release.igdb_id}_${Date.now()}`,
+    name: release.name, platform,
+    status: _novedadesAddToWishlist ? 'Deseados' : 'Backlog',
+    hours_played: 0, cover_url: release.cover_url || null,
+    user_rating: 0, app_id: null, genre: release.genre || null,
+  };
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/game`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) { const d = await res.json(); alert(d.detail || 'Error'); return; }
+    _novedadesAddedIgdbIds.add(release.igdb_id);
+    closeNovedadesAddModal();
+    _renderNovedades();
+    queueToast(_novedadesAddToWishlist ? t('gameAddedToWishlist') : t('gameAddedToLibrary'));
+    syncAll(currentPage);
+    loadGlobalStats();
+  } catch (e) {
+    alert(t('errorAddingGame'));
+  }
+}
+
+document.getElementById('novedades-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('novedades-overlay')) closeNovedadesPanel();
+});
+document.getElementById('novedades-add-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('novedades-add-overlay')) closeNovedadesAddModal();
+});
 
 let _toastQueue = [];
 let _toastBusy = false;
