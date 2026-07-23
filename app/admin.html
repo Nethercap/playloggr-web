@@ -75,6 +75,19 @@
   </div>
 
   <div class="card">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
+      <strong>Estado de servicios</strong>
+      <button class="btn-secondary" style="padding:4px 10px; font-size:11px" onclick="loadServicesHealth()">↻ Verificar ahora</button>
+    </div>
+    <p style="font-size:11px; color:var(--text2); margin-bottom:12px">
+      Chequeo activo de los servicios externos de los que depende la app. Útil para triagear rápido cuando un usuario reporta un problema (login, sync, notificaciones, etc.) sin tener que investigar de cero.
+    </p>
+    <div id="services-health-list">
+      <div style="color:var(--text2); font-size:13px"><div class="spinner"></div> Cargando...</div>
+    </div>
+  </div>
+
+  <div class="card">
     <strong>Gestión de cuentas</strong>
     <p style="font-size:11px; color:var(--text2); margin:6px 0 12px">
       Manual por ahora — se va a reemplazar por Google Play Billing más adelante.
@@ -249,6 +262,7 @@ async function tryLogin() {
     loadPsnStatus();
     loadAnnouncements();
     loadPushStatus();
+    loadServicesHealth();
   } else {
     document.getElementById('login-err').style.display = 'block';
   }
@@ -266,6 +280,41 @@ function _fmtPsnDate(iso) {
   const dateStr = d.toLocaleString('es-AR', { dateStyle: 'medium', timeStyle: 'short' });
   const color = daysLeft < 3 ? 'var(--red)' : daysLeft < 10 ? 'var(--amber)' : 'var(--text2)';
   return `<span style="color:${color}">${dateStr} (${daysLeft >= 0 ? `en ${daysLeft}d` : 'vencido'})</span>`;
+}
+
+const SERVICE_STATUS_STYLE = {
+  ok:    { color: 'var(--green)', label: 'OK' },
+  warn:  { color: 'var(--amber)', label: 'Atención' },
+  error: { color: 'var(--red)',   label: 'Error' },
+};
+
+async function loadServicesHealth() {
+  const box = document.getElementById('services-health-list');
+  box.innerHTML = '<div style="color:var(--text2); font-size:13px"><div class="spinner"></div> Verificando...</div>';
+  try {
+    const res = await fetch(`${API}/admin/services-health`, { headers: headers() });
+    if (!res.ok) throw new Error();
+    const d = await res.json();
+    box.innerHTML = d.services.map(s => {
+      const st = SERVICE_STATUS_STYLE[s.status] || SERVICE_STATUS_STYLE.warn;
+      const urls = (s.urls || []).map(u => `<a href="${u}" target="_blank" style="color:var(--text2)">${u.replace(/^https?:\/\//, '')}</a>`).join(' · ');
+      const fixes = (s.possible_fixes || []).map(f => `<li>${f}</li>`).join('');
+      return `
+        <div style="background:var(--bg3); border-radius:8px; padding:10px 12px; margin-bottom:8px">
+          <div style="display:flex; align-items:center; gap:8px">
+            <span style="width:8px; height:8px; border-radius:50%; background:${st.color}; flex-shrink:0"></span>
+            <strong style="font-size:13px">${s.name}</strong>
+            <span style="font-size:10px; font-weight:600; color:${st.color}; margin-left:auto">${st.label}</span>
+          </div>
+          <div style="font-size:11px; color:var(--text2); margin-top:4px">${s.description}</div>
+          ${s.detail ? `<div style="font-size:11px; color:${st.color}; margin-top:4px">${s.detail}</div>` : ''}
+          ${urls ? `<div style="font-size:11px; margin-top:4px">${urls}</div>` : ''}
+          ${fixes ? `<details style="margin-top:6px"><summary style="font-size:11px; color:var(--text2); cursor:pointer">Posibles soluciones</summary><ul style="font-size:11px; color:var(--text2); margin:4px 0 0 16px; padding:0">${fixes}</ul></details>` : ''}
+        </div>`;
+    }).join('');
+  } catch (e) {
+    box.innerHTML = '<span style="color:var(--red)">Error al verificar los servicios</span>';
+  }
 }
 
 async function loadPsnStatus() {
