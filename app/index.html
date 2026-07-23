@@ -237,6 +237,10 @@
       font-size:26px; box-shadow:0 4px 14px rgba(0,0,0,0.35); cursor:pointer; z-index:150;
     }
     .fab-add-btn:active { transform:scale(0.94); }
+    /* El FAB (z-index:150) quedaba por encima de cualquier modal (z-index:100
+       o mas), tapando parte del editor de avatar y otros popups en mobile —
+       se oculta mientras haya cualquier modal-overlay abierto. */
+    body:has(.modal-overlay.open) .fab-add-btn { display:none !important; }
 
     /* ── Marcos de avatar animados (los 3 anteriores al ultimo: pulso; el
        ultimo/mas alto: degrade RGB desplazandose) ── */
