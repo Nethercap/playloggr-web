@@ -242,6 +242,31 @@
        se oculta mientras haya cualquier modal-overlay abierto. */
     body:has(.modal-overlay.open) .fab-add-btn { display:none !important; }
 
+    /* ── Seleccion masiva (bulk actions) ──────────────────────────────────
+       Desktop: el cuadrado de tilde esta siempre visible (se puede
+       seleccionar con un click directo). Mobile/tablet: queda oculto salvo
+       que ya se entro en "modo seleccion" (mantener pulsado sobre una card),
+       igual que en la app. */
+    .bulk-check {
+      display: none; align-items:center; justify-content:center;
+      width:20px; height:20px; border-radius:5px; border:1.5px solid var(--border2);
+      background:var(--bg2); cursor:pointer; flex-shrink:0; transition:background .1s,border-color .1s;
+    }
+    .bulk-check.checked { background:var(--green); border-color:var(--green); }
+    .bulk-check-grid { position:absolute; bottom:6px; right:6px; z-index:2; background:rgba(0,0,0,0.55); }
+    @media (min-width:641px) { .bulk-check { display:flex; } }
+    body.bulk-mode .bulk-check { display:flex; }
+
+    /* Barra flotante de acciones — deja espacio abajo para que nunca tape
+       el paginador (que sigue en el flujo normal del documento, no fixed). */
+    body.bulk-active .container { padding-bottom:90px; }
+    #bulk-action-bar {
+      position:fixed; left:50%; bottom:20px; transform:translateX(-50%);
+      background:var(--bg); border:0.5px solid var(--border2); border-radius:14px;
+      padding:10px 16px; display:flex; align-items:center; gap:12px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.4); z-index:400; max-width:calc(100vw - 32px);
+    }
+
     /* ── Marcos de avatar animados (los 3 anteriores al ultimo: pulso; el
        ultimo/mas alto: degrade RGB desplazandose) ── */
     .frame-pulse-fuego     { animation: framePulseFuego 2s ease-in-out infinite; }
@@ -1428,7 +1453,9 @@ const I18N = {
     public: 'Público', private: 'Privado', noAccount: '¿No tenés cuenta?', haveAccount: '¿Ya tenés cuenta?',
     register: 'Registrate', registerBtn: 'Registrarse', login: 'Iniciar sesión', forgotPassword: '¿Olvidaste tu contraseña?',
     backToGoogle: '← Volver a Google', email: 'Email', password: 'Contraseña',
-    selected: 'Seleccionados',
+    selected: 'Seleccionados', clearSelection: 'Borrar selección', actions: 'Acciones',
+    bulkFolderHint: 'Se agregan a las carpetas que marques (no se quitan de otras).',
+    confirmBulkDelete: '¿Eliminar {count} juegos seleccionados? Esta acción no se puede deshacer.',
     avatarFrame: 'Marco de avatar', race: 'Raza', hair: 'Pelo', headwear: 'Sombrero/Casco',
     shirt: 'Camisa', pants: 'Pantalón', boots: 'Botas', gloves: 'Guantes', shoulders: 'Hombreras', waist: 'Cinturón',
     deleteLibrary: 'Eliminar biblioteca', deleteLibrarySubtitle: 'Borra todos los juegos de tu biblioteca y deseados.',
@@ -1564,7 +1591,9 @@ const I18N = {
     public: 'Public', private: 'Private', noAccount: "Don't have an account?", haveAccount: 'Already have an account?',
     register: 'Sign up', registerBtn: 'Sign up', login: 'Log in', forgotPassword: 'Forgot your password?',
     backToGoogle: '← Back to Google', email: 'Email', password: 'Password',
-    selected: 'Selected',
+    selected: 'Selected', clearSelection: 'Clear selection', actions: 'Actions',
+    bulkFolderHint: 'They get added to the folders you check (not removed from others).',
+    confirmBulkDelete: 'Delete {count} selected games? This action cannot be undone.',
     avatarFrame: 'Avatar frame', race: 'Race', hair: 'Hair', headwear: 'Headwear',
     shirt: 'Shirt', pants: 'Pants', boots: 'Boots', gloves: 'Gloves', shoulders: 'Shoulders', waist: 'Belt',
     deleteLibrary: 'Delete library', deleteLibrarySubtitle: 'Deletes all games in your library and wishlist.',
@@ -1700,7 +1729,9 @@ const I18N = {
     public: 'Público', private: 'Privado', noAccount: 'Não tem uma conta?', haveAccount: 'Já tem uma conta?',
     register: 'Cadastre-se', registerBtn: 'Cadastrar', login: 'Entrar', forgotPassword: 'Esqueceu sua senha?',
     backToGoogle: '← Voltar ao Google', email: 'Email', password: 'Senha',
-    selected: 'Selecionados',
+    selected: 'Selecionados', clearSelection: 'Limpar seleção', actions: 'Ações',
+    bulkFolderHint: 'São adicionados às pastas marcadas (não removidos de outras).',
+    confirmBulkDelete: 'Excluir {count} jogos selecionados? Esta ação não pode ser desfeita.',
     avatarFrame: 'Moldura de avatar', race: 'Raça', hair: 'Cabelo', headwear: 'Chapéu/Capacete',
     shirt: 'Camisa', pants: 'Calça', boots: 'Botas', gloves: 'Luvas', shoulders: 'Ombreiras', waist: 'Cinto',
     deleteLibrary: 'Excluir biblioteca', deleteLibrarySubtitle: 'Apaga todos os jogos da sua biblioteca e desejados.',
@@ -2697,6 +2728,7 @@ function gameCardHtml(g, opts) {
       <div class="game-cover" data-gid="${g.id}" onclick="openCoverEditFromCard(this)" style="cursor:pointer;position:relative" title="Click para cambiar portada">${cover}<div class="cover-edit-hint" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);opacity:0;transition:opacity 0.15s;font-size:18px">✏️</div></div>
       <button class="play-btn" data-gid="${g.id}" onclick="togglePlaySession('${g.id}')" title="Registrar sesión de juego"
         style="width:28px;height:28px;min-width:28px;border-radius:50%;border:1.5px solid #1D9E75;background:transparent;color:#1D9E75;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1;padding:0">▶</button>
+      ${bulkCheckHtml(g.id)}
     </div>
     <div>
       <div class="game-name">${esc(g.name)}</div>
@@ -2851,6 +2883,7 @@ function renderGamesGrid(items) {
         </div>
         <button onclick="openAccessibleEditModal('${g.id}')" title="${t('seeAllOptions')}"
           style="position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,0.6);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ti-dots" style="font-size:14px"></i></button>
+        ${bulkCheckHtml(g.id, true)}
       </div>
       <div style="padding:8px">
         <div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(g.name)}">${esc(g.name)}</div>
@@ -2870,6 +2903,238 @@ function renderGamesGrid(items) {
       </div>
     </div>`;
   }).join('');
+}
+
+// ── Seleccion masiva (bulk actions) ──────────────────────────────────────
+// Desktop: el tilde esta siempre visible (ver CSS .bulk-check). Mobile:
+// se activa manteniendo pulsado sobre una card (o el cuadrito, si ya esta
+// en modo seleccion) — mismo gesto que la app. La seleccion (Set de ids)
+// persiste al cambiar de pagina porque solo se consulta al renderizar cada
+// card, nunca se resetea entre syncAll().
+let bulkSelected = new Set();
+
+function bulkCheckHtml(gameId, isGrid) {
+  const checked = bulkSelected.has(gameId);
+  const cls = 'bulk-check' + (isGrid ? ' bulk-check-grid' : '') + (checked ? ' checked' : '');
+  return `<div class="${cls}" data-bulkid="${gameId}" onclick="toggleBulkSelect('${gameId}', event)">${checked ? '<i class="ti ti-check" style="font-size:12px;color:#fff"></i>' : ''}</div>`;
+}
+
+function toggleBulkSelect(gameId, event) {
+  if (event) event.stopPropagation();
+  if (bulkSelected.has(gameId)) bulkSelected.delete(gameId);
+  else bulkSelected.add(gameId);
+  document.querySelectorAll(`[data-bulkid="${gameId}"]`).forEach(el => {
+    const checked = bulkSelected.has(gameId);
+    el.classList.toggle('checked', checked);
+    el.innerHTML = checked ? '<i class="ti ti-check" style="font-size:12px;color:#fff"></i>' : '';
+  });
+  updateBulkBar();
+}
+
+// Mantener pulsado (mobile) sobre una card entra en "modo seleccion" —
+// en desktop el tilde ya esta siempre visible asi que esto no hace falta.
+let _bulkPressTimer = null;
+function _bulkPressStart(e) {
+  const target = e.target.closest('button, select, a, input, .bulk-check');
+  if (target) return; // no interceptar controles propios de la card
+  const card = e.target.closest('.game-card, .lib-grid-tile');
+  if (!card) return;
+  const gameId = card.id.replace('gridcard-', '').replace('card-', '');
+  _bulkPressTimer = setTimeout(() => {
+    document.body.classList.add('bulk-mode');
+    toggleBulkSelect(gameId, null);
+  }, 500);
+}
+function _bulkPressCancel() { clearTimeout(_bulkPressTimer); }
+document.getElementById('game-list').addEventListener('touchstart', _bulkPressStart, { passive: true });
+document.getElementById('game-list').addEventListener('touchend', _bulkPressCancel);
+document.getElementById('game-list').addEventListener('touchmove', _bulkPressCancel);
+
+function clearBulkSelection() {
+  bulkSelected.forEach(gid => {
+    document.querySelectorAll(`[data-bulkid="${gid}"]`).forEach(el => { el.classList.remove('checked'); el.innerHTML = ''; });
+  });
+  bulkSelected.clear();
+  document.body.classList.remove('bulk-mode');
+  updateBulkBar();
+}
+
+function updateBulkBar() {
+  const count = bulkSelected.size;
+  document.body.classList.toggle('bulk-active', count > 0);
+  let bar = document.getElementById('bulk-action-bar');
+  if (count === 0) { if (bar) bar.remove(); return; }
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'bulk-action-bar';
+    document.body.appendChild(bar);
+  }
+  bar.innerHTML = `
+    <span style="font-size:13px;font-weight:600;white-space:nowrap">${count} ${t('selected')}</span>
+    <button class="btn-cancel" style="padding:6px 12px;font-size:12px" onclick="clearBulkSelection()">${t('clearSelection')}</button>
+    <div style="position:relative">
+      <button class="btn-save" style="padding:6px 14px;font-size:12px" onclick="toggleBulkActionsMenu(event)">${t('actions')} ▾</button>
+      <div id="bulk-actions-menu" style="display:none;position:absolute;bottom:calc(100% + 6px);left:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;min-width:190px;box-shadow:0 4px 16px rgba(0,0,0,0.3);padding:4px 0">
+        <button class="steam-menu-item" onclick="openBulkFolderPicker()"><i class="ti ti-folder" style="font-size:14px"></i> ${t('addToFolder')}</button>
+        <button class="steam-menu-item" onclick="openBulkStatusPicker()"><i class="ti ti-flag" style="font-size:14px"></i> ${t('status')}</button>
+        <button class="steam-menu-item" onclick="openBulkGenrePicker()"><i class="ti ti-tag" style="font-size:14px"></i> ${t('genre')}</button>
+        <button class="steam-menu-item" onclick="openBulkRatingPicker()"><i class="ti ti-star" style="font-size:14px"></i> ${t('rating')}</button>
+        <button class="steam-menu-item" onclick="bulkToggleHidden()"><i class="ti ti-eye-off" style="font-size:14px"></i> ${t('hideGame')}</button>
+        <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
+        <button class="steam-menu-item" style="color:var(--red)" onclick="bulkDelete()"><i class="ti ti-trash" style="font-size:14px"></i> ${t('delete')}</button>
+      </div>
+    </div>
+  `;
+}
+
+function toggleBulkActionsMenu(e) {
+  e.stopPropagation();
+  const menu = document.getElementById('bulk-actions-menu');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('bulk-actions-menu');
+  if (menu && menu.style.display !== 'none' && !e.target.closest('#bulk-action-bar')) menu.style.display = 'none';
+});
+
+async function _bulkFinish() {
+  clearBulkSelection();
+  await Promise.all([syncAll(currentPage, true), loadGlobalStats(), loadFolders()]);
+  checkAchievements();
+}
+
+function _bulkGameIds() { return [...bulkSelected]; }
+
+// -- Carpeta --
+function openBulkFolderPicker() {
+  document.getElementById('bulk-actions-menu').style.display = 'none';
+  const folders = currentSectionFolders();
+  if (!folders.length) { alert(t('noFoldersInSection')); return; }
+  const body = `
+    <p style="font-size:12px;color:var(--text2);margin-bottom:10px">${t('bulkFolderHint')}</p>
+    <div style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto">
+      ${folders.map(f => `
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+          <input type="checkbox" value="${f.id}" class="bulk-folder-check" />
+          ${esc(f.name)}
+        </label>`).join('')}
+    </div>`;
+  showBulkActionModal(t('addToFolder'), body, async () => {
+    const ids = [...document.querySelectorAll('.bulk-folder-check:checked')].map(cb => parseInt(cb.value));
+    if (!ids.length) return;
+    await Promise.all(_bulkGameIds().flatMap(gid => ids.map(fid =>
+      fetch(`${apiBase()}/api/v1/folders/${fid}/games`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ game_id: gid }),
+      })
+    )));
+    await _bulkFinish();
+  });
+}
+
+// -- Estado --
+function openBulkStatusPicker() {
+  document.getElementById('bulk-actions-menu').style.display = 'none';
+  const body = `<select id="bulk-status-sel" class="status-select" style="width:100%">${statusOptionsHtml('')}</select>`;
+  showBulkActionModal(t('status'), body, async () => {
+    const status = document.getElementById('bulk-status-sel').value;
+    await Promise.all(_bulkGameIds().map(gid =>
+      fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gid)}/status?status=${encodeURIComponent(status)}`, {
+        method: 'PATCH', headers: { 'Authorization': `Bearer ${authToken}` },
+      })
+    ));
+    await _bulkFinish();
+  });
+}
+
+// -- Genero --
+function openBulkGenrePicker() {
+  document.getElementById('bulk-actions-menu').style.display = 'none';
+  const body = `<select id="bulk-genre-sel" class="genre-select" style="width:100%">${genreOptions('')}</select>`;
+  showBulkActionModal(t('genre'), body, async () => {
+    const genre = document.getElementById('bulk-genre-sel').value;
+    await Promise.all(_bulkGameIds().map(gid =>
+      fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gid)}/genre`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ genre: genre || null }),
+      })
+    ));
+    await _bulkFinish();
+  });
+}
+
+// -- Calificacion --
+let _bulkRatingVal = 0;
+function openBulkRatingPicker() {
+  document.getElementById('bulk-actions-menu').style.display = 'none';
+  _bulkRatingVal = 0;
+  const body = `<div id="bulk-stars" style="display:flex;gap:4px;justify-content:center;font-size:26px"></div>`;
+  showBulkActionModal(t('rating'), body, async () => {
+    await Promise.all(_bulkGameIds().map(gid =>
+      fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gid)}/rating`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_rating: _bulkRatingVal }),
+      })
+    ));
+    await _bulkFinish();
+  });
+  _renderBulkStars();
+}
+function _renderBulkStars() {
+  const el = document.getElementById('bulk-stars');
+  if (!el) return;
+  el.innerHTML = [1,2,3,4,5].map(i => `<span onclick="_bulkRatingVal=${i};_renderBulkStars()" style="cursor:pointer;color:${i <= _bulkRatingVal ? 'var(--amber)' : '#d4d4d4'}">${i <= _bulkRatingVal ? '★' : '☆'}</span>`).join('');
+}
+
+// -- Ocultar --
+async function bulkToggleHidden() {
+  document.getElementById('bulk-actions-menu').style.display = 'none';
+  await Promise.all(_bulkGameIds().map(gid =>
+    fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gid)}/hide`, {
+      method: 'PATCH', headers: { 'Authorization': `Bearer ${authToken}` },
+    })
+  ));
+  await _bulkFinish();
+}
+
+// -- Borrar --
+async function bulkDelete() {
+  document.getElementById('bulk-actions-menu').style.display = 'none';
+  const count = bulkSelected.size;
+  if (!confirm(t('confirmBulkDelete').replace('{count}', count))) return;
+  await Promise.all(_bulkGameIds().map(gid =>
+    fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gid)}`, {
+      method: 'DELETE', headers: { 'Authorization': `Bearer ${authToken}` },
+    })
+  ));
+  await _bulkFinish();
+}
+
+// -- Modal generico para las acciones bulk ------------------------------
+function showBulkActionModal(title, bodyHtml, onConfirm) {
+  const existing = document.getElementById('bulk-generic-overlay');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'bulk-generic-overlay';
+  overlay.className = 'modal-overlay open';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:380px">
+      <div class="modal-title">${esc(title)}</div>
+      <div id="bulk-generic-body">${bodyHtml}</div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="this.closest('.modal-overlay').remove()">${t('cancel')}</button>
+        <button class="btn-save" id="bulk-generic-confirm">${t('save')}</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('bulk-generic-confirm').onclick = async () => {
+    await onConfirm();
+    overlay.remove();
+  };
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 }
 
 async function deleteGame(gameId) {
