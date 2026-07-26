@@ -424,7 +424,7 @@
       </div>
 
       <!-- Novedades button -->
-      <button id="novedades-icon-btn" onclick="openNovedadesPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="novedades" title="Novedades">
+      <button id="novedades-icon-btn" onclick="setView('novedades')" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="novedades" title="Novedades">
         <i class="ti ti-sparkles" style="font-size:14px"></i>
       </button>
 
@@ -465,7 +465,7 @@
         </button>
         <div id="header-more-menu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:300;min-width:180px;box-shadow:0 4px 16px rgba(0,0,0,0.3);padding:4px 0">
           <button onclick="toggleLanguage()" class="steam-menu-item"><i class="ti ti-language" style="font-size:14px"></i> <span id="header-more-lang">EN</span></button>
-          <button onclick="openNovedadesPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-sparkles" style="font-size:14px"></i> <span data-i18n="novedades">Novedades</span></button>
+          <button onclick="setView('novedades');toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-sparkles" style="font-size:14px"></i> <span data-i18n="novedades">Novedades</span></button>
           <button onclick="openStatsPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-chart-bar" style="font-size:14px"></i> <span data-i18n="stats">Estadísticas</span></button>
           <button onclick="openConfigPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-settings" style="font-size:14px"></i> <span data-i18n="config">Configuración</span></button>
           <button onclick="openFriendsPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-users" style="font-size:14px"></i> <span data-i18n="friends">Amigos</span></button>
@@ -696,6 +696,13 @@
           style="padding:5px 14px;font-size:12px;border-radius:16px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n="periodMonth">Mes</button>
       </div>
       <div id="stats-period-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
+    </div>
+  </div>
+
+  <!-- Novedades view (full page) -->
+  <div id="novedades-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
+    <div style="padding:16px;max-width:720px;width:100%;margin:0 auto;box-sizing:border-box">
+      <div id="novedades-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
     </div>
   </div>
 
@@ -999,19 +1006,6 @@
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeAchievementsPanel()" data-i18n="close">Cerrar</button>
-    </div>
-  </div>
-</div>
-
-<!-- Novedades Modal -->
-<div class="modal-overlay" id="novedades-overlay">
-  <div class="modal" style="max-width:640px;max-height:85vh;display:flex;flex-direction:column">
-    <div class="modal-title"><i class="ti ti-sparkles"></i> <span data-i18n="novedades">Novedades</span></div>
-    <div id="novedades-content" style="overflow-y:auto;flex:1">
-      <div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeNovedadesPanel()" data-i18n="close">Cerrar</button>
     </div>
   </div>
 </div>
@@ -3677,18 +3671,21 @@ function toggleLastPlayedFilterDropdown(wrap, btn) {
 function setView(view) {
   currentView = view;
 
-  const isStats    = view === 'stats';
-  const isRankings = view === 'rankings';
-  const hideNormal = isStats || isRankings;
+  const isStats     = view === 'stats';
+  const isRankings  = view === 'rankings';
+  const isNovedades = view === 'novedades';
+  const hideNormal = isStats || isRankings || isNovedades;
   const gameList     = document.getElementById('game-list');
   const statsView    = document.getElementById('stats-view');
   const rankingsView = document.getElementById('rankings-view');
+  const novedadesView = document.getElementById('novedades-view');
   const filterBar  = document.getElementById('filter-bar');
   const footer     = document.querySelector('.footer');
   const pagBar     = document.getElementById('pagination-bar');
-  if (gameList)     gameList.style.display     = hideNormal ? 'none' : '';
-  if (statsView)    statsView.style.display    = isStats ? 'flex' : 'none';
-  if (rankingsView) rankingsView.style.display = isRankings ? 'flex' : 'none';
+  if (gameList)      gameList.style.display      = hideNormal ? 'none' : '';
+  if (statsView)     statsView.style.display     = isStats ? 'flex' : 'none';
+  if (rankingsView)  rankingsView.style.display  = isRankings ? 'flex' : 'none';
+  if (novedadesView) novedadesView.style.display = isNovedades ? 'flex' : 'none';
   if (filterBar)    filterBar.style.display    = hideNormal ? 'none' : '';
   if (footer)       footer.style.display       = hideNormal ? 'none' : '';
   if (pagBar)       pagBar.style.display       = hideNormal ? 'none' : '';
@@ -3714,6 +3711,10 @@ function setView(view) {
   if (isRankings) {
     activeRankingId = null;
     loadRankings();
+    return;
+  }
+  if (isNovedades) {
+    loadNovedadesView();
     return;
   }
 
@@ -5364,10 +5365,9 @@ function _novedadesSectionHtml(icon, title, innerHtml) {
     </div>`;
 }
 
-async function openNovedadesPanel() {
-  document.getElementById('novedades-overlay').classList.add('open');
+async function loadNovedadesView() {
   const el = document.getElementById('novedades-content');
-  el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>${t('loading')}</div>`;
+  el.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>${t('loading')}</div>`;
   try {
     const res = await fetch(`${apiBase()}/api/v1/novedades`, { headers: { 'Authorization': `Bearer ${authToken}` } });
     const d = await res.json();
@@ -5412,10 +5412,6 @@ function _renderNovedades() {
   if (recent.length) html += _novedadesSectionHtml('ti-sparkles', t('novedadesRecentReleases'), _novedadesCoverRowHtml(recent));
   if (upcoming.length) html += _novedadesSectionHtml('ti-calendar-event', t('novedadesUpcomingReleases'), _novedadesCoverRowHtml(upcoming));
   el.innerHTML = html;
-}
-
-function closeNovedadesPanel() {
-  document.getElementById('novedades-overlay').classList.remove('open');
 }
 
 let _novedadesAddRelease = null;
@@ -5483,9 +5479,6 @@ async function submitNovedadesAdd() {
   }
 }
 
-document.getElementById('novedades-overlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('novedades-overlay')) closeNovedadesPanel();
-});
 document.getElementById('novedades-add-overlay').addEventListener('click', e => {
   if (e.target === document.getElementById('novedades-add-overlay')) closeNovedadesAddModal();
 });
