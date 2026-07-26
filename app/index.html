@@ -375,7 +375,7 @@
 <div class="container">
 
   <div class="header">
-    <div class="header-title">
+    <div class="header-title" onclick="goHome()" style="cursor:pointer" title="Ir al inicio">
       <i class="ti ti-device-gamepad-2" style="font-size:20px;color:#1D9E75"></i>
       Playloggr
     </div>
@@ -1529,6 +1529,7 @@ const I18N = {
     noRankingsYet: 'No tenés rankings todavía. Creá uno.', noRankingGamesYet: 'Este ranking está vacío. Agregá juegos.',
     rankingLimitReached: 'Máximo 25 juegos por ranking', rankingFreeLimitReached: 'Límite de la versión gratis (3 rankings). Actualizá a premium para crear más.',
     removeFromRanking: 'Quitar del ranking', date: 'Fecha', quantity: 'Cantidad',
+    premiumThanksTitle: '¡Gracias por ser premium!', premiumThanksBody: 'Disfrutá de todas las funcionalidades de Playloggr.', premiumThanksBtn: 'Genial',
     novedades: 'Novedades', novedadesError: 'No se pudo cargar Novedades', novedadesEmpty: 'Todavía no hay novedades para mostrar',
     novedadesFriendsPlaying: 'Amigos jugando esto', novedadesPopularWishlist: 'Popular en Deseados',
     novedadesMostHours: 'Más jugado', novedadesPlayers: 'jugadores',
@@ -1664,6 +1665,7 @@ const I18N = {
     noRankingsYet: "You don't have any rankings yet. Create one.", noRankingGamesYet: 'This ranking is empty. Add games.',
     rankingLimitReached: 'Maximum 25 games per ranking', rankingFreeLimitReached: 'Free version limit (3 rankings). Upgrade to premium to create more.',
     removeFromRanking: 'Remove from ranking', date: 'Date', quantity: 'Quantity',
+    premiumThanksTitle: 'Thanks for going premium!', premiumThanksBody: 'Enjoy all of Playloggr\'s features.', premiumThanksBtn: 'Great',
     novedades: 'News', novedadesError: 'Could not load News', novedadesEmpty: 'No news to show yet',
     novedadesFriendsPlaying: 'Friends playing this', novedadesPopularWishlist: 'Popular in Wishlist',
     novedadesMostHours: 'Most played', novedadesPlayers: 'players',
@@ -1799,6 +1801,7 @@ const I18N = {
     noRankingsYet: 'Você ainda não tem rankings. Crie um.', noRankingGamesYet: 'Este ranking está vazio. Adicione jogos.',
     rankingLimitReached: 'Máximo de 25 jogos por ranking', rankingFreeLimitReached: 'Limite da versão gratuita (3 rankings). Atualize para premium para criar mais.',
     removeFromRanking: 'Remover do ranking', date: 'Data', quantity: 'Quantidade',
+    premiumThanksTitle: 'Obrigado por ser premium!', premiumThanksBody: 'Aproveite todos os recursos do Playloggr.', premiumThanksBtn: 'Ótimo',
     novedades: 'Novidades', novedadesError: 'Não foi possível carregar Novidades', novedadesEmpty: 'Ainda não há novidades para mostrar',
     novedadesFriendsPlaying: 'Amigos jogando isso', novedadesPopularWishlist: 'Popular nos Desejados',
     novedadesMostHours: 'Mais jogado', novedadesPlayers: 'jogadores',
@@ -2642,11 +2645,23 @@ function lastPlayedDisplay(iso) {
 // solo la descripcion cruda, para que el cambio de idioma se refleje al
 // instante sin re-fetch.
 function scoreBadgeHtml(g) {
+  // Si ya lo teniamos en cache de esta sesion (steamScoreCache, aunque
+  // allGames se haya recargado desde cero) lo usamos de una — asi evitamos
+  // el "flash" de ver la reseña en texto (ej. "Mostly Positive") por un
+  // instante antes de que el batch resuelva y lo reemplace por el %.
+  if (g._steamScorePct == null && g.platform === 'Steam' && g.app_id && steamScoreCache[g.app_id]) {
+    const cached = steamScoreCache[g.app_id];
+    g._steamScoreRaw = cached.review_score_desc;
+    g._steamScorePct = cached.total_reviews > 0 ? Math.round(100 * cached.total_positive / cached.total_reviews) : null;
+  }
   const rawScore = g._steamScoreRaw || g.steam_score;
   let _score = rawScore ? steamScoreLabel[rawScore] : null;
-  const scoreText = (_score && g._steamScorePct != null) ? `${g._steamScorePct}%` : (_score ? _score.label : null);
+  // Sin porcentaje todavia: no mostramos el texto crudo (ej. "Mostly
+  // Positive") como relleno — mejor vacio un instante que un flash de
+  // contenido con un formato distinto al que va a quedar.
+  const scoreText = (_score && g._steamScorePct != null) ? `${g._steamScorePct}%` : null;
   const igdbPct = g._igdbRatingPct;
-  return (_score && g.platform === 'Steam')
+  return (_score && scoreText && g.platform === 'Steam')
     ? `<span id="score-${g.id}" class="steam-score ${_score.cls}" title="${esc(_score.label)}">${scoreText}</span>`
     : (igdbPct != null
         ? `<span id="score-${g.id}" class="steam-score ${igdbScoreClass(igdbPct)}" title="Puntaje IGDB (crítica + comunidad)">${igdbPct}%</span>`
@@ -2758,6 +2773,7 @@ async function renderGames() {
           if (!score) return;
           const info = steamScoreLabel[score.review_score_desc];
           if (!info) return;
+          steamScoreCache[g.app_id] = score;
           g._steamScoreRaw = score.review_score_desc;
           g._steamScorePct = score.total_reviews > 0 ? Math.round(100 * score.total_positive / score.total_reviews) : null;
           const text = g._steamScorePct != null ? `${g._steamScorePct}%` : info.label;
@@ -5231,7 +5247,16 @@ async function checkAchievements() {
     if (res.ok) {
       userLevel = d.level ?? userLevel;
       userBadgeTier = d.badge_tier || userBadgeTier;
+      // Level-up desbloquea marcos/fuentes al toque, sin refrescar — antes
+      // esto solo se actualizaba releyendo el perfil (loadPremiumStatus, una
+      // sola vez al cargar la pagina).
+      if (d.unlocked_frames) userUnlockedFrames = d.unlocked_frames;
+      if (d.unlocked_fonts)  userUnlockedFonts  = d.unlocked_fonts;
       applyPremiumUI();
+      // Si el panel de Configuracion (tab Avatar) esta abierto en este
+      // momento, refrescamos los pickers de marco/fuente para que el recien
+      // desbloqueado aparezca ya, sin recargar.
+      if (document.getElementById('cfg-frame-picker')) renderCosmeticPickers();
       if (d.newly_unlocked && d.newly_unlocked.length > 0) {
         d.newly_unlocked.forEach(a => queueToast(`🏆 ${a.name}  +${a.xp} XP`));
       }
@@ -5366,7 +5391,7 @@ function _requestRowHtml(r, trailingHtml, subtitle) {
   return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px">
     <div class="${frameAnimClass(frameId)}" style="width:40px;height:40px;flex-shrink:0;position:relative;${frameWrapStyle(frameId)}">
       <div style="width:100%;height:100%;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden">
-        <div style="width:36px;height:36px;position:relative">${_friendAvatarHtml(r, 36)}</div>
+        <div style="width:36px;height:36px;position:relative;transform:translateY(13%)">${_friendAvatarHtml(r, 36)}</div>
       </div>
       ${frameBadgeHtml(frameId)}
     </div>
@@ -5432,7 +5457,7 @@ async function loadFriendsList() {
         return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px">
           <div class="${frameAnimClass(frameId)}" style="width:44px;height:44px;flex-shrink:0;cursor:pointer;position:relative;${frameWrapStyle(frameId)}" onclick="openFriendProfile('${f.username}')">
             <div style="width:100%;height:100%;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden">
-              <div style="width:40px;height:40px;position:relative">${_friendAvatarHtml(f, 40)}</div>
+              <div style="width:40px;height:40px;position:relative;transform:translateY(13%)">${_friendAvatarHtml(f, 40)}</div>
             </div>
             ${frameBadgeHtml(frameId)}
           </div>
@@ -6035,7 +6060,7 @@ function showToast(msg, isError = false) {
   if (!toast) {
     toast = document.createElement('div');
     toast.id = 'toast-msg';
-    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;transition:opacity 0.3s';
+    toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;transition:opacity 0.3s;max-width:90vw;text-align:center';
     document.body.appendChild(toast);
   }
   toast.textContent = msg;
@@ -6587,6 +6612,16 @@ let userEmail  = '';
 let _currentAnnouncementId = null;
 
 async function checkActiveAnnouncement() {
+  // Si el onboarding (o el modal de elegir username, que lo precede) todavia
+  // esta abierto, esperamos a que termine antes de mostrar el aviso — sino
+  // quedaban superpuestos (mismo patron que usa showOnboarding() para
+  // esperar el modal de username).
+  const onboardingEl = document.getElementById('onboarding-overlay');
+  const usernameEl = document.getElementById('set-username-overlay');
+  if ((onboardingEl && onboardingEl.classList.contains('open')) || (usernameEl && usernameEl.classList.contains('open'))) {
+    setTimeout(checkActiveAnnouncement, 400);
+    return;
+  }
   try {
     const res = await fetch(`${apiBase()}/api/v1/announcements/active`, {
       headers: { 'Authorization': `Bearer ${authToken}` }
@@ -6721,6 +6756,30 @@ async function loadPremiumStatus() {
   applyPremiumUI();
 }
 
+async function pollForPremium(attempt = 0) {
+  const wasPremium = isPremium;
+  await loadPremiumStatus();
+  if (isPremium && !wasPremium) {
+    showPremiumThanksPopup();
+    return;
+  }
+  if (isPremium || attempt >= 10) return; // ~30s max (10 x 3s)
+  setTimeout(() => pollForPremium(attempt + 1), 3000);
+}
+
+function showPremiumThanksPopup() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay open';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:360px;text-align:center">
+      <div style="font-size:40px;margin-bottom:8px">🎉</div>
+      <div class="modal-title" style="justify-content:center">${t('premiumThanksTitle')}</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">${t('premiumThanksBody')}</p>
+      <button class="btn-save" style="width:100%" onclick="this.closest('.modal-overlay').remove()">${t('premiumThanksBtn')}</button>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
 const PADDLE_CLIENT_TOKEN = 'live_4294a95e165defc1705c2a13c35';
 const PADDLE_PRICE_ID     = 'pri_01kx4bzvpcrtgqrpv80p2cep89';
 let _paddleReady = false;
@@ -6731,10 +6790,13 @@ function _ensurePaddleReady() {
     token: PADDLE_CLIENT_TOKEN,
     eventCallback: function (event) {
       if (event.name === 'checkout.completed') {
-        // El webhook es la fuente de verdad; esto solo refresca la UI
-        // mas rapido para que el usuario vea el cambio sin recargar.
+        // El webhook es la fuente de verdad y puede tardar mas de 4s en
+        // procesar — antes hacia un solo chequeo a los 4s y si el webhook
+        // todavia no habia corrido, el usuario tenia que refrescar la
+        // pagina a mano para ver premium activado. Ahora reintenta cada 3s
+        // hasta 30s.
         showToast('¡Pago recibido! Activando premium...', false);
-        setTimeout(loadPremiumStatus, 4000);
+        pollForPremium();
       }
     },
   });
@@ -7682,6 +7744,16 @@ async function confirmFolderGamePicker() {
   closeFolderAddGame();
   await loadFolders();
   if (activeFolderId === -1) renderFolderList();
+}
+
+// Click en el logo/nombre "Playloggr" del header — vuelve a Biblioteca
+// desde cualquier vista (Deseados/Estadisticas/Rankings/Carpetas).
+function goHome() {
+  document.querySelectorAll('.modal-overlay.open').forEach(o => o.classList.remove('open'));
+  activeFolderId = null;
+  const fb = document.getElementById('filter-bar');
+  if (fb) fb.style.removeProperty('display');
+  setView('library');
 }
 
 // ── Folder button click (main btn) ────────────────────────────────────────────
