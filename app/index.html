@@ -2814,8 +2814,15 @@ function canEditLastPlayedWeb(g) {
 // que tocar cada elemento suelto.
 function cardColorStyle(status) {
   if (!cardColorMode || cardColorMode === 'theme') return '';
-  if (cardColorMode === 'white') return 'background:#ffffff;--text:#111111;--text2:#444444;';
-  if (cardColorMode === 'black') return 'background:#000000;--text:#f0f0f0;--text2:#aaaaaa;';
+  // Ojo: setear solo --text/--text2 (custom properties) NO alcanza — nada
+  // hereda el VALOR de color a menos que algun elemento tenga
+  // "color:var(--text)" declarado explicitamente. .game-name (el nombre
+  // del juego) no lo tenia, asi que quedaba con el color heredado de
+  // <body> de siempre (invisible sobre fondo blanco/negro fijo). Se agrega
+  // "color:var(--text)" aca mismo, en el div raiz de la card, para que
+  // ese sea el punto donde arranca la herencia real del nuevo valor.
+  if (cardColorMode === 'white') return 'background:#ffffff;color:#111111;--text:#111111;--text2:#444444;';
+  if (cardColorMode === 'black') return 'background:#000000;color:#f0f0f0;--text:#f0f0f0;--text2:#aaaaaa;';
   const tint = cardColorMode === 'status' ? STATUS_DOT_COLORS[status] : STATUS_DOT_COLORS[cardColorMode];
   if (!tint) return '';
   return `background: color-mix(in srgb, ${tint} 18%, var(--bg));`;
