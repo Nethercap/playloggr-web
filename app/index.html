@@ -4805,32 +4805,30 @@ function renderAppearanceTab() {
   const options = [
     ['theme', 'ti-brightness-6', 'Según tema'],
     ['status', 'ti-palette', 'Según estado del juego'],
-    ['__fixed__', 'ti-pin', 'Color fijo de estado'],
+    ['__fixed__', 'ti-pin', 'Color fijo'],
     ['white', 'ti-square', 'Blanco'],
     ['black', 'ti-square-filled', 'Negro'],
   ];
   const host = document.getElementById('cfg-cardcolor-options');
-  host.innerHTML = options.map(([key, icon, label]) => `
-    <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
-      <input type="radio" name="cfg-cardcolor" value="${key}" ${selectedKey === key ? 'checked' : ''}
-        onchange="onCardColorRadioChange('${key}')" />
-      <i class="ti ${icon}"></i> ${label}
-    </label>
-  `).join('') + (isFixed || selectedKey === '__fixed__' ? `
-    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-left:26px">
+  host.innerHTML = `
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      ${options.map(([key, icon, label]) => `
+        <button type="button" class="cfg-choice-btn ${selectedKey === key ? 'active' : ''}" style="flex:none;padding:8px 12px"
+          onclick="onCardColorChoice('${key}')"><i class="ti ${icon}"></i> ${label}</button>
+      `).join('')}
+    </div>
+  ` + (isFixed || selectedKey === '__fixed__' ? `
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px">
       ${Object.entries(STATUS_DOT_COLORS).map(([status, color]) => `
-        <button type="button" onclick="setCfgChoice('cardColor','${status}')"
-          style="display:flex;align-items:center;gap:6px;padding:5px 10px;font-size:12px;border-radius:20px;cursor:pointer;
-            border:1px solid ${cardColorMode === status ? color : 'var(--border)'};
-            background:${cardColorMode === status ? color + '33' : 'var(--bg3)'};color:var(--text)">
-          <span style="width:10px;height:10px;border-radius:50%;background:${color}"></span>${status}
-        </button>
+        <button type="button" title="${status}" onclick="setCfgChoice('cardColor','${status}')"
+          style="width:28px;height:28px;border-radius:50%;cursor:pointer;background:${color};
+            border:2px solid ${cardColorMode === status ? 'var(--text)' : 'transparent'}"></button>
       `).join('')}
     </div>
   ` : '');
 }
 
-function onCardColorRadioChange(key) {
+function onCardColorChoice(key) {
   if (key === '__fixed__') {
     setCfgChoice('cardColor', Object.keys(STATUS_DOT_COLORS)[0]);
   } else {
