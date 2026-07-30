@@ -1077,7 +1077,13 @@
 <!-- Achievements Modal -->
 <div class="modal-overlay" id="achievements-overlay">
   <div class="modal" style="max-width:520px;max-height:85vh;display:flex;flex-direction:column">
-    <div class="modal-title"><i class="ti ti-trophy"></i> <span data-i18n="achievements">Logros</span></div>
+    <div class="modal-title" style="display:flex;align-items:center;justify-content:space-between">
+      <span><i class="ti ti-trophy"></i> <span data-i18n="achievements">Logros</span></span>
+      <button id="achievements-onlylocked-btn" onclick="toggleAchievementsOnlyLocked()"
+        style="font-size:11px;padding:5px 10px;border-radius:20px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:5px">
+        <i class="ti ti-lock-open"></i> Solo bloqueados
+      </button>
+    </div>
     <div id="achievements-content" style="overflow-y:auto;flex:1">
       <div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div>
     </div>
@@ -5481,6 +5487,9 @@ function achievementInfo(a) {
   return { name: a.name, description: a.description };
 }
 
+let _achievementsData = null;
+let _achievementsOnlyLocked = false;
+
 async function openAchievementsPanel() {
   document.getElementById('achievements-overlay').classList.add('open');
   const el = document.getElementById('achievements-content');
@@ -5489,50 +5498,70 @@ async function openAchievementsPanel() {
     const res = await fetch(`${apiBase()}/api/v1/achievements`, { headers: { 'Authorization': `Bearer ${authToken}` } });
     const d = await res.json();
     if (!res.ok) throw new Error(d.detail || 'Error');
-
-    const progress = d.xp_for_next ? Math.min(1, (d.xp - d.xp_current_level) / (d.xp_for_next - d.xp_current_level)) : 1;
-    const byCategory = {};
-    d.achievements.forEach(a => { (byCategory[a.category] = byCategory[a.category] || []).push(a); });
-
-    const tileHtml = a => { const info = achievementInfo(a); const isRare = a.unlocked && a.global_pct < 10; return `
-      <div class="${isRare ? 'frame-pulse-dorado' : ''}" style="display:flex;align-items:flex-start;gap:10px;padding:10px;margin-bottom:8px;border-radius:8px;background:var(--bg3);opacity:${a.unlocked ? '1' : '0.55'};${isRare ? 'border:2px solid transparent;' : ''}">
-        <i class="ti ${a.unlocked ? 'ti-circle-check' : 'ti-lock'}" style="font-size:18px;color:${a.unlocked ? 'var(--green)' : 'var(--text2)'};margin-top:2px"></i>
-        <div style="flex:1;min-width:0">
-          <div style="display:flex;align-items:center;gap:6px">
-            <span style="font-weight:600;font-size:13px">${info.name}</span>
-            ${a.tier === 'P' ? `<span style="font-size:9px;font-weight:600;color:#EF9F27;background:rgba(239,159,39,0.15);padding:2px 6px;border-radius:6px">${t('premiumLabel')}</span>` : ''}
-          </div>
-          <div style="font-size:11px;color:var(--text2);margin-top:2px">${info.description}</div>
-          <div style="font-size:10px;color:var(--text2);margin-top:4px">+${a.xp} XP · ${a.global_pct}% ${t('ofUsers')}</div>
-        </div>
-      </div>`; };
-
-    const categoriesHtml = Object.entries(byCategory).map(([cat, items]) => `
-      <div style="margin-bottom:16px">
-        <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">${categoryLabel(cat)}</div>
-        ${items.map(tileHtml).join('')}
-      </div>`).join('');
-
-    el.innerHTML = `
-      <div style="padding:14px;background:var(--bg3);border-radius:10px;margin-bottom:16px">
-        <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:40px;height:40px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0">${d.level}</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-weight:700;font-size:14px">${t('levelLabel')} ${d.level}</div>
-            <div style="height:8px;border-radius:4px;background:rgba(136,135,128,0.25);margin-top:6px;overflow:hidden">
-              <div style="height:100%;width:${(progress*100).toFixed(0)}%;background:var(--green)"></div>
-            </div>
-            <div style="font-size:10px;color:var(--text2);margin-top:4px">${d.capped ? t('maxLevelReached') : `${d.xp} / ${d.xp_for_next} XP`}</div>
-          </div>
-          ${d.all_completed ? '<i class="ti ti-trophy" style="font-size:26px;color:#EF9F27"></i>' : ''}
-        </div>
-        <div style="font-size:11px;color:var(--text2);margin-top:10px">${d.unlocked_count} ${t('of')} ${d.total_count} ${t('achievementsUnlocked')}</div>
-      </div>
-      ${categoriesHtml}
-    `;
+    _achievementsData = d;
+    renderAchievementsPanel();
   } catch(e) {
     el.innerHTML = `<div style="color:var(--red);padding:16px">${e.message || t('errorLoadingAchievements')}</div>`;
   }
+}
+
+function toggleAchievementsOnlyLocked() {
+  _achievementsOnlyLocked = !_achievementsOnlyLocked;
+  renderAchievementsPanel();
+}
+
+function renderAchievementsPanel() {
+  const d = _achievementsData;
+  if (!d) return;
+  const el = document.getElementById('achievements-content');
+  const btn = document.getElementById('achievements-onlylocked-btn');
+  if (btn) {
+    btn.innerHTML = `<i class="ti ${_achievementsOnlyLocked ? 'ti-lock' : 'ti-lock-open'}"></i> Solo bloqueados`;
+    btn.style.borderColor = _achievementsOnlyLocked ? 'var(--green)' : 'var(--border)';
+    btn.style.color       = _achievementsOnlyLocked ? 'var(--green)' : 'var(--text2)';
+  }
+
+  const progress = d.xp_for_next ? Math.min(1, (d.xp - d.xp_current_level) / (d.xp_for_next - d.xp_current_level)) : 1;
+  const shown = _achievementsOnlyLocked ? d.achievements.filter(a => !a.unlocked) : d.achievements;
+  const byCategory = {};
+  shown.forEach(a => { (byCategory[a.category] = byCategory[a.category] || []).push(a); });
+
+  const tileHtml = a => { const info = achievementInfo(a); const isRare = a.unlocked && a.global_pct < 10; return `
+    <div class="${isRare ? 'frame-pulse-dorado' : ''}" style="display:flex;align-items:flex-start;gap:10px;padding:10px;margin-bottom:8px;border-radius:8px;background:var(--bg3);opacity:${a.unlocked ? '1' : '0.55'};${isRare ? 'border:2px solid transparent;' : ''}">
+      <i class="ti ${a.unlocked ? 'ti-circle-check' : 'ti-lock'}" style="font-size:18px;color:${a.unlocked ? 'var(--green)' : 'var(--text2)'};margin-top:2px"></i>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-weight:600;font-size:13px">${info.name}</span>
+          ${a.tier === 'P' ? `<span style="font-size:9px;font-weight:600;color:#EF9F27;background:rgba(239,159,39,0.15);padding:2px 6px;border-radius:6px">${t('premiumLabel')}</span>` : ''}
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">${info.description}</div>
+        <div style="font-size:10px;color:var(--text2);margin-top:4px">+${a.xp} XP · ${a.global_pct}% ${t('ofUsers')}</div>
+      </div>
+    </div>`; };
+
+  const categoriesHtml = Object.entries(byCategory).map(([cat, items]) => `
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">${categoryLabel(cat)}</div>
+      ${items.map(tileHtml).join('')}
+    </div>`).join('');
+
+  el.innerHTML = `
+    <div style="padding:14px;background:var(--bg3);border-radius:10px;margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:40px;height:40px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0">${d.level}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:14px">${t('levelLabel')} ${d.level}</div>
+          <div style="height:8px;border-radius:4px;background:rgba(136,135,128,0.25);margin-top:6px;overflow:hidden">
+            <div style="height:100%;width:${(progress*100).toFixed(0)}%;background:var(--green)"></div>
+          </div>
+          <div style="font-size:10px;color:var(--text2);margin-top:4px">${d.capped ? t('maxLevelReached') : `${d.xp} / ${d.xp_for_next} XP`}</div>
+        </div>
+        ${d.all_completed ? '<i class="ti ti-trophy" style="font-size:26px;color:#EF9F27"></i>' : ''}
+      </div>
+      <div style="font-size:11px;color:var(--text2);margin-top:10px">${d.unlocked_count} ${t('of')} ${d.total_count} ${t('achievementsUnlocked')}</div>
+    </div>
+    ${categoriesHtml || (_achievementsOnlyLocked ? `<div style="text-align:center;padding:24px;color:var(--text2)">¡Desbloqueaste todos los logros disponibles!</div>` : '')}
+  `;
 }
 
 function closeAchievementsPanel() {
