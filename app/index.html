@@ -2315,7 +2315,9 @@ function accessibleEditModalBody(gameId) {
   const g = allGames.find(x => x.id === gameId);
   if (!g) return '';
   const isManual = !!g.is_manual;
-  const disabledAttr = isManual ? '' : 'disabled';
+  const canEditHours = canEditHoursWeb(g);
+  const canEditLastPlayed = canEditLastPlayedWeb(g);
+  const canEditPlatform = isManual || /^(gog_|xbox_|epic_)/.test(gameId);
   const fieldStyle = 'width:100%;font-size:16px;padding:10px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text)';
   const labelStyle = 'display:block;font-size:14px;color:var(--text2);margin-bottom:6px';
 
@@ -2324,17 +2326,17 @@ function accessibleEditModalBody(gameId) {
     html += `
       <div style="margin-bottom:16px">
         <label style="${labelStyle}">${t('hoursPlayedLabel') || 'Horas jugadas'}</label>
-        <input type="number" id="ae-hours" value="${g.hours_played || 0}" min="0" step="0.5" style="${fieldStyle}" ${disabledAttr} />
+        <input type="number" id="ae-hours" value="${g.hours_played || 0}" min="0" step="0.5" style="${fieldStyle}" ${canEditHours ? '' : 'disabled'} />
       </div>
       <div style="margin-bottom:16px">
         <label style="${labelStyle}">${t('lastPlayed') || 'Última vez jugado'}</label>
-        <input type="date" id="ae-lastplayed" value="${g.last_played || ''}" style="${fieldStyle}" ${disabledAttr} />
+        <input type="date" id="ae-lastplayed" value="${g.last_played || ''}" style="${fieldStyle}" ${canEditLastPlayed ? '' : 'disabled'} />
       </div>`;
   }
   html += `
     <div style="margin-bottom:16px">
       <label style="${labelStyle}">${t('platform') || 'Plataforma'}</label>
-      <select id="ae-platform" style="${fieldStyle}" ${disabledAttr}>${platformOptionsHtml(g.platform)}</select>
+      <select id="ae-platform" style="${fieldStyle}" ${canEditPlatform ? '' : 'disabled'}>${platformOptionsHtml(g.platform)}</select>
     </div>
     <div style="margin-bottom:16px">
       <label style="${labelStyle}">${t('genre') || 'Género'}</label>
@@ -2739,11 +2741,21 @@ function scoreBadgeHtml(g) {
         : `<span id="score-${g.id}"></span>`);
 }
 
+// GOG/Xbox/Epic sincronizados: plataforma siempre editable, horas solo si
+// esta fuente no trae horas reales (hours_synced), ultima vez jugada solo
+// en GOG/Epic (Xbox trae fecha real) — mismo criterio que la app movil.
+function canEditHoursWeb(g) {
+  return !!g.is_manual || (/^(gog_|xbox_|epic_)/.test(g.id) && !g.hours_synced);
+}
+function canEditLastPlayedWeb(g) {
+  return !!g.is_manual || /^(gog_|epic_)/.test(g.id);
+}
+
 function gameCardHtml(g, opts) {
   const hideLupa = opts && opts.hideLupa;
   const hours = g.hours_played != null ? `${parseFloat(g.hours_played).toFixed(1)} hs` : '— hs';
   const lastPlayedLabel = lastPlayedDisplay(g.last_played);
-  const lastPlayedEl = g.is_manual
+  const lastPlayedEl = canEditLastPlayedWeb(g)
     ? `<span style="cursor:pointer;text-decoration:underline dotted" data-gameid="${g.id}" data-lastplayed="${g.last_played || ''}" onclick="editLastPlayedById(this, event)" title="Editar última vez jugado"><i class="ti ti-calendar-event" style="font-size:12px"></i>${lastPlayedLabel}</span>`
     : (g.last_played ? `<span title="Última vez jugado"><i class="ti ti-calendar-event" style="font-size:12px"></i>${lastPlayedLabel}</span>` : '');
   const cover = steamCoverHtml(g);
@@ -2788,7 +2800,7 @@ function gameCardHtml(g, opts) {
         <div></div>
 
         <div class="game-foot">
-          ${g.status !== 'Deseados' ? (g.is_manual ? `<span style="cursor:pointer;text-decoration:underline dotted" data-gameid="${g.id}" data-hours="${g.hours_played}" onclick="editHoursById(this, event)" title="Editar horas"><i class="ti ti-clock" style="font-size:12px"></i>${hours}</span>` : `<span><i class="ti ti-clock" style="font-size:12px"></i>${hours}</span>`) : ''}
+          ${g.status !== 'Deseados' ? (canEditHoursWeb(g) ? `<span style="cursor:pointer;text-decoration:underline dotted" data-gameid="${g.id}" data-hours="${g.hours_played}" onclick="editHoursById(this, event)" title="Editar horas"><i class="ti ti-clock" style="font-size:12px"></i>${hours}</span>` : `<span><i class="ti ti-clock" style="font-size:12px"></i>${hours}</span>`) : ''}
           ${g.status !== 'Deseados' ? lastPlayedEl : ''}
         </div>
         <button onclick="toggleGameActionsMenu('${g.id}', ${g.hidden}, event, ${hideLupa ? 'true' : 'false'})" title="Más opciones" style="justify-self:end;font-size:12px;padding:2px 10px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-weight:700">•••</button>
@@ -2950,7 +2962,7 @@ function renderGamesGrid(items) {
           ${statusOptionsHtml(g.status)}
         </select>
         <div style="display:flex;align-items:center;justify-content:space-between">
-          ${g.status !== 'Deseados' ? (g.is_manual ? `<span style="font-size:11px;color:var(--text2);cursor:pointer;text-decoration:underline dotted" data-gameid="${g.id}" data-hours="${g.hours_played}" onclick="editHoursById(this, event)" title="Editar horas"><i class="ti ti-clock" style="font-size:11px"></i> ${hours}</span>` : `<span style="font-size:11px;color:var(--text2)"><i class="ti ti-clock" style="font-size:11px"></i> ${hours}</span>`) : '<span></span>'}
+          ${g.status !== 'Deseados' ? (canEditHoursWeb(g) ? `<span style="font-size:11px;color:var(--text2);cursor:pointer;text-decoration:underline dotted" data-gameid="${g.id}" data-hours="${g.hours_played}" onclick="editHoursById(this, event)" title="Editar horas"><i class="ti ti-clock" style="font-size:11px"></i> ${hours}</span>` : `<span style="font-size:11px;color:var(--text2)"><i class="ti ti-clock" style="font-size:11px"></i> ${hours}</span>`) : '<span></span>'}
           <div style="display:flex;gap:4px">
             <button onclick="toggleHideGame('${g.id}', ${g.hidden})" title="${g.hidden ? t('showGame') : t('hideGame')}"
               style="width:24px;height:24px;border-radius:50%;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ${g.hidden ? 'ti-eye' : 'ti-eye-off'}" style="font-size:12px"></i></button>
