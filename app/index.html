@@ -511,6 +511,10 @@
             <button onclick="restoreDeletedSteam('wishlist')" class="steam-menu-item">
               <i class="ti ti-restore"></i> <span data-i18n="restoreWishlist">Restablecer deseados borrados</span>
             </button>
+            <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
+            <button onclick="deletePlatformLibrary('steam','Steam')" class="steam-menu-item" style="color:#e24b4a">
+              <i class="ti ti-trash"></i> Borrar biblioteca
+            </button>
           </div>
           <div style="padding:8px 14px;font-size:10px;color:var(--text2)">⚠ <span data-i18n="steamProfilePublicHint">Tu perfil de Steam debe ser público para sincronizar.</span></div>
         </div>
@@ -539,6 +543,10 @@
             <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
             <button onclick="restoreDeletedPsn()" class="steam-menu-item">
               <i class="ti ti-restore"></i> <span data-i18n="restoreLibrary">Restablecer biblioteca borrada</span>
+            </button>
+            <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
+            <button onclick="deletePlatformLibrary('psn','PSN')" class="steam-menu-item" style="color:#e24b4a">
+              <i class="ti ti-trash"></i> Borrar biblioteca
             </button>
           </div>
           <div style="padding:8px 14px;font-size:10px;color:var(--text2)">⚠ <span data-i18n="psnProfilePublicHint">Tu perfil de PSN debe tener "Juegos" visible públicamente.</span></div>
@@ -6370,6 +6378,10 @@ function renderConnectorMenus() {
           <button onclick="restoreDeletedConnector('${p}')" class="steam-menu-item">
             <i class="ti ti-restore"></i> Restablecer biblioteca borrada
           </button>
+          <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
+          <button onclick="deletePlatformLibrary('${p}','${c.label}')" class="steam-menu-item" style="color:#e24b4a">
+            <i class="ti ti-trash"></i> Borrar biblioteca
+          </button>
         </div>
       </div>
     </div>
@@ -6501,6 +6513,40 @@ async function restoreDeletedConnector(platform) {
   } finally {
     btn.disabled = false;
     btn.innerHTML = `<i class="ti ${c.icon}"></i> ${c.label} ▾`;
+    applyPremiumUI();
+  }
+}
+
+// Borra y de-sincroniza TODA la biblioteca de UNA plataforma (steam/psn/
+// gog/xbox/epic) — a diferencia de deleteLibrary() (borra todo). Generico
+// para los 5 botones "Borrar biblioteca" de cada menu.
+async function deletePlatformLibrary(platform, label) {
+  const menu = document.getElementById(`${platform}-menu`);
+  if (menu) menu.style.display = 'none';
+  if (platform === 'steam') _steamMenuOpen = false;
+  else if (platform === 'psn') _psnMenuOpen = false;
+  else _connectorMenuOpen[platform] = false;
+
+  if (!confirm(`¿Borrar TODOS los juegos de ${label}? Se de-sincronizan de tu cuenta de Playloggr — un nuevo sync los vuelve a traer.`)) return;
+
+  const btn = document.getElementById(`${platform}-menu-btn`);
+  btn.disabled = true;
+  btn.innerHTML = `<i class="ti ti-trash"></i> Borrando...`;
+  try {
+    const res  = await fetch(`${apiBase()}/api/v1/${platform}/library`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error');
+    showToast(`✓ ${data.message}`);
+    await syncAll(1);
+    loadGlobalStats();
+    checkAchievements();
+  } catch(e) {
+    showToast(e.message || 'Error al borrar biblioteca', true);
+  } finally {
+    btn.disabled = false;
     applyPremiumUI();
   }
 }
