@@ -20,6 +20,11 @@
     @media (prefers-color-scheme: dark) {
       :root { --bg:#1a1a1a; --bg2:#242424; --bg3:#2e2e2e; --text:#f0f0f0; --text2:#999; --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2); }
     }
+    /* Override manual (Apariencia > Tema) — gana siempre sobre
+       prefers-color-scheme, seteado via data-theme en <html> por JS al
+       cargar segun la preferencia guardada en el backend. */
+    :root[data-theme="light"] { --bg:#ffffff; --bg2:#f5f5f5; --bg3:#eeeeee; --text:#1a1a1a; --text2:#666666; --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22); }
+    :root[data-theme="dark"]  { --bg:#1a1a1a; --bg2:#242424; --bg3:#2e2e2e; --text:#f0f0f0; --text2:#999; --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2); }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; padding: 20px; }
     .container { max-width: 980px; margin: 0 auto; }
 
@@ -31,6 +36,8 @@
     .sync-btn:hover { background:var(--bg2); }
     .sync-btn:disabled { opacity:.5; pointer-events:none; }
     .plat-chip { display:flex; align-items:center; gap:3px; font-size:11px; color:var(--text2); padding:3px 7px; border-radius:20px; border:0.5px solid var(--border); background:var(--bg2); }
+    .cfg-choice-btn { flex:1; padding:8px; font-size:12px; border-radius:8px; border:0.5px solid var(--border); background:var(--bg3); color:var(--text2); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; }
+    .cfg-choice-btn.active { border-color:var(--green); color:var(--green); background:rgba(29,158,117,0.1); font-weight:600; }
     .dot { width:6px; height:6px; border-radius:50%; background:var(--gray); }
     .dot.ok { background:var(--green); } .dot.err { background:var(--red); }
 
@@ -880,6 +887,8 @@
         style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px" data-i18n="avatarTab">Avatar</button>
       <button id="tab-account" onclick="switchConfigTab('account')"
         style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px" data-i18n="accountTab">Cuenta</button>
+      <button id="tab-appearance" onclick="switchConfigTab('appearance')"
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px">Apariencia</button>
     </div>
 
     <!-- Profile tab -->
@@ -995,6 +1004,30 @@
           <i class="ti ti-user-x"></i> <span data-i18n="deleteAccount">Eliminar cuenta</span>
           <div style="font-size:11px;color:var(--text2);margin-top:2px" data-i18n="deleteAccountSubtitle">Elimina permanentemente tu cuenta y todos tus datos.</div>
         </button>
+      </div>
+    </div>
+
+    <!-- Appearance tab -->
+    <div id="config-appearance" style="display:none">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="modal-group full">
+          <label>Vista por defecto</label>
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <button class="cfg-choice-btn" data-group="view" data-value="list" onclick="setCfgChoice('view','list')"><i class="ti ti-list"></i> Lista</button>
+            <button class="cfg-choice-btn" data-group="view" data-value="grid" onclick="setCfgChoice('view','grid')"><i class="ti ti-layout-grid"></i> Cuadrícula</button>
+          </div>
+        </div>
+        <div class="modal-group full">
+          <label>Tema</label>
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <button class="cfg-choice-btn" data-group="theme" data-value="light" onclick="setCfgChoice('theme','light')"><i class="ti ti-sun"></i> Claro</button>
+            <button class="cfg-choice-btn" data-group="theme" data-value="dark" onclick="setCfgChoice('theme','dark')"><i class="ti ti-moon"></i> Oscuro</button>
+          </div>
+        </div>
+        <div class="modal-group full">
+          <label>Color de card</label>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px" id="cfg-cardcolor-options"></div>
+        </div>
       </div>
     </div>
 
@@ -1923,6 +1956,30 @@ let statusFilter = '', platformFilter = '', searchQ = '', sortMode = 'name', rat
 let currentPage = 1, totalPages = 1, totalGames = 0;
 let showHidden = false;
 let modalStarVal = 0;
+// Apariencia — sincronizada con /settings (mismo valor en la app y la web).
+let cardColorMode = 'theme';
+
+async function loadAppearanceSettings() {
+  try {
+    const data = await (await fetch(`${apiBase()}/api/v1/settings`, { headers: { 'Authorization': `Bearer ${authToken}` } })).json();
+    applyThemeMode(data.theme_mode === 'light' || data.theme_mode === 'dark' ? data.theme_mode : null);
+    if ((data.default_view === 'list' || data.default_view === 'grid') && !localStorage.getItem('gb_lib_view')) {
+      libraryViewMode = data.default_view;
+      localStorage.setItem('gb_lib_view', data.default_view);
+    }
+    if (data.card_color_mode) cardColorMode = data.card_color_mode;
+  } catch(e) {}
+}
+
+function applyThemeMode(mode) {
+  // null/undefined = sin preferencia guardada, se deja que
+  // prefers-color-scheme decida (no se setea data-theme).
+  if (mode === 'light' || mode === 'dark') {
+    document.documentElement.dataset.theme = mode;
+  } else {
+    delete document.documentElement.dataset.theme;
+  }
+}
 
 const platIcons = {
   'Steam': {slug:'steam', color:'#1b2838'},
@@ -2751,6 +2808,19 @@ function canEditLastPlayedWeb(g) {
   return !!g.is_manual || /^(gog_|epic_)/.test(g.id);
 }
 
+// Estilo inline de fondo de card segun Apariencia > Color de card. Blanco/
+// negro tambien pisan --text/--text2 (las custom properties SI cascadean a
+// los hijos via var(--text)), asi el texto de adentro se ve bien sin tener
+// que tocar cada elemento suelto.
+function cardColorStyle(status) {
+  if (!cardColorMode || cardColorMode === 'theme') return '';
+  if (cardColorMode === 'white') return 'background:#ffffff;--text:#111111;--text2:#444444;';
+  if (cardColorMode === 'black') return 'background:#000000;--text:#f0f0f0;--text2:#aaaaaa;';
+  const tint = cardColorMode === 'status' ? STATUS_DOT_COLORS[status] : STATUS_DOT_COLORS[cardColorMode];
+  if (!tint) return '';
+  return `background: color-mix(in srgb, ${tint} 18%, var(--bg));`;
+}
+
 function gameCardHtml(g, opts) {
   const hideLupa = opts && opts.hideLupa;
   const hours = g.hours_played != null ? `${parseFloat(g.hours_played).toFixed(1)} hs` : '— hs';
@@ -2770,7 +2840,7 @@ function gameCardHtml(g, opts) {
   const communityHtml = `<i class="ti ti-users" style="font-size:11px"></i> ${cs ? `${cs.avg_rating} (${cs.rating_count})` : '…'}`;
   const communityStyle = 'display:inline-flex';
 
-  return `<div class="game-card" id="card-${g.id}" ondblclick="handleCardDoubleTap('${g.id}', event)">
+  return `<div class="game-card" id="card-${g.id}" style="${cardColorStyle(g.status)}" ondblclick="handleCardDoubleTap('${g.id}', event)">
     <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0">
       <div class="game-cover" data-gid="${g.id}" onclick="openCoverEditFromCard(this)" style="cursor:pointer;position:relative" title="Click para cambiar portada">${cover}<div class="cover-edit-hint" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);opacity:0;transition:opacity 0.15s;font-size:18px">✏️</div></div>
       <button class="play-btn" data-gid="${g.id}" onclick="togglePlaySession('${g.id}')" title="Registrar sesión de juego"
@@ -2944,7 +3014,7 @@ function renderGamesGrid(items) {
   list.innerHTML = items.map(g => {
     const hours = g.hours_played != null ? `${parseFloat(g.hours_played).toFixed(1)} hs` : '— hs';
     const cover = steamCoverHtml(g, 'width:100%;height:100%;object-fit:cover');
-    return `<div class="lib-grid-tile" id="gridcard-${g.id}" ondblclick="handleCardDoubleTap('${g.id}', event)">
+    return `<div class="lib-grid-tile" id="gridcard-${g.id}" style="${cardColorStyle(g.status)}" ondblclick="handleCardDoubleTap('${g.id}', event)">
       <div style="position:relative">
         <div style="width:100%;aspect-ratio:2/3;background:var(--bg3);overflow:hidden">${cover}</div>
         <div style="position:absolute;top:6px;left:6px;display:flex;align-items:center;gap:4px;max-width:calc(100% - 36px);overflow:hidden">
@@ -4693,13 +4763,15 @@ function closeConfigPanel() {
 }
 
 function switchConfigTab(tab) {
-  document.getElementById('config-profile').style.display = tab === 'profile' ? '' : 'none';
-  document.getElementById('config-avatar').style.display  = tab === 'avatar'  ? '' : 'none';
-  document.getElementById('config-account').style.display = tab === 'account' ? '' : 'none';
+  document.getElementById('config-profile').style.display    = tab === 'profile'    ? '' : 'none';
+  document.getElementById('config-avatar').style.display     = tab === 'avatar'     ? '' : 'none';
+  document.getElementById('config-account').style.display    = tab === 'account'    ? '' : 'none';
+  document.getElementById('config-appearance').style.display = tab === 'appearance' ? '' : 'none';
   const saveBtn = document.getElementById('cfg-save-btn');
-  saveBtn.style.display = tab === 'account' ? 'none' : '';
+  saveBtn.style.display = (tab === 'account' || tab === 'appearance') ? 'none' : '';
   saveBtn.onclick = tab === 'avatar' ? saveAvatarConfig : saveConfig;
-  ['profile','avatar','account'].forEach(t => {
+  if (tab === 'appearance') renderAppearanceTab();
+  ['profile','avatar','account','appearance'].forEach(t => {
     const btn = document.getElementById(`tab-${t}`);
     if (!btn) return;
     const active = t === tab;
@@ -4707,6 +4779,80 @@ function switchConfigTab(tab) {
     btn.style.borderColor = active ? 'var(--green)' : 'var(--border)';
     btn.style.fontWeight  = active ? '600' : 'normal';
   });
+}
+
+// ── Apariencia ─────────────────────────────────────────────────────────────
+
+function renderAppearanceTab() {
+  document.querySelectorAll('.cfg-choice-btn[data-group="view"]').forEach(b => {
+    b.classList.toggle('active', b.dataset.value === libraryViewMode);
+  });
+  const currentTheme = document.documentElement.dataset.theme
+    || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  document.querySelectorAll('.cfg-choice-btn[data-group="theme"]').forEach(b => {
+    b.classList.toggle('active', b.dataset.value === currentTheme);
+  });
+
+  const isFixed = STATUS_DOT_COLORS.hasOwnProperty(cardColorMode);
+  const selectedKey = isFixed ? '__fixed__' : (cardColorMode || 'theme');
+  const options = [
+    ['theme', 'ti-brightness-6', 'Según tema'],
+    ['status', 'ti-palette', 'Según estado del juego'],
+    ['__fixed__', 'ti-pin', 'Color fijo de estado'],
+    ['white', 'ti-square', 'Blanco'],
+    ['black', 'ti-square-filled', 'Negro'],
+  ];
+  const host = document.getElementById('cfg-cardcolor-options');
+  host.innerHTML = options.map(([key, icon, label]) => `
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+      <input type="radio" name="cfg-cardcolor" value="${key}" ${selectedKey === key ? 'checked' : ''}
+        onchange="onCardColorRadioChange('${key}')" />
+      <i class="ti ${icon}"></i> ${label}
+    </label>
+  `).join('') + (isFixed || selectedKey === '__fixed__' ? `
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-left:26px">
+      ${Object.entries(STATUS_DOT_COLORS).map(([status, color]) => `
+        <button type="button" onclick="setCfgChoice('cardColor','${status}')"
+          style="display:flex;align-items:center;gap:6px;padding:5px 10px;font-size:12px;border-radius:20px;cursor:pointer;
+            border:1px solid ${cardColorMode === status ? color : 'var(--border)'};
+            background:${cardColorMode === status ? color + '33' : 'var(--bg3)'};color:var(--text)">
+          <span style="width:10px;height:10px;border-radius:50%;background:${color}"></span>${status}
+        </button>
+      `).join('')}
+    </div>
+  ` : '');
+}
+
+function onCardColorRadioChange(key) {
+  if (key === '__fixed__') {
+    setCfgChoice('cardColor', Object.keys(STATUS_DOT_COLORS)[0]);
+  } else {
+    setCfgChoice('cardColor', key);
+  }
+}
+
+async function setCfgChoice(group, value) {
+  if (group === 'view') {
+    setLibraryViewMode(value); // ya existe: re-renderiza + guarda localStorage
+  } else if (group === 'theme') {
+    applyThemeMode(value);
+  } else if (group === 'cardColor') {
+    cardColorMode = value;
+    renderGames();
+  }
+  renderAppearanceTab();
+
+  const body = {};
+  if (group === 'view') body.default_view = value;
+  if (group === 'theme') body.theme_mode = value;
+  if (group === 'cardColor') body.card_color_mode = value;
+  try {
+    await fetch(`${apiBase()}/api/v1/settings`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  } catch(e) {}
 }
 
 async function saveConfig() {
@@ -5317,8 +5463,8 @@ async function openAchievementsPanel() {
     const byCategory = {};
     d.achievements.forEach(a => { (byCategory[a.category] = byCategory[a.category] || []).push(a); });
 
-    const tileHtml = a => { const info = achievementInfo(a); return `
-      <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;margin-bottom:8px;border-radius:8px;background:var(--bg3);opacity:${a.unlocked ? '1' : '0.55'}">
+    const tileHtml = a => { const info = achievementInfo(a); const isRare = a.unlocked && a.global_pct < 10; return `
+      <div class="${isRare ? 'frame-pulse-dorado' : ''}" style="display:flex;align-items:flex-start;gap:10px;padding:10px;margin-bottom:8px;border-radius:8px;background:var(--bg3);opacity:${a.unlocked ? '1' : '0.55'};${isRare ? 'border:2px solid transparent;' : ''}">
         <i class="ti ${a.unlocked ? 'ti-circle-check' : 'ti-lock'}" style="font-size:18px;color:${a.unlocked ? 'var(--green)' : 'var(--text2)'};margin-top:2px"></i>
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:6px">
@@ -8874,6 +9020,8 @@ async function onLoginSuccess() {
     const hb = document.getElementById('btn-hidden');
     if (hb) hb.style.display = 'inline-flex';
   }, 100);
+
+  await loadAppearanceSettings();
 
   // Load games first (most important) — parallel with stats
   await Promise.all([
