@@ -188,6 +188,9 @@
       .header-right > button[onclick="openConfigPanel()"],
       #friends-btn, #support-link, #logout-btn-header { display:none !important; }
       #header-more-btn { display:inline-flex !important; }
+      /* Conectores: en mobile solo se accede via el menu "..." (arriba) —
+         antes quedaban en su propia fila ocupando espacio aparte. */
+      #connector-row { display:none !important; }
 
       .profile-panel { padding:8px 12px; gap:10px; }
       .profile-panel-name { font-size:13px; }
@@ -471,6 +474,16 @@
           <button onclick="openFriendsPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-users" style="font-size:14px"></i> <span data-i18n="friends">Amigos</span></button>
           <button onclick="openAchievementsPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-trophy" style="font-size:14px"></i> <span data-i18n="achievements">Logros</span></button>
           <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
+          <!-- Conectores — en mobile los botones de arriba estan ocultos
+               (#connector-row), asi que se accede desde aca. Cada uno
+               abre su propio menu, centrado en pantalla (ver el fallback
+               en _positionFixedPopup para boton oculto). -->
+          <button onclick="toggleHeaderMoreMenu();toggleSteamMenu()" class="steam-menu-item"><i class="ti ti-brand-steam" style="font-size:14px"></i> Steam</button>
+          <button onclick="toggleHeaderMoreMenu();togglePsnMenu()" class="steam-menu-item"><img src="https://cdn.simpleicons.org/playstation/888887" style="width:14px;height:14px;vertical-align:-2px"> PSN</button>
+          <button onclick="toggleHeaderMoreMenu();toggleConnectorMenu('gog')" class="steam-menu-item"><img src="https://cdn.simpleicons.org/gogdotcom/888887" style="width:14px;height:14px;vertical-align:-2px"> GOG</button>
+          <button onclick="toggleHeaderMoreMenu();toggleConnectorMenu('xbox')" class="steam-menu-item"><i class="ti ti-brand-xbox" style="font-size:14px"></i> Xbox</button>
+          <button onclick="toggleHeaderMoreMenu();toggleConnectorMenu('epic')" class="steam-menu-item"><img src="https://cdn.simpleicons.org/epicgames/888887" style="width:14px;height:14px;vertical-align:-2px"> Epic</button>
+          <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
           <a href="mailto:nether.appdev@gmail.com" class="steam-menu-item" style="text-decoration:none"><i class="ti ti-lifebuoy" style="font-size:14px"></i> <span data-i18n="support">Soporte</span></a>
           <button onclick="logout()" class="steam-menu-item"><i class="ti ti-logout" style="font-size:14px"></i> <span data-i18n="logout">Salir</span></button>
         </div>
@@ -479,7 +492,7 @@
       <!-- Fuerza salto de línea dentro de .header-right (flex-wrap:wrap): un
            item con width:100% siempre arranca su propia fila — separa los
            conectores de los accesos directos de arriba. -->
-      <div style="width:100%;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px" id="connector-row">
+      <div style="width:100%;display:flex;flex-wrap:wrap;justify-content:flex-start;gap:8px" id="connector-row">
 
       <div style="position:relative;display:inline-block;margin-left:4px" id="steam-menu-wrap">
         <button class="add-btn" onclick="toggleSteamMenu()" id="steam-menu-btn">
@@ -3466,8 +3479,19 @@ function renderFilterDropdowns() {
  * rompe cuando el boton esta dentro de una fila con scroll horizontal
  * (overflow-x:auto), que es el caso en mobile. */
 function _positionFixedPopup(popup, btn) {
-  const rect = btn.getBoundingClientRect();
   popup.style.position = 'fixed';
+  // Si el boton "ancla" esta oculto (ej. se abrio desde el sidebar mobile,
+  // donde los botones de conector no se muestran) no hay de donde anclar
+  // — se centra como modal en vez de quedar pegado a la esquina 0,0.
+  if (!btn || btn.offsetParent === null) {
+    const popupWidth = Math.min(Math.max(popup.offsetWidth || 260, 220), window.innerWidth - 24);
+    popup.style.left = `${Math.max(12, (window.innerWidth - popupWidth) / 2)}px`;
+    popup.style.top  = `${Math.max(12, window.innerHeight * 0.12)}px`;
+    popup.style.maxHeight = `${window.innerHeight * 0.76}px`;
+    popup.style.overflowY = 'auto';
+    return;
+  }
+  const rect = btn.getBoundingClientRect();
   const popupWidth = Math.max(popup.offsetWidth || 200, 180);
   let left = rect.left;
   if (left + popupWidth > window.innerWidth - 8) left = Math.max(8, window.innerWidth - popupWidth - 8);
