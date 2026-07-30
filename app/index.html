@@ -4681,8 +4681,8 @@ async function loadUserStats() {
           <div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">${t('byPlatform')}</div>
           ${platforms.map(([name, count]) => `
             <div style="display:flex;align-items:center;gap:6px;margin-bottom:7px;font-size:13px">
+              ${platIconOnly(name, false)}
               <span style="flex:1;color:var(--text)">${name}</span>
-              <span style="color:var(--text2)">:</span>
               <span style="font-weight:600;min-width:28px;text-align:right">${count}</span>
             </div>
           `).join('')}
@@ -6235,6 +6235,7 @@ async function loadFriendStats() {
       </div>`).join('')}
       <div style="font-weight:600;margin:16px 0 8px">${t('byPlatform')}</div>
       ${byPlatform.map(p => `<div style="display:flex;align-items:center;gap:8px;padding:4px 0">
+        ${platIconOnly(p.platform, false)}
         <div style="flex:1">${p.platform}</div>
         <div style="color:var(--text2);font-size:12px">${p.count}</div>
       </div>`).join('')}
