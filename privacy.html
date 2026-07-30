@@ -52,7 +52,9 @@
     <tr><td>Email y contraseña (hasheada)</td><td>Crear tu cuenta e identificarte al iniciar sesión</td></tr>
     <tr><td>Nombre de usuario, bio, avatar</td><td>Tu perfil público dentro de la app (si lo hacés público)</td></tr>
     <tr><td>Biblioteca de juegos, calificaciones, horas jugadas</td><td>El funcionamiento central de tu backlog</td></tr>
-    <tr><td>Steam ID y datos de tu biblioteca de Steam</td><td>Sincronizar tu biblioteca y wishlist si conectás tu cuenta (opcional, plan premium)</td></tr>
+    <tr><td>Steam ID / Online ID de PSN y datos de tu biblioteca</td><td>Sincronizar tu biblioteca (y wishlist en Steam) si conectás tu cuenta (opcional, plan premium)</td></tr>
+    <tr><td>Tokens de acceso OAuth de GOG, Xbox y Epic Games</td><td>Mantener conectada tu cuenta y volver a sincronizar tu biblioteca sin pedirte el login cada vez (opcional, plan premium) — se guardan cifrados del lado del servidor, la app nunca los ve</td></tr>
+    <tr><td>Biblioteca de GOG, Xbox y Epic Games (nombre, portada, horas si están disponibles)</td><td>Sincronizar tu biblioteca de esas plataformas si conectás tu cuenta (opcional, plan premium)</td></tr>
     <tr><td>Amistades y solicitudes</td><td>La función social de agregar amigos y ver su actividad</td></tr>
     <tr><td>Logros, XP y nivel</td><td>El sistema de gamificación</td></tr>
     <tr><td>Token de notificaciones push (FCM)</td><td>Enviarte notificaciones de solicitudes de amistad (solo app Android)</td></tr>
@@ -65,6 +67,8 @@
     <li><strong>Railway</strong> — hosting del backend y la base de datos.</li>
     <li><strong>Google Sign-In</strong> — inicio de sesión opcional con tu cuenta de Google.</li>
     <li><strong>Steam Web API</strong> — sincronización de biblioteca/wishlist si vinculás tu cuenta de Steam (opcional).</li>
+    <li><strong>PlayStation Network (API no oficial)</strong> — sincronización de biblioteca si vinculás tu Online ID de PSN (opcional).</li>
+    <li><strong>GOG, Xbox Live (Microsoft) y Epic Games</strong> — sincronización de biblioteca vía login OAuth si conectás tu cuenta (opcional). Solo lectura de tu biblioteca — nunca accedemos a tu contraseña ni realizamos acciones dentro de esas cuentas.</li>
     <li><strong>Resend</strong> — envío del mail de recuperación de contraseña.</li>
     <li><strong>Firebase Cloud Messaging</strong> — notificaciones push en la app Android.</li>
     <li><strong>Sentry</strong> — monitoreo de errores técnicos del backend.</li>

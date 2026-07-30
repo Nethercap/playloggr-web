@@ -545,6 +545,12 @@
         </div>
       </div>
 
+      <!-- GOG / Xbox / Epic — login OAuth con pegado de code (en la app -->
+      <!-- movil el WebView intercepta el redirect solo, en un navegador de -->
+      <!-- escritorio no se puede leer esa URL cross-origin, asi que el -->
+      <!-- usuario copia el code/URL final a mano). -->
+      <div id="connector-menus"></div>
+
     </div>
   </div>
 
@@ -950,7 +956,7 @@
         </div>
         <button id="cfg-upgrade-btn" onclick="startPaddleCheckout()" style="display:none;padding:12px;border-radius:8px;border:none;background:var(--green);color:#fff;cursor:pointer;font-size:13px;font-weight:600;text-align:left">
           <i class="ti ti-crown"></i> Actualizar a Premium — USD $6.99 (pago único, impuestos según checkout)
-          <div style="font-size:11px;color:rgba(255,255,255,0.85);margin-top:2px;font-weight:400">Desbloqueá biblioteca ilimitada, sync de Steam, nivel 150 y más.</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.85);margin-top:2px;font-weight:400">Desbloqueá biblioteca ilimitada, sync de Steam/PSN/GOG/Xbox/Epic, nivel 150 y más.</div>
         </button>
         <button onclick="confirmDeleteLibrary()"
           style="padding:10px;border-radius:8px;border:0.5px solid var(--red);background:transparent;color:var(--red);cursor:pointer;font-size:13px;text-align:left">
@@ -6318,6 +6324,189 @@ async function restoreDeletedPsn() {
   }
 }
 
+// ── GOG / Xbox / Epic — mismo patron que Steam/PSN pero con login OAuth ──
+// En la app movil el WebView intercepta el code de la URL de redirect
+// antes de que cargue (esa pagina es de gog.com/epicgames.com, o nuestra
+// para Xbox pero sin handler). En un navegador de escritorio no se puede
+// leer esa URL/contenido cross-origin con JS, asi que el usuario copia el
+// code (o la URL/JSON completo, se extrae con regex) a mano.
+// ti-brand-gog / ti-brand-epic-games no existen en @tabler/icons-webfont
+// 2.44.0 (confirmado contra el CSS real) — se usan iconos genericos.
+// ti-brand-xbox si existe.
+const CONNECTORS = {
+  gog:  { icon: 'ti-disc',       label: 'GOG'  },
+  xbox: { icon: 'ti-brand-xbox', label: 'Xbox' },
+  epic: { icon: 'ti-device-gamepad', label: 'Epic' },
+};
+const _connectorMenuOpen = {};
+
+function renderConnectorMenus() {
+  const host = document.getElementById('connector-menus');
+  if (!host) return;
+  host.innerHTML = Object.entries(CONNECTORS).map(([p, c]) => `
+    <div style="position:relative;display:inline-block;margin-left:4px" id="${p}-menu-wrap">
+      <button class="add-btn" onclick="toggleConnectorMenu('${p}')" id="${p}-menu-btn">
+        <i class="ti ${c.icon}"></i> ${c.label} ▾
+      </button>
+      <div id="${p}-menu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:300;min-width:240px;box-shadow:0 4px 16px rgba(0,0,0,0.3);padding:4px 0">
+        <div style="padding:10px 14px;border-bottom:0.5px solid var(--border)">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Login ${c.label}</div>
+          <button onclick="openConnectorLogin('${p}')" style="width:100%;padding:6px 10px;font-size:12px;border-radius:6px;border:none;background:var(--bg3);color:var(--text);cursor:pointer;text-align:left;margin-bottom:6px">
+            <i class="ti ti-external-link"></i> Abrir login de ${c.label} en otra pestaña
+          </button>
+          <div style="display:flex;gap:6px">
+            <input id="${p}-code-input" type="text" placeholder="Pegá el code (o la URL/JSON final)..."
+              style="flex:1;padding:5px 8px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);min-width:0"
+              onkeydown="if(event.key==='Enter') connectConnectorCode('${p}')" />
+            <button onclick="connectConnectorCode('${p}')" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;white-space:nowrap">Conectar</button>
+          </div>
+          <div id="${p}-status" style="font-size:10px;color:var(--text2);margin-top:4px"></div>
+        </div>
+        <div style="padding:4px 0">
+          <button onclick="syncConnectorLibrary('${p}')" class="steam-menu-item">
+            <i class="ti ti-library"></i> Sincronizar biblioteca
+          </button>
+          <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
+          <button onclick="restoreDeletedConnector('${p}')" class="steam-menu-item">
+            <i class="ti ti-restore"></i> Restablecer biblioteca borrada
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleConnectorMenu(platform) {
+  const menu = document.getElementById(`${platform}-menu`);
+  const btn  = document.getElementById(`${platform}-menu-btn`);
+  _connectorMenuOpen[platform] = !_connectorMenuOpen[platform];
+  if (_connectorMenuOpen[platform]) {
+    menu.style.display = 'block';
+    menu.style.right = 'auto';
+    _positionFixedPopup(menu, btn);
+    setTimeout(() => document.addEventListener('mousedown', (e) => _closeConnectorMenuOutside(platform, e)), 10);
+  } else {
+    menu.style.display = 'none';
+  }
+}
+
+function _closeConnectorMenuOutside(platform, e) {
+  if (!document.getElementById(`${platform}-menu-wrap`)?.contains(e.target)) {
+    document.getElementById(`${platform}-menu`).style.display = 'none';
+    _connectorMenuOpen[platform] = false;
+    document.removeEventListener('mousedown', (e2) => _closeConnectorMenuOutside(platform, e2));
+  }
+}
+
+async function openConnectorLogin(platform) {
+  try {
+    const res  = await fetch(`${apiBase()}/api/v1/connectors/${platform}/login-url`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error');
+    window.open(data.url, '_blank');
+  } catch(e) {
+    showToast(e.message || 'No se pudo abrir el login', true);
+  }
+}
+
+// El "code" puede pegarse como URL completa (?code=XXXX), como el JSON de
+// Epic ({"authorizationCode":"XXXX"}), o el valor pelado — se prueba cada
+// forma y se cae al texto tal cual si ninguna matchea.
+function _extractConnectorCode(pasted) {
+  const raw = pasted.trim();
+  const urlMatch = raw.match(/[?&]code=([^&\s"]+)/);
+  if (urlMatch) return decodeURIComponent(urlMatch[1]);
+  const jsonMatch = raw.match(/"authorizationCode"\s*:\s*"([^"]+)"/);
+  if (jsonMatch) return jsonMatch[1];
+  return raw;
+}
+
+async function connectConnectorCode(platform) {
+  const input = document.getElementById(`${platform}-code-input`);
+  const code  = _extractConnectorCode(input.value || '');
+  if (!code) return;
+  const status = document.getElementById(`${platform}-status`);
+  status.textContent = 'Conectando...';
+  status.style.color = 'var(--text2)';
+  try {
+    const res  = await fetch(`${apiBase()}/api/v1/connectors/${platform}/callback`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error');
+    status.textContent = `✓ ${data.message || 'Conectado'}`;
+    status.style.color = 'var(--green)';
+    input.value = '';
+    await syncAll(1);
+    loadGlobalStats();
+    checkAchievements();
+  } catch(e) {
+    status.textContent = e.message || 'Error al conectar';
+    status.style.color = 'var(--red)';
+  }
+}
+
+async function syncConnectorLibrary(platform) {
+  document.getElementById(`${platform}-menu`).style.display = 'none';
+  _connectorMenuOpen[platform] = false;
+  const btn = document.getElementById(`${platform}-menu-btn`);
+  const c = CONNECTORS[platform];
+  btn.disabled = true;
+  btn.innerHTML = `<i class="ti ${c.icon}"></i> ${t('syncing')}`;
+  try {
+    const res  = await fetch(`${apiBase()}/api/v1/${platform}/sync-library`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error');
+    showToast(`✓ ${data.message}`);
+    await syncAll(1);
+    loadGlobalStats();
+    checkAchievements();
+  } catch(e) {
+    showToast(e.message || 'Error al sincronizar biblioteca', true);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<i class="ti ${c.icon}"></i> ${c.label} ▾`;
+    applyPremiumUI();
+  }
+}
+
+async function restoreDeletedConnector(platform) {
+  document.getElementById(`${platform}-menu`).style.display = 'none';
+  _connectorMenuOpen[platform] = false;
+  const c = CONNECTORS[platform];
+  if (!confirm(`¿Restablecer los juegos de ${c.label} que borraste?`)) return;
+  const btn = document.getElementById(`${platform}-menu-btn`);
+  btn.disabled = true;
+  btn.innerHTML = `<i class="ti ${c.icon}"></i> ${t('restoring')}`;
+  try {
+    const res  = await fetch(`${apiBase()}/api/v1/${platform}/restore-deleted`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error');
+    showToast(`✓ ${data.message}`);
+    syncAll(1);
+    loadGlobalStats();
+    checkAchievements();
+  } catch(e) {
+    showToast(e.message || 'Error al restablecer', true);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<i class="ti ${c.icon}"></i> ${c.label} ▾`;
+    applyPremiumUI();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', renderConnectorMenus);
+
 function showToast(msg, isError = false) {
   let toast = document.getElementById('toast-msg');
   if (!toast) {
@@ -7259,6 +7448,29 @@ function applyPremiumUI() {
       btn.onclick = toggleSteamMenu;
     }
   }
+  // Todos los conectores (PSN, GOG, Xbox, Epic) requieren premium igual que
+  // Steam — antes solo Steam se bloqueaba del lado del cliente.
+  const psnBtn = document.getElementById('psn-menu-btn');
+  if (psnBtn) {
+    if (!isPremium) {
+      psnBtn.innerHTML = '<i class="ti ti-device-gamepad-2"></i> PSN <i class="ti ti-lock" style="font-size:11px"></i>';
+      psnBtn.onclick = () => showToast('Sincronizar con PSN requiere la versión premium', true);
+    } else {
+      psnBtn.innerHTML = '<i class="ti ti-device-gamepad-2"></i> PSN ▾';
+      psnBtn.onclick = togglePsnMenu;
+    }
+  }
+  Object.entries(CONNECTORS).forEach(([p, c]) => {
+    const cbtn = document.getElementById(`${p}-menu-btn`);
+    if (!cbtn) return;
+    if (!isPremium) {
+      cbtn.innerHTML = `<i class="ti ${c.icon}"></i> ${c.label} <i class="ti ti-lock" style="font-size:11px"></i>`;
+      cbtn.onclick = () => showToast(`Sincronizar con ${c.label} requiere la versión premium`, true);
+    } else {
+      cbtn.innerHTML = `<i class="ti ${c.icon}"></i> ${c.label} ▾`;
+      cbtn.onclick = () => toggleConnectorMenu(p);
+    }
+  });
   ['premium-badge', 'cfg-premium-badge'].forEach(id => {
     const badge = document.getElementById(id);
     if (!badge) return;
