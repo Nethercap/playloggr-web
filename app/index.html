@@ -476,6 +476,11 @@
         </div>
       </div>
 
+      <!-- Fuerza salto de línea dentro de .header-right (flex-wrap:wrap): un
+           item con width:100% siempre arranca su propia fila — separa los
+           conectores de los accesos directos de arriba. -->
+      <div style="width:100%;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px" id="connector-row">
+
       <div style="position:relative;display:inline-block;margin-left:4px" id="steam-menu-wrap">
         <button class="add-btn" onclick="toggleSteamMenu()" id="steam-menu-btn">
           <i class="ti ti-brand-steam"></i> Steam ▾
@@ -523,7 +528,7 @@
       <!-- PSN (beta) -->
       <div style="position:relative;display:inline-block;margin-left:4px" id="psn-menu-wrap">
         <button class="add-btn" onclick="togglePsnMenu()" id="psn-menu-btn">
-          <i class="ti ti-device-gamepad-2"></i> PSN ▾
+          <img src="https://cdn.simpleicons.org/playstation/ffffff" style="width:13px;height:13px;vertical-align:-2px"> PSN ▾
         </button>
         <div id="psn-menu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:300;min-width:220px;box-shadow:0 4px 16px rgba(0,0,0,0.3);padding:4px 0">
           <div id="psn-id-section" style="padding:10px 14px;border-bottom:0.5px solid var(--border)">
@@ -559,6 +564,7 @@
       <!-- usuario copia el code/URL final a mano). -->
       <div id="connector-menus"></div>
 
+      </div>
     </div>
   </div>
 
@@ -1907,6 +1913,7 @@ let modalStarVal = 0;
 
 const platIcons = {
   'Steam': {slug:'steam', color:'#1b2838'},
+  'GOG': {slug:'gogdotcom', color:'#6a3191'},
   'Epic': {slug:'epicgames', color:'#2d2d2d'},
   'EA Play': {slug:'ea', color:'#ff4747'},
   'Windows PC': {slug:'windows', color:'#0078d4'},
@@ -1917,11 +1924,15 @@ const platIcons = {
   'PlayStation 2': {slug:'playstation', color:'#003087'},
   'PlayStation 1': {slug:'playstation', color:'#003087'},
   'PSP Vita': {slug:'playstation', color:'#003087'},
-  'XBOX X': {slug:'xbox', color:'#107c10'},
-  'XBOX S': {slug:'xbox', color:'#107c10'},
-  'XBOX PC': {slug:'xbox', color:'#107c10'},
-  'XBOX 360': {slug:'xbox', color:'#107c10'},
-  'XBOX One': {slug:'xbox', color:'#107c10'},
+  // simpleicons.org NO tiene logo de Xbox (404 confirmado) — se usa el
+  // glyph de Tabler (ti-brand-xbox, ese si existe) en vez de una imagen
+  // rota, mismo criterio que Nintendo (sin logo real disponible).
+  'XBOX': {tablerIcon:'brand-xbox', color:'#107c10'},
+  'XBOX X': {tablerIcon:'brand-xbox', color:'#107c10'},
+  'XBOX S': {tablerIcon:'brand-xbox', color:'#107c10'},
+  'XBOX PC': {tablerIcon:'brand-xbox', color:'#107c10'},
+  'XBOX 360': {tablerIcon:'brand-xbox', color:'#107c10'},
+  'XBOX One': {tablerIcon:'brand-xbox', color:'#107c10'},
   'Nintendo Switch 1': {tablerIcon:'device-gamepad-2', color:'#e4000f'},
   'Nintendo Switch 2': {tablerIcon:'device-gamepad-2', color:'#e4000f'},
   'Nintendo 3DS': {tablerIcon:'device-gamepad-2', color:'#e4000f'},
@@ -2616,9 +2627,12 @@ const communityStatsCache = {};
 function steamCoverHtml(g, extraStyle = '') {
   const styleAttr = extraStyle ? ` style="${extraStyle}"` : '';
   if (!g.app_id) {
+    // id="cover-${g.id}" para poder pisar el src cuando llegue la portada
+    // de respaldo de IGDB (GOG/Xbox/Epic sin portada propia) — ver
+    // fetchIgdbCovers().
     return g.cover_url
-      ? `<img src="${g.cover_url}" alt="${esc(g.name)}"${styleAttr} onerror="this.style.display='none'">`
-      : `<span>🎮</span>`;
+      ? `<img id="cover-${g.id}" src="${g.cover_url}" alt="${esc(g.name)}"${styleAttr} onerror="this.style.display='none'">`
+      : `<span id="cover-${g.id}">🎮</span>`;
   }
   const base = `https://cdn.cloudflare.steamstatic.com/steam/apps/${g.app_id}`;
   const candidates = [
@@ -2780,7 +2794,7 @@ async function renderGames() {
       const addFn = currentView === 'wishlist' ? 'openWishlistModal()' : 'openModal()';
       const syncBtns = currentView === 'wishlist' ? '' : `
             <button onclick="toggleSteamMenu()" class="add-btn" style="background:transparent;border:0.5px solid var(--border2);color:var(--text)"><i class="ti ti-brand-steam"></i> Sincronizar Steam</button>
-            <button onclick="togglePsnMenu()" class="add-btn" style="background:transparent;border:0.5px solid var(--border2);color:var(--text)"><i class="ti ti-device-gamepad-2"></i> Sincronizar PSN</button>`;
+            <button onclick="togglePsnMenu()" class="add-btn" style="background:transparent;border:0.5px solid var(--border2);color:var(--text)"><img src="https://cdn.simpleicons.org/playstation/ffffff" style="width:13px;height:13px;vertical-align:-2px"> Sincronizar PSN</button>`;
       list.innerHTML = `
         <div class="empty">
           <i class="ti ti-mood-sad" style="font-size:32px;display:block;margin-bottom:10px"></i>
@@ -2849,6 +2863,29 @@ async function renderGames() {
           g._igdbRatingPct = pct;
           const el = document.getElementById(`score-${g.id}`);
           if (el) el.outerHTML = `<span id="score-${g.id}" class="steam-score ${igdbScoreClass(pct)}" title="Puntaje IGDB (crítica + comunidad)">${pct}%</span>`;
+        });
+      }
+    } catch(e) {}
+  }
+
+  // Portada de respaldo de IGDB para juegos sin portada propia (Epic
+  // siempre, Xbox/GOG cuando el detalle no la trae) — mismo criterio que
+  // ya usa la app movil.
+  const toFetchCover = items.filter(g => !g.app_id && !g.cover_url);
+  if (toFetchCover.length > 0) {
+    const names = toFetchCover.map(g => g.name).join(',');
+    try {
+      const res = await fetch(`${apiBase()}/api/v1/igdb/cover/batch?names=${encodeURIComponent(names)}`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+      if (res.ok) {
+        const covers = await res.json();
+        toFetchCover.forEach(g => {
+          const url = covers[g.name];
+          if (!url) return;
+          g.cover_url = url;
+          const el = document.getElementById(`cover-${g.id}`);
+          if (el) el.outerHTML = `<img id="cover-${g.id}" src="${url}" alt="${esc(g.name)}" style="${el.getAttribute('style') || ''}" onerror="this.style.display='none'">`;
         });
       }
     } catch(e) {}
@@ -3225,8 +3262,8 @@ function statusLabel(s) {
   return s;
 }
 
-const PLATFORM_LIST = ['Steam','Epic','EA Play','Windows PC','Mac iOS','PlayStation 5','PlayStation 4',
-  'PlayStation 3','PlayStation 2','PlayStation 1','PSP Vita','XBOX X','XBOX S','XBOX PC','XBOX 360','XBOX One',
+const PLATFORM_LIST = ['Steam','GOG','Epic','EA Play','Windows PC','Mac iOS','PlayStation 5','PlayStation 4',
+  'PlayStation 3','PlayStation 2','PlayStation 1','PSP Vita','XBOX','XBOX X','XBOX S','XBOX PC','XBOX 360','XBOX One',
   'Nintendo Switch 1','Nintendo Switch 2','Nintendo 3DS','Nintendo 64','Nintendo Gamecube','Game Boy',
   'Game Boy Advance','SNES','Sega Genesis','Sega Dreamcast','Meta Quest','Android','iOS'];
 
@@ -6300,7 +6337,7 @@ async function syncPsnLibrary() {
     showToast(e.message || 'Error al sincronizar PSN', true);
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '<i class="ti ti-device-gamepad-2"></i> PSN ▾';
+    btn.innerHTML = '<img src="https://cdn.simpleicons.org/playstation/ffffff" style="width:13px;height:13px;vertical-align:-2px"> PSN ▾';
     applyPremiumUI();
   }
 }
@@ -6327,7 +6364,7 @@ async function restoreDeletedPsn() {
     showToast(e.message || 'Error al restablecer', true);
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '<i class="ti ti-device-gamepad-2"></i> PSN ▾';
+    btn.innerHTML = '<img src="https://cdn.simpleicons.org/playstation/ffffff" style="width:13px;height:13px;vertical-align:-2px"> PSN ▾';
     applyPremiumUI();
   }
 }
@@ -6339,13 +6376,30 @@ async function restoreDeletedPsn() {
 // leer esa URL/contenido cross-origin con JS, asi que el usuario copia el
 // code (o la URL/JSON completo, se extrae con regex) a mano.
 // ti-brand-gog / ti-brand-epic-games no existen en @tabler/icons-webfont
-// 2.44.0 (confirmado contra el CSS real) — se usan iconos genericos.
-// ti-brand-xbox si existe.
+// 2.44.0 (confirmado contra el CSS real) — GOG y Epic usan su logo real de
+// Simple Icons (si existen ahi, confirmado). Xbox es al reves: Simple
+// Icons NO tiene Xbox (404 confirmado) pero Tabler si (ti-brand-xbox).
 const CONNECTORS = {
-  gog:  { icon: 'ti-disc',       label: 'GOG'  },
-  xbox: { icon: 'ti-brand-xbox', label: 'Xbox' },
-  epic: { icon: 'ti-device-gamepad', label: 'Epic' },
+  gog: {
+    slug: 'gogdotcom', label: 'GOG',
+    instructions: '1) Iniciá sesión con usuario y contraseña de GOG (no funciona "Continuar con Google"). 2) La página final va a quedar en blanco o dar error — no importa, copiá la URL COMPLETA de la barra de direcciones de esa pestaña (tiene que contener "code=...") y pegala abajo.',
+  },
+  xbox: {
+    tablerIcon: 'brand-xbox', label: 'Xbox',
+    instructions: '1) Iniciá sesión con tu cuenta de Microsoft/Xbox. 2) Vas a terminar en una página de error de Playloggr — es esperado, no pasa nada. Copiá la URL COMPLETA de la barra de direcciones de esa pestaña (tiene que contener "code=...") y pegala abajo.',
+  },
+  epic: {
+    slug: 'epicgames', label: 'Epic',
+    instructions: '1) Iniciá sesión con tu cuenta de Epic Games. 2) Vas a terminar en una página con texto plano tipo JSON. Copiá TODO ese texto (o solo el valor de "authorizationCode") y pegalo abajo.',
+  },
 };
+// Icono de un conector para usar en botones (texto blanco chico, no el
+// badge circular de las cards) — imagen real via Simple Icons si hay slug,
+// si no el glyph de Tabler.
+function _connIcon(c) {
+  if (c.slug) return `<img src="https://cdn.simpleicons.org/${c.slug}/ffffff" style="width:13px;height:13px;vertical-align:-2px">`;
+  return `<i class="ti ti-${c.tablerIcon}"></i>`;
+}
 const _connectorMenuOpen = {};
 
 function renderConnectorMenus() {
@@ -6354,11 +6408,12 @@ function renderConnectorMenus() {
   host.innerHTML = Object.entries(CONNECTORS).map(([p, c]) => `
     <div style="position:relative;display:inline-block;margin-left:4px" id="${p}-menu-wrap">
       <button class="add-btn" onclick="toggleConnectorMenu('${p}')" id="${p}-menu-btn">
-        <i class="ti ${c.icon}"></i> ${c.label} ▾
+        ${_connIcon(c)} ${c.label} ▾
       </button>
       <div id="${p}-menu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:300;min-width:240px;box-shadow:0 4px 16px rgba(0,0,0,0.3);padding:4px 0">
         <div style="padding:10px 14px;border-bottom:0.5px solid var(--border)">
           <div style="font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Login ${c.label}</div>
+          <div style="font-size:10px;color:var(--text2);line-height:1.5;margin-bottom:8px;background:var(--bg3);border-radius:6px;padding:8px">${c.instructions}</div>
           <button onclick="openConnectorLogin('${p}')" style="width:100%;padding:6px 10px;font-size:12px;border-radius:6px;border:none;background:var(--bg3);color:var(--text);cursor:pointer;text-align:left;margin-bottom:6px">
             <i class="ti ti-external-link"></i> Abrir login de ${c.label} en otra pestaña
           </button>
@@ -6468,7 +6523,7 @@ async function syncConnectorLibrary(platform) {
   const btn = document.getElementById(`${platform}-menu-btn`);
   const c = CONNECTORS[platform];
   btn.disabled = true;
-  btn.innerHTML = `<i class="ti ${c.icon}"></i> ${t('syncing')}`;
+  btn.innerHTML = `${_connIcon(c)} ${t('syncing')}`;
   try {
     const res  = await fetch(`${apiBase()}/api/v1/${platform}/sync-library`, {
       method: 'POST',
@@ -6484,7 +6539,7 @@ async function syncConnectorLibrary(platform) {
     showToast(e.message || 'Error al sincronizar biblioteca', true);
   } finally {
     btn.disabled = false;
-    btn.innerHTML = `<i class="ti ${c.icon}"></i> ${c.label} ▾`;
+    btn.innerHTML = `${_connIcon(c)} ${c.label} ▾`;
     applyPremiumUI();
   }
 }
@@ -6496,7 +6551,7 @@ async function restoreDeletedConnector(platform) {
   if (!confirm(`¿Restablecer los juegos de ${c.label} que borraste?`)) return;
   const btn = document.getElementById(`${platform}-menu-btn`);
   btn.disabled = true;
-  btn.innerHTML = `<i class="ti ${c.icon}"></i> ${t('restoring')}`;
+  btn.innerHTML = `${_connIcon(c)} ${t('restoring')}`;
   try {
     const res  = await fetch(`${apiBase()}/api/v1/${platform}/restore-deleted`, {
       method: 'POST',
@@ -6512,7 +6567,7 @@ async function restoreDeletedConnector(platform) {
     showToast(e.message || 'Error al restablecer', true);
   } finally {
     btn.disabled = false;
-    btn.innerHTML = `<i class="ti ${c.icon}"></i> ${c.label} ▾`;
+    btn.innerHTML = `${_connIcon(c)} ${c.label} ▾`;
     applyPremiumUI();
   }
 }
@@ -7499,10 +7554,10 @@ function applyPremiumUI() {
   const psnBtn = document.getElementById('psn-menu-btn');
   if (psnBtn) {
     if (!isPremium) {
-      psnBtn.innerHTML = '<i class="ti ti-device-gamepad-2"></i> PSN <i class="ti ti-lock" style="font-size:11px"></i>';
+      psnBtn.innerHTML = '<img src="https://cdn.simpleicons.org/playstation/ffffff" style="width:13px;height:13px;vertical-align:-2px"> PSN <i class="ti ti-lock" style="font-size:11px"></i>';
       psnBtn.onclick = () => showToast('Sincronizar con PSN requiere la versión premium', true);
     } else {
-      psnBtn.innerHTML = '<i class="ti ti-device-gamepad-2"></i> PSN ▾';
+      psnBtn.innerHTML = '<img src="https://cdn.simpleicons.org/playstation/ffffff" style="width:13px;height:13px;vertical-align:-2px"> PSN ▾';
       psnBtn.onclick = togglePsnMenu;
     }
   }
@@ -7510,10 +7565,10 @@ function applyPremiumUI() {
     const cbtn = document.getElementById(`${p}-menu-btn`);
     if (!cbtn) return;
     if (!isPremium) {
-      cbtn.innerHTML = `<i class="ti ${c.icon}"></i> ${c.label} <i class="ti ti-lock" style="font-size:11px"></i>`;
+      cbtn.innerHTML = `${_connIcon(c)} ${c.label} <i class="ti ti-lock" style="font-size:11px"></i>`;
       cbtn.onclick = () => showToast(`Sincronizar con ${c.label} requiere la versión premium`, true);
     } else {
-      cbtn.innerHTML = `<i class="ti ${c.icon}"></i> ${c.label} ▾`;
+      cbtn.innerHTML = `${_connIcon(c)} ${c.label} ▾`;
       cbtn.onclick = () => toggleConnectorMenu(p);
     }
   });
