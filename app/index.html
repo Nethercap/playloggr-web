@@ -310,6 +310,17 @@
       to { transform: rotate(360deg); }
     }
   </style>
+  <script>
+    // Aplicar el tema guardado ANTES del primer paint — si esto esperara
+    // a /settings (loadAppearanceSettings, ya async y despues del login),
+    // en conexiones lentas se veia un flash del tema del SO antes de
+    // cambiar al guardado. Se cachea en localStorage cada vez que
+    // applyThemeMode() corre con un valor real (ver esa funcion).
+    (function() {
+      const saved = localStorage.getItem('gb_theme');
+      if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
+    })();
+  </script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
@@ -1985,8 +1996,10 @@ function applyThemeMode(mode) {
   // prefers-color-scheme decida (no se setea data-theme).
   if (mode === 'light' || mode === 'dark') {
     document.documentElement.dataset.theme = mode;
+    localStorage.setItem('gb_theme', mode);
   } else {
     delete document.documentElement.dataset.theme;
+    localStorage.removeItem('gb_theme');
   }
 }
 
