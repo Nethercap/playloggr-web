@@ -111,23 +111,13 @@
     background: var(--bg2); border: 1px solid var(--border); padding: 8px 14px; border-radius: 20px;
   }
 
-  /* ── Gallery ── */
+  /* ── Gallery (carrusel de a un screenshot por vez) ── */
   .gallery-section { padding: 56px 0 24px; }
-  .gallery-scroll {
-    display: flex; gap: 16px; overflow-x: auto; padding: 8px 24px 20px;
-    scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
-  }
-  /* Cuando las cards entran todas en pantalla, centrarlas en vez de
-     dejarlas pegadas a la izquierda. En viewports mas chicos donde
-     desborda, se mantiene el scroll horizontal normal (sin centrar,
-     evita el bug de recorte inicial de Chrome/Firefox con overflow+center). */
-  @media (min-width: 1180px) {
-    .gallery-scroll { justify-content: center; }
-  }
-  .gallery-scroll::-webkit-scrollbar { height: 8px; }
-  .gallery-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .gallery-carousel { display: flex; align-items: center; justify-content: center; gap: 14px; }
+  .gallery-viewport { width: 380px; max-width: calc(100vw - 100px); height: 340px; overflow: hidden; border-radius: 20px; }
+  .gallery-track { display: flex; height: 100%; transition: transform 0.35s ease; }
   .shot {
-    scroll-snap-align: center; flex: 0 0 auto; width: 380px; height: 340px;
+    flex: 0 0 100%; width: 380px; height: 340px;
     background: var(--bg2); border: 1px solid var(--border); border-radius: 20px;
     overflow: hidden; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.4);
   }
@@ -137,6 +127,16 @@
     background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
     font-size: 12.5px; color: #fff; font-weight: 600;
   }
+  .gallery-arrow {
+    flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%;
+    border: 1px solid var(--border); background: var(--bg2); color: var(--text);
+    font-size: 20px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .gallery-arrow:hover { background: var(--bg3); }
+  @media (max-width: 520px) { .gallery-arrow { display: none; } }
+  .gallery-dots { display: flex; justify-content: center; gap: 8px; margin-top: 14px; }
+  .gallery-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); cursor: pointer; border: none; padding: 0; }
+  .gallery-dot.active { background: var(--green); }
 
   /* ── Section headers ── */
   .section { padding: 72px 0; }
@@ -295,7 +295,7 @@
 
     <div class="pill-row">
       <span class="pill">🔄 Steam, PlayStation, GOG, Xbox y Epic</span>
-      <span class="pill">🏆 150 logros desbloqueables</span>
+      <span class="pill">🏆 157 logros desbloqueables</span>
       <span class="pill">📊 Estadísticas en tiempo real</span>
       <span class="pill">👥 Backlog social con amigos</span>
     </div>
@@ -304,24 +304,31 @@
 
 <!-- ═══════════════ GALERÍA ═══════════════ -->
 <section class="gallery-section">
-  <div class="gallery-scroll" id="gallery-scroll">
-    <div class="shot">
-      <img src="/assets/screenshots/biblioteca.png" alt="Biblioteca de juegos en Playloggr, con filtros por estado, plataforma y género" loading="lazy" />
-      <div class="shot-caption">📚 Tu biblioteca completa, con filtros</div>
+  <div class="gallery-carousel">
+    <button class="gallery-arrow gallery-prev" aria-label="Anterior" onclick="galleryNav(-1)">‹</button>
+    <div class="gallery-viewport">
+      <div class="gallery-track" id="gallery-scroll">
+        <div class="shot">
+          <img src="/assets/screenshots/biblioteca.png" alt="Biblioteca de juegos en Playloggr, con filtros por estado, plataforma y género" loading="lazy" />
+          <div class="shot-caption">📚 Tu biblioteca completa, con filtros</div>
+        </div>
+        <div class="shot">
+          <img src="/assets/screenshots/logros.png" alt="Panel de logros y niveles de Playloggr" loading="lazy" />
+          <div class="shot-caption">🏆 157 logros para desbloquear</div>
+        </div>
+        <div class="shot">
+          <img src="/assets/screenshots/estadisticas.png" alt="Estadísticas de biblioteca, horas jugadas y calificaciones en Playloggr" loading="lazy" />
+          <div class="shot-caption">📊 Estadísticas reales de tu backlog</div>
+        </div>
+        <div class="shot">
+          <img src="/assets/screenshots/avatar.png" alt="Personalización de avatar y marcos desbloqueables en Playloggr" loading="lazy" />
+          <div class="shot-caption">🧑‍🎨 Avatar y marcos exclusivos por nivel</div>
+        </div>
+      </div>
     </div>
-    <div class="shot">
-      <img src="/assets/screenshots/logros.png" alt="Panel de logros y niveles de Playloggr" loading="lazy" />
-      <div class="shot-caption">🏆 150 logros para desbloquear</div>
-    </div>
-    <div class="shot">
-      <img src="/assets/screenshots/estadisticas.png" alt="Estadísticas de biblioteca, horas jugadas y calificaciones en Playloggr" loading="lazy" />
-      <div class="shot-caption">📊 Estadísticas reales de tu backlog</div>
-    </div>
-    <div class="shot">
-      <img src="/assets/screenshots/avatar.png" alt="Personalización de avatar y marcos desbloqueables en Playloggr" loading="lazy" />
-      <div class="shot-caption">🧑‍🎨 Avatar y marcos exclusivos por nivel</div>
-    </div>
+    <button class="gallery-arrow gallery-next" aria-label="Siguiente" onclick="galleryNav(1)">›</button>
   </div>
+  <div class="gallery-dots" id="gallery-dots"></div>
 </section>
 
 <!-- ═══════════════ FUNCIONALIDADES Y PLANES ═══════════════ -->
@@ -367,7 +374,7 @@
       <div class="feature-card">
         <div class="f-icon">🏆</div>
         <h3>Logros y niveles</h3>
-        <p>150 logros para desbloquear, sistema de XP, niveles, marcos de avatar y fuentes exclusivas a medida que avanzás.</p>
+        <p>157 logros para desbloquear, sistema de XP, niveles, marcos de avatar y fuentes exclusivas a medida que avanzás.</p>
       </div>
       <div class="feature-card">
         <div class="f-icon">📊</div>
@@ -424,7 +431,7 @@
           <li><span class="check">✓</span> Biblioteca y deseados <strong>ilimitados</strong></li>
           <li><span class="check">✓</span> Carpetas y amigos <strong>ilimitados</strong></li>
           <li><span class="check">✓</span> Nivel <strong>150</strong> + marcos exclusivos</li>
-          <li><span class="check">✓</span> Los <strong>150 logros</strong> disponibles</li>
+          <li><span class="check">✓</span> Los <strong>157 logros</strong> disponibles</li>
           <li><span class="check">✓</span> <strong>Sincronización con Steam, PlayStation, GOG, Xbox y Epic</strong></li>
           <li><span class="check">✓</span> Rankings y stats de amigos</li>
         </ul>
@@ -471,6 +478,37 @@
 
 <script>
   document.getElementById('year').textContent = new Date().getFullYear();
+
+  // ── Carrusel de screenshots (uno a la vez, flechas + swipe) ──
+  (function initGalleryCarousel() {
+    const track = document.getElementById('gallery-scroll');
+    const dotsWrap = document.getElementById('gallery-dots');
+    if (!track) return;
+    const slides = Array.from(track.children);
+    let idx = 0;
+    slides.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.className = 'gallery-dot' + (i === 0 ? ' active' : '');
+      dot.setAttribute('aria-label', `Screenshot ${i + 1}`);
+      dot.addEventListener('click', () => goTo(i));
+      dotsWrap.appendChild(dot);
+    });
+    function update() {
+      track.style.transform = `translateX(-${idx * 100}%)`;
+      Array.from(dotsWrap.children).forEach((d, i) => d.classList.toggle('active', i === idx));
+    }
+    function goTo(i) { idx = (i + slides.length) % slides.length; update(); }
+    window.galleryNav = (dir) => goTo(idx + dir);
+    let startX = null;
+    track.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+    track.addEventListener('touchend', e => {
+      if (startX === null) return;
+      const dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dx) > 40) goTo(idx + (dx < 0 ? 1 : -1));
+      startX = null;
+    }, { passive: true });
+    update();
+  })();
 
   // ── Selector de idioma (primera visita) ──
   (function initLangPicker() {

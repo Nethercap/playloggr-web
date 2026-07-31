@@ -1628,7 +1628,7 @@ const I18N = {
     tourTitleFilters: 'Filtrá tu biblioteca', tourBodyFilters: 'Filtrá por estado, plataforma, género, horas y calificación, y buscá por nombre.',
     tourTitleRankings: 'Armá tus rankings', tourBodyRankings: 'Creá tu propio top de hasta 25 juegos y ordenalos arrastrando las fichas.',
     tourTitleFriends: 'Agregá amigos', tourBodyFriends: 'Sumá amigos, mirá qué están jugando y comparen bibliotecas.',
-    tourTitleAchievements: 'Desbloqueá logros', tourBodyAchievements: '150 logros para desbloquear, con XP y niveles a medida que jugás.',
+    tourTitleAchievements: 'Desbloqueá logros', tourBodyAchievements: '157 logros para desbloquear, con XP y niveles a medida que jugás.',
     tourTitleAvatar: 'Personalizá tu avatar', tourBodyAvatar: 'Tocá acá para armar tu personaje pixel art con marcos y fuentes exclusivas.',
     tourTitleSupport: '¿Tenés dudas?', tourBodySupport: 'Escribinos por acá cuando quieras, respondemos a todos los mails.',
     tourTitleAppearance: 'Hacela tuya', tourBodyAppearance: 'Tocá acá y elegí "Apariencia" para cambiar entre tema claro/oscuro, vista lista/cuadrícula y color de card.',
@@ -1769,7 +1769,7 @@ const I18N = {
     tourTitleFilters: 'Filter your library', tourBodyFilters: 'Filter by status, platform, genre, hours and rating, and search by name.',
     tourTitleRankings: 'Build your rankings', tourBodyRankings: 'Create your own top of up to 25 games and reorder them by dragging the tiles.',
     tourTitleFriends: 'Add friends', tourBodyFriends: 'Add friends, see what they\'re playing and compare libraries.',
-    tourTitleAchievements: 'Unlock achievements', tourBodyAchievements: '150 achievements to unlock, with XP and levels as you play.',
+    tourTitleAchievements: 'Unlock achievements', tourBodyAchievements: '157 achievements to unlock, with XP and levels as you play.',
     tourTitleAvatar: 'Customize your avatar', tourBodyAvatar: 'Tap here to build your pixel-art character with exclusive frames and fonts.',
     tourTitleSupport: 'Have questions?', tourBodySupport: 'Write to us here anytime, we reply to every email.',
     tourTitleAppearance: 'Make it yours', tourBodyAppearance: 'Tap here and choose "Appearance" to switch between light/dark theme, list/grid view and card colors.',
@@ -1910,7 +1910,7 @@ const I18N = {
     tourTitleFilters: 'Filtre sua biblioteca', tourBodyFilters: 'Filtre por status, plataforma, gênero, horas e avaliação, e busque por nome.',
     tourTitleRankings: 'Monte seus rankings', tourBodyRankings: 'Crie seu próprio top de até 25 jogos e reordene arrastando as fichas.',
     tourTitleFriends: 'Adicione amigos', tourBodyFriends: 'Adicione amigos, veja o que estão jogando e comparem bibliotecas.',
-    tourTitleAchievements: 'Desbloqueie conquistas', tourBodyAchievements: '150 conquistas para desbloquear, com XP e níveis conforme você joga.',
+    tourTitleAchievements: 'Desbloqueie conquistas', tourBodyAchievements: '157 conquistas para desbloquear, com XP e níveis conforme você joga.',
     tourTitleAvatar: 'Personalize seu avatar', tourBodyAvatar: 'Toque aqui para montar seu personagem em pixel art com molduras e fontes exclusivas.',
     tourTitleSupport: 'Tem dúvidas?', tourBodySupport: 'Escreva para nós por aqui quando quiser, respondemos a todos os emails.',
     tourTitleAppearance: 'Deixe do seu jeito', tourBodyAppearance: 'Toque aqui e escolha "Aparência" para alternar entre tema claro/escuro, visualização em lista/grade e cor do card.',
@@ -3992,6 +3992,10 @@ async function changeStatus(gameId, newStatus) {
     }
     const sel = card.querySelector('.status-select');
     if (sel) sel.style.color = STATUS_DOT_COLORS[newStatus] || '';
+    // Si el modo de color de card esta en "por estado", el fondo tambien
+    // depende del status — sin esto quedaba con el color del estado viejo
+    // hasta el proximo render/recarga.
+    if (cardColorMode === 'status') card.style.cssText = cardColorStyle(newStatus);
   }
 
   // Move card between sections seamlessly
@@ -7654,6 +7658,22 @@ function showOnboarding() {
   slidesEl.style.transition = 'transform .25s ease';
   _renderOnboardingStep();
   document.getElementById('onboarding-overlay').classList.add('open');
+  _initOnboardingSwipe();
+}
+
+let _onboardingSwipeInit = false;
+function _initOnboardingSwipe() {
+  if (_onboardingSwipeInit) return;
+  _onboardingSwipeInit = true;
+  const el = document.getElementById('onboarding-slides');
+  let startX = null;
+  el.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+  el.addEventListener('touchend', e => {
+    if (startX === null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) > 40) onboardingStep(dx < 0 ? 1 : -1);
+    startX = null;
+  }, { passive: true });
 }
 
 function _renderOnboardingStep() {

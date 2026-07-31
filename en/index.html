@@ -111,19 +111,13 @@
     background: var(--bg2); border: 1px solid var(--border); padding: 8px 14px; border-radius: 20px;
   }
 
-  /* ── Gallery ── */
+  /* ── Gallery (carousel, one screenshot at a time) ── */
   .gallery-section { padding: 56px 0 24px; }
-  .gallery-scroll {
-    display: flex; gap: 16px; overflow-x: auto; padding: 8px 24px 20px;
-    scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
-  }
-  @media (min-width: 1180px) {
-    .gallery-scroll { justify-content: center; }
-  }
-  .gallery-scroll::-webkit-scrollbar { height: 8px; }
-  .gallery-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .gallery-carousel { display: flex; align-items: center; justify-content: center; gap: 14px; }
+  .gallery-viewport { width: 380px; max-width: calc(100vw - 100px); height: 340px; overflow: hidden; border-radius: 20px; }
+  .gallery-track { display: flex; height: 100%; transition: transform 0.35s ease; }
   .shot {
-    scroll-snap-align: center; flex: 0 0 auto; width: 380px; height: 340px;
+    flex: 0 0 100%; width: 380px; height: 340px;
     background: var(--bg2); border: 1px solid var(--border); border-radius: 20px;
     overflow: hidden; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.4);
   }
@@ -133,6 +127,16 @@
     background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
     font-size: 12.5px; color: #fff; font-weight: 600;
   }
+  .gallery-arrow {
+    flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%;
+    border: 1px solid var(--border); background: var(--bg2); color: var(--text);
+    font-size: 20px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .gallery-arrow:hover { background: var(--bg3); }
+  @media (max-width: 520px) { .gallery-arrow { display: none; } }
+  .gallery-dots { display: flex; justify-content: center; gap: 8px; margin-top: 14px; }
+  .gallery-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); cursor: pointer; border: none; padding: 0; }
+  .gallery-dot.active { background: var(--green); }
 
   /* ── Section headers ── */
   .section { padding: 72px 0; }
@@ -292,7 +296,7 @@
     <div class="pill-row">
       <span class="pill">🔄 Steam sync</span>
       <span class="pill">🎮 PlayStation (beta)</span>
-      <span class="pill">🏆 150 unlockable achievements</span>
+      <span class="pill">🏆 157 unlockable achievements</span>
       <span class="pill">📊 Real-time statistics</span>
       <span class="pill">👥 Social backlog with friends</span>
     </div>
@@ -301,24 +305,31 @@
 
 <!-- ═══════════════ GALLERY ═══════════════ -->
 <section class="gallery-section">
-  <div class="gallery-scroll" id="gallery-scroll">
-    <div class="shot">
-      <img src="/assets/screenshots/biblioteca.png" alt="Game library in Playloggr, with filters by status, platform, and genre" loading="lazy" />
-      <div class="shot-caption">📚 Your whole library, with filters</div>
+  <div class="gallery-carousel">
+    <button class="gallery-arrow gallery-prev" aria-label="Previous" onclick="galleryNav(-1)">‹</button>
+    <div class="gallery-viewport">
+      <div class="gallery-track" id="gallery-scroll">
+        <div class="shot">
+          <img src="/assets/screenshots/biblioteca.png" alt="Game library in Playloggr, with filters by status, platform, and genre" loading="lazy" />
+          <div class="shot-caption">📚 Your whole library, with filters</div>
+        </div>
+        <div class="shot">
+          <img src="/assets/screenshots/logros.png" alt="Achievements and level panel in Playloggr" loading="lazy" />
+          <div class="shot-caption">🏆 157 achievements to unlock</div>
+        </div>
+        <div class="shot">
+          <img src="/assets/screenshots/estadisticas.png" alt="Library statistics, hours played, and ratings in Playloggr" loading="lazy" />
+          <div class="shot-caption">📊 Real stats on your backlog</div>
+        </div>
+        <div class="shot">
+          <img src="/assets/screenshots/avatar.png" alt="Avatar customization and unlockable frames in Playloggr" loading="lazy" />
+          <div class="shot-caption">🧑‍🎨 Avatar and exclusive frames by level</div>
+        </div>
+      </div>
     </div>
-    <div class="shot">
-      <img src="/assets/screenshots/logros.png" alt="Achievements and level panel in Playloggr" loading="lazy" />
-      <div class="shot-caption">🏆 150 achievements to unlock</div>
-    </div>
-    <div class="shot">
-      <img src="/assets/screenshots/estadisticas.png" alt="Library statistics, hours played, and ratings in Playloggr" loading="lazy" />
-      <div class="shot-caption">📊 Real stats on your backlog</div>
-    </div>
-    <div class="shot">
-      <img src="/assets/screenshots/avatar.png" alt="Avatar customization and unlockable frames in Playloggr" loading="lazy" />
-      <div class="shot-caption">🧑‍🎨 Avatar and exclusive frames by level</div>
-    </div>
+    <button class="gallery-arrow gallery-next" aria-label="Next" onclick="galleryNav(1)">›</button>
   </div>
+  <div class="gallery-dots" id="gallery-dots"></div>
 </section>
 
 <!-- ═══════════════ FEATURES AND PLANS ═══════════════ -->
@@ -349,7 +360,7 @@
       <div class="feature-card">
         <div class="f-icon">🏆</div>
         <h3>Achievements and levels</h3>
-        <p>150 achievements to unlock, an XP system, levels, avatar frames, and exclusive fonts as you progress.</p>
+        <p>157 achievements to unlock, an XP system, levels, avatar frames, and exclusive fonts as you progress.</p>
       </div>
       <div class="feature-card">
         <div class="f-icon">📊</div>
@@ -406,7 +417,7 @@
           <li><span class="check">✓</span> <strong>Unlimited</strong> library and wishlist</li>
           <li><span class="check">✓</span> <strong>Unlimited</strong> folders and friends</li>
           <li><span class="check">✓</span> Level <strong>150</strong> + exclusive frames</li>
-          <li><span class="check">✓</span> All <strong>150 achievements</strong> available</li>
+          <li><span class="check">✓</span> All <strong>157 achievements</strong> available</li>
           <li><span class="check">✓</span> <strong>Steam and PlayStation sync</strong></li>
           <li><span class="check">✓</span> Friends' rankings and stats</li>
         </ul>
@@ -453,6 +464,37 @@
 
 <script>
   document.getElementById('year').textContent = new Date().getFullYear();
+
+  // ── Screenshot carousel (one at a time, arrows + swipe) ──
+  (function initGalleryCarousel() {
+    const track = document.getElementById('gallery-scroll');
+    const dotsWrap = document.getElementById('gallery-dots');
+    if (!track) return;
+    const slides = Array.from(track.children);
+    let idx = 0;
+    slides.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.className = 'gallery-dot' + (i === 0 ? ' active' : '');
+      dot.setAttribute('aria-label', `Screenshot ${i + 1}`);
+      dot.addEventListener('click', () => goTo(i));
+      dotsWrap.appendChild(dot);
+    });
+    function update() {
+      track.style.transform = `translateX(-${idx * 100}%)`;
+      Array.from(dotsWrap.children).forEach((d, i) => d.classList.toggle('active', i === idx));
+    }
+    function goTo(i) { idx = (i + slides.length) % slides.length; update(); }
+    window.galleryNav = (dir) => goTo(idx + dir);
+    let startX = null;
+    track.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+    track.addEventListener('touchend', e => {
+      if (startX === null) return;
+      const dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dx) > 40) goTo(idx + (dx < 0 ? 1 : -1));
+      startX = null;
+    }, { passive: true });
+    update();
+  })();
 
   // ── Language picker (first visit) ──
   (function initLangPicker() {
