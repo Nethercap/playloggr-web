@@ -1646,6 +1646,7 @@ const I18N = {
     novedadesFriendsPlaying: 'Amigos jugando esto (últimos 5 días)', novedadesPopularWishlist: 'Popular en Deseados (últimos 7 días)',
     novedadesMostHours: 'Más jugado (desde ayer)', novedadesPlayers: 'jugadores',
     novedadesRecentReleases: 'Recién salió', novedadesUpcomingReleases: 'Próximamente',
+    novedadesFreeGames: 'Juegos gratis', novedadesFreeGamesClaim: 'Reclamar', novedadesFreeGamesEndDate: 'Hasta el {date}',
     gameAddedToLibrary: 'Juego agregado a biblioteca', gameAddedToWishlist: 'Juego agregado a deseados',
     choosePlatform: 'Elegí la plataforma',
   },
@@ -1787,6 +1788,7 @@ const I18N = {
     novedadesFriendsPlaying: 'Friends playing this (last 5 days)', novedadesPopularWishlist: 'Popular in Wishlist (last 7 days)',
     novedadesMostHours: 'Most played (since yesterday)', novedadesPlayers: 'players',
     novedadesRecentReleases: 'Just released', novedadesUpcomingReleases: 'Coming soon',
+    novedadesFreeGames: 'Free games', novedadesFreeGamesClaim: 'Claim', novedadesFreeGamesEndDate: 'Until {date}',
     gameAddedToLibrary: 'Game added to library', gameAddedToWishlist: 'Game added to wishlist',
     choosePlatform: 'Choose the platform',
   },
@@ -1928,6 +1930,7 @@ const I18N = {
     novedadesFriendsPlaying: 'Amigos jogando isso (últimos 5 dias)', novedadesPopularWishlist: 'Popular nos Desejados (últimos 7 dias)',
     novedadesMostHours: 'Mais jogado (desde ontem)', novedadesPlayers: 'jogadores',
     novedadesRecentReleases: 'Lançou agora', novedadesUpcomingReleases: 'Em breve',
+    novedadesFreeGames: 'Jogos grátis', novedadesFreeGamesClaim: 'Resgatar', novedadesFreeGamesEndDate: 'Até {date}',
     gameAddedToLibrary: 'Jogo adicionado à biblioteca', gameAddedToWishlist: 'Jogo adicionado aos desejados',
     choosePlatform: 'Escolha a plataforma',
   },
@@ -2022,6 +2025,7 @@ const platIcons = {
   'PlayStation 2': {slug:'playstation', color:'#003087'},
   'PlayStation 1': {slug:'playstation', color:'#003087'},
   'PSP Vita': {slug:'playstation', color:'#003087'},
+  'PSN': {slug:'playstation', color:'#003087'},
   // simpleicons.org NO tiene logo de Xbox (404 confirmado) — se usa el
   // glyph de Tabler (ti-brand-xbox, ese si existe) en vez de una imagen
   // rota, mismo criterio que Nintendo (sin logo real disponible).
@@ -5651,6 +5655,31 @@ function _novedadesSimpleTileHtml(title, subtitle, trailing) {
     </div>`;
 }
 
+function _novedadesFreeGameTileHtml(g) {
+  const endDate = (g.end_date || '').split('-').reverse().join('/');
+  return `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;margin-bottom:6px;border-radius:8px;background:var(--bg3)">
+      <img src="${g.image_url || ''}" style="width:44px;height:44px;object-fit:cover;border-radius:6px;background:var(--bg2)" onerror="this.style.display='none'">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;line-height:1.3;overflow-wrap:break-word">${esc(g.title || '')}</div>
+        ${endDate ? `<div style="font-size:10.5px;color:var(--text2);margin-top:2px">${t('novedadesFreeGamesEndDate').replace('{date}', endDate)}</div>` : ''}
+      </div>
+      ${g.claim_url ? `<a href="${g.claim_url}" target="_blank" rel="noopener" class="btn-cancel" style="flex-shrink:0;padding:5px 12px;font-size:11.5px;text-decoration:none">${t('novedadesFreeGamesClaim')}</a>` : ''}
+    </div>`;
+}
+
+function _novedadesFreeGamesHtml(freeGames) {
+  const order = ['Steam', 'Epic', 'GOG', 'PSN'];
+  return order.filter(p => (freeGames[p] || []).length).map(p => `
+    <div style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+        ${platIconOnly(p, false)}
+        <span style="font-size:12.5px;font-weight:600">${p}</span>
+      </div>
+      ${freeGames[p].map(_novedadesFreeGameTileHtml).join('')}
+    </div>`).join('');
+}
+
 function _novedadesSectionHtml(icon, title, innerHtml) {
   return `
     <div style="margin-bottom:20px">
@@ -5687,8 +5716,10 @@ function _renderNovedades() {
   const mostHours = d.most_hours || [];
   const recent = (d.releases && d.releases.recent) || [];
   const upcoming = (d.releases && d.releases.upcoming) || [];
+  const freeGames = d.free_games || {};
+  const freeGamesEmpty = !Object.values(freeGames).some(list => (list || []).length);
 
-  if (!friendsPlaying.length && !popularWishlist.length && !mostHours.length && !recent.length && !upcoming.length) {
+  if (!friendsPlaying.length && !popularWishlist.length && !mostHours.length && !recent.length && !upcoming.length && freeGamesEmpty) {
     el.innerHTML = `<div style="text-align:center;padding:40px 16px;color:var(--text2)"><i class="ti ti-sparkles" style="font-size:32px"></i><div style="margin-top:10px">${t('novedadesEmpty')}</div></div>`;
     return;
   }
@@ -5708,6 +5739,7 @@ function _renderNovedades() {
   }
   if (recent.length) html += _novedadesSectionHtml('ti-sparkles', t('novedadesRecentReleases'), _novedadesCoverRowHtml(recent));
   if (upcoming.length) html += _novedadesSectionHtml('ti-calendar-event', t('novedadesUpcomingReleases'), _novedadesCoverRowHtml(upcoming));
+  if (!freeGamesEmpty) html += _novedadesSectionHtml('ti-gift', t('novedadesFreeGames'), _novedadesFreeGamesHtml(freeGames));
   el.innerHTML = html;
 }
 
