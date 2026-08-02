@@ -1144,7 +1144,9 @@
       <button id="ftab-wishlist" onclick="switchFriendTab('wishlist')"
         style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px" data-i18n="wishlist">Deseados</button>
       <button id="ftab-stats" onclick="switchFriendTab('stats')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px" data-i18n="stats">Estadísticas</button>
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px" data-i18n="stats">Estadísticas</button>
+      <button id="ftab-common" onclick="switchFriendTab('common')"
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px" data-i18n="commonGames">En común</button>
     </div>
 
     <div id="friend-tab-library">
@@ -1181,6 +1183,10 @@
 
     <div id="friend-tab-stats" style="display:none;overflow-y:auto;max-height:55vh">
       <div id="friend-stats-content"></div>
+    </div>
+
+    <div id="friend-tab-common" style="display:none">
+      <div id="friend-common-list" style="overflow-y:auto;max-height:55vh;display:flex;flex-direction:column;gap:8px"></div>
     </div>
 
     <div class="modal-actions">
@@ -1496,6 +1502,7 @@ let currentLang = localStorage.getItem('gb_lang') || 'es';
 const I18N = {
   es: {
     sync: 'Sincronizar', stats: 'Estadísticas', config: 'Configuración', friends: 'Amigos',
+    commonGames: 'En común', noCommonGames: 'No tienen juegos en común', you: 'Vos',
     achievements: 'Logros', steamMenu: 'Steam', steamId: 'Steam ID', save: 'Guardar',
     syncLibrary: 'Sincronizar biblioteca', syncWishlist: 'Sincronizar deseados', syncAll: 'Sincronizar todo',
     restoreLibrary: 'Restablecer biblioteca borrada', restoreWishlist: 'Restablecer deseados borrados',
@@ -1637,6 +1644,7 @@ const I18N = {
   },
   en: {
     sync: 'Sync', stats: 'Stats', config: 'Settings', friends: 'Friends',
+    commonGames: 'In common', noCommonGames: 'No games in common', you: 'You',
     achievements: 'Achievements', steamMenu: 'Steam', steamId: 'Steam ID', save: 'Save',
     syncLibrary: 'Sync library', syncWishlist: 'Sync wishlist', syncAll: 'Sync all',
     restoreLibrary: 'Restore deleted library', restoreWishlist: 'Restore deleted wishlist',
@@ -1778,6 +1786,7 @@ const I18N = {
   },
   pt: {
     sync: 'Sincronizar', stats: 'Estatísticas', config: 'Configurações', friends: 'Amigos',
+    commonGames: 'Em comum', noCommonGames: 'Vocês não têm jogos em comum', you: 'Você',
     achievements: 'Conquistas', steamMenu: 'Steam', steamId: 'Steam ID', save: 'Salvar',
     syncLibrary: 'Sincronizar biblioteca', syncWishlist: 'Sincronizar desejados', syncAll: 'Sincronizar tudo',
     restoreLibrary: 'Restaurar biblioteca apagada', restoreWishlist: 'Restaurar desejados apagados',
@@ -5723,7 +5732,8 @@ function switchFriendTab(tab) {
   document.getElementById('friend-tab-library').style.display  = tab === 'library'  ? '' : 'none';
   document.getElementById('friend-tab-wishlist').style.display = tab === 'wishlist' ? '' : 'none';
   document.getElementById('friend-tab-stats').style.display    = tab === 'stats'    ? '' : 'none';
-  ['library','wishlist','stats'].forEach(t => {
+  document.getElementById('friend-tab-common').style.display   = tab === 'common'   ? '' : 'none';
+  ['library','wishlist','stats','common'].forEach(t => {
     const btn = document.getElementById(`ftab-${t}`);
     const active = t === tab;
     btn.style.color       = active ? 'var(--green)' : 'var(--text2)';
@@ -5732,7 +5742,50 @@ function switchFriendTab(tab) {
   });
   if (tab === 'library') loadFriendLibrary();
   else if (tab === 'wishlist') loadFriendWishlist();
+  else if (tab === 'common') loadFriendCommonGames();
   else loadFriendStats();
+}
+
+async function loadFriendCommonGames() {
+  const list = document.getElementById('friend-common-list');
+  list.innerHTML = `<div class="empty"><i class="ti ti-loader"></i>${t('loading')}</div>`;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/friends/${encodeURIComponent(currentFriendUsername)}/common-games`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error');
+    const games = data.common_games || [];
+    list.innerHTML = games.length
+      ? games.map(commonGameCardHtml).join('')
+      : `<div class="empty"><i class="ti ti-mood-sad"></i>${t('noCommonGames')}</div>`;
+  } catch(e) {
+    list.innerHTML = `<div class="empty"><i class="ti ti-alert-triangle"></i>${e.message}</div>`;
+  }
+}
+
+function commonGameCardHtml(g) {
+  const cover = steamCoverHtml({ cover_url: g.cover_url, name: g.name }, 'width:100%;height:100%;object-fit:cover');
+  const myColor     = _statusColorsFriend[g.my_status] || '#888780';
+  const friendColor = _statusColorsFriend[g.friend_status] || '#888780';
+  return `<div class="game-card">
+    <div class="game-cover" style="pointer-events:none">${cover}</div>
+    <div>
+      <div class="game-name">${esc(g.name)}</div>
+      <div class="game-meta">
+        <span style="color:var(--text2);font-size:11px">${t('you')}:</span> ${platBadge(g.my_platform)}
+        <span style="display:inline-flex;align-items:center;gap:4px;margin-left:4px;font-size:11px;color:${myColor}"><div class="sdot" style="background:${myColor}"></div>${statusLabel(g.my_status)}</span>
+      </div>
+      <div class="game-meta" style="margin-top:4px">
+        <span style="color:var(--text2);font-size:11px">${esc(currentFriendUsername)}:</span> ${platBadge(g.friend_platform)}
+        <span style="display:inline-flex;align-items:center;gap:4px;margin-left:4px;font-size:11px;color:${friendColor}"><div class="sdot" style="background:${friendColor}"></div>${statusLabel(g.friend_status)}</span>
+      </div>
+    </div>
+    <div class="game-status-col">
+      <div style="font-size:11px;color:var(--text2)">${t('you')}: ${g.my_hours}hs</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:2px">${esc(currentFriendUsername)}: ${g.friend_hours}hs</div>
+    </div>
+  </div>`;
 }
 
 function friendGameCardHtml(g) {
