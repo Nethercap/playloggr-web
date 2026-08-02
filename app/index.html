@@ -6951,6 +6951,30 @@ function renderPagination() {
   document.getElementById('game-list').after(bar);
 }
 
+// ── Swipe horizontal en biblioteca/deseados = cambiar de pagina (mobile) ──
+let _swipeStartX = null, _swipeStartY = null;
+function _initGameListSwipe() {
+  const el = document.getElementById('game-list');
+  if (!el || el.dataset.swipeInit) return;
+  el.dataset.swipeInit = '1';
+  el.addEventListener('touchstart', e => {
+    _swipeStartX = e.touches[0].clientX;
+    _swipeStartY = e.touches[0].clientY;
+  }, { passive: true });
+  el.addEventListener('touchend', e => {
+    if (_swipeStartX === null) return;
+    const dx = e.changedTouches[0].clientX - _swipeStartX;
+    const dy = e.changedTouches[0].clientY - _swipeStartY;
+    // Solo si el gesto fue mayormente horizontal — evita robarle el swipe
+    // al scroll vertical normal de la lista.
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx < 0 && currentPage < totalPages) syncAll(currentPage + 1, true);
+      else if (dx > 0 && currentPage > 1) syncAll(currentPage - 1, true);
+    }
+    _swipeStartX = null; _swipeStartY = null;
+  }, { passive: true });
+}
+
 const _statusBtnsEl = document.getElementById('status-btns');
 if (_statusBtnsEl) _statusBtnsEl.addEventListener('click', e => {
   const btn = e.target.closest('.fbtn');
@@ -8668,6 +8692,7 @@ async function checkActiveSession() {
 async function onLoginSuccess() {
   document.getElementById('login-screen').style.display = 'none';
   resetActiveFilters();
+  _initGameListSwipe();
 
   const profilePanel = document.getElementById('profile-panel');
   profilePanel.innerHTML = `
