@@ -31,7 +31,6 @@
     .header { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:14px 18px; display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
     .header-title { font-size:17px; font-weight:500; display:flex; align-items:center; gap:8px; }
     .header-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-    .api-input { font-size:12px; padding:5px 9px; border-radius:var(--radius-md); border:0.5px solid var(--border2); background:var(--bg2); color:var(--text); width:200px; }
     .sync-btn { font-size:12px; padding:5px 12px; border-radius:var(--radius-md); border:0.5px solid var(--border2); background:transparent; color:var(--text); cursor:pointer; display:flex; align-items:center; gap:5px; }
     .sync-btn:hover { background:var(--bg2); }
     .sync-btn:disabled { opacity:.5; pointer-events:none; }
@@ -50,9 +49,7 @@
     .stat-value { font-size:22px; font-weight:500; }
 
     .controls { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:11px 14px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
-    .search-box { flex:1; min-width:140px; font-size:13px; padding:6px 9px; border-radius:var(--radius-md); border:0.5px solid var(--border2); background:var(--bg2); color:var(--text); }
     .controls select { font-size:12px; padding:6px 9px; border-radius:var(--radius-md); border:0.5px solid var(--border2); background:var(--bg2); color:var(--text); }
-    .filter-group { display:flex; gap:4px; flex-wrap:wrap; }
     .fbtn { font-size:12px; padding:4px 10px; border-radius:20px; border:0.5px solid var(--border2); background:transparent; color:var(--text2); cursor:pointer; }
     .fbtn.active { background:var(--green); border-color:var(--green); color:#fff; font-weight:500; }
 
@@ -77,10 +74,6 @@
     .game-name { font-size:14px; font-weight:500; margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .game-meta { display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:4px; }
     .plat-badge { display:inline-flex; align-items:center; gap:3px; font-size:11px; padding:2px 7px; border-radius:20px; font-weight:500; }
-    .plat-Steam { background:#1D3A5B; color:#89C3F0; }
-    .plat-PSN   { background:#0D2159; color:#6B9FE4; }
-    .plat-Xbox  { background:#0B3A15; color:#6EC97E; }
-    .plat-EA    { background:#4A1A08; color:#F5824A; }
     .steam-score { font-size:11px; padding:2px 7px; border-radius:20px; font-weight:500; }
     .score-overwhelmingly-positive { background:#1a4a2e; color:#5DCAA5; }
     .score-very-positive           { background:#1a3a2e; color:#9FE1CB; }
@@ -105,7 +98,6 @@
     .star-val { font-size:12px; color:var(--text2); min-width:24px; }
 
     .status-sel { font-size:12px; padding:4px 7px; border-radius:var(--radius-md); border:0.5px solid var(--border2); background:var(--bg2); color:var(--text); cursor:pointer; width:auto; max-width:140px; }
-    .slabel { display:flex; align-items:center; gap:4px; font-size:11px; color:var(--text2); }
     .sdot { width:8px; height:8px; border-radius:50%; display:inline-block; flex-shrink:0; }
     .s-Completado   { background:#1D9E75; }
     .s-Jugando      { background:#378ADD; }
@@ -4037,12 +4029,6 @@ async function saveSettings() {
   }
 }
 
-function toggleSortDir() {
-  sortDir = sortDir === 'asc' ? 'desc' : 'asc';
-  document.getElementById('sort-dir-btn').textContent = sortDir === 'asc' ? '↓' : '↑';
-  syncAll(1);
-}
-
 function applyFilters() {
   searchQ  = document.getElementById('search-input')?.value || '';
   sortMode = document.getElementById('sort-sel')?.value || 'name';
@@ -4065,10 +4051,6 @@ function showGoogleLogin() {
 
 async function openStatsPanel() {
   setView('stats');
-}
-
-function closeStatsPanel() {
-  setView('library');
 }
 
 function switchStatsTab(tab) {
@@ -7743,21 +7725,6 @@ function updateFolderBtn() {
     label.textContent = `${t('folders')}${folders.length ? ' (' + folders.length + ')' : ''}`;
     wrap.style.borderColor = 'var(--border)';
     wrap.querySelectorAll('button').forEach(b => b.style.color = 'var(--text2)');
-  }
-}
-
-function clickFolderBtn() {
-  if (activeFolderId === -1) {
-    // Already in folder list — show dropdown
-    toggleFolderDropdown();
-  } else if (activeFolderId) {
-    // In a folder — clear filter, go back to folder list
-    activeFolderId = -1;
-    updateFolderBtn();
-    renderFolderList();
-  } else {
-    // Show dropdown
-    toggleFolderDropdown();
   }
 }
 
