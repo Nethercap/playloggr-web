@@ -2055,6 +2055,20 @@ function esc(str) {
     .replace(/'/g, '&#39;');
 }
 
+/** Para insertar de forma segura un valor dentro de un onclick="fn('...')":
+ * esc() sola NO alcanza aca — el navegador decodifica entities del
+ * atributo ANTES de que el motor JS lo parsee como codigo, asi que un
+ * username/nombre con comilla simple rompe el string JS igual aunque este
+ * "escapado" con &#39;. Hay que escapar en capas: primero el string JS
+ * (comilla simple/backslash), despues el atributo HTML que lo contiene. */
+function jsAttrEsc(str) {
+  const jsEscaped = String(str ?? '')
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/\n/g, '\\n');
+  return esc(jsEscaped);
+}
+
 function _hexToRgb(hex) {
   const h = hex.replace('#','');
   const n = parseInt(h.length === 3 ? h.split('').map(c=>c+c).join('') : h, 16);
@@ -5544,7 +5558,7 @@ function _requestRowHtml(r, trailingHtml, subtitle) {
       ${frameBadgeHtml(frameId)}
     </div>
     <div style="flex:1;min-width:0">
-      <div style="font-weight:600;font-size:13px">${r.username}</div>
+      <div style="font-weight:600;font-size:13px">${esc(r.username)}</div>
       ${subtitle ? `<div style="font-size:11px;color:var(--text2);margin-top:2px">${subtitle}</div>` : ''}
     </div>
     ${trailingHtml}
@@ -5574,11 +5588,11 @@ async function loadFriendsList() {
     if (incoming.length) {
       html += `<div style="font-weight:600;font-size:12px;margin-bottom:4px">${t('incomingRequests')}</div>`;
       html += incoming.map(r => _requestRowHtml(r, `
-        <button onclick="acceptFriendRequest('${r.username}')" title="${t('accept')}"
+        <button onclick="acceptFriendRequest('${jsAttrEsc(r.username)}')" title="${t('accept')}"
           style="padding:5px 8px;font-size:11px;border-radius:6px;border:0.5px solid var(--green);background:transparent;color:var(--green);cursor:pointer">
           <i class="ti ti-check"></i>
         </button>
-        <button onclick="removeFriendByUsername('${r.username}')" title="${t('reject')}"
+        <button onclick="removeFriendByUsername('${jsAttrEsc(r.username)}')" title="${t('reject')}"
           style="padding:5px 8px;font-size:11px;border-radius:6px;border:0.5px solid var(--red);background:transparent;color:var(--red);cursor:pointer">
           <i class="ti ti-x"></i>
         </button>
@@ -5587,7 +5601,7 @@ async function loadFriendsList() {
     if (sent.length) {
       html += `<div style="font-weight:600;font-size:12px;margin:12px 0 4px">${t('sentRequests')}</div>`;
       html += sent.map(r => _requestRowHtml(r, `
-        <button onclick="removeFriendByUsername('${r.username}')" title="${t('cancel')}"
+        <button onclick="removeFriendByUsername('${jsAttrEsc(r.username)}')" title="${t('cancel')}"
           style="padding:5px 10px;font-size:11px;border-radius:6px;border:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer">${t('cancel')}</button>
       `, t('waitingConfirmation'))).join('');
     }
@@ -5598,26 +5612,26 @@ async function loadFriendsList() {
           ? `<span style="background:#1D9E75;color:#fff;font-size:10px;padding:2px 6px;border-radius:6px;margin-left:6px">${t('inSession')}</span>`
           : '';
         const subtitle = f.in_session
-          ? `<span style="color:#1D9E75">${f.session_game || ''} · ${f.session_platform || ''}</span>`
+          ? `<span style="color:#1D9E75">${esc(f.session_game || '')} · ${esc(f.session_platform || '')}</span>`
           : `${f.library_count} ${t('gamesLower')} · ${f.wishlist_count} ${t('wishlistLower')} · ${Math.round(f.total_hours)} hs`;
         const frameId = f.level_info && f.level_info.frame;
         const fontId  = f.level_info && f.level_info.font;
         return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px">
-          <div class="${frameAnimClass(frameId)}" style="width:44px;height:44px;flex-shrink:0;cursor:pointer;position:relative;${frameWrapStyle(frameId)}" onclick="openFriendProfile('${f.username}')">
+          <div class="${frameAnimClass(frameId)}" style="width:44px;height:44px;flex-shrink:0;cursor:pointer;position:relative;${frameWrapStyle(frameId)}" onclick="openFriendProfile('${jsAttrEsc(f.username)}')">
             <div style="width:100%;height:100%;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden">
               <div style="width:40px;height:40px;position:relative;transform:translateY(-11.7%)">${_friendAvatarHtml(f, 40)}</div>
             </div>
             ${frameBadgeHtml(frameId)}
           </div>
-          <div style="flex:1;min-width:0;cursor:pointer" onclick="openFriendProfile('${f.username}')">
-            <div style="font-weight:600;font-size:13px;display:flex;align-items:center"><span style="${usernameFontStyle(fontId)}">${levelBadgeHtml(f.level_info, 24)}${f.username}</span>${sessionBadge}</div>
+          <div style="flex:1;min-width:0;cursor:pointer" onclick="openFriendProfile('${jsAttrEsc(f.username)}')">
+            <div style="font-weight:600;font-size:13px;display:flex;align-items:center"><span style="${usernameFontStyle(fontId)}">${levelBadgeHtml(f.level_info, 24)}${esc(f.username)}</span>${sessionBadge}</div>
             <div style="font-size:11px;color:var(--text2);margin-top:2px">${subtitle}</div>
           </div>
-          <button onclick="removeFriendByUsername('${f.username}')" title="${t('removeFriend')}"
+          <button onclick="removeFriendByUsername('${jsAttrEsc(f.username)}')" title="${t('removeFriend')}"
             style="padding:5px 8px;font-size:11px;border-radius:6px;border:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer">
             <i class="ti ti-user-minus"></i>
           </button>
-          <button onclick="blockFriendByUsername('${f.username}')" title="${t('block')}"
+          <button onclick="blockFriendByUsername('${jsAttrEsc(f.username)}')" title="${t('block')}"
             style="padding:5px 8px;font-size:11px;border-radius:6px;border:0.5px solid var(--red);background:transparent;color:var(--red);cursor:pointer">
             <i class="ti ti-ban"></i>
           </button>
@@ -5712,7 +5726,7 @@ async function openFriendProfile(username) {
   const cached = (window._friendsCache || []).find(f => f.username === username);
   const li = cached && cached.level_info;
   document.getElementById('friend-profile-title').innerHTML =
-    `<i class="ti ti-user"></i> ${levelBadgeHtml(li)}<span style="${usernameFontStyle(li && li.font)}">${username}</span>`;
+    `<i class="ti ti-user"></i> ${levelBadgeHtml(li)}<span style="${usernameFontStyle(li && li.font)}">${esc(username)}</span>`;
   document.getElementById('friend-profile-overlay').classList.add('open');
   switchFriendTab('library');
 }
@@ -7789,7 +7803,7 @@ function renderFolderDropdownItems() {
               <div style="font-size:10px;color:var(--text2)">${f.game_count} juegos · ${new Date(f.created_at).toLocaleDateString('es-AR')}</div>
             </div>
           </div>
-          <button onclick="event.stopPropagation();openRenameFolder(${f.id},'${f.name.replace(/'/g,"\'")}')"
+          <button onclick="event.stopPropagation();openRenameFolder(${f.id},'${jsAttrEsc(f.name)}')"
             style="background:none;border:none;color:var(--text2);cursor:pointer;padding:2px 4px;font-size:12px" title="Renombrar">✏️</button>
           <button onclick="event.stopPropagation();deleteFolder(${f.id})"
             style="background:none;border:none;color:var(--red);cursor:pointer;padding:2px 4px;font-size:12px" title="Eliminar">🗑</button>
@@ -7833,7 +7847,7 @@ function showFolderLabel() {
       label.style.cssText = 'padding:4px 16px;font-size:12px;color:var(--green);display:flex;align-items:center;gap:6px;border-bottom:0.5px solid var(--border)';
       document.getElementById('filter-bar').insertAdjacentElement('afterend', label);
     }
-    label.innerHTML = `<i class="ti ti-folder" style="font-size:13px"></i> <strong>${f ? f.name : 'Carpeta'}</strong>
+    label.innerHTML = `<i class="ti ti-folder" style="font-size:13px"></i> <strong>${f ? esc(f.name) : 'Carpeta'}</strong>
       <button onclick="exitFolder()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:11px;margin-left:4px">✕ Salir de carpeta</button>`;
     label.style.display = 'flex';
   } else if (label) {
@@ -7916,7 +7930,7 @@ function renderFolderList() {
                     style="background:none;border:0.5px solid var(--border);border-radius:4px;color:var(--text2);cursor:pointer;padding:2px 6px;font-size:11px" title="Agregar juegos">
                     <i class="ti ti-plus"></i>
                   </button>
-                  <button onclick="event.stopPropagation();openRenameFolder(${f.id},'${f.name.replace(/'/g,"\'")}')"
+                  <button onclick="event.stopPropagation();openRenameFolder(${f.id},'${jsAttrEsc(f.name)}')"
                     style="background:none;border:0.5px solid var(--border);border-radius:4px;color:var(--text2);cursor:pointer;padding:2px 6px;font-size:11px">✏️</button>
                   <button onclick="event.stopPropagation();deleteFolder(${f.id})"
                     style="background:none;border:0.5px solid var(--border);border-radius:4px;color:var(--red);cursor:pointer;padding:2px 6px;font-size:11px">🗑</button>
