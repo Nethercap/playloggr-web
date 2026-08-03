@@ -1161,6 +1161,8 @@
           <option value="rating" data-i18n="rating">Calificación</option>
           <option value="platform" data-i18n="platform">Plataforma</option>
         </select>
+        <button id="friend-sort-dir-library" onclick="toggleFriendSortDir('library')"
+          style="padding:6px 8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">↑</button>
       </div>
       <div id="friend-library-list" style="overflow-y:auto;max-height:50vh;display:flex;flex-direction:column;gap:8px"></div>
     </div>
@@ -1177,6 +1179,8 @@
           <option value="rating" data-i18n="rating">Calificación</option>
           <option value="platform" data-i18n="platform">Plataforma</option>
         </select>
+        <button id="friend-sort-dir-wishlist" onclick="toggleFriendSortDir('wishlist')"
+          style="padding:6px 8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">↑</button>
       </div>
       <div id="friend-wishlist-list" style="overflow-y:auto;max-height:50vh;display:flex;flex-direction:column;gap:8px"></div>
     </div>
@@ -5807,13 +5811,21 @@ function friendGameCardHtml(g) {
   </div>`;
 }
 
+const _friendSortDir = { library: 'asc', wishlist: 'asc' };
+
+function toggleFriendSortDir(tab) {
+  _friendSortDir[tab] = _friendSortDir[tab] === 'asc' ? 'desc' : 'asc';
+  document.getElementById(`friend-sort-dir-${tab}`).textContent = _friendSortDir[tab] === 'asc' ? '↑' : '↓';
+  if (tab === 'library') loadFriendLibrary(); else loadFriendWishlist();
+}
+
 async function loadFriendLibrary() {
   const list = document.getElementById('friend-library-list');
   list.innerHTML = `<div class="empty"><i class="ti ti-loader"></i>${t('loading')}</div>`;
   const search = document.getElementById('friend-search-library').value.trim();
   const sort   = document.getElementById('friend-sort-library').value;
   try {
-    const params = new URLSearchParams({ sort, order: 'asc', per_page: '100' });
+    const params = new URLSearchParams({ sort, order: _friendSortDir.library, per_page: '100' });
     if (search) params.set('search', search);
     const res = await fetch(`${apiBase()}/api/v1/friends/${encodeURIComponent(currentFriendUsername)}/backlog?${params}`, {
       headers: { 'Authorization': `Bearer ${authToken}` }
@@ -5835,7 +5847,7 @@ async function loadFriendWishlist() {
   const search = document.getElementById('friend-search-wishlist').value.trim();
   const sort   = document.getElementById('friend-sort-wishlist').value;
   try {
-    const params = new URLSearchParams({ status: 'Deseados', sort, order: 'asc', per_page: '100' });
+    const params = new URLSearchParams({ status: 'Deseados', sort, order: _friendSortDir.wishlist, per_page: '100' });
     if (search) params.set('search', search);
     const res = await fetch(`${apiBase()}/api/v1/friends/${encodeURIComponent(currentFriendUsername)}/backlog?${params}`, {
       headers: { 'Authorization': `Bearer ${authToken}` }
