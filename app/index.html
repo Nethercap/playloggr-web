@@ -5111,6 +5111,11 @@ function renderAchievementsPanel() {
   const shown = _achievementsOnlyLocked ? d.achievements.filter(a => !a.unlocked) : d.achievements;
   const byCategory = {};
   shown.forEach(a => { (byCategory[a.category] = byCategory[a.category] || []).push(a); });
+  // Desbloqueados arriba, bloqueados abajo dentro de cada categoria (antes
+  // quedaban mezclados en el orden del catalogo).
+  Object.values(byCategory).forEach(items => {
+    items.sort((a, b) => (b.unlocked ? 1 : 0) - (a.unlocked ? 1 : 0));
+  });
 
   const tileHtml = a => { const info = achievementInfo(a); const isRare = a.unlocked && a.global_pct < 10; return `
     <div class="${isRare ? 'frame-pulse-dorado' : ''}" style="display:flex;align-items:flex-start;gap:10px;padding:10px;margin-bottom:8px;border-radius:8px;background:var(--bg3);opacity:${a.unlocked ? '1' : '0.55'};${isRare ? 'border:2px solid transparent;' : ''}">
