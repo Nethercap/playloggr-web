@@ -6349,7 +6349,7 @@ function renderConnectorMenus() {
             <input id="${p}-code-input" type="text" placeholder="Pegá el code (o la URL/JSON final)..."
               style="flex:1;padding:5px 8px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);min-width:0"
               onkeydown="if(event.key==='Enter') connectConnectorCode('${p}')"
-              onpaste="setTimeout(() => connectConnectorCode('${p}'), 0)" />
+              onpaste="_onConnectorCodePaste(event, '${p}')" />
             <button onclick="connectConnectorCode('${p}')" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;white-space:nowrap">Conectar</button>
           </div>
           <div id="${p}-status" style="font-size:10px;color:var(--text2);margin-top:4px"></div>
@@ -6417,6 +6417,21 @@ function _extractConnectorCode(pasted) {
   const jsonMatch = raw.match(/"authorizationCode"\s*:\s*"([^"]+)"/);
   if (jsonMatch) return jsonMatch[1];
   return raw;
+}
+
+// Dispara el connect apenas se pega el code/URL/JSON, sin esperar Enter o
+// click en "Conectar". Se lee el texto directo del evento de paste (en vez
+// de esperar a que el navegador termine de escribirlo en el input y recien
+// ahi reaccionar con un setTimeout) porque en Chrome Android ese timing no
+// esta garantizado — el value del input puede seguir vacio cuando corre el
+// timeout, y el auto-connect no dispara nunca.
+function _onConnectorCodePaste(e, platform) {
+  const pasted = (e.clipboardData || window.clipboardData)?.getData('text');
+  if (!pasted) return;
+  e.preventDefault();
+  const input = document.getElementById(`${platform}-code-input`);
+  input.value = pasted;
+  connectConnectorCode(platform);
 }
 
 // Codes que ya se mandaron a intercambiar por plataforma — evita el doble
