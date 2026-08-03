@@ -6348,7 +6348,8 @@ function renderConnectorMenus() {
           <div style="display:flex;gap:6px">
             <input id="${p}-code-input" type="text" placeholder="Pegá el code (o la URL/JSON final)..."
               style="flex:1;padding:5px 8px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);min-width:0"
-              onkeydown="if(event.key==='Enter') connectConnectorCode('${p}')" />
+              onkeydown="if(event.key==='Enter') connectConnectorCode('${p}')"
+              onpaste="setTimeout(() => connectConnectorCode('${p}'), 0)" />
             <button onclick="connectConnectorCode('${p}')" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;white-space:nowrap">Conectar</button>
           </div>
           <div id="${p}-status" style="font-size:10px;color:var(--text2);margin-top:4px"></div>
@@ -6418,10 +6419,19 @@ function _extractConnectorCode(pasted) {
   return raw;
 }
 
+// Codes que ya se mandaron a intercambiar por plataforma — evita el doble
+// submit (paste dispara auto-conexion Y el usuario tambien aprieta Enter/
+// Conectar) que gastaba el code de Epic dos veces: la primera peticion lo
+// consume bien pero si la segunda llega despues, el usuario ve un error
+// aunque la conexion ya se haya hecho.
+const _connectorCodeInFlight = {};
+
 async function connectConnectorCode(platform) {
   const input = document.getElementById(`${platform}-code-input`);
   const code  = _extractConnectorCode(input.value || '');
   if (!code) return;
+  if (_connectorCodeInFlight[platform] === code) return;
+  _connectorCodeInFlight[platform] = code;
   const status = document.getElementById(`${platform}-status`);
   status.textContent = 'Conectando...';
   status.style.color = 'var(--text2)';
@@ -6442,6 +6452,8 @@ async function connectConnectorCode(platform) {
   } catch(e) {
     status.textContent = e.message || 'Error al conectar';
     status.style.color = 'var(--red)';
+  } finally {
+    if (_connectorCodeInFlight[platform] === code) delete _connectorCodeInFlight[platform];
   }
 }
 
