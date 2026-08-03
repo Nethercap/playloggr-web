@@ -508,7 +508,32 @@
         <button class="add-btn" onclick="toggleSteamMenu()" id="steam-menu-btn">
           <i class="ti ti-brand-steam"></i> Steam ▾
         </button>
-        <div id="steam-menu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:300;min-width:220px;box-shadow:0 4px 16px rgba(0,0,0,0.3);padding:4px 0">
+      </div>
+
+      <!-- PSN (beta) -->
+      <div style="position:relative;display:inline-block;margin-left:4px" id="psn-menu-wrap">
+        <button class="add-btn" onclick="togglePsnMenu()" id="psn-menu-btn">
+          <img src="https://cdn.simpleicons.org/playstation/ffffff" style="width:13px;height:13px;vertical-align:-2px"> PSN ▾
+        </button>
+      </div>
+
+      <!-- GOG / Xbox / Epic — login OAuth con pegado de code (en la app -->
+      <!-- movil el WebView intercepta el redirect solo, en un navegador de -->
+      <!-- escritorio no se puede leer esa URL cross-origin, asi que el -->
+      <!-- usuario copia el code/URL final a mano). -->
+      <div id="connector-buttons"></div>
+
+      </div>
+
+      <!-- Los menus/dropdowns de Steam/PSN/GOG/Xbox/Epic viven FUERA de
+           #connector-row a proposito: esa fila tiene display:none!important
+           en mobile (los botones "ancla" solo se ven en desktop, en mobile
+           se accede via el menu "..." del header), y un ancestro con
+           display:none oculta TODO el subarbol sin importar que el propio
+           menu tenga position:fixed — asi quedaban invisibles al abrirlos
+           desde mobile aunque _positionFixedPopup los centrara como modal
+           (bug real reportado: "la web mobile no muestra conectores"). -->
+      <div id="steam-menu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:300;min-width:220px;box-shadow:0 4px 16px rgba(0,0,0,0.3);padding:4px 0">
           <!-- Steam ID section -->
           <div id="steam-id-section" style="padding:10px 14px;border-bottom:0.5px solid var(--border)">
             <div style="font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Steam ID</div>
@@ -545,15 +570,9 @@
             </button>
           </div>
           <div style="padding:8px 14px;font-size:10px;color:var(--text2)">⚠ <span data-i18n="steamProfilePublicHint">Tu perfil de Steam debe ser público para sincronizar.</span></div>
-        </div>
       </div>
 
-      <!-- PSN (beta) -->
-      <div style="position:relative;display:inline-block;margin-left:4px" id="psn-menu-wrap">
-        <button class="add-btn" onclick="togglePsnMenu()" id="psn-menu-btn">
-          <img src="https://cdn.simpleicons.org/playstation/ffffff" style="width:13px;height:13px;vertical-align:-2px"> PSN ▾
-        </button>
-        <div id="psn-menu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:300;min-width:220px;box-shadow:0 4px 16px rgba(0,0,0,0.3);padding:4px 0">
+      <div id="psn-menu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:300;min-width:220px;box-shadow:0 4px 16px rgba(0,0,0,0.3);padding:4px 0">
           <div id="psn-id-section" style="padding:10px 14px;border-bottom:0.5px solid var(--border)">
             <div style="font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Online ID</div>
             <div style="display:flex;gap:6px">
@@ -578,16 +597,10 @@
             </button>
           </div>
           <div style="padding:8px 14px;font-size:10px;color:var(--text2)">⚠ <span data-i18n="psnProfilePublicHint">Tu perfil de PSN debe tener "Juegos" visible públicamente.</span></div>
-        </div>
       </div>
 
-      <!-- GOG / Xbox / Epic — login OAuth con pegado de code (en la app -->
-      <!-- movil el WebView intercepta el redirect solo, en un navegador de -->
-      <!-- escritorio no se puede leer esa URL cross-origin, asi que el -->
-      <!-- usuario copia el code/URL final a mano). -->
       <div id="connector-menus"></div>
 
-      </div>
     </div>
   </div>
 
@@ -5963,7 +5976,11 @@ function toggleSteamMenu() {
 }
 
 function _closeSteamMenuOutside(e) {
-  if (!document.getElementById('steam-menu-wrap')?.contains(e.target)) {
+  // steam-menu vive fuera de steam-menu-wrap (ver comentario junto a su
+  // definicion en el HTML) — hay que chequear ambos para no cerrarlo al
+  // clickear dentro del propio menu.
+  if (!document.getElementById('steam-menu-wrap')?.contains(e.target) &&
+      !document.getElementById('steam-menu')?.contains(e.target)) {
     document.getElementById('steam-menu').style.display = 'none';
     _steamMenuOpen = false;
     document.removeEventListener('mousedown', _closeSteamMenuOutside);
@@ -6170,7 +6187,8 @@ function togglePsnMenu() {
 }
 
 function _closePsnMenuOutside(e) {
-  if (!document.getElementById('psn-menu-wrap')?.contains(e.target)) {
+  if (!document.getElementById('psn-menu-wrap')?.contains(e.target) &&
+      !document.getElementById('psn-menu')?.contains(e.target)) {
     document.getElementById('psn-menu').style.display = 'none';
     _psnMenuOpen = false;
     document.removeEventListener('mousedown', _closePsnMenuOutside);
@@ -6299,13 +6317,22 @@ function _connIcon(c) {
 const _connectorMenuOpen = {};
 
 function renderConnectorMenus() {
-  const host = document.getElementById('connector-menus');
-  if (!host) return;
-  host.innerHTML = Object.entries(CONNECTORS).map(([p, c]) => `
+  // Botones "ancla" (solo visibles en desktop) y sus menus/dropdowns viven
+  // en hosts SEPARADOS: #connector-buttons esta dentro de #connector-row
+  // (oculto en mobile), #connector-menus esta afuera — asi el menu no
+  // queda atrapado por el display:none del ancestro cuando se abre desde
+  // el menu "..." de mobile. Ver comentario junto a #steam-menu.
+  const btnHost = document.getElementById('connector-buttons');
+  const menuHost = document.getElementById('connector-menus');
+  if (!btnHost || !menuHost) return;
+  btnHost.innerHTML = Object.entries(CONNECTORS).map(([p, c]) => `
     <div style="position:relative;display:inline-block;margin-left:4px" id="${p}-menu-wrap">
       <button class="add-btn" onclick="toggleConnectorMenu('${p}')" id="${p}-menu-btn">
         ${_connIcon(c)} ${c.label} ▾
       </button>
+    </div>
+  `).join('');
+  menuHost.innerHTML = Object.entries(CONNECTORS).map(([p, c]) => `
       <div id="${p}-menu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:300;min-width:240px;box-shadow:0 4px 16px rgba(0,0,0,0.3);padding:4px 0">
         <div style="padding:10px 14px;border-bottom:0.5px solid var(--border)">
           <div style="font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Login ${c.label}</div>
@@ -6335,7 +6362,6 @@ function renderConnectorMenus() {
           </button>
         </div>
       </div>
-    </div>
   `).join('');
 }
 
@@ -6354,7 +6380,8 @@ function toggleConnectorMenu(platform) {
 }
 
 function _closeConnectorMenuOutside(platform, e) {
-  if (!document.getElementById(`${platform}-menu-wrap`)?.contains(e.target)) {
+  if (!document.getElementById(`${platform}-menu-wrap`)?.contains(e.target) &&
+      !document.getElementById(`${platform}-menu`)?.contains(e.target)) {
     document.getElementById(`${platform}-menu`).style.display = 'none';
     _connectorMenuOpen[platform] = false;
     document.removeEventListener('mousedown', (e2) => _closeConnectorMenuOutside(platform, e2));
