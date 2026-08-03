@@ -6348,6 +6348,7 @@ function renderConnectorMenus() {
           <div style="display:flex;gap:6px">
             <input id="${p}-code-input" type="text" placeholder="Pegá el code (o la URL/JSON final)..."
               style="flex:1;padding:5px 8px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);min-width:0"
+              onpaste="_onConnectorCodePaste(event, '${p}')"
               onkeydown="if(event.key==='Enter') connectConnectorCode('${p}')" />
             <button onclick="connectConnectorCode('${p}')" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;white-space:nowrap">Conectar</button>
           </div>
@@ -6416,6 +6417,19 @@ function _extractConnectorCode(pasted) {
   const jsonMatch = raw.match(/"authorizationCode"\s*:\s*"([^"]+)"/);
   if (jsonMatch) return jsonMatch[1];
   return raw;
+}
+
+// Dispara el connect apenas se pega el code/URL/JSON, sin esperar Enter o
+// click en "Conectar" — los authorizationCode de Epic son de un solo uso y
+// vencen rapido, asi que cada paso manual de mas resta margen antes de que
+// el backend llegue a canjearlo contra Epic.
+function _onConnectorCodePaste(e, platform) {
+  const pasted = (e.clipboardData || window.clipboardData)?.getData('text');
+  if (!pasted) return;
+  e.preventDefault();
+  const input = document.getElementById(`${platform}-code-input`);
+  input.value = pasted;
+  connectConnectorCode(platform);
 }
 
 async function connectConnectorCode(platform) {
