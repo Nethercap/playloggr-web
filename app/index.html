@@ -6307,9 +6307,22 @@ const CONNECTORS = {
     tablerIcon: 'brand-xbox', label: 'Xbox',
     instructions: '1) Iniciá sesión con tu cuenta de Microsoft/Xbox. 2) Vas a terminar en una página de error de Playloggr — es esperado, no pasa nada. Copiá la URL COMPLETA de la barra de direcciones de esa pestaña (tiene que contener "code=...") y pegala abajo.',
   },
+  // Epic: el paso de "Conectar" (login + pegar code) se saca de la web —
+  // el authorizationCode que devuelve Epic dura muy poco (pensado para que
+  // lo capture un WebView al instante, como hace la app) y el flujo web
+  // obliga a copiar/pegar a mano entre pestañas, asi que para cuando el
+  // usuario pega el code Epic ya lo invalido (authorization_code_not_found,
+  // confirmado con varios intentos reales). No hay API oficial alternativa:
+  // los datos de biblioteca de Epic solo existen via este protocolo no
+  // oficial atado al client_id del launcher, cuyo redirect_uri Epic no
+  // permite cambiar. PERO una vez conectada desde la app, sincronizar
+  // (usa el refresh_token ya guardado, no un code nuevo) SI funciona bien
+  // desde la web — por eso Epic sigue en este objeto (para las acciones de
+  // sincronizar/restablecer/borrar) con `webConnectDisabled: true` en vez
+  // de sacarse del todo.
   epic: {
     slug: 'epicgames', label: 'Epic',
-    instructions: '1) Iniciá sesión con tu cuenta de Epic Games. 2) Vas a terminar en una página con texto plano tipo JSON. Copiá TODO ese texto (o solo el valor de "authorizationCode") y pegalo abajo.',
+    webConnectDisabled: true,
   },
 };
 // Icono de un conector para usar en botones (texto blanco chico, no el
@@ -6339,6 +6352,13 @@ function renderConnectorMenus() {
   `).join('');
   menuHost.innerHTML = Object.entries(CONNECTORS).map(([p, c]) => `
       <div id="${p}-menu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:300;min-width:240px;box-shadow:0 4px 16px rgba(0,0,0,0.3);padding:4px 0">
+        ${c.webConnectDisabled ? `
+        <div style="padding:10px 14px;border-bottom:0.5px solid var(--border)">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">${c.label}</div>
+          <div style="font-size:10px;color:var(--text2);line-height:1.5;background:var(--bg3);border-radius:6px;padding:8px">
+            <i class="ti ti-device-mobile"></i> La conexión inicial con ${c.label} solo se puede hacer desde la app (no desde el navegador). Ya conectada, podés sincronizar desde acá.
+          </div>
+        </div>` : `
         <div style="padding:10px 14px;border-bottom:0.5px solid var(--border)">
           <div style="font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Login ${c.label}</div>
           <div style="font-size:10px;color:var(--text2);line-height:1.5;margin-bottom:8px;background:var(--bg3);border-radius:6px;padding:8px">${c.instructions}</div>
@@ -6353,7 +6373,7 @@ function renderConnectorMenus() {
             <button onclick="connectConnectorCode('${p}')" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;white-space:nowrap">Conectar</button>
           </div>
           <div id="${p}-status" style="font-size:10px;color:var(--text2);margin-top:4px"></div>
-        </div>
+        </div>`}
         <div style="padding:4px 0">
           <button onclick="syncConnectorLibrary('${p}')" class="steam-menu-item">
             <i class="ti ti-library"></i> Sincronizar biblioteca
