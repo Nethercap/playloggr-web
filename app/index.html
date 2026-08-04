@@ -2964,9 +2964,13 @@ async function renderGames() {
       const steamOnclick = isPremium ? 'toggleSteamMenu()' : "showToast('Sincronizar con Steam requiere la versión premium', true)";
       const psnOnclick   = isPremium ? 'togglePsnMenu()'   : "showToast('Sincronizar con PSN requiere la versión premium', true)";
       const lockIcon = isPremium ? '' : ' <i class="ti ti-lock" style="font-size:11px"></i>';
+      const connectorBtns = Object.entries(CONNECTORS).map(([p, c]) => {
+        const onclick = isPremium ? `toggleConnectorMenu('${p}')` : `showToast('Sincronizar con ${c.label} requiere la versión premium', true)`;
+        return `<button onclick="${onclick}" class="add-btn" style="background:transparent;border:0.5px solid var(--border2);color:var(--text)">${_connIcon(c)} Sincronizar ${c.label}${lockIcon}</button>`;
+      }).join('');
       const syncBtns = currentView === 'wishlist' ? '' : `
             <button onclick="${steamOnclick}" class="add-btn" style="background:transparent;border:0.5px solid var(--border2);color:var(--text)"><i class="ti ti-brand-steam"></i> Sincronizar Steam${lockIcon}</button>
-            <button onclick="${psnOnclick}" class="add-btn" style="background:transparent;border:0.5px solid var(--border2);color:var(--text)"><img src="https://cdn.simpleicons.org/playstation/ffffff" style="width:13px;height:13px;vertical-align:-2px"> Sincronizar PSN${lockIcon}</button>`;
+            <button onclick="${psnOnclick}" class="add-btn" style="background:transparent;border:0.5px solid var(--border2);color:var(--text)"><img src="https://cdn.simpleicons.org/playstation/ffffff" style="width:13px;height:13px;vertical-align:-2px"> Sincronizar PSN${lockIcon}</button>${connectorBtns}`;
       list.innerHTML = `
         <div class="empty">
           <i class="ti ti-mood-sad" style="font-size:32px;display:block;margin-bottom:10px"></i>
