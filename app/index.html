@@ -5242,12 +5242,10 @@ async function loadGomVoteTab() {
     const d = await res.json();
     if (!res.ok) throw new Error(d.detail || 'Error');
     _gomStatus = d;
+    // Sin precargar candidatos — la busqueda va contra TODO IGDB (no un
+    // catalogo local recortado), asi que sin texto no hay nada relevante
+    // para mostrar (traeria el mes entero: DLC, remasters, etc).
     _gomCandidates = [];
-    if (d.is_open) {
-      const cres = await fetch(`${apiBase()}/api/v1/game-of-month/candidates?q=`, { headers: { 'Authorization': `Bearer ${authToken}` } });
-      const cd = await cres.json();
-      if (cres.ok) _gomCandidates = cd.candidates || [];
-    }
     renderGomVoteTab();
   } catch (e) {
     el.innerHTML = `<div style="color:var(--red);padding:16px">${e.message || 'Error'}</div>`;
@@ -5287,19 +5285,28 @@ function renderGomVoteTab() {
     html += `<div style="font-size:12px;font-weight:600;margin:10px 0 6px">${myVote ? 'Cambiar voto' : 'Elegí tu candidato'}</div>`;
     html += `<input id="gom-search-input" type="text" placeholder="Buscar juego..." oninput="onGomSearchInput(this.value)"
       style="width:100%;padding:7px 10px;font-size:13px;background:var(--bg3);border:0.5px solid var(--border);border-radius:8px;color:var(--text);margin-bottom:10px;box-sizing:border-box">`;
-    html += `<div id="gom-candidates-list">${_gomCandidatesListHtml()}</div>`;
+    html += `<div id="gom-candidates-list">${_gomCandidatesListHtml(false)}</div>`;
   }
   el.innerHTML = html;
 }
 
-function _gomCandidatesListHtml() {
-  if (!_gomCandidates.length) return `<div style="text-align:center;padding:16px;color:var(--text2)">Sin resultados</div>`;
+function _gomCandidatesListHtml(searchedYet) {
+  if (!_gomCandidates.length) {
+    const msg = searchedYet ? 'Sin resultados' : 'Buscá el juego que querés votar';
+    return `<div style="text-align:center;padding:16px;color:var(--text2)">${msg}</div>`;
+  }
   const myVoteId = _gomStatus?.my_vote?.igdb_id;
   return _gomCandidates.map(g => _gomCandidateTileHtml(g, g.igdb_id === myVoteId, g.igdb_id === myVoteId)).join('');
 }
 
 function onGomSearchInput(q) {
   clearTimeout(_gomSearchTimer);
+  if (!q.trim()) {
+    _gomCandidates = [];
+    const listEl = document.getElementById('gom-candidates-list');
+    if (listEl) listEl.innerHTML = _gomCandidatesListHtml(false);
+    return;
+  }
   _gomSearchTimer = setTimeout(async () => {
     try {
       const res = await fetch(`${apiBase()}/api/v1/game-of-month/candidates?q=${encodeURIComponent(q)}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
@@ -5307,7 +5314,7 @@ function onGomSearchInput(q) {
       if (res.ok) {
         _gomCandidates = d.candidates || [];
         const listEl = document.getElementById('gom-candidates-list');
-        if (listEl) listEl.innerHTML = _gomCandidatesListHtml();
+        if (listEl) listEl.innerHTML = _gomCandidatesListHtml(true);
       }
     } catch (_) {}
   }, 350);
