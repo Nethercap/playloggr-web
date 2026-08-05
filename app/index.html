@@ -183,7 +183,7 @@
 
       .header { padding:10px 14px; }
       /* Colapsar idioma/novedades/stats/config/amigos/logros en el menu "..." */
-      #lang-toggle-btn, #novedades-icon-btn, #stats-icon-btn, #achievements-btn,
+      #lang-toggle-btn, #novedades-icon-btn, #stats-icon-btn, #achievements-btn, #gom-icon-btn,
       .header-right > button[onclick="openConfigPanel()"],
       #friends-btn, #support-link, #logout-btn-header { display:none !important; }
       #header-more-btn { display:inline-flex !important; }
@@ -461,6 +461,11 @@
         <i class="ti ti-trophy" style="font-size:14px"></i>
       </button>
 
+      <!-- Game of the month button -->
+      <button id="gom-icon-btn" onclick="openGomPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" title="Juego del mes">
+        <i class="ti ti-stars" style="font-size:14px"></i>
+      </button>
+
       <!-- Support button -->
       <a id="support-link" href="mailto:nether.appdev@gmail.com" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center" data-i18n-title="support" title="Soporte">
         <i class="ti ti-lifebuoy" style="font-size:14px"></i>
@@ -483,6 +488,7 @@
           <button onclick="openConfigPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-settings" style="font-size:14px"></i> <span data-i18n="config">Configuración</span></button>
           <button onclick="openFriendsPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-users" style="font-size:14px"></i> <span data-i18n="friends">Amigos</span></button>
           <button onclick="openAchievementsPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-trophy" style="font-size:14px"></i> <span data-i18n="achievements">Logros</span></button>
+          <button onclick="openGomPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-stars" style="font-size:14px"></i> Juego del mes</button>
           <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
           <!-- Conectores — en mobile los botones de arriba estan ocultos
                (#connector-row), asi que se accede desde aca. Cada uno
@@ -1088,6 +1094,25 @@
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeAchievementsPanel()" data-i18n="close">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Juego del mes Modal -->
+<div class="modal-overlay" id="gom-overlay">
+  <div class="modal" style="max-width:520px;max-height:85vh;display:flex;flex-direction:column">
+    <div class="modal-title" style="display:flex;align-items:center;justify-content:space-between">
+      <span><i class="ti ti-stars"></i> Juego del mes</span>
+    </div>
+    <div style="display:flex;gap:6px;padding:0 2px 10px">
+      <button id="gom-tab-vote" onclick="setGomTab('vote')" class="add-btn" style="flex:1;justify-content:center"></button>
+      <button id="gom-tab-history" onclick="setGomTab('history')" class="add-btn" style="flex:1;justify-content:center"></button>
+    </div>
+    <div id="gom-content" style="overflow-y:auto;flex:1">
+      <div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeGomPanel()" data-i18n="close">Cerrar</button>
     </div>
   </div>
 </div>
@@ -5172,6 +5197,209 @@ function renderAchievementsPanel() {
 
 function closeAchievementsPanel() {
   document.getElementById('achievements-overlay').classList.remove('open');
+}
+
+// ── Juego del mes ────────────────────────────────────────────────────────
+const _GOM_MONTH_NAMES = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+function gomMonthLabel(month) {
+  const parts = (month || '').split('-');
+  if (parts.length !== 2) return month;
+  const m = parseInt(parts[1], 10);
+  if (!m || m < 1 || m > 12) return month;
+  return `${_GOM_MONTH_NAMES[m]} ${parts[0]}`;
+}
+
+let _gomTab = 'vote';
+let _gomStatus = null;
+let _gomCandidates = [];
+let _gomHistory = null;
+let _gomSearchTimer = null;
+
+async function openGomPanel() {
+  document.getElementById('gom-overlay').classList.add('open');
+  setGomTab('vote');
+}
+
+function setGomTab(tab) {
+  _gomTab = tab;
+  const voteBtn = document.getElementById('gom-tab-vote');
+  const histBtn = document.getElementById('gom-tab-history');
+  voteBtn.textContent = 'Votar';
+  histBtn.textContent = 'Histórico';
+  voteBtn.style.background = tab === 'vote' ? 'var(--green)' : 'transparent';
+  voteBtn.style.color = tab === 'vote' ? '#fff' : 'var(--text)';
+  histBtn.style.background = tab === 'history' ? 'var(--green)' : 'transparent';
+  histBtn.style.color = tab === 'history' ? '#fff' : 'var(--text)';
+  if (tab === 'vote') loadGomVoteTab(); else loadGomHistoryTab();
+}
+
+async function loadGomVoteTab() {
+  const el = document.getElementById('gom-content');
+  el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>${t('loading')}</div>`;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/game-of-month/status`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    _gomStatus = d;
+    _gomCandidates = [];
+    if (d.is_open) {
+      const cres = await fetch(`${apiBase()}/api/v1/game-of-month/candidates?q=`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+      const cd = await cres.json();
+      if (cres.ok) _gomCandidates = cd.candidates || [];
+    }
+    renderGomVoteTab();
+  } catch (e) {
+    el.innerHTML = `<div style="color:var(--red);padding:16px">${e.message || 'Error'}</div>`;
+  }
+}
+
+function _gomCandidateTileHtml(g, selected, disabled) {
+  const cover = g.cover_url
+    ? `<img src="${g.cover_url}" style="width:40px;height:54px;object-fit:cover;border-radius:6px" onerror="this.style.display='none'">`
+    : `<div style="width:40px;height:54px;border-radius:6px;background:var(--bg3);display:flex;align-items:center;justify-content:center">🎮</div>`;
+  return `
+    <div ${disabled ? '' : `onclick="voteGom(${g.igdb_id}, '${esc(g.name).replace(/'/g, "\\'")}', ${g.cover_url ? `'${g.cover_url}'` : 'null'})"`}
+      style="display:flex;align-items:center;gap:10px;padding:8px;margin-bottom:8px;border-radius:10px;background:${selected ? 'color-mix(in srgb, var(--green) 12%, var(--bg3))' : 'var(--bg3)'};cursor:${disabled ? 'default' : 'pointer'}">
+      ${cover}
+      <div style="flex:1;min-width:0;font-weight:600;font-size:13px">${esc(g.name)}</div>
+      ${selected ? '<i class="ti ti-circle-check" style="color:var(--green);font-size:20px"></i>' : ''}
+    </div>`;
+}
+
+function renderGomVoteTab() {
+  const d = _gomStatus;
+  const el = document.getElementById('gom-content');
+  const myVote = d.my_vote;
+  let html = `
+    <div style="padding:12px;background:var(--bg3);border-radius:10px;margin-bottom:14px">
+      <div style="font-weight:700;font-size:14px">Juego del mes: ${gomMonthLabel(d.month)}</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:4px">
+        ${d.is_open ? 'Votá hasta el día 8 de este mes. Podés cambiar tu voto mientras la votación siga abierta.'
+                    : 'La votación ya cerró. Los resultados salen el día 9 — mirá la pestaña Histórico.'}
+      </div>
+    </div>`;
+  if (myVote) {
+    html += `<div style="font-size:12px;font-weight:600;margin-bottom:6px">${d.is_open ? 'Tu voto actual' : 'Votaste'}</div>`;
+    html += _gomCandidateTileHtml({ igdb_id: myVote.igdb_id, name: myVote.name, cover_url: myVote.cover_url }, true, true);
+  }
+  if (d.is_open) {
+    html += `<div style="font-size:12px;font-weight:600;margin:10px 0 6px">${myVote ? 'Cambiar voto' : 'Elegí tu candidato'}</div>`;
+    html += `<input id="gom-search-input" type="text" placeholder="Buscar juego..." oninput="onGomSearchInput(this.value)"
+      style="width:100%;padding:7px 10px;font-size:13px;background:var(--bg3);border:0.5px solid var(--border);border-radius:8px;color:var(--text);margin-bottom:10px;box-sizing:border-box">`;
+    html += `<div id="gom-candidates-list">${_gomCandidatesListHtml()}</div>`;
+  }
+  el.innerHTML = html;
+}
+
+function _gomCandidatesListHtml() {
+  if (!_gomCandidates.length) return `<div style="text-align:center;padding:16px;color:var(--text2)">Sin resultados</div>`;
+  const myVoteId = _gomStatus?.my_vote?.igdb_id;
+  return _gomCandidates.map(g => _gomCandidateTileHtml(g, g.igdb_id === myVoteId, g.igdb_id === myVoteId)).join('');
+}
+
+function onGomSearchInput(q) {
+  clearTimeout(_gomSearchTimer);
+  _gomSearchTimer = setTimeout(async () => {
+    try {
+      const res = await fetch(`${apiBase()}/api/v1/game-of-month/candidates?q=${encodeURIComponent(q)}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+      const d = await res.json();
+      if (res.ok) {
+        _gomCandidates = d.candidates || [];
+        const listEl = document.getElementById('gom-candidates-list');
+        if (listEl) listEl.innerHTML = _gomCandidatesListHtml();
+      }
+    } catch (_) {}
+  }, 350);
+}
+
+async function voteGom(igdbId, name, coverUrl) {
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/game-of-month/vote`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ igdb_id: igdbId, name, cover_url: coverUrl }),
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    await loadGomVoteTab();
+  } catch (e) {
+    showToast(e.message || 'No se pudo registrar el voto', true);
+  }
+}
+
+async function loadGomHistoryTab() {
+  const el = document.getElementById('gom-content');
+  el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>${t('loading')}</div>`;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/game-of-month/history`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    _gomHistory = d.history || [];
+    renderGomHistoryTab();
+  } catch (e) {
+    el.innerHTML = `<div style="color:var(--red);padding:16px">${e.message || 'Error'}</div>`;
+  }
+}
+
+function renderGomHistoryTab() {
+  const el = document.getElementById('gom-content');
+  if (!_gomHistory.length) {
+    el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text2)">Todavía no hay resultados — el primero sale el día 9.</div>`;
+    return;
+  }
+  el.innerHTML = _gomHistory.map((entry, i) => {
+    const cover = entry.cover_url
+      ? `<img src="${entry.cover_url}" style="width:46px;height:62px;object-fit:cover;border-radius:6px" onerror="this.style.display='none'">`
+      : `<div style="width:46px;height:62px;border-radius:6px;background:var(--bg2);display:flex;align-items:center;justify-content:center">🎮</div>`;
+    const ownedBadge = entry.owned
+      ? `<span style="font-size:9px;font-weight:600;padding:2px 6px;border-radius:20px;margin-left:6px;background:${entry.owned === 'wishlist' ? 'rgba(239,159,39,0.15)' : 'rgba(29,158,117,0.15)'};color:${entry.owned === 'wishlist' ? '#EF9F27' : 'var(--green)'}">${entry.owned === 'wishlist' ? 'Deseados' : 'Biblioteca'}</span>`
+      : '';
+    return `
+      <div style="display:flex;align-items:center;gap:12px;padding:10px;margin-bottom:10px;border-radius:10px;background:var(--bg3)">
+        ${cover}
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11px;color:var(--text2)">${gomMonthLabel(entry.month)}</div>
+          <div style="font-weight:700;font-size:14px">${esc(entry.name)}</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px">${entry.votes} votos${ownedBadge}</div>
+        </div>
+        <button onclick="showGomTop3(${i})" style="width:32px;height:32px;border-radius:50%;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer">
+          <i class="ti ti-dots"></i>
+        </button>
+      </div>`;
+  }).join('');
+}
+
+function showGomTop3(index) {
+  const entry = _gomHistory[index];
+  const medals = ['🥇', '🥈', '🥉'];
+  const rows = (entry.top3 || []).map((g, i) => {
+    const cover = g.cover_url
+      ? `<img src="${g.cover_url}" style="width:34px;height:46px;object-fit:cover;border-radius:6px" onerror="this.style.display='none'">`
+      : `<div style="width:34px;height:46px;border-radius:6px;background:var(--bg3);display:flex;align-items:center;justify-content:center">🎮</div>`;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0">
+      <span style="font-size:20px">${medals[i] || ''}</span>
+      ${cover}
+      <div style="flex:1;min-width:0;font-weight:600;font-size:13px">${esc(g.name)}</div>
+      <div style="font-size:11px;color:var(--text2)">${g.votes} votos</div>
+    </div>`;
+  }).join('');
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay open';
+  overlay.id = 'gom-top3-overlay';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:400px">
+      <div class="modal-title">Podio — ${gomMonthLabel(entry.month)}</div>
+      <div style="padding:4px 0">${rows}</div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="document.getElementById('gom-top3-overlay').remove()">Cerrar</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function closeGomPanel() {
+  document.getElementById('gom-overlay').classList.remove('open');
 }
 
 // ── Novedades ────────────────────────────────────────────────────────
