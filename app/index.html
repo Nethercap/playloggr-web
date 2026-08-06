@@ -1008,7 +1008,7 @@
         </div>
         <button id="cfg-upgrade-btn" onclick="startPaddleCheckout()" style="display:none;padding:12px;border-radius:8px;border:none;background:var(--green);color:#fff;cursor:pointer;font-size:13px;font-weight:600;text-align:left">
           <i class="ti ti-crown"></i> Actualizar a Premium — USD $6.99 (pago único, impuestos según checkout)
-          <div style="font-size:11px;color:rgba(255,255,255,0.85);margin-top:2px;font-weight:400">Desbloqueá biblioteca ilimitada, sync de Steam/PSN/GOG/Xbox/Epic, nivel 150 y más.</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.85);margin-top:2px;font-weight:400">Desbloqueá logros, XP y nivel, personalización completa de avatar, más carpetas/rankings/amigos, votar Juego del mes y más.</div>
         </button>
         <button onclick="confirmDeleteLibrary()"
           style="padding:10px;border-radius:8px;border:0.5px solid var(--red);background:transparent;color:var(--red);cursor:pointer;font-size:13px;text-align:left">
@@ -2999,24 +2999,13 @@ async function renderGames() {
   if (!items.length) {
     if (!allGames.length) {
       const addFn = currentView === 'wishlist' ? 'openWishlistModal()' : 'openModal()';
-      // Mismo gate que los botones de conectores del header (applyPremiumUI)
-      // — estos botones del estado vacio son elementos DOM aparte, con su
-      // propio onclick hardcodeado, asi que ese gate (que solo pisa
-      // #steam-menu-btn/#psn-menu-btn) no los alcanzaba: un usuario gratis
-      // podia abrir el modal y guardar su Steam ID/Online ID desde aca
-      // igual (el sync en si lo rechaza el backend con 403, pero la UI no
-      // avisaba nada hasta ese punto, mucho mas confuso que el candado que
-      // ya se ve en el header).
-      const steamOnclick = isPremium ? 'toggleSteamMenu()' : "showToast('Sincronizar con Steam requiere la versión premium', true)";
-      const psnOnclick   = isPremium ? 'togglePsnMenu()'   : "showToast('Sincronizar con PSN requiere la versión premium', true)";
-      const lockIcon = isPremium ? '' : ' <i class="ti ti-lock" style="font-size:11px"></i>';
+      // Sincronizar plataformas es gratis para todos (rediseño de premium).
       const connectorBtns = Object.entries(CONNECTORS).map(([p, c]) => {
-        const onclick = isPremium ? `toggleConnectorMenu('${p}')` : `showToast('Sincronizar con ${c.label} requiere la versión premium', true)`;
-        return `<button onclick="${onclick}" class="add-btn" style="background:transparent;border:0.5px solid var(--border2);color:var(--text)">${_connIcon(c)} Sincronizar ${c.label}${lockIcon}</button>`;
+        return `<button onclick="toggleConnectorMenu('${p}')" class="add-btn" style="background:transparent;border:0.5px solid var(--border2);color:var(--text)">${_connIcon(c)} Sincronizar ${c.label}</button>`;
       }).join('');
       const syncBtns = currentView === 'wishlist' ? '' : `
-            <button onclick="${steamOnclick}" class="add-btn" style="background:transparent;border:0.5px solid var(--border2);color:var(--text)"><i class="ti ti-brand-steam"></i> Sincronizar Steam${lockIcon}</button>
-            <button onclick="${psnOnclick}" class="add-btn" style="background:transparent;border:0.5px solid var(--border2);color:var(--text)"><img src="https://cdn.simpleicons.org/playstation/ffffff" style="width:13px;height:13px;vertical-align:-2px"> Sincronizar PSN${lockIcon}</button>${connectorBtns}`;
+            <button onclick="toggleSteamMenu()" class="add-btn" style="background:transparent;border:0.5px solid var(--border2);color:var(--text)"><i class="ti ti-brand-steam"></i> Sincronizar Steam</button>
+            <button onclick="togglePsnMenu()" class="add-btn" style="background:transparent;border:0.5px solid var(--border2);color:var(--text)"><img src="https://cdn.simpleicons.org/playstation/ffffff" style="width:13px;height:13px;vertical-align:-2px"> Sincronizar PSN</button>${connectorBtns}`;
       list.innerHTML = `
         <div class="empty">
           <i class="ti ti-mood-sad" style="font-size:32px;display:block;margin-bottom:10px"></i>
@@ -7831,45 +7820,25 @@ function _endTour() {
 }
 
 function applyPremiumUI() {
+  // Rediseño de premium: sincronizar Steam/PSN/GOG/Xbox/Epic pasa a ser
+  // gratis para todos — se sacan los candados/toasts de bloqueo, siempre
+  // quedan con el onclick real de abrir el menu de conexion.
   const btn = document.getElementById('steam-menu-btn');
   if (btn) {
-    if (!isPremium) {
-      btn.innerHTML = '<i class="ti ti-brand-steam"></i> Steam <i class="ti ti-lock" style="font-size:11px"></i>';
-      btn.onclick = () => showToast('Sincronizar con Steam requiere la versión premium', true);
-    } else {
-      btn.innerHTML = '<i class="ti ti-brand-steam"></i> Steam ▾';
-      btn.onclick = toggleSteamMenu;
-    }
+    btn.innerHTML = '<i class="ti ti-brand-steam"></i> Steam ▾';
+    btn.onclick = toggleSteamMenu;
   }
-  // Todos los conectores (PSN, GOG, Xbox, Epic) requieren premium igual que
-  // Steam — antes solo Steam se bloqueaba del lado del cliente.
   const psnBtn = document.getElementById('psn-menu-btn');
   if (psnBtn) {
-    if (!isPremium) {
-      psnBtn.innerHTML = '<img src="https://cdn.simpleicons.org/playstation/ffffff" style="width:13px;height:13px;vertical-align:-2px"> PSN <i class="ti ti-lock" style="font-size:11px"></i>';
-      psnBtn.onclick = () => showToast('Sincronizar con PSN requiere la versión premium', true);
-    } else {
-      psnBtn.innerHTML = '<img src="https://cdn.simpleicons.org/playstation/ffffff" style="width:13px;height:13px;vertical-align:-2px"> PSN ▾';
-      psnBtn.onclick = togglePsnMenu;
-    }
+    psnBtn.innerHTML = '<img src="https://cdn.simpleicons.org/playstation/ffffff" style="width:13px;height:13px;vertical-align:-2px"> PSN ▾';
+    psnBtn.onclick = togglePsnMenu;
   }
   Object.entries(CONNECTORS).forEach(([p, c]) => {
     const cbtn = document.getElementById(`${p}-menu-btn`);
     if (!cbtn) return;
-    if (!isPremium) {
-      cbtn.innerHTML = `${_connIcon(c)} ${c.label} <i class="ti ti-lock" style="font-size:11px"></i>`;
-      cbtn.onclick = () => showToast(`Sincronizar con ${c.label} requiere la versión premium`, true);
-    } else {
-      cbtn.innerHTML = `${_connIcon(c)} ${c.label} ▾`;
-      cbtn.onclick = () => toggleConnectorMenu(p);
-    }
+    cbtn.innerHTML = `${_connIcon(c)} ${c.label} ▾`;
+    cbtn.onclick = () => toggleConnectorMenu(p);
   });
-  // Los botones de conectores del menu "..." de mobile son elementos DOM
-  // aparte (ids propios, no #steam-menu-btn/#psn-menu-btn/${p}-menu-btn),
-  // asi que el gate de arriba no los tocaba — un usuario gratis podia
-  // abrir el modal de Steam/PSN/GOG/Xbox/Epic desde el menu mobile sin
-  // ningun aviso (el sync en si lo rechaza el backend con 403, pero recien
-  // ahi, mucho mas confuso que el candado que ya se ve en desktop).
   const mobileGateMap = {
     'mobile-steam-menu-btn': () => toggleSteamMenu(),
     'mobile-psn-menu-btn':   () => togglePsnMenu(),
@@ -7877,18 +7846,12 @@ function applyPremiumUI() {
     'mobile-xbox-menu-btn':  () => toggleConnectorMenu('xbox'),
     'mobile-epic-menu-btn':  () => toggleConnectorMenu('epic'),
   };
-  const mobileLabelMap = { 'mobile-steam-menu-btn': 'Steam', 'mobile-psn-menu-btn': 'PSN', 'mobile-gog-menu-btn': 'GOG', 'mobile-xbox-menu-btn': 'Xbox', 'mobile-epic-menu-btn': 'Epic' };
   Object.entries(mobileGateMap).forEach(([id, openFn]) => {
     const mbtn = document.getElementById(id);
     if (!mbtn) return;
     const lock = mbtn.querySelector('.ti-lock');
-    if (!isPremium) {
-      if (!lock) mbtn.insertAdjacentHTML('beforeend', ' <i class="ti ti-lock" style="font-size:11px"></i>');
-      mbtn.onclick = () => { toggleHeaderMoreMenu(); showToast(`Sincronizar con ${mobileLabelMap[id]} requiere la versión premium`, true); };
-    } else {
-      if (lock) lock.remove();
-      mbtn.onclick = () => { toggleHeaderMoreMenu(); openFn(); };
-    }
+    if (lock) lock.remove();
+    mbtn.onclick = () => { toggleHeaderMoreMenu(); openFn(); };
   });
   ['premium-badge', 'cfg-premium-badge'].forEach(id => {
     const badge = document.getElementById(id);
