@@ -466,6 +466,11 @@
         <i class="ti ti-stars" style="font-size:14px"></i>
       </button>
 
+      <!-- My reviews button -->
+      <button id="myreviews-icon-btn" onclick="openMyReviewsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="myReviews" title="Mis reseñas">
+        <i class="ti ti-message-star" style="font-size:14px"></i>
+      </button>
+
       <!-- Support button -->
       <a id="support-link" href="mailto:nether.appdev@gmail.com" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center" data-i18n-title="support" title="Soporte">
         <i class="ti ti-lifebuoy" style="font-size:14px"></i>
@@ -489,6 +494,7 @@
           <button onclick="openFriendsPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-users" style="font-size:14px"></i> <span data-i18n="friends">Amigos</span></button>
           <button onclick="openAchievementsPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-trophy" style="font-size:14px"></i> <span data-i18n="achievements">Logros</span></button>
           <button onclick="openGomPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-stars" style="font-size:14px"></i> <span data-i18n="gameOfMonth">Juego del mes</span></button>
+          <button onclick="openMyReviewsPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-message-star" style="font-size:14px"></i> <span data-i18n="myReviews">Mis reseñas</span></button>
           <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
           <!-- Conectores — en mobile los botones de arriba estan ocultos
                (#connector-row), asi que se accede desde aca. Cada uno
@@ -1117,6 +1123,32 @@
   </div>
 </div>
 
+<!-- Mis reseñas Modal -->
+<div class="modal-overlay" id="myreviews-overlay">
+  <div class="modal" style="max-width:480px;max-height:85vh;display:flex;flex-direction:column">
+    <div class="modal-title" style="display:flex;align-items:center;justify-content:space-between">
+      <span><i class="ti ti-message-star"></i> <span data-i18n="myReviews">Mis reseñas</span></span>
+      <select id="myreviews-sort" onchange="_myReviewsSortChange()" style="font-size:12px;padding:4px 6px;border-radius:6px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text)">
+        <option value="date_desc" data-i18n="reviewsSortDate">Fecha ↓</option>
+        <option value="date_asc" data-i18n="reviewsSortDate">Fecha ↑</option>
+        <option value="rating_desc" data-i18n="reviewsSortRating">Calificación ↓</option>
+        <option value="rating_asc" data-i18n="reviewsSortRating">Calificación ↑</option>
+      </select>
+    </div>
+    <div style="padding:0 2px 10px">
+      <button onclick="openReviewGamePicker()" class="add-btn" style="width:100%;justify-content:center">
+        <i class="ti ti-plus"></i> <span data-i18n="addReview">Agregar reseña</span>
+      </button>
+    </div>
+    <div id="myreviews-content" style="overflow-y:auto;flex:1">
+      <div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeMyReviewsPanel()" data-i18n="close">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Novedades: agregar juego desde un lanzamiento -->
 <div class="modal-overlay" id="novedades-add-overlay">
   <div class="modal" style="max-width:380px">
@@ -1184,7 +1216,9 @@
       <button id="ftab-stats" onclick="switchFriendTab('stats')"
         style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px" data-i18n="stats">Estadísticas</button>
       <button id="ftab-common" onclick="switchFriendTab('common')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px" data-i18n="commonGames">En común</button>
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px" data-i18n="commonGames">En común</button>
+      <button id="ftab-reviews" onclick="switchFriendTab('reviews')"
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px" data-i18n="reviewsTitle">Reseñas</button>
     </div>
 
     <div id="friend-tab-library">
@@ -1229,6 +1263,10 @@
 
     <div id="friend-tab-common" style="display:none">
       <div id="friend-common-list" style="overflow-y:auto;max-height:55vh;display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+
+    <div id="friend-tab-reviews" style="display:none">
+      <div id="friend-reviews-list" style="overflow-y:auto;max-height:55vh;display:flex;flex-direction:column;gap:8px"></div>
     </div>
 
     <div class="modal-actions">
@@ -1611,6 +1649,16 @@ const I18N = {
     gomSearchPlaceholder: 'Buscar juego...', gomSearchHint: 'Buscá el juego que querés votar', gomNoResults: 'Sin resultados',
     gomVoteError: 'No se pudo registrar el voto', gomNoHistoryYet: 'Todavía no hay resultados — el primero sale el día 9.',
     gomVotes: 'votos', gomPodium: 'Podio', gomOwnedLibrary: 'Biblioteca', gomOwnedWishlist: 'Deseados',
+    writeReview: 'Escribir reseña', editReview: 'Editar reseña', viewReviews: 'Ver reseñas', myReviews: 'Mis reseñas',
+    reviewHint: '¿Qué te pareció este juego?', reviewVisibility: 'Visibilidad',
+    reviewVisibilityPublic: 'Pública', reviewVisibilityPrivate: 'Privada', reviewPostAnonymous: 'Publicar como anónimo',
+    reviewSave: 'Guardar', reviewDelete: 'Eliminar reseña', reviewDeleteConfirm: '¿Eliminar tu reseña de este juego?',
+    reviewSaveError: 'No se pudo guardar la reseña', reviewDeleteError: 'No se pudo eliminar la reseña',
+    reviewAnonymousLabel: 'Anónimo', reviewsTitle: 'Reseñas', reviewsSortDate: 'Fecha', reviewsSortRating: 'Calificación',
+    reviewsEmpty: 'Todavía no hay reseñas para este juego.', reviewReport: 'Reportar', reviewReportSent: 'Reseña reportada',
+    reviewReportConfirm: '¿Reportar esta reseña por contenido inapropiado?', recentReviews: 'Últimas reseñas',
+    recentReviewsEmpty: 'Todavía no hay reseñas recientes.', myReviewsEmpty: 'Todavía no escribiste ninguna reseña.',
+    addReview: 'Agregar reseña', reviewPickGame: 'Elegí un juego', reviewPickGameHint: 'Buscá el juego para reseñar',
     noFriendsYet: 'Todavía no agregaste amigos', incomingRequests: 'Solicitudes recibidas',
     sentRequests: 'Solicitudes enviadas', accept: 'Aceptar', reject: 'Rechazar',
     waitingConfirmation: 'Esperando confirmación', inSession: 'En sesión',
@@ -1760,6 +1808,16 @@ const I18N = {
     gomSearchPlaceholder: 'Search game...', gomSearchHint: 'Search for the game you want to vote for', gomNoResults: 'No results',
     gomVoteError: 'Could not register your vote', gomNoHistoryYet: "There aren't any results yet — the first one comes out on the 9th.",
     gomVotes: 'votes', gomPodium: 'Podium', gomOwnedLibrary: 'Library', gomOwnedWishlist: 'Wishlist',
+    writeReview: 'Write a review', editReview: 'Edit review', viewReviews: 'View reviews', myReviews: 'My reviews',
+    reviewHint: 'What did you think of this game?', reviewVisibility: 'Visibility',
+    reviewVisibilityPublic: 'Public', reviewVisibilityPrivate: 'Private', reviewPostAnonymous: 'Post anonymously',
+    reviewSave: 'Save', reviewDelete: 'Delete review', reviewDeleteConfirm: 'Delete your review for this game?',
+    reviewSaveError: "Couldn't save the review", reviewDeleteError: "Couldn't delete the review",
+    reviewAnonymousLabel: 'Anonymous', reviewsTitle: 'Reviews', reviewsSortDate: 'Date', reviewsSortRating: 'Rating',
+    reviewsEmpty: 'No reviews yet for this game.', reviewReport: 'Report', reviewReportSent: 'Review reported',
+    reviewReportConfirm: 'Report this review for inappropriate content?', recentReviews: 'Recent reviews',
+    recentReviewsEmpty: 'No recent reviews yet.', myReviewsEmpty: "You haven't written any reviews yet.",
+    addReview: 'Add review', reviewPickGame: 'Pick a game', reviewPickGameHint: 'Search for the game to review',
     noFriendsYet: "You haven't added any friends yet", incomingRequests: 'Incoming requests',
     sentRequests: 'Sent requests', accept: 'Accept', reject: 'Reject',
     waitingConfirmation: 'Waiting for confirmation', inSession: 'In session',
@@ -1909,6 +1967,16 @@ const I18N = {
     gomSearchPlaceholder: 'Buscar jogo...', gomSearchHint: 'Busque o jogo que você quer votar', gomNoResults: 'Sem resultados',
     gomVoteError: 'Não foi possível registrar o voto', gomNoHistoryYet: 'Ainda não há resultados — o primeiro sai no dia 9.',
     gomVotes: 'votos', gomPodium: 'Pódio', gomOwnedLibrary: 'Biblioteca', gomOwnedWishlist: 'Desejados',
+    writeReview: 'Escrever resenha', editReview: 'Editar resenha', viewReviews: 'Ver resenhas', myReviews: 'Minhas resenhas',
+    reviewHint: 'O que você achou deste jogo?', reviewVisibility: 'Visibilidade',
+    reviewVisibilityPublic: 'Pública', reviewVisibilityPrivate: 'Privada', reviewPostAnonymous: 'Publicar como anônimo',
+    reviewSave: 'Salvar', reviewDelete: 'Excluir resenha', reviewDeleteConfirm: 'Excluir sua resenha deste jogo?',
+    reviewSaveError: 'Não foi possível salvar a resenha', reviewDeleteError: 'Não foi possível excluir a resenha',
+    reviewAnonymousLabel: 'Anônimo', reviewsTitle: 'Resenhas', reviewsSortDate: 'Data', reviewsSortRating: 'Avaliação',
+    reviewsEmpty: 'Ainda não há resenhas para este jogo.', reviewReport: 'Denunciar', reviewReportSent: 'Resenha denunciada',
+    reviewReportConfirm: 'Denunciar esta resenha por conteúdo inadequado?', recentReviews: 'Últimas resenhas',
+    recentReviewsEmpty: 'Ainda não há resenhas recentes.', myReviewsEmpty: 'Você ainda não escreveu nenhuma resenha.',
+    addReview: 'Adicionar resenha', reviewPickGame: 'Escolha um jogo', reviewPickGameHint: 'Busque o jogo para resenhar',
     noFriendsYet: 'Você ainda não adicionou amigos', incomingRequests: 'Solicitações recebidas',
     sentRequests: 'Solicitações enviadas', accept: 'Aceitar', reject: 'Rejeitar',
     waitingConfirmation: 'Aguardando confirmação', inSession: 'Em sessão',
@@ -2281,6 +2349,18 @@ function toggleGameActionsMenu(gameId, hidden, event, hideLupa) {
   folderItem.onclick = () => { openCardFolderPicker(gameId); popup.remove(); };
   popup.appendChild(folderItem);
 
+  const reviewItem = document.createElement('button');
+  reviewItem.className = 'steam-menu-item';
+  reviewItem.innerHTML = '<i class="ti ti-message-star" style="font-size:14px"></i> ' + t('writeReview');
+  reviewItem.onclick = () => { openReviewEditor(gameId); popup.remove(); };
+  popup.appendChild(reviewItem);
+
+  const viewReviewsItem = document.createElement('button');
+  viewReviewsItem.className = 'steam-menu-item';
+  viewReviewsItem.innerHTML = '<i class="ti ti-messages" style="font-size:14px"></i> ' + t('viewReviews');
+  viewReviewsItem.onclick = () => { openReviewsList(gameId); popup.remove(); };
+  popup.appendChild(viewReviewsItem);
+
   const hideItem = document.createElement('button');
   hideItem.className = 'steam-menu-item';
   hideItem.innerHTML = hidden ? '<i class="ti ti-eye" style="font-size:14px"></i> Mostrar' : '<i class="ti ti-eye-off" style="font-size:14px"></i> Ocultar';
@@ -2353,6 +2433,318 @@ function starClick(gameId, starIndex, event) {
   const g = allGames.find(x => x.id === gameId);
   // Si ya tiene esa calificación, limpiar a 0
   setRating(gameId, (g && g.user_rating === value) ? 0 : value);
+}
+
+// ── Reseñas de juegos ────────────────────────────────────────────────────
+function _formatReviewDate(iso) {
+  if (!iso || iso.length < 10) return '';
+  const p = iso.substring(0, 10).split('-');
+  if (p.length !== 3) return '';
+  return `${p[2]}/${p[1]}/${p[0]}`;
+}
+
+async function openReviewEditor(gameId) {
+  const g = allGames.find(x => x.id === gameId);
+  const gameName = g ? g.name : gameId;
+  const overlay = document.createElement('div');
+  overlay.id = 'review-editor-overlay';
+  overlay.className = 'modal-overlay open';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:420px">
+      <div class="modal-title" id="review-editor-title">${t('writeReview')}</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px">${esc(gameName)}</div>
+      <textarea id="review-editor-text" maxlength="400" rows="5" placeholder="${esc(t('reviewHint'))}"
+        style="width:100%;resize:vertical;padding:10px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text);font-family:inherit;font-size:13px"></textarea>
+      <div style="font-size:11px;color:var(--text2);margin:4px 0 12px" id="review-editor-count">0/400</div>
+      <div style="font-size:12px;font-weight:600;margin-bottom:6px">${t('reviewVisibility')}</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button type="button" id="review-vis-public" onclick="_setReviewVisibility('public')" class="add-btn" style="flex:1;justify-content:center">${t('reviewVisibilityPublic')}</button>
+        <button type="button" id="review-vis-private" onclick="_setReviewVisibility('private')" class="add-btn" style="flex:1;justify-content:center">${t('reviewVisibilityPrivate')}</button>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:12px;cursor:pointer">
+        <input type="checkbox" id="review-editor-anon"> ${t('reviewPostAnonymous')}
+      </label>
+      <div id="review-editor-error" style="color:var(--red);font-size:12px;margin-bottom:8px;display:none"></div>
+      <div class="modal-actions" style="justify-content:space-between">
+        <button id="review-editor-delete" class="btn-cancel" style="color:var(--red);display:none" onclick="_deleteReviewFromEditor('${gameId}')">${t('reviewDelete')}</button>
+        <div style="flex:1"></div>
+        <button class="btn-cancel" onclick="this.closest('.modal-overlay').remove()">${t('cancel')}</button>
+        <button class="btn-save" onclick="_saveReview('${gameId}')">${t('reviewSave')}</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+
+  const textarea = document.getElementById('review-editor-text');
+  textarea.addEventListener('input', () => {
+    document.getElementById('review-editor-count').textContent = `${textarea.value.length}/400`;
+  });
+  window._reviewEditorVisibility = 'public';
+  _setReviewVisibility('public');
+
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gameId)}/review/mine`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const d = await res.json();
+    if (d && d.review) {
+      document.getElementById('review-editor-title').textContent = t('editReview');
+      textarea.value = d.review.text || '';
+      textarea.dispatchEvent(new Event('input'));
+      document.getElementById('review-editor-anon').checked = !!d.review.is_anonymous;
+      _setReviewVisibility(d.review.visibility || 'public');
+      document.getElementById('review-editor-delete').style.display = 'inline-block';
+    }
+  } catch (e) {}
+}
+
+function _setReviewVisibility(vis) {
+  window._reviewEditorVisibility = vis;
+  const pub = document.getElementById('review-vis-public');
+  const priv = document.getElementById('review-vis-private');
+  if (!pub || !priv) return;
+  pub.style.background = vis === 'public' ? 'var(--green)' : 'transparent';
+  pub.style.color = vis === 'public' ? '#fff' : 'var(--text)';
+  priv.style.background = vis === 'private' ? 'var(--green)' : 'transparent';
+  priv.style.color = vis === 'private' ? '#fff' : 'var(--text)';
+}
+
+async function _saveReview(gameId) {
+  const text = document.getElementById('review-editor-text').value.trim();
+  const errEl = document.getElementById('review-editor-error');
+  errEl.style.display = 'none';
+  if (!text) return;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gameId)}/review`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text,
+        visibility: window._reviewEditorVisibility || 'public',
+        is_anonymous: document.getElementById('review-editor-anon').checked,
+      }),
+    });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(d.detail || t('reviewSaveError'));
+    document.getElementById('review-editor-overlay').remove();
+    if (typeof _myReviewsRefresh === 'function' && document.getElementById('myreviews-overlay')?.classList.contains('open')) _myReviewsRefresh();
+  } catch (e) {
+    errEl.textContent = e.message || t('reviewSaveError');
+    errEl.style.display = 'block';
+  }
+}
+
+async function _deleteReviewFromEditor(gameId) {
+  if (!confirm(t('reviewDeleteConfirm'))) return;
+  try {
+    await fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gameId)}/review`, {
+      method: 'DELETE', headers: { 'Authorization': `Bearer ${authToken}` },
+    });
+    document.getElementById('review-editor-overlay').remove();
+    if (typeof _myReviewsRefresh === 'function' && document.getElementById('myreviews-overlay')?.classList.contains('open')) _myReviewsRefresh();
+  } catch (e) {
+    alert(t('reviewDeleteError'));
+  }
+}
+
+let _reviewsListSort = 'date', _reviewsListOrder = 'desc';
+
+async function openReviewsList(gameId) {
+  const g = allGames.find(x => x.id === gameId);
+  const gameName = g ? g.name : gameId;
+  _reviewsListSort = 'date'; _reviewsListOrder = 'desc';
+  const overlay = document.createElement('div');
+  overlay.id = 'reviews-list-overlay';
+  overlay.className = 'modal-overlay open';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:460px;max-height:85vh;display:flex;flex-direction:column">
+      <div class="modal-title" style="display:flex;align-items:center;justify-content:space-between">
+        <span>${t('reviewsTitle')} · ${esc(gameName)}</span>
+        <select id="reviews-list-sort" onchange="_reviewsListSortChange('${gameId}')" style="font-size:12px;padding:4px 6px;border-radius:6px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text)">
+          <option value="date_desc">${t('reviewsSortDate')} ↓</option>
+          <option value="date_asc">${t('reviewsSortDate')} ↑</option>
+          <option value="rating_desc">${t('reviewsSortRating')} ↓</option>
+          <option value="rating_asc">${t('reviewsSortRating')} ↑</option>
+        </select>
+      </div>
+      <div id="reviews-list-content" style="overflow-y:auto;flex:1">
+        <div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>${t('loading')}</div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="this.closest('.modal-overlay').remove()">${t('close')}</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  await _loadReviewsList(gameId);
+}
+
+function _reviewsListSortChange(gameId) {
+  const v = document.getElementById('reviews-list-sort').value.split('_');
+  _reviewsListSort = v[0]; _reviewsListOrder = v[1];
+  _loadReviewsList(gameId);
+}
+
+async function _loadReviewsList(gameId) {
+  const el = document.getElementById('reviews-list-content');
+  el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>${t('loading')}</div>`;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gameId)}/reviews?sort=${_reviewsListSort}&order=${_reviewsListOrder}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    const reviews = d.reviews || [];
+    if (!reviews.length) {
+      el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text2)">${t('reviewsEmpty')}</div>`;
+      return;
+    }
+    el.innerHTML = reviews.map(r => {
+      const name = r.is_anonymous ? t('reviewAnonymousLabel') : esc(r.username || '?');
+      const rating = r.rating > 0 ? `<span style="color:var(--amber)">★</span> ${r.rating.toFixed(1)}` : '';
+      const reportBtn = r.is_mine ? '' : `<button onclick="_reportReview(${r.id})" title="${esc(t('reviewReport'))}" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:14px"><i class="ti ti-flag"></i></button>`;
+      return `
+        <div style="padding:10px 4px;border-bottom:0.5px solid var(--border)">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-weight:600;font-size:13px">${name}</span>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px">${rating}${reportBtn}</div>
+          </div>
+          <div style="font-size:13px;margin-top:4px">${esc(r.text)}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px">${_formatReviewDate(r.updated_at)}</div>
+        </div>`;
+    }).join('');
+  } catch (e) {
+    el.innerHTML = `<div style="color:var(--red);padding:16px">${e.message || 'Error'}</div>`;
+  }
+}
+
+async function _reportReview(reviewId) {
+  if (!confirm(t('reviewReportConfirm'))) return;
+  try {
+    await fetch(`${apiBase()}/api/v1/reviews/${reviewId}/report`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason: null }),
+    });
+    alert(t('reviewReportSent'));
+  } catch (e) {}
+}
+
+// ── Mis reseñas ──────────────────────────────────────────────────────────
+let _myReviewsSort = 'date', _myReviewsOrder = 'desc';
+
+function openMyReviewsPanel() {
+  document.getElementById('myreviews-overlay').classList.add('open');
+  _myReviewsRefresh();
+}
+
+function closeMyReviewsPanel() {
+  document.getElementById('myreviews-overlay').classList.remove('open');
+}
+
+function _myReviewsSortChange() {
+  const v = document.getElementById('myreviews-sort').value.split('_');
+  _myReviewsSort = v[0]; _myReviewsOrder = v[1];
+  _myReviewsRefresh();
+}
+
+async function _myReviewsRefresh() {
+  const el = document.getElementById('myreviews-content');
+  el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>${t('loading')}</div>`;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/reviews/mine?sort=${_myReviewsSort}&order=${_myReviewsOrder}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    const reviews = d.reviews || [];
+    if (!reviews.length) {
+      el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text2)">${t('myReviewsEmpty')}</div>`;
+      return;
+    }
+    el.innerHTML = reviews.map(r => {
+      const rating = r.rating > 0 ? `<span style="color:var(--amber)">★</span> ${r.rating.toFixed(1)}` : '';
+      const isPublic = r.visibility === 'public';
+      return `
+        <div style="padding:10px 4px;border-bottom:0.5px solid var(--border)">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-weight:700;font-size:13px">${esc(r.game_name)}</span>
+            <span style="font-size:12px">${rating}</span>
+          </div>
+          <div style="font-size:13px;margin-top:4px">${esc(r.text)}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+            <span style="font-size:11px;color:var(--text2)">${_formatReviewDate(r.updated_at)}</span>
+            <div style="display:flex;gap:10px">
+              <button onclick="_toggleMyReviewVisibility('${r.game_id}', '${r.visibility}')" title="${esc(isPublic ? t('reviewVisibilityPublic') : t('reviewVisibilityPrivate'))}" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:15px"><i class="ti ${isPublic ? 'ti-world' : 'ti-lock'}"></i></button>
+              <button onclick="openReviewEditor('${r.game_id}')" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:15px"><i class="ti ti-pencil"></i></button>
+              <button onclick="_deleteMyReview('${r.game_id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:15px"><i class="ti ti-trash"></i></button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  } catch (e) {
+    el.innerHTML = `<div style="color:var(--red);padding:16px">${e.message || 'Error'}</div>`;
+  }
+}
+
+async function _toggleMyReviewVisibility(gameId, current) {
+  const newVis = current === 'public' ? 'private' : 'public';
+  try {
+    await fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gameId)}/review/visibility`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ visibility: newVis }),
+    });
+    _myReviewsRefresh();
+  } catch (e) {}
+}
+
+async function _deleteMyReview(gameId) {
+  if (!confirm(t('reviewDeleteConfirm'))) return;
+  try {
+    await fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gameId)}/review`, {
+      method: 'DELETE', headers: { 'Authorization': `Bearer ${authToken}` },
+    });
+    _myReviewsRefresh();
+  } catch (e) {}
+}
+
+let _reviewPickerTimer = null;
+
+async function openReviewGamePicker() {
+  const overlay = document.createElement('div');
+  overlay.id = 'review-picker-overlay';
+  overlay.className = 'modal-overlay open';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:420px;max-height:80vh;display:flex;flex-direction:column">
+      <div class="modal-title">${t('reviewPickGame')}</div>
+      <input id="review-picker-search" type="text" placeholder="${esc(t('reviewPickGameHint'))}"
+        style="width:100%;padding:8px 10px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text);font-size:13px;margin-bottom:10px">
+      <div id="review-picker-results" style="overflow-y:auto;flex:1"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="this.closest('.modal-overlay').remove()">${t('cancel')}</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.getElementById('review-picker-search').addEventListener('input', (e) => {
+    clearTimeout(_reviewPickerTimer);
+    _reviewPickerTimer = setTimeout(() => _loadReviewPickerResults(e.target.value), 300);
+  });
+  _loadReviewPickerResults('');
+}
+
+async function _loadReviewPickerResults(search) {
+  const el = document.getElementById('review-picker-results');
+  el.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text2)"><div class="spinner" style="margin:0 auto"></div></div>`;
+  try {
+    const params = new URLSearchParams({ sort: 'name', order: 'asc', page: '1', per_page: '50' });
+    if (search) params.set('search', search);
+    const res = await fetch(`${apiBase()}/api/v1/backlog?${params}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const d = await res.json();
+    const games = d.games || [];
+    if (!games.length) { el.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text2)">—</div>`; return; }
+    el.innerHTML = games.map(g => `
+      <div onclick="document.getElementById('review-picker-overlay').remove();openReviewEditor('${g.id}')"
+        style="padding:8px 4px;cursor:pointer;font-size:13px;border-bottom:0.5px solid var(--border)">${esc(g.name)}</div>
+    `).join('');
+  } catch (e) {
+    el.innerHTML = '';
+  }
 }
 
 async function setRating(gameId, value) {
@@ -5537,6 +5929,8 @@ function _novedadesSectionHtml(icon, title, innerHtml) {
     </div>`;
 }
 
+let _novedadesReviews = [];
+
 async function loadNovedadesView() {
   const el = document.getElementById('novedades-content');
   el.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>${t('loading')}</div>`;
@@ -5547,10 +5941,35 @@ async function loadNovedadesView() {
     _novedadesData = d;
     _novedadesAddedIgdbIds = new Set();
     ['recent', 'upcoming'].forEach(k => (d.releases[k] || []).forEach(g => { if (g.owned) _novedadesAddedIgdbIds.add(g.igdb_id); }));
+    try {
+      const rres = await fetch(`${apiBase()}/api/v1/reviews/recent?limit=20`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+      const rd = await rres.json();
+      _novedadesReviews = rres.ok ? (rd.reviews || []) : [];
+    } catch (e) { _novedadesReviews = []; }
     _renderNovedades();
   } catch (e) {
     el.innerHTML = `<div style="color:var(--red);padding:16px">${e.message || t('novedadesError')}</div>`;
   }
+}
+
+function _novedadesReviewTileHtml(r) {
+  const name = r.is_anonymous ? t('reviewAnonymousLabel') : esc(r.username || '?');
+  const rating = r.rating > 0 ? `<span style="color:var(--amber)">★</span> ${r.rating.toFixed(1)}` : '';
+  const cover = r.cover_url
+    ? `<img src="${r.cover_url}" style="width:34px;height:44px;object-fit:cover;border-radius:6px" onerror="this.style.display='none'">`
+    : `<div style="width:34px;height:44px;border-radius:6px;background:var(--bg3);display:flex;align-items:center;justify-content:center">🎮</div>`;
+  return `
+    <div style="display:flex;gap:10px;padding:10px;margin-bottom:6px;border-radius:10px;background:var(--bg3)">
+      ${cover}
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;gap:6px">
+          <span style="font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.game_name)}</span>
+          <span style="font-size:12px;white-space:nowrap">${rating}</span>
+        </div>
+        <div style="font-size:12px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${esc(r.text)}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">${name} · ${_formatReviewDate(r.updated_at)}</div>
+      </div>
+    </div>`;
 }
 
 function _renderNovedades() {
@@ -5565,7 +5984,7 @@ function _renderNovedades() {
   const freeGames = d.free_games || {};
   const freeGamesEmpty = !Object.values(freeGames).some(list => (list || []).length);
 
-  if (!friendsPlaying.length && !popularWishlist.length && !mostHours.length && !recent.length && !upcoming.length && freeGamesEmpty) {
+  if (!friendsPlaying.length && !popularWishlist.length && !mostHours.length && !recent.length && !upcoming.length && freeGamesEmpty && !(_novedadesReviews || []).length) {
     el.innerHTML = `<div style="text-align:center;padding:40px 16px;color:var(--text2)"><i class="ti ti-sparkles" style="font-size:32px"></i><div style="margin-top:10px">${t('novedadesEmpty')}</div></div>`;
     return;
   }
@@ -5585,6 +6004,7 @@ function _renderNovedades() {
   }
   if (recent.length) html += _novedadesSectionHtml('ti-sparkles', t('novedadesRecentReleases'), _novedadesCoverRowHtml(recent));
   if (upcoming.length) html += _novedadesSectionHtml('ti-calendar-event', t('novedadesUpcomingReleases'), _novedadesCoverRowHtml(upcoming));
+  if ((_novedadesReviews || []).length) html += _novedadesSectionHtml('ti-message-star', t('recentReviews'), _novedadesReviews.map(_novedadesReviewTileHtml).join(''));
   if (!freeGamesEmpty) html += _novedadesSectionHtml('ti-gift', t('novedadesFreeGames'), _novedadesFreeGamesHtml(freeGames));
   el.innerHTML = html;
 }
@@ -6018,7 +6438,8 @@ function switchFriendTab(tab) {
   document.getElementById('friend-tab-wishlist').style.display = tab === 'wishlist' ? '' : 'none';
   document.getElementById('friend-tab-stats').style.display    = tab === 'stats'    ? '' : 'none';
   document.getElementById('friend-tab-common').style.display   = tab === 'common'   ? '' : 'none';
-  ['library','wishlist','stats','common'].forEach(t => {
+  document.getElementById('friend-tab-reviews').style.display  = tab === 'reviews'  ? '' : 'none';
+  ['library','wishlist','stats','common','reviews'].forEach(t => {
     const btn = document.getElementById(`ftab-${t}`);
     const active = t === tab;
     btn.style.color       = active ? 'var(--green)' : 'var(--text2)';
@@ -6028,7 +6449,34 @@ function switchFriendTab(tab) {
   if (tab === 'library') loadFriendLibrary();
   else if (tab === 'wishlist') loadFriendWishlist();
   else if (tab === 'common') loadFriendCommonGames();
+  else if (tab === 'reviews') loadFriendReviews();
   else loadFriendStats();
+}
+
+async function loadFriendReviews() {
+  const list = document.getElementById('friend-reviews-list');
+  list.innerHTML = `<div class="empty"><i class="ti ti-loader"></i>${t('loading')}</div>`;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/friends/${encodeURIComponent(currentFriendUsername)}/reviews`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error');
+    const reviews = data.reviews || [];
+    list.innerHTML = reviews.length
+      ? reviews.map(r => `
+          <div style="padding:10px;border-radius:10px;background:var(--bg3)">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-weight:700;font-size:13px">${esc(r.game_name)}</span>
+              ${r.rating > 0 ? `<span style="font-size:12px"><span style="color:var(--amber)">★</span> ${r.rating.toFixed(1)}</span>` : ''}
+            </div>
+            <div style="font-size:13px;margin-top:4px">${esc(r.text)}</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:4px">${_formatReviewDate(r.updated_at)}</div>
+          </div>`).join('')
+      : `<div class="empty"><i class="ti ti-mood-sad"></i>${t('reviewsEmpty')}</div>`;
+  } catch(e) {
+    list.innerHTML = `<div class="empty"><i class="ti ti-alert-triangle"></i>${e.message}</div>`;
+  }
 }
 
 async function loadFriendCommonGames() {
