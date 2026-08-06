@@ -164,6 +164,22 @@
 
   <div class="card">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
+      <strong>Juego del mes — votación en vivo</strong>
+      <button class="btn-secondary" style="padding:4px 10px; font-size:11px" onclick="loadGomLive()">↻ Actualizar</button>
+    </div>
+    <p style="font-size:11px; color:var(--text2); margin-bottom:12px" id="gom-live-summary">Cargando...</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Juego</th><th>Votos</th></tr></thead>
+        <tbody id="gom-live-tbody">
+          <tr><td colspan="3" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
       <strong>Push personalizado</strong>
     </div>
     <p style="font-size:11px; color:var(--text2); margin-bottom:12px">
@@ -254,6 +270,7 @@ async function tryLogin() {
     loadPsnStatus();
     loadAnnouncements();
     loadPushStatus();
+    loadGomLive();
     loadServicesHealth();
   } else {
     document.getElementById('login-err').style.display = 'block';
@@ -435,6 +452,28 @@ async function loadPushStatus() {
     `).join('');
   } catch (e) {
     tbody.innerHTML = `<tr><td colspan="5" style="color:var(--red)">${e.name === 'AbortError' ? 'Tardó demasiado (timeout) — probá de nuevo' : 'Error al cargar'}</td></tr>`;
+  }
+}
+
+async function loadGomLive() {
+  const summary = document.getElementById('gom-live-summary');
+  const tbody = document.getElementById('gom-live-tbody');
+  try {
+    const res = await fetchTimeout(`${API}/admin/game-of-month/live`, { headers: headers() });
+    const d = await res.json();
+    if (!res.ok) throw new Error();
+    summary.textContent = `Mes ${d.month} — ${d.is_open ? 'votación abierta' : 'votación cerrada'} — ${d.total_votes} voto${d.total_votes === 1 ? '' : 's'} en total`;
+    tbody.innerHTML = d.standing.length
+      ? d.standing.map((s, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${s.name}</td>
+            <td>${s.votes}</td>
+          </tr>
+        `).join('')
+      : `<tr><td colspan="3" style="color:var(--text2)">Todavía no hay votos este mes</td></tr>`;
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="3" style="color:var(--red)">${e.name === 'AbortError' ? 'Tardó demasiado (timeout) — probá de nuevo' : 'Error al cargar'}</td></tr>`;
   }
 }
 
