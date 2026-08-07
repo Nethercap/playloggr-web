@@ -49,6 +49,7 @@
     .header-title { font-size:17px; font-weight:500; display:flex; align-items:center; gap:8px; }
     .header-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
     .sidebar-only-label { display:none; }
+    .sidebar-widget { display:none; }
 
     /* ── Desktop/tablet (>640px): sidebar fijo a la izquierda (mismas
        opciones que el drawer de la app) y panel de perfil fijo a la
@@ -98,13 +99,33 @@
 
       #header-more-wrap { display:none !important; }
 
+      #right-sidebar {
+        position:fixed; top:20px; right:32px; bottom:20px; width:220px; z-index:80;
+        display:flex; flex-direction:column; gap:16px; overflow-y:auto; overflow-x:hidden;
+      }
       #profile-panel {
-        position:fixed; top:20px; right:32px; width:220px; z-index:80;
-        flex-direction:column; align-items:center; text-align:center; margin-bottom:0;
+        flex-direction:column; align-items:center; text-align:center; margin-bottom:0; flex-shrink:0;
       }
       #profile-panel .profile-panel-info { align-items:center; }
       #profile-panel #plat-status-row { margin-left:0 !important; justify-content:center; flex-wrap:wrap; }
       .container { max-width:900px; }
+
+      /* ── Widgets del sidebar derecho: amigos / proximos lanzamientos /
+         recien salidos — cada uno con su propio scroll, alto fijo para
+         mostrar ~5 filas (56px cada una) y el resto con scroll interno. ── */
+      .sidebar-widget {
+        display:block; background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg);
+        padding:12px; flex-shrink:0;
+      }
+      .sidebar-widget-title { font-size:12px; font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+      .sidebar-widget-list { display:flex; flex-direction:column; gap:6px; max-height:280px; overflow-y:auto; }
+      .sidebar-widget-row { display:flex; align-items:center; gap:8px; padding:4px 2px; cursor:default; }
+      .sidebar-widget-row-cover { width:30px; height:40px; border-radius:5px; background:var(--bg3); flex-shrink:0; overflow:hidden; }
+      .sidebar-widget-row-cover img { width:100%; height:100%; object-fit:cover; }
+      .sidebar-widget-row-text { flex:1; min-width:0; }
+      .sidebar-widget-row-name { font-size:11.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .sidebar-widget-row-sub { font-size:10px; color:var(--text2); margin-top:1px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .sidebar-widget-empty { font-size:11px; color:var(--text2); text-align:center; padding:8px 0; }
 
       /* ── Sidebar del medio: vista/filtros (Biblioteca-Deseados-Rankings-
          Carpetas, filtros, lista/cuadricula, ocultos, orden, buscar) —
@@ -729,8 +750,28 @@
 
   <div class="error-banner" id="error-banner"></div>
 
-  <!-- Panel de perfil: avatar + nombre + nivel (mobile y web) -->
-  <div class="profile-panel" id="profile-panel"></div>
+  <!-- Panel de perfil: avatar + nombre + nivel (mobile y web) — en desktop
+       (>640px) es el primer bloque de #right-sidebar, con los widgets de
+       amigos/lanzamientos debajo (ver media query). En mobile queda igual
+       que siempre, sin wrapper visible. -->
+  <div id="right-sidebar">
+    <div class="profile-panel" id="profile-panel"></div>
+
+    <div class="sidebar-widget" id="widget-friends">
+      <div class="sidebar-widget-title"><i class="ti ti-users"></i> <span data-i18n="friends">Amigos</span></div>
+      <div class="sidebar-widget-list" id="widget-friends-list"></div>
+    </div>
+
+    <div class="sidebar-widget" id="widget-upcoming">
+      <div class="sidebar-widget-title"><i class="ti ti-calendar-event"></i> <span data-i18n="novedadesUpcomingReleases">Próximos lanzamientos</span></div>
+      <div class="sidebar-widget-list" id="widget-upcoming-list"></div>
+    </div>
+
+    <div class="sidebar-widget" id="widget-recent">
+      <div class="sidebar-widget-title"><i class="ti ti-sparkles"></i> <span data-i18n="novedadesRecentReleases">Recién salidos</span></div>
+      <div class="sidebar-widget-list" id="widget-recent-list"></div>
+    </div>
+  </div>
 
   <!-- Totales globales -->
   <div style="display:flex;gap:10px;margin-bottom:14px;align-items:flex-start">
@@ -9760,6 +9801,71 @@ async function onLoginSuccess() {
   checkActiveSession();
   loadAvatarConfig();
   checkAchievements();
+  loadSidebarWidgets();
+}
+
+// ── Widgets del sidebar derecho (desktop): amigos + proximos lanzamientos +
+// recien salidos, debajo del panel de perfil. No se recargan solos — se
+// refrescan la proxima vez que se loguea/recarga la pagina, es informacion
+// de "vistazo rapido" no critica.
+async function loadSidebarWidgets() {
+  loadWidgetFriends();
+  loadWidgetReleases();
+}
+
+async function loadWidgetFriends() {
+  const el = document.getElementById('widget-friends-list');
+  if (!el) return;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/friends`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const d = await res.json();
+    const friends = d.friends || [];
+    if (!friends.length) { el.innerHTML = `<div class="sidebar-widget-empty">${t('noFriendsYet')}</div>`; return; }
+    el.innerHTML = friends.map(f => `
+      <div class="sidebar-widget-row" style="cursor:pointer" onclick="openFriendProfile('${jsAttrEsc(f.username)}')">
+        <div style="width:30px;height:30px;border-radius:50%;overflow:hidden;background:var(--bg3);flex-shrink:0;position:relative">
+          <div style="width:30px;height:30px;position:relative;transform:translateY(-11.7%)">${_friendAvatarHtml(f, 30)}</div>
+        </div>
+        <div class="sidebar-widget-row-text">
+          <div class="sidebar-widget-row-name">${esc(f.username)}</div>
+          <div class="sidebar-widget-row-sub">${f.in_session ? t('inSession') : `${f.library_count} ${t('gamesLower') || ''}`}</div>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    el.innerHTML = `<div class="sidebar-widget-empty">—</div>`;
+  }
+}
+
+function _widgetReleaseRowHtml(g) {
+  const releaseDate = _formatReleaseDate(g.first_release_date);
+  return `
+    <div class="sidebar-widget-row">
+      <div class="sidebar-widget-row-cover">
+        <img src="${g.cover_url || ''}" onerror="this.style.display='none'">
+      </div>
+      <div class="sidebar-widget-row-text">
+        <div class="sidebar-widget-row-name">${esc(g.name || '')}</div>
+        ${releaseDate ? `<div class="sidebar-widget-row-sub">${releaseDate}</div>` : ''}
+      </div>
+    </div>`;
+}
+
+async function loadWidgetReleases() {
+  const upEl = document.getElementById('widget-upcoming-list');
+  const recEl = document.getElementById('widget-recent-list');
+  if (!upEl && !recEl) return;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/novedades`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const d = await res.json();
+    const upcoming = ((d.releases && d.releases.upcoming) || []).slice(0, 5);
+    const recent = ((d.releases && d.releases.recent) || []).slice(0, 5);
+    if (upEl) upEl.innerHTML = upcoming.length ? upcoming.map(_widgetReleaseRowHtml).join('') : `<div class="sidebar-widget-empty">—</div>`;
+    if (recEl) recEl.innerHTML = recent.length ? recent.map(_widgetReleaseRowHtml).join('') : `<div class="sidebar-widget-empty">—</div>`;
+  } catch (e) {
+    if (upEl) upEl.innerHTML = `<div class="sidebar-widget-empty">—</div>`;
+    if (recEl) recEl.innerHTML = `<div class="sidebar-widget-empty">—</div>`;
+  }
 }
 
 function logout() {
