@@ -16,6 +16,12 @@
   .container { max-width: 720px; margin: 0 auto; }
   h1 { font-size: 18px; font-weight: 600; display:flex; align-items:center; gap:8px; margin-bottom: 20px; }
   .card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+  .card-header { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+  .card-header-title { display: flex; align-items: center; gap: 8px; }
+  .card-chevron { font-size: 11px; color: var(--text2); transition: transform .15s; display: inline-block; }
+  .card.open .card-chevron { transform: rotate(90deg); }
+  .card-body { display: none; margin-top: 12px; }
+  .card.open .card-body { display: block; }
   .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
   .metric { background: var(--bg3); border-radius: 8px; padding: 12px; }
   .metric-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
@@ -64,175 +70,216 @@
     <button class="btn-secondary" style="margin-left:auto; padding:4px 10px; font-size:11px" onclick="logout()">Salir</button>
   </h1>
 
-  <div class="card">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
-      <strong>Métricas generales</strong>
-      <button class="btn-secondary" style="padding:4px 10px; font-size:11px" onclick="loadMetrics()">↻ Actualizar</button>
+  <div class="card" id="card-metrics">
+    <div class="card-header" onclick="toggleCard('card-metrics')">
+      <span class="card-header-title"><span class="card-chevron">▸</span><strong>Métricas generales</strong></span>
+      <button class="btn-secondary" style="padding:4px 10px; font-size:11px" onclick="event.stopPropagation(); loadMetrics()">↻ Actualizar</button>
     </div>
-    <div class="metrics-grid" id="metrics-grid">
-      <div style="color:var(--text2); font-size:13px"><div class="spinner"></div> Cargando...</div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
-      <strong>Estado de servicios</strong>
-      <button class="btn-secondary" style="padding:4px 10px; font-size:11px" onclick="loadServicesHealth()">↻ Verificar ahora</button>
-    </div>
-    <p style="font-size:11px; color:var(--text2); margin-bottom:12px">
-      Chequeo activo de los servicios externos de los que depende la app. Útil para triagear rápido cuando un usuario reporta un problema (login, sync, notificaciones, etc.) sin tener que investigar de cero.
-    </p>
-    <div id="services-health-list">
-      <div style="color:var(--text2); font-size:13px"><div class="spinner"></div> Cargando...</div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
-      <strong>PSN — cuenta de servicio</strong>
-      <button class="btn-secondary" style="padding:4px 10px; font-size:11px" onclick="loadPsnStatus()">↻ Actualizar</button>
-    </div>
-    <p style="font-size:11px; color:var(--text2); margin-bottom:12px">
-      El connector de PSN (experimental) usa una cuenta de servicio propia. El refresh_token vence cada ~2 meses —
-      cuando venza, sacá un NPSSO nuevo logueandote en <a href="https://my.playstation.com/" target="_blank" style="color:var(--text2)">my.playstation.com</a>
-      y visitando después, en el mismo navegador, <a href="https://ca.account.sony.com/api/v1/ssocookie" target="_blank" style="color:var(--text2)">ca.account.sony.com/api/v1/ssocookie</a> (devuelve <code>{"npsso":"..."}</code>).
-    </p>
-    <div id="psn-status" style="font-size:13px; margin-bottom:12px; color:var(--text2)"><div class="spinner"></div> Cargando...</div>
-    <div class="row">
-      <div>
-        <label>NPSSO</label>
-        <input type="password" id="psn-npsso-input" placeholder="Pegá el npsso acá" onkeydown="if(event.key==='Enter') updatePsnToken()" />
-      </div>
-      <button class="btn-primary" onclick="updatePsnToken()">Actualizar</button>
-    </div>
-    <div class="msg" id="psn-msg"></div>
-  </div>
-
-  <div class="card">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
-      <strong>Anuncios (popup para usuarios)</strong>
-    </div>
-    <p style="font-size:11px; color:var(--text2); margin-bottom:12px">
-      Se muestra como popup en la web y la app a todos los usuarios que todavía no lo vieron. Solo puede haber uno activo — al publicar uno nuevo se desactiva el anterior.
-    </p>
-    <div id="announcement-active-box" style="font-size:12px; color:var(--text2); margin-bottom:12px">
-      <div class="spinner"></div> Cargando...
-    </div>
-    <div class="row">
-      <div>
-        <label>Título (opcional)</label>
-        <input type="text" id="announcement-title" placeholder="Ej: Mantenimiento programado" />
+    <div class="card-body">
+      <div class="metrics-grid" id="metrics-grid">
+        <div style="color:var(--text2); font-size:13px"><div class="spinner"></div> Cargando...</div>
       </div>
     </div>
-    <div style="margin-top:8px">
-      <label>Mensaje</label>
-      <textarea id="announcement-message" rows="3" placeholder="Escribí el aviso para los usuarios..."
-        style="font-size:13px; padding:8px 10px; border-radius:8px; border:0.5px solid var(--border2); background:var(--bg3); color:var(--text); width:100%; font-family:inherit; resize:vertical"></textarea>
-    </div>
-    <div class="row" style="margin-top:12px">
-      <button class="btn-primary" onclick="publishAnnouncement()">Publicar</button>
-    </div>
-    <div class="msg" id="announcement-msg"></div>
-    <div class="table-wrap" style="margin-top:14px">
-      <table>
-        <thead><tr><th>Título</th><th>Mensaje</th><th>Estado</th><th>Fecha</th><th></th></tr></thead>
-        <tbody id="announcements-tbody">
-          <tr><td colspan="5" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>
-        </tbody>
-      </table>
-    </div>
   </div>
 
-  <div class="card">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
-      <strong>Novedades — push automático</strong>
-      <button class="btn-secondary" style="padding:4px 10px; font-size:11px" onclick="loadPushStatus()">↻ Actualizar</button>
+  <div class="card" id="card-services">
+    <div class="card-header" onclick="toggleCard('card-services')">
+      <span class="card-header-title"><span class="card-chevron">▸</span><strong>Estado de servicios</strong></span>
+      <button class="btn-secondary" style="padding:4px 10px; font-size:11px" onclick="event.stopPropagation(); loadServicesHealth()">↻ Verificar ahora</button>
     </div>
-    <p style="font-size:11px; color:var(--text2); margin-bottom:12px">
-      Cada uno corre solo cuando corresponde según su cadencia (el cron externo dispara todos los días/el día que toque, el backend decide si ya es hora). "Disparar ahora" siempre fuerza el envío, ignorando la cadencia — útil para probar.
-    </p>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Novedad</th><th>Última corrida</th><th>Resultado</th><th>Notificados</th><th></th></tr></thead>
-        <tbody id="push-status-tbody">
-          <tr><td colspan="5" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="msg" id="push-trigger-msg"></div>
-  </div>
-
-  <div class="card">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
-      <strong>Juego del mes — votación en vivo</strong>
-      <button class="btn-secondary" style="padding:4px 10px; font-size:11px" onclick="loadGomLive()">↻ Actualizar</button>
-    </div>
-    <p style="font-size:11px; color:var(--text2); margin-bottom:12px" id="gom-live-summary">Cargando...</p>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>#</th><th>Juego</th><th>Votos</th></tr></thead>
-        <tbody id="gom-live-tbody">
-          <tr><td colspan="3" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="card">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
-      <strong>Push personalizado</strong>
-    </div>
-    <p style="font-size:11px; color:var(--text2); margin-bottom:12px">
-      Manda una notificación con título y texto libre a todos los usuarios con la app instalada. Al tocarla, simplemente abre la app.
-    </p>
-    <div class="row">
-      <div>
-        <label>Título</label>
-        <input type="text" id="custom-push-title" placeholder="Ej: ¡Nueva función!" />
+    <div class="card-body">
+      <p style="font-size:11px; color:var(--text2); margin-bottom:12px">
+        Chequeo activo de los servicios externos de los que depende la app. Útil para triagear rápido cuando un usuario reporta un problema (login, sync, notificaciones, etc.) sin tener que investigar de cero.
+      </p>
+      <div id="services-health-list">
+        <div style="color:var(--text2); font-size:13px"><div class="spinner"></div> Cargando...</div>
       </div>
     </div>
-    <div style="margin-top:8px">
-      <label>Texto</label>
-      <textarea id="custom-push-body" rows="2" placeholder="Escribí el mensaje..."
-        style="font-size:13px; padding:8px 10px; border-radius:8px; border:0.5px solid var(--border2); background:var(--bg3); color:var(--text); width:100%; font-family:inherit; resize:vertical"></textarea>
-    </div>
-    <div class="row" style="margin-top:12px">
-      <button class="btn-primary" onclick="sendCustomPush()">Enviar a todos</button>
-    </div>
-    <div class="msg" id="custom-push-msg"></div>
   </div>
 
-  <div class="card">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
-      <strong>Usuarios totales</strong>
+  <div class="card" id="card-psn">
+    <div class="card-header" onclick="toggleCard('card-psn')">
+      <span class="card-header-title"><span class="card-chevron">▸</span><strong>PSN — cuenta de servicio</strong></span>
+      <button class="btn-secondary" style="padding:4px 10px; font-size:11px" onclick="event.stopPropagation(); loadPsnStatus()">↻ Actualizar</button>
     </div>
-    <div class="row">
-      <div>
-        <label>Buscar por email o username</label>
-        <input type="text" id="users-search" placeholder="buscar..." onkeydown="if(event.key==='Enter'){usersPage=1; loadUsers();}" />
+    <div class="card-body">
+      <p style="font-size:11px; color:var(--text2); margin-bottom:12px">
+        El connector de PSN (experimental) usa una cuenta de servicio propia. El refresh_token vence cada ~2 meses —
+        cuando venza, sacá un NPSSO nuevo logueandote en <a href="https://my.playstation.com/" target="_blank" style="color:var(--text2)">my.playstation.com</a>
+        y visitando después, en el mismo navegador, <a href="https://ca.account.sony.com/api/v1/ssocookie" target="_blank" style="color:var(--text2)">ca.account.sony.com/api/v1/ssocookie</a> (devuelve <code>{"npsso":"..."}</code>).
+      </p>
+      <div id="psn-status" style="font-size:13px; margin-bottom:12px; color:var(--text2)"><div class="spinner"></div> Cargando...</div>
+      <div class="row">
+        <div>
+          <label>NPSSO</label>
+          <input type="password" id="psn-npsso-input" placeholder="Pegá el npsso acá" onkeydown="if(event.key==='Enter') updatePsnToken()" />
+        </div>
+        <button class="btn-primary" onclick="updatePsnToken()">Actualizar</button>
       </div>
-      <div>
-        <label>Ordenar por</label>
-        <select id="users-sort" onchange="usersPage=1; loadUsers();">
-          <option value="id_desc">Más nuevos primero</option>
-          <option value="id_asc">Más antiguos primero</option>
-          <option value="last_seen_desc">Última vez: más reciente</option>
-          <option value="last_seen_asc">Última vez: más antigua</option>
-        </select>
+      <div class="msg" id="psn-msg"></div>
+    </div>
+  </div>
+
+  <div class="card" id="card-announcements">
+    <div class="card-header" onclick="toggleCard('card-announcements')">
+      <span class="card-header-title"><span class="card-chevron">▸</span><strong>Anuncios (popup para usuarios)</strong></span>
+    </div>
+    <div class="card-body">
+      <p style="font-size:11px; color:var(--text2); margin-bottom:12px">
+        Se muestra como popup en la web y la app a todos los usuarios que todavía no lo vieron. Solo puede haber uno activo — al publicar uno nuevo se desactiva el anterior.
+      </p>
+      <div id="announcement-active-box" style="font-size:12px; color:var(--text2); margin-bottom:12px">
+        <div class="spinner"></div> Cargando...
       </div>
-      <button class="btn-secondary" onclick="usersPage=1; loadUsers();">Buscar</button>
+      <div class="row">
+        <div>
+          <label>Título (opcional)</label>
+          <input type="text" id="announcement-title" placeholder="Ej: Mantenimiento programado" />
+        </div>
+      </div>
+      <div style="margin-top:8px">
+        <label>Mensaje</label>
+        <textarea id="announcement-message" rows="3" placeholder="Escribí el aviso para los usuarios..."
+          style="font-size:13px; padding:8px 10px; border-radius:8px; border:0.5px solid var(--border2); background:var(--bg3); color:var(--text); width:100%; font-family:inherit; resize:vertical"></textarea>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn-primary" onclick="publishAnnouncement()">Publicar</button>
+      </div>
+      <div class="msg" id="announcement-msg"></div>
+      <div class="table-wrap" style="margin-top:14px">
+        <table>
+          <thead><tr><th>Título</th><th>Mensaje</th><th>Estado</th><th>Fecha</th><th></th></tr></thead>
+          <tbody id="announcements-tbody">
+            <tr><td colspan="5" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr><th>Usuario</th><th>Email</th><th>Nivel</th><th>Última vez</th><th></th><th></th><th></th></tr>
-        </thead>
-        <tbody id="users-tbody">
-          <tr><td colspan="7" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>
-        </tbody>
-      </table>
+  </div>
+
+  <div class="card" id="card-push-status">
+    <div class="card-header" onclick="toggleCard('card-push-status')">
+      <span class="card-header-title"><span class="card-chevron">▸</span><strong>Novedades — push automático</strong></span>
+      <button class="btn-secondary" style="padding:4px 10px; font-size:11px" onclick="event.stopPropagation(); loadPushStatus()">↻ Actualizar</button>
     </div>
-    <div class="pagination" id="users-pagination"></div>
+    <div class="card-body">
+      <p style="font-size:11px; color:var(--text2); margin-bottom:12px">
+        Cada uno corre solo cuando corresponde según su cadencia (el cron externo dispara todos los días/el día que toque, el backend decide si ya es hora). "Disparar ahora" siempre fuerza el envío, ignorando la cadencia — útil para probar.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Novedad</th><th>Última corrida</th><th>Resultado</th><th>Notificados</th><th></th></tr></thead>
+          <tbody id="push-status-tbody">
+            <tr><td colspan="5" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="msg" id="push-trigger-msg"></div>
+    </div>
+  </div>
+
+  <div class="card" id="card-gom-live">
+    <div class="card-header" onclick="toggleCard('card-gom-live')">
+      <span class="card-header-title"><span class="card-chevron">▸</span><strong>Juego del mes — votación en vivo</strong></span>
+      <button class="btn-secondary" style="padding:4px 10px; font-size:11px" onclick="event.stopPropagation(); loadGomLive()">↻ Actualizar</button>
+    </div>
+    <div class="card-body">
+      <p style="font-size:11px; color:var(--text2); margin-bottom:12px" id="gom-live-summary">Cargando...</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Juego</th><th>Votos</th></tr></thead>
+          <tbody id="gom-live-tbody">
+            <tr><td colspan="3" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="card-reviews">
+    <div class="card-header" onclick="toggleCard('card-reviews')">
+      <span class="card-header-title"><span class="card-chevron">▸</span><strong>Reseñas</strong></span>
+      <button class="btn-secondary" style="padding:4px 10px; font-size:11px" onclick="event.stopPropagation(); reviewsPage=1; loadAdminReviews();">↻ Actualizar</button>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div>
+          <label>Buscar por usuario o juego</label>
+          <input type="text" id="reviews-search" placeholder="buscar..." onkeydown="if(event.key==='Enter'){reviewsPage=1; loadAdminReviews();}" />
+        </div>
+        <button class="btn-secondary" onclick="reviewsPage=1; loadAdminReviews();">Buscar</button>
+      </div>
+      <div class="table-wrap" style="margin-top:12px">
+        <table>
+          <thead><tr><th>Usuario</th><th>Juego</th><th>Reseña</th><th>Visibilidad</th><th>Fecha</th><th></th></tr></thead>
+          <tbody id="reviews-tbody">
+            <tr><td colspan="6" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination" id="reviews-pagination"></div>
+    </div>
+  </div>
+
+  <div class="card" id="card-custom-push">
+    <div class="card-header" onclick="toggleCard('card-custom-push')">
+      <span class="card-header-title"><span class="card-chevron">▸</span><strong>Push personalizado</strong></span>
+    </div>
+    <div class="card-body">
+      <p style="font-size:11px; color:var(--text2); margin-bottom:12px">
+        Manda una notificación con título y texto libre a todos los usuarios con la app instalada. Al tocarla, simplemente abre la app.
+      </p>
+      <div class="row">
+        <div>
+          <label>Título</label>
+          <input type="text" id="custom-push-title" placeholder="Ej: ¡Nueva función!" />
+        </div>
+      </div>
+      <div style="margin-top:8px">
+        <label>Texto</label>
+        <textarea id="custom-push-body" rows="2" placeholder="Escribí el mensaje..."
+          style="font-size:13px; padding:8px 10px; border-radius:8px; border:0.5px solid var(--border2); background:var(--bg3); color:var(--text); width:100%; font-family:inherit; resize:vertical"></textarea>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn-primary" onclick="sendCustomPush()">Enviar a todos</button>
+      </div>
+      <div class="msg" id="custom-push-msg"></div>
+    </div>
+  </div>
+
+  <div class="card" id="card-users">
+    <div class="card-header" onclick="toggleCard('card-users')">
+      <span class="card-header-title"><span class="card-chevron">▸</span><strong>Usuarios totales</strong></span>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div>
+          <label>Buscar por email o username</label>
+          <input type="text" id="users-search" placeholder="buscar..." onkeydown="if(event.key==='Enter'){usersPage=1; loadUsers();}" />
+        </div>
+        <div>
+          <label>Ordenar por</label>
+          <select id="users-sort" onchange="usersPage=1; loadUsers();">
+            <option value="id_desc">Más nuevos primero</option>
+            <option value="id_asc">Más antiguos primero</option>
+            <option value="last_seen_desc">Última vez: más reciente</option>
+            <option value="last_seen_asc">Última vez: más antigua</option>
+          </select>
+        </div>
+        <button class="btn-secondary" onclick="usersPage=1; loadUsers();">Buscar</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Usuario</th><th>Email</th><th>Nivel</th><th>Última vez</th><th></th><th></th><th></th></tr>
+          </thead>
+          <tbody id="users-tbody">
+            <tr><td colspan="7" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination" id="users-pagination"></div>
+    </div>
   </div>
 </div>
 
@@ -272,9 +319,14 @@ async function tryLogin() {
     loadPushStatus();
     loadGomLive();
     loadServicesHealth();
+    loadAdminReviews();
   } else {
     document.getElementById('login-err').style.display = 'block';
   }
+}
+
+function toggleCard(id) {
+  document.getElementById(id).classList.toggle('open');
 }
 
 function logout() {
@@ -583,6 +635,57 @@ async function deactivateAnnouncement(id) {
   }
 }
 
+let reviewsPage = 1;
+
+function escHtml(str) {
+  return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+async function loadAdminReviews() {
+  const tbody = document.getElementById('reviews-tbody');
+  const search = document.getElementById('reviews-search').value.trim();
+  tbody.innerHTML = '<tr><td colspan="6" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>';
+  try {
+    const url = `${API}/admin/reviews?page=${reviewsPage}&search=${encodeURIComponent(search)}`;
+    const res = await fetchTimeout(url, { headers: headers() });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    if (d.reviews.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="color:var(--text2)">Sin resultados</td></tr>';
+    } else {
+      tbody.innerHTML = d.reviews.map(r => `
+        <tr>
+          <td>${escHtml(r.username)}</td>
+          <td>${escHtml(r.game_name)}</td>
+          <td style="max-width:260px">${escHtml(r.text)}</td>
+          <td>${r.visibility === 'public' ? 'Pública' : 'Privada'}</td>
+          <td>${new Date(r.updated_at).toLocaleDateString('es-AR')}</td>
+          <td><button class="icon-btn" title="Eliminar reseña" onclick="deleteAdminReview(${r.id})">🗑️</button></td>
+        </tr>
+      `).join('');
+    }
+    document.getElementById('reviews-pagination').innerHTML = `
+      <button class="btn-secondary" style="padding:4px 10px" ${d.page <= 1 ? 'disabled' : ''} onclick="reviewsPage=${d.page - 1}; loadAdminReviews();">←</button>
+      <span>Página ${d.page} de ${d.total_pages} (${d.total_count} reseñas)</span>
+      <button class="btn-secondary" style="padding:4px 10px" ${d.page >= d.total_pages ? 'disabled' : ''} onclick="reviewsPage=${d.page + 1}; loadAdminReviews();">→</button>
+    `;
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="6" style="color:var(--red)">${e.message || 'Error al cargar reseñas'}</td></tr>`;
+  }
+}
+
+async function deleteAdminReview(reviewId) {
+  if (!confirm('¿Eliminar esta reseña permanentemente?')) return;
+  try {
+    const res = await fetch(`${API}/admin/reviews/${reviewId}`, { method: 'DELETE', headers: headers() });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    loadAdminReviews();
+  } catch (e) {
+    alert(e.message || 'Error al eliminar la reseña');
+  }
+}
+
 let usersPage = 1;
 
 async function loadUsers() {
@@ -669,6 +772,7 @@ if (adminKey) {
       loadUsers();
       loadPsnStatus();
       loadAnnouncements();
+      loadAdminReviews();
       return res.json().then(renderMetrics);
     } else {
       localStorage.removeItem('admin_key');
