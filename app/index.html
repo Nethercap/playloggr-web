@@ -4204,7 +4204,30 @@ function _positionFixedPopup(popup, btn) {
   let left = rect.left;
   if (left + popupWidth > window.innerWidth - 8) left = Math.max(8, window.innerWidth - popupWidth - 8);
   popup.style.left = `${left}px`;
-  popup.style.top  = `${rect.bottom + 4}px`;
+
+  // Vertical: si no entra debajo del boton (comun con el sidebar fijo,
+  // donde Xbox/Epic quedan cerca del borde inferior) se abre arriba en vez
+  // de abajo; si tampoco entra arriba, se deja pegado al borde con scroll
+  // propio en vez de salirse de la ventana (se cortaba con la barra de
+  // tareas del SO).
+  const popupHeight = popup.offsetHeight || 200;
+  const spaceBelow = window.innerHeight - rect.bottom - 8;
+  const spaceAbove = rect.top - 8;
+  popup.style.maxHeight = '';
+  popup.style.overflowY = '';
+  if (popupHeight <= spaceBelow) {
+    popup.style.top = `${rect.bottom + 4}px`;
+  } else if (popupHeight <= spaceAbove) {
+    popup.style.top = `${rect.top - popupHeight - 4}px`;
+  } else if (spaceBelow >= spaceAbove) {
+    popup.style.top = `${rect.bottom + 4}px`;
+    popup.style.maxHeight = `${spaceBelow}px`;
+    popup.style.overflowY = 'auto';
+  } else {
+    popup.style.top = '8px';
+    popup.style.maxHeight = `${spaceAbove}px`;
+    popup.style.overflowY = 'auto';
+  }
 }
 
 function toggleFilterDropdown(key, options, wrap, btn) {
