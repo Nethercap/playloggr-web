@@ -2721,6 +2721,8 @@ async function _deleteMyReview(gameId) {
 }
 
 let _reviewPickerTimer = null;
+let _reviewPickerSearch = '';
+let _reviewPickerPage = 1;
 
 async function openReviewGamePicker() {
   const overlay = document.createElement('div');
@@ -2732,6 +2734,7 @@ async function openReviewGamePicker() {
       <input id="review-picker-search" type="text" placeholder="${esc(t('reviewPickGameHint'))}"
         style="width:100%;padding:8px 10px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text);font-size:13px;margin-bottom:10px">
       <div id="review-picker-results" style="overflow-y:auto;flex:1"></div>
+      <div id="review-picker-pagination" style="display:flex;align-items:center;justify-content:center;gap:12px;padding-top:10px"></div>
       <div class="modal-actions">
         <button class="btn-cancel" onclick="this.closest('.modal-overlay').remove()">${t('cancel')}</button>
       </div>
@@ -2740,17 +2743,30 @@ async function openReviewGamePicker() {
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   document.getElementById('review-picker-search').addEventListener('input', (e) => {
     clearTimeout(_reviewPickerTimer);
-    _reviewPickerTimer = setTimeout(() => _loadReviewPickerResults(e.target.value), 300);
+    _reviewPickerTimer = setTimeout(() => {
+      _reviewPickerSearch = e.target.value;
+      _reviewPickerPage = 1;
+      _loadReviewPickerResults();
+    }, 300);
   });
-  _loadReviewPickerResults('');
+  _reviewPickerSearch = '';
+  _reviewPickerPage = 1;
+  _loadReviewPickerResults();
 }
 
-async function _loadReviewPickerResults(search) {
+function _reviewPickerGoTo(page) {
+  _reviewPickerPage = page;
+  _loadReviewPickerResults();
+}
+
+async function _loadReviewPickerResults() {
   const el = document.getElementById('review-picker-results');
+  const pag = document.getElementById('review-picker-pagination');
   el.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text2)"><div class="spinner" style="margin:0 auto"></div></div>`;
+  pag.innerHTML = '';
   try {
-    const params = new URLSearchParams({ sort: 'name', order: 'asc', page: '1', per_page: '50' });
-    if (search) params.set('search', search);
+    const params = new URLSearchParams({ sort: 'name', order: 'asc', page: String(_reviewPickerPage), per_page: '20' });
+    if (_reviewPickerSearch) params.set('search', _reviewPickerSearch);
     const res = await fetch(`${apiBase()}/api/v1/backlog?${params}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
     const d = await res.json();
     const games = d.games || [];
@@ -2759,6 +2775,15 @@ async function _loadReviewPickerResults(search) {
       <div onclick="document.getElementById('review-picker-overlay').remove();openReviewEditor('${g.id}')"
         style="padding:8px 4px;cursor:pointer;font-size:13px;border-bottom:0.5px solid var(--border)">${esc(g.name)}</div>
     `).join('');
+    const totalPages = d.total_pages || 1;
+    if (totalPages > 1) {
+      pag.innerHTML = `
+        <button onclick="_reviewPickerGoTo(${_reviewPickerPage - 1})" ${_reviewPickerPage <= 1 ? 'disabled' : ''}
+          style="padding:4px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text);cursor:pointer">‹</button>
+        <span style="font-size:12px;color:var(--text2)">${_reviewPickerPage} / ${totalPages}</span>
+        <button onclick="_reviewPickerGoTo(${_reviewPickerPage + 1})" ${_reviewPickerPage >= totalPages ? 'disabled' : ''}
+          style="padding:4px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text);cursor:pointer">›</button>`;
+    }
   } catch (e) {
     el.innerHTML = '';
   }
@@ -2914,9 +2939,19 @@ function accessibleEditModalBody(gameId) {
       <select id="ae-status" style="${fieldStyle};color:${STATUS_DOT_COLORS[g.status]||''}">${statusOptionsHtml(g.status)}</select>
     </div>
     <button onclick="closeAccessibleEditModal();openCardFolderPicker('${gameId}')"
-      style="width:100%;padding:11px;font-size:15px;border-radius:8px;border:0.5px solid var(--border2);background:transparent;color:var(--text);cursor:pointer;margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:6px">
+      style="width:100%;padding:11px;font-size:15px;border-radius:8px;border:0.5px solid var(--border2);background:transparent;color:var(--text);cursor:pointer;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:6px">
       <i class="ti ti-folder-plus"></i> ${t('folder') || 'Carpeta'}
     </button>
+    <div style="display:flex;gap:10px;margin-bottom:20px">
+      <button onclick="closeAccessibleEditModal();openReviewEditor('${gameId}')"
+        style="flex:1;padding:11px;font-size:15px;border-radius:8px;border:0.5px solid var(--border2);background:transparent;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+        <i class="ti ti-message-star"></i> ${t('writeReview')}
+      </button>
+      <button onclick="closeAccessibleEditModal();openReviewsList('${gameId}')"
+        style="flex:1;padding:11px;font-size:15px;border-radius:8px;border:0.5px solid var(--border2);background:transparent;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+        <i class="ti ti-messages"></i> ${t('viewReviews')}
+      </button>
+    </div>
     <div style="display:flex;gap:10px;margin-bottom:20px">
       <button onclick="toggleHideGame('${gameId}', ${!!g.hidden});closeAccessibleEditModal()"
         style="flex:1;padding:11px;font-size:15px;border-radius:8px;border:0.5px solid var(--border2);background:transparent;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
