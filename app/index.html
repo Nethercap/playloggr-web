@@ -7154,11 +7154,11 @@ async function restoreDeletedPsn() {
 const CONNECTORS = {
   gog: {
     slug: 'gogdotcom', label: 'GOG',
-    instructions: '1) Iniciá sesión con usuario y contraseña de GOG (no funciona "Continuar con Google"). 2) La página final va a quedar en blanco o dar error — no importa, copiá la URL COMPLETA de la barra de direcciones de esa pestaña (tiene que contener "code=...") y pegala abajo.',
+    instructions: '1) Iniciá sesión con usuario y contraseña de GOG (no funciona "Continuar con Google") — el login pasa por la página oficial de GOG, nunca por nosotros. 2) Al terminar, esa pestaña va a quedar en blanco o dar error — es normal, es una limitación de GOG, no nuestra: copiá la URL COMPLETA de la barra de direcciones (tiene que contener "code=...", no es información sensible) y pegala abajo.',
   },
   xbox: {
-    tablerIcon: 'brand-xbox', label: 'Xbox',
-    instructions: '1) Iniciá sesión con tu cuenta de Microsoft/Xbox. 2) Vas a terminar en una página de error de Playloggr — es esperado, no pasa nada. Copiá la URL COMPLETA de la barra de direcciones de esa pestaña (tiene que contener "code=...") y pegala abajo.',
+    tablerIcon: 'brand-xbox', label: 'Xbox', popupCapture: true,
+    instructions: 'Se abre una ventana para iniciar sesión con tu cuenta de Microsoft/Xbox — al terminar se conecta solo, no hace falta copiar nada. Si tu navegador bloqueó la ventana emergente, permitila e intentá de nuevo.',
   },
   // Epic: el paso de "Conectar" (login + pegar code) se saca de la web —
   // el authorizationCode que devuelve Epic dura muy poco (pensado para que
@@ -7274,7 +7274,27 @@ async function openConnectorLogin(platform) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Error');
-    window.open(data.url, '_blank');
+
+    if (CONNECTORS[platform]?.popupCapture) {
+      // El redirect_uri de esta plataforma es nuestro (a diferencia de GOG,
+      // que redirige a embed.gog.com y ahi no hay nada que interceptar) —
+      // esa pagina nos manda el code de vuelta via postMessage, sin que el
+      // usuario tenga que copiar/pegar una URL que no entiende.
+      const popup = window.open(data.url, `${platform}-login`, 'width=500,height=650,scrollbars=yes');
+      if (!popup) { window.open(data.url, '_blank'); return; }
+      window.addEventListener('message', function handler(e) {
+        if (!e.data || e.data.type !== `playloggr_${platform}`) return;
+        window.removeEventListener('message', handler);
+        if (e.data.error) { showToast('Error: ' + e.data.error, true); return; }
+        if (e.data.code) {
+          const input = document.getElementById(`${platform}-code-input`);
+          if (input) input.value = e.data.code;
+          connectConnectorCode(platform);
+        }
+      });
+    } else {
+      window.open(data.url, '_blank');
+    }
   } catch(e) {
     showToast(e.message || 'No se pudo abrir el login', true);
   }
