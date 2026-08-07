@@ -48,6 +48,48 @@
     .mobile-sidebar-divider { height:0.5px; background:var(--border); margin:10px 0; }
     .header-title { font-size:17px; font-weight:500; display:flex; align-items:center; gap:8px; }
     .header-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .sidebar-only-label { display:none; }
+
+    /* ── Desktop/tablet (>640px): sidebar fijo a la izquierda (mismas
+       opciones que el drawer de la app) y panel de perfil fijo a la
+       derecha, ambos siempre visibles — reemplaza el header horizontal.
+       En mobile (<=640px) se mantiene el header compacto + drawer "...". ── */
+    @media (min-width:641px) {
+      body { padding-left:236px; padding-right:272px; }
+
+      .header {
+        position:fixed; top:20px; left:20px; bottom:20px; width:200px;
+        flex-direction:column; align-items:stretch; justify-content:flex-start;
+        overflow-y:auto; overflow-x:hidden; z-index:80; margin-bottom:0; padding:16px 0;
+      }
+      .header-title { padding:0 16px 14px; flex-shrink:0; }
+      .header-right { flex-direction:column; align-items:stretch; gap:2px; flex-wrap:nowrap; width:100%; }
+      .header-right > button, .header-right > a, .header-right > #notif-bell-wrap > button {
+        width:100%; justify-content:flex-start; margin-left:0 !important;
+        border:none; border-radius:0; background:transparent; padding:9px 16px;
+        gap:12px; font-size:13px;
+      }
+      .header-right > button:hover, .header-right > a:hover, .header-right > #notif-bell-wrap > button:hover { background:var(--bg2); }
+      #notif-bell-wrap { width:100%; }
+      .sidebar-only-label { display:inline; }
+
+      #connector-row {
+        flex-direction:column; flex-wrap:nowrap !important; width:100%; gap:2px; margin-top:10px !important;
+        padding-top:10px; border-top:0.5px solid var(--border); display:flex !important;
+      }
+      #connector-row div { display:block; width:100%; margin-left:0 !important; }
+      #connector-row .add-btn { width:100%; justify-content:flex-start; border:none; border-radius:0; padding:9px 16px; }
+      #connector-row .add-btn:hover { background:var(--bg2); }
+
+      #header-more-wrap { display:none !important; }
+
+      #profile-panel {
+        position:fixed; top:20px; right:20px; width:240px; z-index:80;
+        flex-direction:column; align-items:flex-start; margin-bottom:0;
+      }
+      #profile-panel #plat-status-row { margin-left:0 !important; flex-wrap:wrap; }
+      .container { max-width:900px; }
+    }
     .sync-btn { font-size:12px; padding:5px 12px; border-radius:var(--radius-md); border:0.5px solid var(--border2); background:transparent; color:var(--text); cursor:pointer; display:flex; align-items:center; gap:5px; }
     .sync-btn:hover { background:var(--bg2); }
     .sync-btn:disabled { opacity:.5; pointer-events:none; }
@@ -465,6 +507,7 @@
       <div style="position:relative;display:inline-block;margin-left:4px" id="notif-bell-wrap">
         <button id="notif-bell-btn" onclick="toggleNotifDropdown()" style="position:relative;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="notifications" title="Notificaciones">
           <i class="ti ti-bell" style="font-size:14px"></i>
+          <span class="sidebar-only-label" data-i18n="notifications">Notificaciones</span>
           <span id="notif-bell-dot" style="display:none;position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:#E24B4A"></span>
         </button>
         <div id="notif-dropdown" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:300;min-width:260px;box-shadow:0 4px 16px rgba(0,0,0,0.3)">
@@ -479,46 +522,55 @@
       <!-- Novedades button -->
       <button id="novedades-icon-btn" onclick="setView('novedades')" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="novedades" title="Novedades">
         <i class="ti ti-sparkles" style="font-size:14px"></i>
+        <span class="sidebar-only-label" data-i18n="novedades">Novedades</span>
       </button>
 
       <!-- Stats button -->
       <button id="stats-icon-btn" onclick="openStatsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="stats" title="Estadísticas">
         <i class="ti ti-chart-bar" style="font-size:14px"></i>
+        <span class="sidebar-only-label" data-i18n="stats">Estadísticas</span>
       </button>
 
       <!-- Config button -->
       <button id="config-btn" onclick="openConfigPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="config" title="Configuración">
         <i class="ti ti-settings" style="font-size:14px"></i>
+        <span class="sidebar-only-label" data-i18n="config">Configuración</span>
       </button>
 
       <!-- Friends button -->
       <button id="friends-btn" onclick="openFriendsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="friends" title="Amigos">
         <i class="ti ti-users" style="font-size:14px"></i>
+        <span class="sidebar-only-label" data-i18n="friends">Amigos</span>
       </button>
 
       <!-- Achievements button -->
       <button id="achievements-btn" onclick="openAchievementsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="achievements" title="Logros">
         <i class="ti ti-trophy" style="font-size:14px"></i>
+        <span class="sidebar-only-label" data-i18n="achievements">Logros</span>
       </button>
 
       <!-- Game of the month button -->
       <button id="gom-icon-btn" onclick="openGomPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="gameOfMonth" title="Juego del mes">
         <i class="ti ti-stars" style="font-size:14px"></i>
+        <span class="sidebar-only-label" data-i18n="gameOfMonth">Juego del mes</span>
       </button>
 
       <!-- My reviews button -->
       <button id="myreviews-icon-btn" onclick="openMyReviewsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="myReviews" title="Mis reseñas">
         <i class="ti ti-message-star" style="font-size:14px"></i>
+        <span class="sidebar-only-label" data-i18n="myReviews">Mis reseñas</span>
       </button>
 
       <!-- Support button -->
       <a id="support-link" href="mailto:nether.appdev@gmail.com" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center" data-i18n-title="support" title="Soporte">
         <i class="ti ti-lifebuoy" style="font-size:14px"></i>
+        <span class="sidebar-only-label" data-i18n="support">Soporte</span>
       </a>
 
       <!-- Logout button -->
       <button id="logout-btn-header" onclick="logout()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="logout" title="Salir">
         <i class="ti ti-logout" style="font-size:14px"></i>
+        <span class="sidebar-only-label" data-i18n="logout">Salir</span>
       </button>
 
       <!-- Menu "..." (mobile): abre el sidebar completo, mismas opciones que el drawer de la app -->
