@@ -55,39 +55,55 @@
        derecha, ambos siempre visibles — reemplaza el header horizontal.
        En mobile (<=640px) se mantiene el header compacto + drawer "...". ── */
     @media (min-width:641px) {
-      body { padding-left:236px; padding-right:272px; }
+      body { padding-left:236px; padding-right:280px; }
 
+      /* .header pasa a ser un contenedor transparente de posicionamiento —
+         el titulo y el bloque de navegacion son dos tarjetas separadas
+         adentro (gap entre ellas), no una sola caja continua. */
       .header {
         position:fixed; top:20px; left:20px; bottom:20px; width:200px;
         flex-direction:column; align-items:stretch; justify-content:flex-start;
-        overflow-y:auto; overflow-x:hidden; z-index:80; margin-bottom:0; padding:16px 0;
+        background:transparent; border:none; padding:0; margin-bottom:0; gap:16px;
+        overflow:visible; z-index:80;
       }
-      .header-title { padding:0 16px 14px; flex-shrink:0; }
-      .header-right { flex-direction:column; align-items:stretch; gap:2px; flex-wrap:nowrap; width:100%; }
+      .header-title {
+        flex-shrink:0; background:var(--bg); border:0.5px solid var(--border);
+        border-radius:var(--radius-lg); padding:14px 16px; margin:0;
+      }
+      .header-right {
+        flex-direction:column; align-items:stretch; gap:5px; flex-wrap:nowrap; width:100%;
+        background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg);
+        padding:10px 0; flex:1; min-height:0; overflow-y:auto; overflow-x:hidden;
+      }
       .header-right > button, .header-right > a, .header-right > #notif-bell-wrap > button {
-        width:100%; justify-content:flex-start; margin-left:0 !important;
-        border:none; border-radius:0; background:transparent; padding:9px 16px;
-        gap:12px; font-size:13px;
+        display:flex !important; width:100% !important; justify-content:flex-start !important;
+        text-align:left !important; margin-left:0 !important;
+        border:none !important; border-radius:0 !important; background:transparent !important; box-shadow:none !important;
+        padding:9px 16px !important; gap:12px !important; font-size:13px !important;
       }
-      .header-right > button:hover, .header-right > a:hover, .header-right > #notif-bell-wrap > button:hover { background:var(--bg2); }
+      .header-right > button:hover, .header-right > a:hover, .header-right > #notif-bell-wrap > button:hover { background:var(--bg2) !important; }
       #notif-bell-wrap { width:100%; }
       .sidebar-only-label { display:inline; }
 
       #connector-row {
-        flex-direction:column; flex-wrap:nowrap !important; width:100%; gap:2px; margin-top:10px !important;
-        padding-top:10px; border-top:0.5px solid var(--border); display:flex !important;
+        flex-direction:column; flex-wrap:nowrap !important; width:100%; gap:5px; margin-top:14px !important;
+        padding-top:14px; border-top:0.5px solid var(--border); display:flex !important;
       }
       #connector-row div { display:block; width:100%; margin-left:0 !important; }
-      #connector-row .add-btn { width:100%; justify-content:flex-start; border:none; border-radius:0; padding:9px 16px; }
-      #connector-row .add-btn:hover { background:var(--bg2); }
+      #connector-row .add-btn {
+        display:flex !important; width:100% !important; justify-content:flex-start !important;
+        text-align:left !important; border:none !important; border-radius:0 !important; padding:9px 16px !important;
+      }
+      #connector-row .add-btn:hover { background:var(--bg2) !important; }
 
       #header-more-wrap { display:none !important; }
 
       #profile-panel {
-        position:fixed; top:20px; right:20px; width:240px; z-index:80;
-        flex-direction:column; align-items:flex-start; margin-bottom:0;
+        position:fixed; top:20px; right:32px; width:220px; z-index:80;
+        flex-direction:column; align-items:center; text-align:center; margin-bottom:0;
       }
-      #profile-panel #plat-status-row { margin-left:0 !important; flex-wrap:wrap; }
+      #profile-panel .profile-panel-info { align-items:center; }
+      #profile-panel #plat-status-row { margin-left:0 !important; justify-content:center; flex-wrap:wrap; }
       .container { max-width:900px; }
     }
     .sync-btn { font-size:12px; padding:5px 12px; border-radius:var(--radius-md); border:0.5px solid var(--border2); background:transparent; color:var(--text); cursor:pointer; display:flex; align-items:center; gap:5px; }
