@@ -291,7 +291,7 @@
       /* Header mobile: solo queda Playloggr, notificaciones y "..." — el
          resto vive en el sidebar completo que abre el "..." (mismas
          opciones que el drawer de la app, ver #mobile-sidebar). */
-      #lang-toggle-btn, #novedades-icon-btn, #stats-icon-btn, #achievements-btn, #gom-icon-btn, #myreviews-icon-btn,
+      #lang-toggle-btn, #novedades-icon-btn, #achievements-btn, #gom-icon-btn, #myreviews-icon-btn,
       .header-right > button[onclick="openConfigPanel()"],
       #friends-btn, #support-link, #logout-btn-header { display:none !important; }
       #header-more-btn { display:inline-flex !important; }
@@ -573,11 +573,6 @@
       </button>
 
       <!-- Stats button -->
-      <button id="stats-icon-btn" onclick="openStatsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="stats" title="Estadísticas">
-        <i class="ti ti-chart-bar" style="font-size:14px"></i>
-        <span class="sidebar-only-label" data-i18n="stats">Estadísticas</span>
-      </button>
-
       <!-- Config button -->
       <button id="config-btn" onclick="openConfigPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="config" title="Configuración">
         <i class="ti ti-settings" style="font-size:14px"></i>
@@ -764,8 +759,8 @@
         <i class="ti ti-bookmark" style="font-size:14px"></i> <span data-i18n="wishlist">Deseados</span>
       </button>
       <button id="view-stats" onclick="setView('stats')" data-i18n-title="stats" title="Estadísticas"
-        style="padding:6px 12px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);color:var(--text2);display:inline-flex;align-items:center;gap:5px;flex-shrink:0">
-        <i class="ti ti-chart-bar" style="font-size:16px"></i>
+        style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);color:var(--text2);display:inline-flex;align-items:center;gap:5px;flex-shrink:0">
+        <i class="ti ti-chart-bar" style="font-size:14px"></i> <span data-i18n="stats">Estadísticas</span>
       </button>
       <button id="view-rankings" onclick="setView('rankings')"
         style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);color:var(--text2);display:inline-flex;align-items:center;gap:5px">
