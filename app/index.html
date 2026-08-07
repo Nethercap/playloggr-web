@@ -721,7 +721,7 @@
     </div>
   </div>
   <!-- View selector + filters -->
-  <div style="border-bottom:0.5px solid var(--border)">
+  <div id="library-toolbar" style="border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:60;background:var(--bg3);padding-top:6px;margin-top:-6px">
     <!-- Main selector: Biblioteca / Deseados -->
     <div id="view-selector-row" style="display:flex;padding:8px 0;gap:8px;align-items:center">
       <button id="view-library"  onclick="setView('library')"
@@ -809,6 +809,7 @@
           style="padding:4px 10px;font-size:12px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text);width:160px" />
       </div>
     </div>
+  </div>
 
   <div class="game-list" id="game-list">
     <div class="empty"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="connectingBackend">Conectando con el backend...</span></div>
