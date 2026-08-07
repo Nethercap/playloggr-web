@@ -762,14 +762,18 @@
       <div class="sidebar-widget-list" id="widget-friends-list"></div>
     </div>
 
-    <div class="sidebar-widget" id="widget-upcoming">
-      <div class="sidebar-widget-title"><i class="ti ti-calendar-event"></i> <span data-i18n="novedadesUpcomingReleases">Próximos lanzamientos</span></div>
-      <div class="sidebar-widget-list" id="widget-upcoming-list"></div>
-    </div>
-
-    <div class="sidebar-widget" id="widget-recent">
-      <div class="sidebar-widget-title"><i class="ti ti-sparkles"></i> <span data-i18n="novedadesRecentReleases">Recién salidos</span></div>
-      <div class="sidebar-widget-list" id="widget-recent-list"></div>
+    <div class="sidebar-widget" id="widget-releases">
+      <div class="sidebar-widget-title" style="justify-content:space-between">
+        <span style="display:flex;align-items:center;gap:6px">
+          <i class="ti ti-sparkles" id="widget-releases-icon"></i> <span id="widget-releases-label">Recién salido</span>
+        </span>
+        <span style="display:flex;gap:2px">
+          <button onclick="toggleWidgetReleasesMode()" title="Recién salido / Próximos" style="background:none;border:none;color:var(--text2);cursor:pointer;padding:2px;display:flex">
+            <i class="ti ti-arrows-left-right" style="font-size:13px"></i>
+          </button>
+        </span>
+      </div>
+      <div class="sidebar-widget-list" id="widget-releases-list"></div>
     </div>
   </div>
 
@@ -9851,20 +9855,37 @@ function _widgetReleaseRowHtml(g) {
     </div>`;
 }
 
+let _widgetReleasesMode = 'recent'; // 'recent' | 'upcoming' — arranca en "Recién salido"
+let _widgetReleasesData = { recent: [], upcoming: [] };
+
+function toggleWidgetReleasesMode() {
+  _widgetReleasesMode = _widgetReleasesMode === 'recent' ? 'upcoming' : 'recent';
+  _renderWidgetReleases();
+}
+
+function _renderWidgetReleases() {
+  const label = document.getElementById('widget-releases-label');
+  const icon = document.getElementById('widget-releases-icon');
+  const list = document.getElementById('widget-releases-list');
+  if (!label || !list) return;
+  const isRecent = _widgetReleasesMode === 'recent';
+  label.textContent = isRecent ? t('novedadesRecentReleases') : t('novedadesUpcomingReleases');
+  icon.className = `ti ${isRecent ? 'ti-sparkles' : 'ti-calendar-event'}`;
+  const games = (isRecent ? _widgetReleasesData.recent : _widgetReleasesData.upcoming).slice(0, 5);
+  list.innerHTML = games.length ? games.map(_widgetReleaseRowHtml).join('') : `<div class="sidebar-widget-empty">—</div>`;
+}
+
 async function loadWidgetReleases() {
-  const upEl = document.getElementById('widget-upcoming-list');
-  const recEl = document.getElementById('widget-recent-list');
-  if (!upEl && !recEl) return;
+  const list = document.getElementById('widget-releases-list');
+  if (!list) return;
   try {
     const res = await fetch(`${apiBase()}/api/v1/novedades`, { headers: { 'Authorization': `Bearer ${authToken}` } });
     const d = await res.json();
-    const upcoming = ((d.releases && d.releases.upcoming) || []).slice(0, 5);
-    const recent = ((d.releases && d.releases.recent) || []).slice(0, 5);
-    if (upEl) upEl.innerHTML = upcoming.length ? upcoming.map(_widgetReleaseRowHtml).join('') : `<div class="sidebar-widget-empty">—</div>`;
-    if (recEl) recEl.innerHTML = recent.length ? recent.map(_widgetReleaseRowHtml).join('') : `<div class="sidebar-widget-empty">—</div>`;
+    _widgetReleasesData.upcoming = (d.releases && d.releases.upcoming) || [];
+    _widgetReleasesData.recent = (d.releases && d.releases.recent) || [];
+    _renderWidgetReleases();
   } catch (e) {
-    if (upEl) upEl.innerHTML = `<div class="sidebar-widget-empty">—</div>`;
-    if (recEl) recEl.innerHTML = `<div class="sidebar-widget-empty">—</div>`;
+    list.innerHTML = `<div class="sidebar-widget-empty">—</div>`;
   }
 }
 
