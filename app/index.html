@@ -28,7 +28,24 @@
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; padding: 20px; }
     .container { max-width: 980px; margin: 0 auto; }
 
-    .header { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:14px 18px; display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
+    .header { position:sticky; top:0; z-index:250; background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:14px 18px; display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
+
+    /* ── Sidebar mobile (reemplaza el dropdown "..." — mismas opciones que
+       el drawer de la app, no un popup chico) ── */
+    .mobile-sidebar-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:598; }
+    .mobile-sidebar-backdrop.open { display:block; }
+    .mobile-sidebar {
+      position:fixed; top:0; left:0; bottom:0; width:78%; max-width:300px;
+      background:var(--bg); z-index:599; box-shadow:2px 0 16px rgba(0,0,0,.3);
+      transform:translateX(-100%); transition:transform .25s ease;
+      overflow-y:auto; padding-bottom:12px;
+    }
+    .mobile-sidebar.open { transform:translateX(0); }
+    .mobile-sidebar-header { padding:20px 18px 14px; font-size:19px; font-weight:700; display:flex; align-items:center; gap:8px; border-bottom:0.5px solid var(--border); margin-bottom:6px; }
+    .mobile-sidebar-item { display:flex; align-items:center; gap:14px; width:100%; padding:12px 18px; font-size:14px; border:none; background:transparent; color:var(--text); cursor:pointer; text-align:left; text-decoration:none; }
+    .mobile-sidebar-item:active { background:var(--bg2); }
+    .mobile-sidebar-item i, .mobile-sidebar-item img { width:20px; text-align:center; font-size:18px; flex-shrink:0; }
+    .mobile-sidebar-divider { height:0.5px; background:var(--border); margin:10px 0; }
     .header-title { font-size:17px; font-weight:500; display:flex; align-items:center; gap:8px; }
     .header-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
     .sync-btn { font-size:12px; padding:5px 12px; border-radius:var(--radius-md); border:0.5px solid var(--border2); background:transparent; color:var(--text); cursor:pointer; display:flex; align-items:center; gap:5px; }
@@ -182,8 +199,10 @@
       body { padding:10px; }
 
       .header { padding:10px 14px; }
-      /* Colapsar idioma/novedades/stats/config/amigos/logros en el menu "..." */
-      #lang-toggle-btn, #novedades-icon-btn, #stats-icon-btn, #achievements-btn, #gom-icon-btn,
+      /* Header mobile: solo queda Playloggr, notificaciones y "..." — el
+         resto vive en el sidebar completo que abre el "..." (mismas
+         opciones que el drawer de la app, ver #mobile-sidebar). */
+      #lang-toggle-btn, #novedades-icon-btn, #stats-icon-btn, #achievements-btn, #gom-icon-btn, #myreviews-icon-btn,
       .header-right > button[onclick="openConfigPanel()"],
       #friends-btn, #support-link, #logout-btn-header { display:none !important; }
       #header-more-btn { display:inline-flex !important; }
@@ -410,6 +429,27 @@
   </div>
 </div>
 
+<!-- Sidebar mobile (reemplaza el menu "..." chico) — mismas opciones que el drawer de la app -->
+<div class="mobile-sidebar-backdrop" id="mobile-sidebar-backdrop" onclick="toggleHeaderMoreMenu()"></div>
+<div class="mobile-sidebar" id="mobile-sidebar">
+  <div class="mobile-sidebar-header"><i class="ti ti-device-gamepad-2" style="color:#1D9E75"></i> Playloggr</div>
+  <button onclick="setView('novedades');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-sparkles"></i> <span data-i18n="novedades">Novedades</span></button>
+  <button onclick="openGomPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-stars"></i> <span data-i18n="gameOfMonth">Juego del mes</span></button>
+  <button onclick="openMyReviewsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-message-star"></i> <span data-i18n="myReviews">Mis reseñas</span></button>
+  <button onclick="openFriendsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-users"></i> <span data-i18n="friends">Amigos</span></button>
+  <button onclick="openAchievementsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-trophy"></i> <span data-i18n="achievements">Logros</span></button>
+  <button onclick="openConfigPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-settings"></i> <span data-i18n="config">Configuración</span></button>
+  <div class="mobile-sidebar-divider"></div>
+  <button id="mobile-steam-menu-btn" onclick="toggleHeaderMoreMenu();toggleSteamMenu()" class="mobile-sidebar-item"><i class="ti ti-brand-steam"></i> Steam</button>
+  <button id="mobile-psn-menu-btn" onclick="toggleHeaderMoreMenu();togglePsnMenu()" class="mobile-sidebar-item"><img src="https://cdn.simpleicons.org/playstation/888887"> PSN</button>
+  <button id="mobile-gog-menu-btn" onclick="toggleHeaderMoreMenu();toggleConnectorMenu('gog')" class="mobile-sidebar-item"><img src="https://cdn.simpleicons.org/gogdotcom/888887"> GOG</button>
+  <button id="mobile-xbox-menu-btn" onclick="toggleHeaderMoreMenu();toggleConnectorMenu('xbox')" class="mobile-sidebar-item"><i class="ti ti-brand-xbox"></i> Xbox</button>
+  <button id="mobile-epic-menu-btn" onclick="toggleHeaderMoreMenu();toggleConnectorMenu('epic')" class="mobile-sidebar-item"><img src="https://cdn.simpleicons.org/epicgames/888887"> Epic</button>
+  <div class="mobile-sidebar-divider"></div>
+  <a href="mailto:nether.appdev@gmail.com" class="mobile-sidebar-item"><i class="ti ti-lifebuoy"></i> <span data-i18n="support">Soporte</span></a>
+  <button onclick="logout()" class="mobile-sidebar-item"><i class="ti ti-logout"></i> <span data-i18n="logout">Salir</span></button>
+</div>
+
 <div class="container">
 
   <div class="header">
@@ -481,34 +521,11 @@
         <i class="ti ti-logout" style="font-size:14px"></i>
       </button>
 
-      <!-- Menu "..." (mobile): agrupa idioma/stats/config/amigos/logros/soporte/salir -->
+      <!-- Menu "..." (mobile): abre el sidebar completo, mismas opciones que el drawer de la app -->
       <div style="position:relative;display:inline-block;margin-left:4px" id="header-more-wrap">
         <button onclick="toggleHeaderMoreMenu()" id="header-more-btn" style="padding:5px 10px;font-size:14px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer">
           <i class="ti ti-dots-vertical"></i>
         </button>
-        <div id="header-more-menu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:300;min-width:180px;box-shadow:0 4px 16px rgba(0,0,0,0.3);padding:4px 0">
-          <button onclick="toggleLanguage()" class="steam-menu-item"><i class="ti ti-language" style="font-size:14px"></i> <span id="header-more-lang">EN</span></button>
-          <button onclick="setView('novedades');toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-sparkles" style="font-size:14px"></i> <span data-i18n="novedades">Novedades</span></button>
-          <button onclick="openStatsPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-chart-bar" style="font-size:14px"></i> <span data-i18n="stats">Estadísticas</span></button>
-          <button onclick="openConfigPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-settings" style="font-size:14px"></i> <span data-i18n="config">Configuración</span></button>
-          <button onclick="openFriendsPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-users" style="font-size:14px"></i> <span data-i18n="friends">Amigos</span></button>
-          <button onclick="openAchievementsPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-trophy" style="font-size:14px"></i> <span data-i18n="achievements">Logros</span></button>
-          <button onclick="openGomPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-stars" style="font-size:14px"></i> <span data-i18n="gameOfMonth">Juego del mes</span></button>
-          <button onclick="openMyReviewsPanel();toggleHeaderMoreMenu()" class="steam-menu-item"><i class="ti ti-message-star" style="font-size:14px"></i> <span data-i18n="myReviews">Mis reseñas</span></button>
-          <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
-          <!-- Conectores — en mobile los botones de arriba estan ocultos
-               (#connector-row), asi que se accede desde aca. Cada uno
-               abre su propio menu, centrado en pantalla (ver el fallback
-               en _positionFixedPopup para boton oculto). -->
-          <button id="mobile-steam-menu-btn" onclick="toggleHeaderMoreMenu();toggleSteamMenu()" class="steam-menu-item"><i class="ti ti-brand-steam" style="font-size:14px"></i> Steam</button>
-          <button id="mobile-psn-menu-btn" onclick="toggleHeaderMoreMenu();togglePsnMenu()" class="steam-menu-item"><img src="https://cdn.simpleicons.org/playstation/888887" style="width:14px;height:14px;vertical-align:-2px"> PSN</button>
-          <button id="mobile-gog-menu-btn" onclick="toggleHeaderMoreMenu();toggleConnectorMenu('gog')" class="steam-menu-item"><img src="https://cdn.simpleicons.org/gogdotcom/888887" style="width:14px;height:14px;vertical-align:-2px"> GOG</button>
-          <button id="mobile-xbox-menu-btn" onclick="toggleHeaderMoreMenu();toggleConnectorMenu('xbox')" class="steam-menu-item"><i class="ti ti-brand-xbox" style="font-size:14px"></i> Xbox</button>
-          <button id="mobile-epic-menu-btn" onclick="toggleHeaderMoreMenu();toggleConnectorMenu('epic')" class="steam-menu-item"><img src="https://cdn.simpleicons.org/epicgames/888887" style="width:14px;height:14px;vertical-align:-2px"> Epic</button>
-          <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
-          <a href="mailto:nether.appdev@gmail.com" class="steam-menu-item" style="text-decoration:none"><i class="ti ti-lifebuoy" style="font-size:14px"></i> <span data-i18n="support">Soporte</span></a>
-          <button onclick="logout()" class="steam-menu-item"><i class="ti ti-logout" style="font-size:14px"></i> <span data-i18n="logout">Salir</span></button>
-        </div>
       </div>
 
       <!-- Fuerza salto de línea dentro de .header-right (flex-wrap:wrap): un
@@ -6705,29 +6722,11 @@ function _closeSteamMenuOutside(e) {
 
 let _headerMoreOpen = false;
 function toggleHeaderMoreMenu() {
-  const menu = document.getElementById('header-more-menu');
-  const btn  = document.getElementById('header-more-btn');
+  const sidebar  = document.getElementById('mobile-sidebar');
+  const backdrop = document.getElementById('mobile-sidebar-backdrop');
   _headerMoreOpen = !_headerMoreOpen;
-  if (_headerMoreOpen) {
-    // El header es horizontalmente scrolleable en mobile — anclar el
-    // dropdown con CSS (position:absolute + right:0) queda mal ubicado
-    // segun el scroll. Se posiciona con coordenadas reales de pantalla,
-    // igual que los demas popups (_positionFixedPopup).
-    menu.style.display = 'block';
-    menu.style.right = 'auto';
-    _positionFixedPopup(menu, btn);
-    setTimeout(() => document.addEventListener('mousedown', _closeHeaderMoreOutside), 10);
-  } else {
-    menu.style.display = 'none';
-  }
-}
-
-function _closeHeaderMoreOutside(e) {
-  if (!document.getElementById('header-more-wrap')?.contains(e.target)) {
-    document.getElementById('header-more-menu').style.display = 'none';
-    _headerMoreOpen = false;
-    document.removeEventListener('mousedown', _closeHeaderMoreOutside);
-  }
+  sidebar.classList.toggle('open', _headerMoreOpen);
+  backdrop.classList.toggle('open', _headerMoreOpen);
 }
 
 async function loadSteamIdIntoMenu() {
