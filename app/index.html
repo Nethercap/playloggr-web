@@ -28,7 +28,7 @@
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; padding: 20px; }
     .container { max-width: 980px; margin: 0 auto; }
 
-    .header { position:sticky; top:0; z-index:250; background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:14px 18px; display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
+    .header { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:14px 18px; display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
 
     /* ── Sidebar mobile (reemplaza el dropdown "..." — mismas opciones que
        el drawer de la app, no un popup chico) ── */
@@ -1157,7 +1157,7 @@
         <i class="ti ti-plus"></i> <span data-i18n="addReview">Agregar reseña</span>
       </button>
     </div>
-    <div id="myreviews-content" style="overflow-y:auto;flex:1">
+    <div id="myreviews-content" style="overflow-y:auto;flex:1;min-height:0">
       <div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div>
     </div>
     <div class="modal-actions">
@@ -2582,7 +2582,7 @@ async function openReviewsList(gameId) {
           <option value="rating_asc">${t('reviewsSortRating')} ↑</option>
         </select>
       </div>
-      <div id="reviews-list-content" style="overflow-y:auto;flex:1">
+      <div id="reviews-list-content" style="overflow-y:auto;flex:1;min-height:0">
         <div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>${t('loading')}</div>
       </div>
       <div class="modal-actions">
@@ -2733,7 +2733,7 @@ async function openReviewGamePicker() {
       <div class="modal-title">${t('reviewPickGame')}</div>
       <input id="review-picker-search" type="text" placeholder="${esc(t('reviewPickGameHint'))}"
         style="width:100%;padding:8px 10px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text);font-size:13px;margin-bottom:10px">
-      <div id="review-picker-results" style="overflow-y:auto;flex:1"></div>
+      <div id="review-picker-results" style="overflow-y:auto;flex:1;min-height:0"></div>
       <div id="review-picker-pagination" style="display:flex;align-items:center;justify-content:center;gap:12px;padding-top:10px"></div>
       <div class="modal-actions">
         <button class="btn-cancel" onclick="this.closest('.modal-overlay').remove()">${t('cancel')}</button>
@@ -3981,6 +3981,22 @@ async function saveCoverEdit() {
     syncAll(currentPage, true);
   } catch(e) { alert(t('errorUpdatingCover')); }
 }
+
+// Al abrir cualquier panel (.modal-overlay.open) se cierran automaticamente
+// los demas que hayan quedado abiertos — antes cada uno se abria/cerraba de
+// forma independiente y en mobile terminaban superpuestos (ej. abrir Logros
+// y despues Amigos dejaba a Amigos "por abajo" de Logros, ambos con
+// display:flex al mismo tiempo).
+new MutationObserver(muts => {
+  for (const m of muts) {
+    const el = m.target;
+    if (el.classList && el.classList.contains('modal-overlay') && el.classList.contains('open')) {
+      document.querySelectorAll('.modal-overlay.open').forEach(other => {
+        if (other !== el) other.classList.remove('open');
+      });
+    }
+  }
+}).observe(document.body, { attributes: true, attributeFilter: ['class'], subtree: true });
 
 document.addEventListener('DOMContentLoaded', () => {
   const ci = document.getElementById('cover-url-input');
