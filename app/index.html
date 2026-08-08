@@ -58,16 +58,19 @@
     @media (min-width:641px) {
       body { padding-left:236px; padding-right:280px; }
 
-      /* .header pasa a ser un contenedor transparente de posicionamiento —
-         el titulo y el bloque de navegacion son dos tarjetas separadas
-         adentro (gap entre ellas), no una sola caja continua. */
+      /* .header pasa a ser un contenedor transparente de posicionamiento,
+         solo para el bloque de navegacion — el titulo "Playloggr" se saca
+         del flujo (position:fixed propio) para poder extenderse como
+         banner por ARRIBA de los dos sidebars (nav + filtros), no solo del
+         primero. */
       .header {
-        position:fixed; top:20px; left:20px; bottom:20px; width:200px;
+        position:fixed; top:88px; left:20px; bottom:20px; width:200px;
         flex-direction:column; align-items:stretch; justify-content:flex-start;
-        background:transparent; border:none; padding:0; margin-bottom:0; gap:16px;
+        background:transparent; border:none; padding:0; margin-bottom:0;
         overflow:visible; z-index:80;
       }
       .header-title {
+        position:fixed; top:20px; left:20px; width:412px; z-index:81;
         flex-shrink:0; background:var(--bg); border:0.5px solid var(--border);
         border-radius:var(--radius-lg); padding:14px 16px; margin:0;
       }
@@ -135,28 +138,33 @@
       body { padding-left:452px; }
       #library-toolbar {
         position:fixed !important; top:88px !important; left:236px !important; bottom:20px !important; width:196px !important;
-        border-bottom:none; background:var(--bg); border:0.5px solid var(--border);
+        border-bottom:none !important; background:var(--bg) !important; border:0.5px solid var(--border) !important;
         border-radius:var(--radius-lg); padding:16px 14px; margin-top:0 !important;
-        overflow-y:auto; z-index:70;
+        overflow-y:auto; z-index:70; display:flex !important; flex-direction:column;
       }
-      #view-selector-row { flex-direction:column; align-items:stretch; gap:6px; padding:0 0 14px; }
-      #view-selector-row > button { width:100%; justify-content:flex-start !important; }
-      #view-selector-row > span { margin-left:0 !important; display:block; margin-top:6px; font-size:11px; }
+      /* "Agregar juego" va primero — order gana sobre la posicion en el
+         HTML (que sigue siendo la misma, filter-bar-row1 la comparte con
+         mobile) sin tener que duplicar el boton. */
+      #view-selector-row { order:2; flex-direction:column; align-items:stretch; gap:6px; padding:0 0 14px; text-align:left; }
+      #view-selector-row > button { width:100%; justify-content:flex-start !important; text-align:left; }
+      #view-selector-row > span { margin-left:0 !important; display:block; margin-top:6px; font-size:11px; text-align:left; }
       #folder-filter-wrap { width:100%; }
       #folder-filter-btn { width:100%; }
-      #filter-bar { padding:0; }
-      #filter-bar-row1 { flex-direction:column; align-items:stretch; }
+      #folder-filter-btn > button { justify-content:flex-start; text-align:left; }
+      #filter-bar { order:3; padding:0; display:flex; flex-direction:column; }
+      #filter-bar-row1 { order:2; flex-direction:column; align-items:stretch; }
       #filter-dropdowns { flex-direction:column; align-items:stretch; }
       #filter-dropdowns > div { width:100%; }
-      #filter-dropdowns button { width:100%; text-align:left; }
-      #add-game-btn-wrap { margin-left:0 !important; width:100%; margin-top:6px; }
+      #filter-dropdowns button { width:100%; text-align:left; justify-content:flex-start; }
+      #add-game-btn-wrap { order:-1; margin-left:0 !important; width:100%; margin-top:0; margin-bottom:14px; }
       #add-game-btn-wrap button { width:100%; justify-content:center; }
-      #filter-bar-row1b { flex-direction:column; align-items:stretch; margin-top:14px !important; padding-top:14px !important; }
+      #filter-bar-row1b { order:3; flex-direction:column; align-items:stretch; margin-top:14px !important; padding-top:14px !important; }
       #view-mode-toggle { width:100%; }
       #view-mode-toggle button { flex:1; }
       #btn-hidden { width:100%; justify-content:center; margin-top:6px; }
-      #filter-bar-row2 { flex-direction:column; align-items:stretch; margin-top:14px !important; padding-top:14px !important; }
+      #filter-bar-row2 { order:4; flex-direction:column; align-items:stretch; margin-top:14px !important; padding-top:14px !important; }
       #search-input { width:100% !important; }
+      #sort-sel { text-align:left; }
     }
     .sync-btn { font-size:12px; padding:5px 12px; border-radius:var(--radius-md); border:0.5px solid var(--border2); background:transparent; color:var(--text); cursor:pointer; display:flex; align-items:center; gap:5px; }
     .sync-btn:hover { background:var(--bg2); }
@@ -793,6 +801,16 @@
   </div>
   <!-- View selector + filters -->
   <div id="library-toolbar" style="border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:60;background:var(--bg3);padding-top:6px;margin-top:-6px">
+    <!-- Add button — en desktop va primero (ver #library-toolbar en la
+         media query, order:-1); en mobile no se ve (es el FAB en su lugar). -->
+    <div id="add-game-btn-wrap" style="margin-left:auto;display:flex;gap:6px;align-items:center">
+      <button id="add-game-btn" onclick="openModal()" style="display:none;padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">
+        <i class="ti ti-plus"></i> <span data-i18n="addGame">Agregar juego</span>
+      </button>
+      <button id="add-wishlist-btn" onclick="openWishlistModal()" style="display:none;padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:#EF9F27;color:#fff;cursor:pointer">
+        <i class="ti ti-star"></i> <span data-i18n="addWishlistGame">Agregar juego deseado</span>
+      </button>
+    </div>
     <!-- Main selector: Biblioteca / Deseados -->
     <div id="view-selector-row" style="display:flex;padding:8px 0;gap:8px;align-items:center">
       <button id="view-library"  onclick="setView('library')"
@@ -836,16 +854,6 @@
       <div id="filter-bar-row1" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;row-gap:4px">
         <!-- Filter dropdowns injected by JS -->
         <div id="filter-dropdowns" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"></div>
-
-        <!-- Add button (desktop; en mobile es el boton flotante) -->
-        <div id="add-game-btn-wrap" style="margin-left:auto;display:flex;gap:6px;align-items:center">
-          <button id="add-game-btn" onclick="openModal()" style="display:none;padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">
-            <i class="ti ti-plus"></i> <span data-i18n="addGame">Agregar juego</span>
-          </button>
-          <button id="add-wishlist-btn" onclick="openWishlistModal()" style="display:none;padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:#EF9F27;color:#fff;cursor:pointer">
-            <i class="ti ti-star"></i> <span data-i18n="addWishlistGame">Agregar juego deseado</span>
-          </button>
-        </div>
       </div>
 
       <!-- Row 1b: vista lista/cuadricula + ocultos, en su propia linea -->
