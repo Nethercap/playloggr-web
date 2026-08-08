@@ -1874,7 +1874,7 @@ const I18N = {
     tourTitleFilters: 'Filtrá tu biblioteca', tourBodyFilters: 'Filtrá por estado, plataforma, horas y calificación, y buscá por nombre.',
     tourTitleRankings: 'Armá tus rankings', tourBodyRankings: 'Creá tu propio top de hasta 25 juegos y ordenalos arrastrando las fichas.',
     tourTitleFriends: 'Agregá amigos', tourBodyFriends: 'Sumá amigos, mirá qué están jugando y comparen bibliotecas.',
-    tourTitleAchievements: 'Desbloqueá logros', tourBodyAchievements: '134 logros para desbloquear, con XP y niveles a medida que jugás.',
+    tourTitleAchievements: 'Desbloqueá logros', tourBodyAchievements: '139 logros para desbloquear, con XP y niveles a medida que jugás.',
     tourTitleAvatar: 'Personalizá tu avatar', tourBodyAvatar: 'Tocá acá para armar tu personaje pixel art con marcos y fuentes exclusivas.',
     tourTitleSupport: '¿Tenés dudas?', tourBodySupport: 'Escribinos por acá cuando quieras, respondemos a todos los mails.',
     tourTitleAppearance: 'Hacela tuya', tourBodyAppearance: 'Tocá acá y elegí "Apariencia" para cambiar entre tema claro/oscuro, vista lista/cuadrícula y color de card.',
@@ -2033,7 +2033,7 @@ const I18N = {
     tourTitleFilters: 'Filter your library', tourBodyFilters: 'Filter by status, platform, hours and rating, and search by name.',
     tourTitleRankings: 'Build your rankings', tourBodyRankings: 'Create your own top of up to 25 games and reorder them by dragging the tiles.',
     tourTitleFriends: 'Add friends', tourBodyFriends: 'Add friends, see what they\'re playing and compare libraries.',
-    tourTitleAchievements: 'Unlock achievements', tourBodyAchievements: '134 achievements to unlock, with XP and levels as you play.',
+    tourTitleAchievements: 'Unlock achievements', tourBodyAchievements: '139 achievements to unlock, with XP and levels as you play.',
     tourTitleAvatar: 'Customize your avatar', tourBodyAvatar: 'Tap here to build your pixel-art character with exclusive frames and fonts.',
     tourTitleSupport: 'Have questions?', tourBodySupport: 'Write to us here anytime, we reply to every email.',
     tourTitleAppearance: 'Make it yours', tourBodyAppearance: 'Tap here and choose "Appearance" to switch between light/dark theme, list/grid view and card colors.',
@@ -2192,7 +2192,7 @@ const I18N = {
     tourTitleFilters: 'Filtre sua biblioteca', tourBodyFilters: 'Filtre por status, plataforma, horas e avaliação, e busque por nome.',
     tourTitleRankings: 'Monte seus rankings', tourBodyRankings: 'Crie seu próprio top de até 25 jogos e reordene arrastando as fichas.',
     tourTitleFriends: 'Adicione amigos', tourBodyFriends: 'Adicione amigos, veja o que estão jogando e comparem bibliotecas.',
-    tourTitleAchievements: 'Desbloqueie conquistas', tourBodyAchievements: '134 conquistas para desbloquear, com XP e níveis conforme você joga.',
+    tourTitleAchievements: 'Desbloqueie conquistas', tourBodyAchievements: '139 conquistas para desbloquear, com XP e níveis conforme você joga.',
     tourTitleAvatar: 'Personalize seu avatar', tourBodyAvatar: 'Toque aqui para montar seu personagem em pixel art com molduras e fontes exclusivas.',
     tourTitleSupport: 'Tem dúvidas?', tourBodySupport: 'Escreva para nós por aqui quando quiser, respondemos a todos os emails.',
     tourTitleAppearance: 'Deixe do seu jeito', tourBodyAppearance: 'Toque aqui e escolha "Aparência" para alternar entre tema claro/escuro, visualização em lista/grade e cor do card.',
@@ -5327,11 +5327,11 @@ const _statusColorsFriend = {
 
 const CATEGORY_LABELS_EN = {
   actividad: 'Activity', biblioteca: 'Library', calificaciones: 'Ratings', social: 'Social',
-  steam: 'Steam', comunidad: 'Community', avatar: 'Avatar', cuenta: 'Account',
+  steam: 'Steam', comunidad: 'Community', avatar: 'Avatar', cuenta: 'Account', resenas: 'Reviews',
 };
 const CATEGORY_LABELS_PT = {
   actividad: 'Atividade', biblioteca: 'Biblioteca', calificaciones: 'Avaliações', social: 'Social',
-  steam: 'Steam', comunidad: 'Comunidade', avatar: 'Avatar', cuenta: 'Conta',
+  steam: 'Steam', comunidad: 'Comunidade', avatar: 'Avatar', cuenta: 'Conta', resenas: 'Resenhas',
 };
 function categoryLabel(c) {
   if (currentLang === 'en') return CATEGORY_LABELS_EN[c] || c;
@@ -5467,6 +5467,11 @@ const ACHIEVEMENT_LABELS_EN = {
   steam_3000_hours: { name: 'Steam Legend', description: 'Log 3000 hours played on Steam' },
   community_75: { name: 'Outstanding Contributor', description: 'Add 75 new games to the community' },
   community_100: { name: 'Founding Pillar', description: 'Add 100 new games to the community' },
+  review_1: { name: 'First Review', description: 'Write your first review' },
+  review_10: { name: 'Reviewer', description: 'Write 10 reviews' },
+  review_20: { name: 'Active Reviewer', description: 'Write 20 reviews' },
+  review_50: { name: 'Expert Reviewer', description: 'Write 50 reviews' },
+  review_100: { name: 'Legendary Reviewer', description: 'Write 100 reviews' },
 };
 
 const ACHIEVEMENT_LABELS_PT = {
@@ -5597,6 +5602,11 @@ const ACHIEVEMENT_LABELS_PT = {
   steam_3000_hours: { name: 'Lenda da Steam', description: 'Registre 3000 horas jogadas na Steam' },
   community_75: { name: 'Contribuidor Excepcional', description: 'Adicione 75 novos jogos à comunidade' },
   community_100: { name: 'Pilar Fundador', description: 'Adicione 100 novos jogos à comunidade' },
+  review_1: { name: 'Primeira Resenha', description: 'Escreva sua primeira resenha' },
+  review_10: { name: 'Resenhista', description: 'Escreva 10 resenhas' },
+  review_20: { name: 'Resenhista Ativo', description: 'Escreva 20 resenhas' },
+  review_50: { name: 'Resenhista Especialista', description: 'Escreva 50 resenhas' },
+  review_100: { name: 'Resenhista Lendário', description: 'Escreva 100 resenhas' },
 };
 
 function achievementInfo(a) {
