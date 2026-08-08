@@ -271,10 +271,10 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>Usuario</th><th>Email</th><th>Nivel</th><th>Última vez</th><th></th><th></th><th></th></tr>
+            <tr><th>Usuario</th><th>Email</th><th>Nivel</th><th>Biblioteca</th><th>Plataformas</th><th>Última vez</th><th></th><th></th><th></th></tr>
           </thead>
           <tbody id="users-tbody">
-            <tr><td colspan="7" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>
+            <tr><td colspan="9" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>
           </tbody>
         </table>
       </div>
@@ -691,7 +691,7 @@ let usersPage = 1;
 async function loadUsers() {
   const tbody = document.getElementById('users-tbody');
   const search = document.getElementById('users-search').value.trim();
-  tbody.innerHTML = '<tr><td colspan="7" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="9" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>';
   try {
     const sort = document.getElementById('users-sort').value;
     const url = `${API}/admin/users?page=${usersPage}&search=${encodeURIComponent(search)}&sort=${sort}`;
@@ -699,13 +699,15 @@ async function loadUsers() {
     const d = await res.json();
     if (!res.ok) throw new Error(d.detail || 'Error');
     if (d.users.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="color:var(--text2)">Sin resultados</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" style="color:var(--text2)">Sin resultados</td></tr>';
     } else {
       tbody.innerHTML = d.users.map(u => `
         <tr>
           <td>${u.username}</td>
           <td>${u.email}</td>
           <td>${u.level} · <span class="badge ${u.is_premium ? 'badge-premium' : 'badge-free'}">${u.is_premium ? 'Premium' : 'Gratis'}</span></td>
+          <td>${u.library_count}</td>
+          <td>${(u.synced_platforms && u.synced_platforms.length) ? u.synced_platforms.join(', ') : '<span style="color:var(--text2)">—</span>'}</td>
           <td>${formatLastSeen(u.last_seen_at)}</td>
           <td><button class="btn-secondary" style="padding:4px 8px; font-size:11px" onclick="adminTogglePremium('${u.email}', ${!u.is_premium})">${u.is_premium ? 'Marcar Gratis' : 'Marcar Premium'}</button></td>
           <td><button class="icon-btn" title="Restablecer contraseña" onclick="adminResetPassword('${u.email}')">🔑</button></td>
@@ -719,7 +721,7 @@ async function loadUsers() {
       <button class="btn-secondary" style="padding:4px 10px" ${d.page >= d.total_pages ? 'disabled' : ''} onclick="usersPage=${d.page + 1}; loadUsers();">→</button>
     `;
   } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="7" style="color:var(--red)">${e.message || 'Error al cargar usuarios'}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" style="color:var(--red)">${e.message || 'Error al cargar usuarios'}</td></tr>`;
   }
 }
 
