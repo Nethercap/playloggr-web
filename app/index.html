@@ -879,7 +879,6 @@
           <option value="rating" data-i18n="rating">Calificación</option>
           <option value="platform" data-i18n="platform">Plataforma</option>
           <option value="status" data-i18n="status">Estado</option>
-          <option value="genre" data-i18n="genre">Género</option>
         </select>
         <button onclick="toggleSortOrder()" id="sort-dir-btn"
           style="padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">
@@ -1027,10 +1026,6 @@
           <option value="Android">Android</option>
           <option value="iOS">iOS</option>
         </select>
-      </div>
-      <div class="modal-group">
-        <label data-i18n="genre">Género</label>
-        <select id="wm-genre" class="genre-select"></select>
       </div>
     </div>
     <div class="modal-actions">
@@ -1696,10 +1691,6 @@
         <label data-i18n="hoursPlayedLabel">Horas jugadas</label>
         <input type="number" id="m-hours" value="0" min="0" step="0.5" />
       </div>
-      <div class="modal-group">
-        <label data-i18n="genre">Género</label>
-        <select id="m-genre" class="genre-select"></select>
-      </div>
       <div class="modal-group full">
         <label data-i18n="yourRating">Tu calificación</label>
         <div id="modal-stars" style="display:flex;gap:3px;margin-top:4px"></div>
@@ -1759,10 +1750,10 @@ const I18N = {
     customizeAvatar: 'Personalizar avatar', library: 'Biblioteca', globalTab: 'Global',
     hidden: 'Ocultos', addGame: 'Agregar juego', addWishlistGame: 'Agregar juego deseado',
     name: 'Nombre', hours: 'Horas', rating: 'Calificación', platform: 'Plataforma',
-    status: 'Estado', genre: 'Género', searchGame: 'Buscar juego...', connectingBackend: 'Conectando con el backend...',
+    status: 'Estado', searchGame: 'Buscar juego...', connectingBackend: 'Conectando con el backend...',
     myStats: 'Mis stats', loading: 'Cargando...', folders: 'Carpetas',
     addToWishlist: 'Agregar a deseados', searchGameLabel: 'Buscar juego', searchYourGame: 'Buscá tu juego...',
-    noGenre: 'Sin género', cancel: 'Cancelar', add: 'Agregar', changeCover: 'Cambiar portada',
+    cancel: 'Cancelar', add: 'Agregar', changeCover: 'Cambiar portada',
     imageUrl: 'URL de la imagen', preview: 'Vista previa', settings: 'Configuración',
     profileTab: 'Perfil', avatarTab: 'Avatar', accountTab: 'Cuenta', username: 'Nombre de usuario',
     usernameFont: 'Fuente de nombre de usuario', language: 'Idioma', profileVisibility: 'Perfil',
@@ -1872,22 +1863,22 @@ const I18N = {
     onboardTitle1: 'Tu biblioteca, ordenada', onboardBody1: 'Todos tus juegos en un solo lugar: qué estás jugando, qué completaste, qué dejaste y qué te falta arrancar.',
     onboardTitle2: 'Sincronizá tus plataformas', onboardBody2: 'Conectá Steam, PlayStation, GOG, Xbox o Epic Games y traé tu biblioteca, deseados, reseñas y portadas automáticamente.',
     onboardTitle3: 'Subí de nivel', onboardBody3: 'Ganás experiencia por cada juego que agregás, calificás o completás. Desbloqueá marcos y fuentes para tu perfil.',
-    onboardTitle4: 'Mirá tus estadísticas', onboardBody4: 'Horas jugadas, géneros favoritos, comparación con el resto de la comunidad y rankings globales.',
+    onboardTitle4: 'Mirá tus estadísticas', onboardBody4: 'Horas jugadas, comparación con el resto de la comunidad y rankings globales.',
     onboardTitle5: 'Personalizá tu avatar', onboardBody5: 'Armá tu propio personaje pixel art con la ropa y accesorios que vayas desbloqueando.',
     onboardNext: 'Siguiente', onboardBack: 'Atrás', onboardStart: 'Empezar', onboardSkip: 'Saltar',
     tourTitleSteam: 'Sincronizá tus plataformas', tourBodySteam: 'Tocá acá para conectar Steam, PlayStation, GOG, Xbox o Epic Games y traer tu biblioteca automáticamente.',
     tourTitleAdd: 'Agregá juegos', tourBodyAdd: 'Tocá acá para agregar un juego manualmente a tu biblioteca.',
     tourTitleFolders: 'Organizá con carpetas', tourBodyFolders: 'Creá carpetas para agrupar tus juegos como quieras.',
-    tourTitleStats: 'Mirá tus estadísticas', tourBodyStats: 'Tocá acá para ver tus horas, géneros favoritos y rankings globales.',
+    tourTitleStats: 'Mirá tus estadísticas', tourBodyStats: 'Tocá acá para ver tus horas y rankings globales.',
     tourTitleSession: 'Registrá una sesión en vivo', tourBodySession: 'Tocá este botón en cualquier juego para iniciar el cronómetro mientras jugás.',
-    tourTitleFilters: 'Filtrá tu biblioteca', tourBodyFilters: 'Filtrá por estado, plataforma, género, horas y calificación, y buscá por nombre.',
+    tourTitleFilters: 'Filtrá tu biblioteca', tourBodyFilters: 'Filtrá por estado, plataforma, horas y calificación, y buscá por nombre.',
     tourTitleRankings: 'Armá tus rankings', tourBodyRankings: 'Creá tu propio top de hasta 25 juegos y ordenalos arrastrando las fichas.',
     tourTitleFriends: 'Agregá amigos', tourBodyFriends: 'Sumá amigos, mirá qué están jugando y comparen bibliotecas.',
-    tourTitleAchievements: 'Desbloqueá logros', tourBodyAchievements: '157 logros para desbloquear, con XP y niveles a medida que jugás.',
+    tourTitleAchievements: 'Desbloqueá logros', tourBodyAchievements: '134 logros para desbloquear, con XP y niveles a medida que jugás.',
     tourTitleAvatar: 'Personalizá tu avatar', tourBodyAvatar: 'Tocá acá para armar tu personaje pixel art con marcos y fuentes exclusivas.',
     tourTitleSupport: '¿Tenés dudas?', tourBodySupport: 'Escribinos por acá cuando quieras, respondemos a todos los mails.',
     tourTitleAppearance: 'Hacela tuya', tourBodyAppearance: 'Tocá acá y elegí "Apariencia" para cambiar entre tema claro/oscuro, vista lista/cuadrícula y color de card.',
-    tourTitleQuickEdit: 'Edición rápida', tourBodyQuickEdit: 'Hacé doble click en cualquier juego (o el ícono de editar) para cambiar horas, plataforma, género y más, todo junto.',
+    tourTitleQuickEdit: 'Edición rápida', tourBodyQuickEdit: 'Hacé doble click en cualquier juego (o el ícono de editar) para cambiar horas, plataforma y más, todo junto.',
     tourTitleBulk: 'Seleccioná varios juegos', tourBodyBulk: 'Activá el modo selección para elegir varios juegos y aplicar acciones en lote.',
     tourDone: 'Listo',
     rankings: 'Rankings', newRanking: 'Nuevo ranking', backToRankings: '← Volver a rankings', addToRanking: 'Agregar a ranking',
@@ -1918,10 +1909,10 @@ const I18N = {
     customizeAvatar: 'Customize avatar', library: 'Library', globalTab: 'Global',
     hidden: 'Hidden', addGame: 'Add game', addWishlistGame: 'Add wishlist game',
     name: 'Name', hours: 'Hours', rating: 'Rating', platform: 'Platform',
-    status: 'Status', genre: 'Genre', searchGame: 'Search game...', connectingBackend: 'Connecting to backend...',
+    status: 'Status', searchGame: 'Search game...', connectingBackend: 'Connecting to backend...',
     myStats: 'My stats', loading: 'Loading...', folders: 'Folders',
     addToWishlist: 'Add to wishlist', searchGameLabel: 'Search game', searchYourGame: 'Search your game...',
-    noGenre: 'No genre', cancel: 'Cancel', add: 'Add', changeCover: 'Change cover',
+    cancel: 'Cancel', add: 'Add', changeCover: 'Change cover',
     imageUrl: 'Image URL', preview: 'Preview', settings: 'Settings',
     profileTab: 'Profile', avatarTab: 'Avatar', accountTab: 'Account', username: 'Username',
     usernameFont: 'Username font', language: 'Language', profileVisibility: 'Profile',
@@ -2031,22 +2022,22 @@ const I18N = {
     onboardTitle1: 'Your backlog, organized', onboardBody1: 'All your games in one place: what you\'re playing, what you\'ve finished, what you dropped, and what\'s next.',
     onboardTitle2: 'Sync your platforms', onboardBody2: 'Connect Steam, PlayStation, GOG, Xbox or Epic Games to automatically bring in your library, wishlist, reviews and covers.',
     onboardTitle3: 'Level up', onboardBody3: 'Earn XP for every game you add, rate or finish. Unlock frames and fonts for your profile.',
-    onboardTitle4: 'Check your stats', onboardBody4: 'Hours played, favorite genres, comparisons with the rest of the community and global rankings.',
+    onboardTitle4: 'Check your stats', onboardBody4: 'Hours played, comparisons with the rest of the community and global rankings.',
     onboardTitle5: 'Customize your avatar', onboardBody5: 'Build your own pixel-art character with the clothes and accessories you unlock.',
     onboardNext: 'Next', onboardBack: 'Back', onboardStart: 'Get started', onboardSkip: 'Skip',
     tourTitleSteam: 'Sync your platforms', tourBodySteam: 'Tap here to connect Steam, PlayStation, GOG, Xbox or Epic Games and bring in your library automatically.',
     tourTitleAdd: 'Add games', tourBodyAdd: 'Tap here to manually add a game to your library.',
     tourTitleFolders: 'Organize with folders', tourBodyFolders: 'Create folders to group your games however you like.',
-    tourTitleStats: 'Check your stats', tourBodyStats: 'Tap here to see your hours, favorite genres and global rankings.',
+    tourTitleStats: 'Check your stats', tourBodyStats: 'Tap here to see your hours and global rankings.',
     tourTitleSession: 'Log a live session', tourBodySession: 'Tap this button on any game to start the timer while you play.',
-    tourTitleFilters: 'Filter your library', tourBodyFilters: 'Filter by status, platform, genre, hours and rating, and search by name.',
+    tourTitleFilters: 'Filter your library', tourBodyFilters: 'Filter by status, platform, hours and rating, and search by name.',
     tourTitleRankings: 'Build your rankings', tourBodyRankings: 'Create your own top of up to 25 games and reorder them by dragging the tiles.',
     tourTitleFriends: 'Add friends', tourBodyFriends: 'Add friends, see what they\'re playing and compare libraries.',
-    tourTitleAchievements: 'Unlock achievements', tourBodyAchievements: '157 achievements to unlock, with XP and levels as you play.',
+    tourTitleAchievements: 'Unlock achievements', tourBodyAchievements: '134 achievements to unlock, with XP and levels as you play.',
     tourTitleAvatar: 'Customize your avatar', tourBodyAvatar: 'Tap here to build your pixel-art character with exclusive frames and fonts.',
     tourTitleSupport: 'Have questions?', tourBodySupport: 'Write to us here anytime, we reply to every email.',
     tourTitleAppearance: 'Make it yours', tourBodyAppearance: 'Tap here and choose "Appearance" to switch between light/dark theme, list/grid view and card colors.',
-    tourTitleQuickEdit: 'Quick edit', tourBodyQuickEdit: 'Double-click any game (or the edit icon) to change hours, platform, genre and more, all in one place.',
+    tourTitleQuickEdit: 'Quick edit', tourBodyQuickEdit: 'Double-click any game (or the edit icon) to change hours, platform and more, all in one place.',
     tourTitleBulk: 'Select multiple games', tourBodyBulk: 'Turn on selection mode to pick several games and apply actions in bulk.',
     tourDone: 'Done',
     rankings: 'Rankings', newRanking: 'New ranking', backToRankings: '← Back to rankings', addToRanking: 'Add to ranking',
@@ -2077,10 +2068,10 @@ const I18N = {
     customizeAvatar: 'Personalizar avatar', library: 'Biblioteca', globalTab: 'Global',
     hidden: 'Ocultos', addGame: 'Adicionar jogo', addWishlistGame: 'Adicionar jogo desejado',
     name: 'Nome', hours: 'Horas', rating: 'Avaliação', platform: 'Plataforma',
-    status: 'Status', genre: 'Gênero', searchGame: 'Buscar jogo...', connectingBackend: 'Conectando ao backend...',
+    status: 'Status', searchGame: 'Buscar jogo...', connectingBackend: 'Conectando ao backend...',
     myStats: 'Minhas estatísticas', loading: 'Carregando...', folders: 'Pastas',
     addToWishlist: 'Adicionar aos desejados', searchGameLabel: 'Buscar jogo', searchYourGame: 'Busque seu jogo...',
-    noGenre: 'Sem gênero', cancel: 'Cancelar', add: 'Adicionar', changeCover: 'Trocar capa',
+    cancel: 'Cancelar', add: 'Adicionar', changeCover: 'Trocar capa',
     imageUrl: 'URL da imagem', preview: 'Prévia', settings: 'Configurações',
     profileTab: 'Perfil', avatarTab: 'Avatar', accountTab: 'Conta', username: 'Nome de usuário',
     usernameFont: 'Fonte do nome de usuário', language: 'Idioma', profileVisibility: 'Perfil',
@@ -2190,22 +2181,22 @@ const I18N = {
     onboardTitle1: 'Sua biblioteca, organizada', onboardBody1: 'Todos os seus jogos em um só lugar: o que você está jogando, o que completou, o que abandonou e o que falta começar.',
     onboardTitle2: 'Sincronize suas plataformas', onboardBody2: 'Conecte Steam, PlayStation, GOG, Xbox ou Epic Games e traga sua biblioteca, desejados, avaliações e capas automaticamente.',
     onboardTitle3: 'Suba de nível', onboardBody3: 'Ganhe experiência por cada jogo que você adiciona, avalia ou completa. Desbloqueie molduras e fontes para o seu perfil.',
-    onboardTitle4: 'Veja suas estatísticas', onboardBody4: 'Horas jogadas, gêneros favoritos, comparação com o resto da comunidade e rankings globais.',
+    onboardTitle4: 'Veja suas estatísticas', onboardBody4: 'Horas jogadas, comparação com o resto da comunidade e rankings globais.',
     onboardTitle5: 'Personalize seu avatar', onboardBody5: 'Monte seu próprio personagem em pixel art com as roupas e acessórios que for desbloqueando.',
     onboardNext: 'Próximo', onboardBack: 'Voltar', onboardStart: 'Começar', onboardSkip: 'Pular',
     tourTitleSteam: 'Sincronize suas plataformas', tourBodySteam: 'Toque aqui para conectar Steam, PlayStation, GOG, Xbox ou Epic Games e trazer sua biblioteca automaticamente.',
     tourTitleAdd: 'Adicione jogos', tourBodyAdd: 'Toque aqui para adicionar um jogo manualmente à sua biblioteca.',
     tourTitleFolders: 'Organize com pastas', tourBodyFolders: 'Crie pastas para agrupar seus jogos como quiser.',
-    tourTitleStats: 'Veja suas estatísticas', tourBodyStats: 'Toque aqui para ver suas horas, gêneros favoritos e rankings globais.',
+    tourTitleStats: 'Veja suas estatísticas', tourBodyStats: 'Toque aqui para ver suas horas e rankings globais.',
     tourTitleSession: 'Registre uma sessão ao vivo', tourBodySession: 'Toque neste botão em qualquer jogo para iniciar o cronômetro enquanto joga.',
-    tourTitleFilters: 'Filtre sua biblioteca', tourBodyFilters: 'Filtre por status, plataforma, gênero, horas e avaliação, e busque por nome.',
+    tourTitleFilters: 'Filtre sua biblioteca', tourBodyFilters: 'Filtre por status, plataforma, horas e avaliação, e busque por nome.',
     tourTitleRankings: 'Monte seus rankings', tourBodyRankings: 'Crie seu próprio top de até 25 jogos e reordene arrastando as fichas.',
     tourTitleFriends: 'Adicione amigos', tourBodyFriends: 'Adicione amigos, veja o que estão jogando e comparem bibliotecas.',
-    tourTitleAchievements: 'Desbloqueie conquistas', tourBodyAchievements: '157 conquistas para desbloquear, com XP e níveis conforme você joga.',
+    tourTitleAchievements: 'Desbloqueie conquistas', tourBodyAchievements: '134 conquistas para desbloquear, com XP e níveis conforme você joga.',
     tourTitleAvatar: 'Personalize seu avatar', tourBodyAvatar: 'Toque aqui para montar seu personagem em pixel art com molduras e fontes exclusivas.',
     tourTitleSupport: 'Tem dúvidas?', tourBodySupport: 'Escreva para nós por aqui quando quiser, respondemos a todos os emails.',
     tourTitleAppearance: 'Deixe do seu jeito', tourBodyAppearance: 'Toque aqui e escolha "Aparência" para alternar entre tema claro/escuro, visualização em lista/grade e cor do card.',
-    tourTitleQuickEdit: 'Edição rápida', tourBodyQuickEdit: 'Clique duas vezes em qualquer jogo (ou no ícone de editar) para mudar horas, plataforma, gênero e mais, tudo junto.',
+    tourTitleQuickEdit: 'Edição rápida', tourBodyQuickEdit: 'Clique duas vezes em qualquer jogo (ou no ícone de editar) para mudar horas, plataforma e mais, tudo junto.',
     tourTitleBulk: 'Selecione vários jogos', tourBodyBulk: 'Ative o modo seleção para escolher vários jogos e aplicar ações em lote.',
     tourDone: 'Concluído',
     rankings: 'Rankings', newRanking: 'Novo ranking', backToRankings: '← Voltar aos rankings', addToRanking: 'Adicionar ao ranking',
@@ -2232,9 +2223,6 @@ function applyI18n() {
   document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.getAttribute('data-i18n-html')); });
   document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.getAttribute('data-i18n-title')); });
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.getAttribute('data-i18n-placeholder')); });
-  document.querySelectorAll('.genre-select option[value]:not([value=""])').forEach(opt => {
-    opt.textContent = typeof genreLabel === 'function' ? genreLabel(opt.value) : opt.value;
-  });
   document.querySelectorAll('.status-select option[value]').forEach(opt => {
     opt.textContent = typeof statusLabel === 'function' ? statusLabel(opt.value) : opt.value;
   });
@@ -3080,10 +3068,6 @@ function accessibleEditModalBody(gameId) {
       <select id="ae-platform" style="${fieldStyle}" ${canEditPlatform ? '' : 'disabled'}>${platformOptionsHtml(g.platform)}</select>
     </div>
     <div style="margin-bottom:16px">
-      <label style="${labelStyle}">${t('genre') || 'Género'}</label>
-      <select id="ae-genre" style="${fieldStyle}">${genreOptions(g.genre)}</select>
-    </div>
-    <div style="margin-bottom:16px">
       <label style="${labelStyle}">${t('status') || 'Estado'}</label>
       <select id="ae-status" style="${fieldStyle};color:${STATUS_DOT_COLORS[g.status]||''}">${statusOptionsHtml(g.status)}</select>
     </div>
@@ -3131,7 +3115,6 @@ async function aeSaveAll(gameId) {
   const hoursEl  = document.getElementById('ae-hours');
   const lpEl     = document.getElementById('ae-lastplayed');
   const platEl   = document.getElementById('ae-platform');
-  const genreEl  = document.getElementById('ae-genre');
   const statusEl = document.getElementById('ae-status');
 
   const calls = [];
@@ -3164,15 +3147,6 @@ async function aeSaveAll(gameId) {
       method: 'PATCH',
       headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ platform: platEl.value }),
-    }));
-  }
-  if (genreEl && genreEl.value !== (g.genre || '')) {
-    const genre = genreEl.value || null;
-    g.genre = genre;
-    calls.push(fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gameId)}/genre`, {
-      method: 'PATCH',
-      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ genre }),
     }));
   }
   if (statusEl && statusEl.value !== g.status) {
@@ -3561,9 +3535,7 @@ function gameCardHtml(g, opts) {
         </div>
         <div></div>
 
-        <select class="genre-sel genre-select" data-gid="${g.id}" onchange="changeGenre('${g.id}',this.value)" style="font-size:11px;width:auto;max-width:100%;justify-self:start;padding:2px 4px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text2)">
-          ${genreOptions(g.genre)}
-        </select>
+        <div></div>
         <div style="display:flex;align-items:center;gap:6px;justify-self:end">
           <div class="sdot s-${g.status}"></div>
           <select class="status-sel status-select" onchange="changeStatus('${g.id}',this.value)" style="color:${STATUS_DOT_COLORS[g.status]||''}">
@@ -3826,7 +3798,6 @@ function updateBulkBar() {
       <div id="bulk-actions-menu" style="display:none;position:absolute;bottom:calc(100% + 6px);left:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;min-width:190px;box-shadow:0 4px 16px rgba(0,0,0,0.3);padding:4px 0">
         <button class="steam-menu-item" onclick="openBulkFolderPicker()"><i class="ti ti-folder" style="font-size:14px"></i> ${t('addToFolder')}</button>
         <button class="steam-menu-item" onclick="openBulkStatusPicker()"><i class="ti ti-flag" style="font-size:14px"></i> ${t('status')}</button>
-        <button class="steam-menu-item" onclick="openBulkGenrePicker()"><i class="ti ti-tag" style="font-size:14px"></i> ${t('genre')}</button>
         <button class="steam-menu-item" onclick="openBulkRatingPicker()"><i class="ti ti-star" style="font-size:14px"></i> ${t('rating')}</button>
         <button class="steam-menu-item" onclick="bulkToggleHidden()"><i class="ti ti-eye-off" style="font-size:14px"></i> ${t('hideGame')}</button>
         <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
@@ -3891,23 +3862,6 @@ function openBulkStatusPicker() {
     await Promise.all(_bulkGameIds().map(gid =>
       fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gid)}/status?status=${encodeURIComponent(status)}`, {
         method: 'PATCH', headers: { 'Authorization': `Bearer ${authToken}` },
-      })
-    ));
-    await _bulkFinish();
-  });
-}
-
-// -- Genero --
-function openBulkGenrePicker() {
-  document.getElementById('bulk-actions-menu').style.display = 'none';
-  const body = `<select id="bulk-genre-sel" class="genre-select" style="width:100%">${genreOptions('')}</select>`;
-  showBulkActionModal(t('genre'), body, async () => {
-    const genre = document.getElementById('bulk-genre-sel').value;
-    await Promise.all(_bulkGameIds().map(gid =>
-      fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gid)}/genre`, {
-        method: 'PATCH',
-        headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ genre: genre || null }),
       })
     ));
     await _bulkFinish();
@@ -4019,39 +3973,6 @@ async function deleteGame(gameId) {
   }
 }
 
-// Generos = el taxonomia fija de IGDB (mismo set que usamos para auto-completar
-// el genero al agregar un juego) — el VALOR guardado es siempre el nombre en
-// ingles de IGDB (para que el matching automatico funcione sin traducir ida y
-// vuelta), la ETIQUETA mostrada se traduce por idioma via genreLabel().
-const GENRES = [
-  "Adventure", "Role-playing (RPG)", "Shooter", "Strategy", "Tactical", "Simulator", "Sport",
-  "Racing", "Fighting", "Platform", "Puzzle", "Hack and slash/Beat 'em up", "Point-and-click",
-  "Pinball", "Arcade", "Indie", "Visual Novel", "Music", "Card & Board Game", "MOBA", "Quiz/Trivia",
-];
-const GENRE_LABELS_ES = {
-  'Adventure': 'Aventura', 'Role-playing (RPG)': 'Rol (RPG)', 'Shooter': 'Disparos',
-  'Strategy': 'Estrategia', 'Tactical': 'Táctico',
-  'Simulator': 'Simulación', 'Sport': 'Deportes', 'Racing': 'Carreras', 'Fighting': 'Lucha',
-  'Platform': 'Plataformas', 'Puzzle': 'Puzzle', "Hack and slash/Beat 'em up": 'Hack and slash',
-  'Point-and-click': 'Point-and-click', 'Pinball': 'Pinball', 'Arcade': 'Arcade', 'Indie': 'Indie',
-  'Visual Novel': 'Visual Novel', 'Music': 'Música', 'Card & Board Game': 'Cartas y mesa',
-  'MOBA': 'MOBA', 'Quiz/Trivia': 'Preguntas y respuestas',
-};
-const GENRE_LABELS_PT = {
-  'Adventure': 'Aventura', 'Role-playing (RPG)': 'RPG', 'Shooter': 'Tiro',
-  'Strategy': 'Estratégia', 'Tactical': 'Tático',
-  'Simulator': 'Simulação', 'Sport': 'Esportes', 'Racing': 'Corrida', 'Fighting': 'Luta',
-  'Platform': 'Plataforma', 'Puzzle': 'Puzzle', "Hack and slash/Beat 'em up": 'Hack and slash',
-  'Point-and-click': 'Apontar e clicar', 'Pinball': 'Pinball', 'Arcade': 'Arcade', 'Indie': 'Indie',
-  'Visual Novel': 'Visual Novel', 'Music': 'Música', 'Card & Board Game': 'Cartas e tabuleiro',
-  'MOBA': 'MOBA', 'Quiz/Trivia': 'Perguntas e respostas',
-};
-function genreLabel(g) {
-  if (currentLang === 'en') return g;
-  if (currentLang === 'pt') return GENRE_LABELS_PT[g] || g;
-  return GENRE_LABELS_ES[g] || g;
-}
-
 const STATUS_LABELS_EN = {
   'Jugando': 'Playing', 'Completado': 'Completed', 'Backlog': 'Backlog',
   'Abandonado': 'Abandoned', 'Intermitente': 'On hold', 'Deseados': 'Wishlist',
@@ -4073,15 +3994,6 @@ const PLATFORM_LIST = ['Steam','GOG','Epic','EA Play','Windows PC','Mac iOS','Pl
 
 function platformOptionsHtml(selected) {
   return PLATFORM_LIST.map(p => `<option value="${p}"${p === selected ? ' selected' : ''}>${p}</option>`).join('');
-}
-
-function genreOptions(selected) {
-  const opts = [`<option value="">${t('noGenre')}</option>`];
-  GENRES.forEach(g => {
-    const sel = selected === g ? ' selected' : '';
-    opts.push(`<option value="${g}"${sel}>${genreLabel(g)}</option>`);
-  });
-  return opts.join('');
 }
 
 let _coverEditGameId = null;
@@ -4179,27 +4091,15 @@ document.addEventListener('DOMContentLoaded', layoutMobileNav);
 mobileNavQuery.addEventListener('change', layoutMobileNav);
 layoutMobileNav();
 
-async function changeGenre(gameId, genre) {
-  const g = allGames.find(x => x.id === gameId);
-  if (g) g.genre = genre || null;
-  try {
-    await fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(gameId)}/genre`, {
-      method: 'PATCH',
-      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ genre: genre || null }),
-    });
-  } catch(e) {}
-}
-
 // ── View & Filter System ─────────────────────────────────────────────────────
 
 let currentView     = 'library'; // 'library' | 'wishlist'
 let availableFilters = {};
-let activeFilters   = {}; // { statuses: Set, platforms: Set, genres: Set, hours: Set, ratings: Set }
+let activeFilters   = {}; // { statuses: Set, platforms: Set, hours: Set, ratings: Set }
 
 function resetActiveFilters() {
   activeFilters = {
-    statuses: new Set(), platforms: new Set(), genres: new Set(),
+    statuses: new Set(), platforms: new Set(),
     hours: new Set(), ratings: new Set(),
   };
 }
@@ -4224,13 +4124,11 @@ function renderFilterDropdowns() {
     ? [
         { key: 'statuses',  label: t('status'),   options: availableFilters.library?.statuses  || [] },
         { key: 'platforms', label: t('platform'),  options: availableFilters.library?.platforms || [] },
-        { key: 'genres',    label: t('genre'),     options: availableFilters.library?.genres    || [] },
         { key: 'hours',     label: t('hours'),     options: availableFilters.library?.hours     || [] },
         { key: 'ratings',   label: t('rating'),    options: availableFilters.library?.ratings   || [] },
       ]
     : [
         { key: 'platforms', label: t('platform'),  options: availableFilters.wishlist?.platforms || [] },
-        { key: 'genres',    label: t('genre'),      options: availableFilters.wishlist?.genres    || [] },
       ];
 
   filters.forEach(({ key, label, options }) => {
@@ -4343,7 +4241,7 @@ function toggleFilterDropdown(key, options, wrap, btn) {
       const filterBtn = document.getElementById(`filter-btn-${key}`);
       if (filterBtn) {
         const count = activeFilters[key].size;
-        const filterLabel = key === 'statuses' ? t('status') : key === 'platforms' ? t('platform') : key === 'genres' ? t('genre') : key === 'hours' ? t('hours') : t('rating');
+        const filterLabel = key === 'statuses' ? t('status') : key === 'platforms' ? t('platform') : key === 'hours' ? t('hours') : t('rating');
         filterBtn.innerHTML = count > 0
           ? `${filterLabel} <span style="background:var(--green);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px">${count}</span>`
           : `${filterLabel} ▾`;
@@ -4356,7 +4254,7 @@ function toggleFilterDropdown(key, options, wrap, btn) {
     cb.style.accentColor = 'var(--green)';
     cb.style.pointerEvents = 'none';
     const label = document.createElement('span');
-    label.textContent = key === 'statuses' ? statusLabel(opt) : key === 'genres' ? genreLabel(opt) : opt;
+    label.textContent = key === 'statuses' ? statusLabel(opt) : opt;
     item.appendChild(cb);
     item.appendChild(label);
     popup.appendChild(item);
@@ -4459,8 +4357,8 @@ function setView(view) {
   resetActiveFilters();
   const sortSel = document.getElementById('sort-sel');
   if (sortSel) {
-    const wishlistOpts = ['<option value="name">Nombre</option>','<option value="platform">Plataforma</option>','<option value="genre">Género</option>'];
-    const libraryOpts  = ['<option value="name">Nombre</option>','<option value="hours">Horas</option>','<option value="rating">Calificación</option>','<option value="platform">Plataforma</option>','<option value="status">Estado</option>','<option value="genre">Género</option>'];
+    const wishlistOpts = ['<option value="name">Nombre</option>','<option value="platform">Plataforma</option>'];
+    const libraryOpts  = ['<option value="name">Nombre</option>','<option value="hours">Horas</option>','<option value="rating">Calificación</option>','<option value="platform">Plataforma</option>','<option value="status">Estado</option>'];
     sortSel.innerHTML  = (view === 'wishlist' ? wishlistOpts : libraryOpts).join('');
   }
 
@@ -5487,12 +5385,9 @@ const ACHIEVEMENT_LABELS_EN = {
   folders_5: { name: 'Archivist', description: 'Create 5 folders' },
   folders_10: { name: 'Expert Archivist', description: 'Create 10 folders' },
   folders_20: { name: 'Master Archivist', description: 'Create 20 folders' },
-  genres_5: { name: 'Genre Explorer', description: 'Have games from at least 5 different genres' },
-  genres_10: { name: 'All-Rounder', description: 'Have games from at least 10 different genres' },
   platforms_3: { name: 'Total Multiplatform', description: 'Have games on at least 3 different platforms' },
   covers_1: { name: 'Cover Designer', description: 'Customize the cover of 1 game' },
   covers_10: { name: 'Visual Curator', description: 'Customize the cover of 10 games' },
-  genre_tagger_10: { name: 'Tagger', description: 'Assign a genre to 10 games' },
   rate_1: { name: 'Rookie Critic', description: 'Rate 1 game' },
   rate_5: { name: 'Active Critic', description: 'Rate 5 games' },
   rate_10: { name: 'Expert Critic', description: 'Rate 10 games' },
@@ -5540,26 +5435,6 @@ const ACHIEVEMENT_LABELS_EN = {
   retro_3: { name: 'Retrogamer', description: 'Have 3 retro games (classic consoles)' },
   retro_10: { name: 'Expert Retrogamer', description: 'Have 10 retro games (classic consoles)' },
   vr_gamer: { name: 'Virtual Reality', description: 'Have 1 Meta Quest game' },
-  genre_rpg_5: { name: 'RPG Adventurer', description: 'Have 5 RPG games' },
-  genre_rpg_10: { name: 'RPG Master', description: 'Have 10 RPG games' },
-  genre_terror_5: { name: 'Fearless', description: 'Have 5 Horror games' },
-  genre_terror_10: { name: 'Scare Hunter', description: 'Have 10 Horror games' },
-  genre_estrategia_5: { name: 'Strategist', description: 'Have 5 Strategy games' },
-  genre_estrategia_10: { name: 'Grand Strategist', description: 'Have 10 Strategy games' },
-  genre_deportes_5: { name: 'Athlete', description: 'Have 5 Sports games' },
-  genre_deportes_10: { name: 'Sportsman', description: 'Have 10 Sports games' },
-  genre_indie_5: { name: 'Indie Lover', description: 'Have 5 Indie games' },
-  genre_indie_10: { name: 'Indie Curator', description: 'Have 10 Indie games' },
-  genre_mundoabierto_5: { name: 'Explorer', description: 'Have 5 Open World games' },
-  genre_mundoabierto_10: { name: 'Great Explorer', description: 'Have 10 Open World games' },
-  genre_multijugador_5: { name: 'Social Gamer', description: 'Have 5 Multiplayer games' },
-  genre_multijugador_10: { name: 'Team Player', description: 'Have 10 Multiplayer games' },
-  genre_puzzle_5: { name: 'Solver', description: 'Have 5 Puzzle games' },
-  genre_puzzle_10: { name: 'Puzzle Genius', description: 'Have 10 Puzzle games' },
-  genre_carreras_5: { name: 'Pilot', description: 'Have 5 Racing games' },
-  genre_lucha_5: { name: 'Fighter', description: 'Have 5 Fighting games' },
-  genre_visualnovel_5: { name: 'Reader', description: 'Have 5 Visual Novel games' },
-  genre_ritmo_5: { name: 'In Rhythm', description: 'Have 5 Music/Rhythm games' },
   perfectionist_5: { name: 'Perfectionist', description: 'Rate 5 games with 5 stars' },
   perfectionist_15: { name: 'Expert Perfectionist', description: 'Rate 15 games with 5 stars' },
   honest_critic_3: { name: 'Honest Critic', description: 'Rate 3 games with 1 star' },
@@ -5640,12 +5515,9 @@ const ACHIEVEMENT_LABELS_PT = {
   folders_5: { name: 'Arquivista', description: 'Crie 5 pastas' },
   folders_10: { name: 'Arquivista Especialista', description: 'Crie 10 pastas' },
   folders_20: { name: 'Mestre Arquivista', description: 'Crie 20 pastas' },
-  genres_5: { name: 'Explorador de Gêneros', description: 'Tenha jogos de pelo menos 5 gêneros diferentes' },
-  genres_10: { name: 'Multifacetado', description: 'Tenha jogos de pelo menos 10 gêneros diferentes' },
   platforms_3: { name: 'Multiplataforma Total', description: 'Tenha jogos em pelo menos 3 plataformas diferentes' },
   covers_1: { name: 'Designer de Capas', description: 'Personalize a capa de 1 jogo' },
   covers_10: { name: 'Curador Visual', description: 'Personalize a capa de 10 jogos' },
-  genre_tagger_10: { name: 'Etiquetador', description: 'Atribua um gênero a 10 jogos' },
   rate_1: { name: 'Crítico Iniciante', description: 'Avalie 1 jogo' },
   rate_5: { name: 'Crítico Ativo', description: 'Avalie 5 jogos' },
   rate_10: { name: 'Crítico Especialista', description: 'Avalie 10 jogos' },
@@ -5693,26 +5565,6 @@ const ACHIEVEMENT_LABELS_PT = {
   retro_3: { name: 'Retrogamer', description: 'Tenha 3 jogos retrô (consoles clássicos)' },
   retro_10: { name: 'Retrogamer Especialista', description: 'Tenha 10 jogos retrô (consoles clássicos)' },
   vr_gamer: { name: 'Realidade Virtual', description: 'Tenha 1 jogo de Meta Quest' },
-  genre_rpg_5: { name: 'Aventureiro RPG', description: 'Tenha 5 jogos de RPG' },
-  genre_rpg_10: { name: 'Mestre RPG', description: 'Tenha 10 jogos de RPG' },
-  genre_terror_5: { name: 'Destemido', description: 'Tenha 5 jogos de Terror' },
-  genre_terror_10: { name: 'Caçador de Sustos', description: 'Tenha 10 jogos de Terror' },
-  genre_estrategia_5: { name: 'Estrategista', description: 'Tenha 5 jogos de Estratégia' },
-  genre_estrategia_10: { name: 'Grande Estrategista', description: 'Tenha 10 jogos de Estratégia' },
-  genre_deportes_5: { name: 'Atleta', description: 'Tenha 5 jogos de Esportes' },
-  genre_deportes_10: { name: 'Esportista', description: 'Tenha 10 jogos de Esportes' },
-  genre_indie_5: { name: 'Amante Indie', description: 'Tenha 5 jogos Indie' },
-  genre_indie_10: { name: 'Curador Indie', description: 'Tenha 10 jogos Indie' },
-  genre_mundoabierto_5: { name: 'Explorador', description: 'Tenha 5 jogos de Mundo Aberto' },
-  genre_mundoabierto_10: { name: 'Grande Explorador', description: 'Tenha 10 jogos de Mundo Aberto' },
-  genre_multijugador_5: { name: 'Jogador Social', description: 'Tenha 5 jogos Multijogador' },
-  genre_multijugador_10: { name: 'Jogador de Equipe', description: 'Tenha 10 jogos Multijogador' },
-  genre_puzzle_5: { name: 'Solucionador', description: 'Tenha 5 jogos de Puzzle' },
-  genre_puzzle_10: { name: 'Gênio dos Puzzles', description: 'Tenha 10 jogos de Puzzle' },
-  genre_carreras_5: { name: 'Piloto', description: 'Tenha 5 jogos de Corrida' },
-  genre_lucha_5: { name: 'Lutador', description: 'Tenha 5 jogos de Luta' },
-  genre_visualnovel_5: { name: 'Leitor', description: 'Tenha 5 jogos de Visual Novel' },
-  genre_ritmo_5: { name: 'No Ritmo', description: 'Tenha 5 jogos de Música/Ritmo' },
   perfectionist_5: { name: 'Perfeccionista', description: 'Avalie 5 jogos com 5 estrelas' },
   perfectionist_15: { name: 'Perfeccionista Especialista', description: 'Avalie 15 jogos com 5 estrelas' },
   honest_critic_3: { name: 'Crítico Honesto', description: 'Avalie 3 jogos com 1 estrela' },
@@ -6294,7 +6146,7 @@ async function submitNovedadesAdd() {
     name: release.name, platform,
     status: _novedadesAddToWishlist ? 'Deseados' : 'Backlog',
     hours_played: 0, cover_url: release.cover_url || null,
-    user_rating: 0, app_id: null, genre: release.genre || null,
+    user_rating: 0, app_id: null,
   };
   try {
     const res = await fetch(`${apiBase()}/api/v1/game`, {
@@ -6775,7 +6627,6 @@ function friendGameCardHtml(g) {
       <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:${color}">
         <div class="sdot" style="background:${color}"></div>${statusLabel(g.status)}
       </div>
-      ${g.genre ? `<div style="font-size:11px;color:var(--text2);margin-top:4px">${g.genre}</div>` : ''}
     </div>
   </div>`;
 }
@@ -7635,7 +7486,6 @@ async function saveSetUsername() {
 function openWishlistModal() {
   document.getElementById('wm-name').value    = '';
   document.getElementById('wm-platform').value = 'Steam';
-  document.getElementById('wm-genre').innerHTML = genreOptions('');
   document.getElementById('wm-appid').value    = '';
   document.getElementById('wishlist-search-results').style.display = 'none';
   document.getElementById('wishlist-modal-overlay').classList.add('open');
@@ -7688,7 +7538,6 @@ function selectWishlistGame(key) {
 async function saveWishlistGame() {
   const name    = document.getElementById('wm-name').value.trim();
   const platform = document.getElementById('wm-platform').value;
-  const genre   = document.getElementById('wm-genre').value;
   const appid   = document.getElementById('wm-appid').value;
   if (!name) { alert(t('enterGameName')); return; }
 
@@ -7699,7 +7548,6 @@ async function saveWishlistGame() {
     id: gameId, name, platform, status: 'Deseados',
     hours_played: 0, cover_url: coverDefault,
     user_rating: 0, app_id: appid || null,
-    genre: genre || null,
   };
 
   try {
@@ -7784,7 +7632,6 @@ function openModal() {
   document.getElementById('m-hours').value    = '0';
   document.getElementById('m-cover').value    = '';
   document.getElementById('m-appid').value    = '';
-  document.getElementById('m-genre').innerHTML = genreOptions('');
   document.getElementById('steam-search-results').style.display = 'none';
   const mhg = document.getElementById('m-hours-group'); if (mhg) mhg.style.display = '';
   renderModalStars();
@@ -7820,7 +7667,6 @@ async function submitGame() {
   const status   = document.getElementById('m-status').value;
   const hours    = parseFloat(document.getElementById('m-hours').value) || 0;
   const cover    = document.getElementById('m-cover').value.trim();
-  const genre    = document.getElementById('m-genre').value;
 
   if (!name) { alert(t('enterGameName')); return; }
 
@@ -7836,7 +7682,6 @@ async function submitGame() {
     cover_url: cover || coverDefault,
     user_rating: modalStarVal,
     app_id: appid || null,
-    genre: genre || null,
   };
 
   try {
@@ -9217,8 +9062,7 @@ function renderFolderGamePicker() {
         <div style="display:table-cell;padding:6px 8px;font-size:11px;color:var(--text2);text-align:left">${col('name',t('name'))}</div>
         <div style="display:table-cell;width:110px;min-width:110px;max-width:110px;padding:6px 8px;font-size:11px;color:var(--text2)">${col('platform',t('platform'))}</div>
         <div style="display:table-cell;width:70px;min-width:70px;max-width:70px;padding:6px 8px;font-size:11px;color:var(--text2)">${col('hours_played',t('hours'))}</div>
-        <div style="display:table-cell;width:50px;min-width:50px;max-width:50px;padding:6px 8px;font-size:11px;color:var(--text2)">${col('user_rating','★')}</div>
-        <div style="display:table-cell;width:90px;min-width:90px;max-width:90px;padding:6px 16px 6px 8px;font-size:11px;color:var(--text2)">${col('genre',t('genre'))}</div>
+        <div style="display:table-cell;width:50px;min-width:50px;max-width:50px;padding:6px 16px 6px 8px;font-size:11px;color:var(--text2)">${col('user_rating','★')}</div>
       </div>
     </div>
     <div style="overflow-y:auto;max-height:400px">
@@ -9235,8 +9079,7 @@ function renderFolderGamePicker() {
             <div style="display:table-cell;padding:8px 8px;font-size:12px;max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle" title="${esc(g.name)}">${esc(g.name)}</div>
             <div style="display:table-cell;width:110px;padding:8px 8px;font-size:11px;color:var(--text2);vertical-align:middle">${g.platform}</div>
             <div style="display:table-cell;width:65px;padding:8px 8px;font-size:11px;color:var(--text2);vertical-align:middle">${g.hours_played}h</div>
-            <div style="display:table-cell;width:50px;padding:8px 8px;font-size:11px;color:var(--text2);vertical-align:middle">${g.user_rating > 0 ? '★'.repeat(Math.floor(g.user_rating)) : '—'}</div>
-            <div style="display:table-cell;width:90px;padding:8px 16px 8px 8px;font-size:11px;color:var(--text2);vertical-align:middle;border-bottom:0.5px solid var(--border)">${g.genre || '—'}</div>
+            <div style="display:table-cell;width:50px;padding:8px 16px 8px 8px;font-size:11px;color:var(--text2);vertical-align:middle;border-bottom:0.5px solid var(--border)">${g.user_rating > 0 ? '★'.repeat(Math.floor(g.user_rating)) : '—'}</div>
           </div>`).join('') + '</div>'}
     </div>`;
 }
@@ -9986,7 +9829,6 @@ async function syncAll(page = 1, silent = false) {
   const af = activeFilters || {};
   if (af.statuses?.size)  params.set('statuses',   [...af.statuses].join(','));
   if (af.platforms?.size) params.set('platforms',  [...af.platforms].join(','));
-  if (af.genres?.size)    params.set('genres',     [...af.genres].join(','));
   if (af.hours?.size)     params.set('hours_range',[...af.hours].join(','));
   if (af.ratings?.size)   params.set('ratings',    [...af.ratings].join(','));
 
