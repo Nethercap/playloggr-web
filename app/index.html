@@ -596,9 +596,10 @@
       </div>
 
       <!-- Novedades button -->
-      <button id="novedades-icon-btn" onclick="setView('novedades')" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="novedades" title="Novedades">
+      <button id="novedades-icon-btn" onclick="setView('novedades')" style="position:relative;margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="novedades" title="Novedades">
         <i class="ti ti-sparkles" style="font-size:14px"></i>
         <span class="sidebar-only-label" data-i18n="novedades">Novedades</span>
+        <span id="novedades-btn-dot" style="display:none;position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:#E24B4A"></span>
       </button>
 
       <!-- Stats button -->
@@ -609,9 +610,10 @@
       </button>
 
       <!-- Friends button -->
-      <button id="friends-btn" onclick="openFriendsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="friends" title="Amigos">
+      <button id="friends-btn" onclick="openFriendsPanel()" style="position:relative;margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="friends" title="Amigos">
         <i class="ti ti-users" style="font-size:14px"></i>
         <span class="sidebar-only-label" data-i18n="friends">Amigos</span>
+        <span id="friends-btn-dot" style="display:none;position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:#E24B4A"></span>
       </button>
 
       <!-- Achievements button -->
@@ -3516,41 +3518,41 @@ function gameCardHtml(g, opts) {
   // render anterior en esta sesion) lo mostramos de una en vez de arrancar
   // en "…" y parpadear.
   const cs = communityStatsCache[g.id];
-  const communityHtml = `<i class="ti ti-users" style="font-size:11px"></i> ${cs ? `${cs.avg_rating} (${cs.rating_count})` : '…'}`;
+  const communityHtml = `<i class="ti ti-users" style="font-size:11px"></i> ${cs ? `${cs.rating_count > 0 ? cs.avg_rating : '0.0'} (${cs.rating_count})` : '…'}`;
   const communityStyle = 'display:inline-flex';
 
   return `<div class="game-card" id="card-${g.id}" style="${cardColorStyle(g.status)}" ondblclick="handleCardDoubleTap('${g.id}', event)">
     <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0">
       <div class="game-cover" data-gid="${g.id}" onclick="openCoverEditFromCard(this)" style="cursor:pointer;position:relative" title="Click para cambiar portada">${cover}<div class="cover-edit-hint" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);opacity:0;transition:opacity 0.15s;font-size:18px">✏️</div></div>
-      <button class="play-btn" data-gid="${g.id}" onclick="togglePlaySession('${g.id}')" title="Registrar sesión de juego"
-        style="width:28px;height:28px;min-width:28px;border-radius:50%;border:1.5px solid #1D9E75;background:transparent;color:#1D9E75;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1;padding:0">▶</button>
       ${bulkCheckHtml(g.id)}
     </div>
-    <div>
+    <div style="min-width:0">
       <div class="game-name">${esc(g.name)}</div>
-      <div class="game-card-grid">
-        <div class="game-meta">
-          ${platBadge(g.platform)}
-          ${scoreEl}
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+          <div class="game-meta" style="margin-bottom:0">
+            ${platBadge(g.platform)}
+            ${scoreEl}
+          </div>
+          ${g.status !== 'Deseados' ? `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><div id="stars-${g.id}">${starPickerHtml(g.id, g.user_rating || 0)}</div><span id="community-${g.id}" style="${communityStyle};align-items:center;gap:3px;font-size:11px;color:var(--text2)">${communityHtml}</span></div>` : ''}
+          <div class="game-foot">
+            ${g.status !== 'Deseados' ? (canEditHoursWeb(g) ? `<span style="cursor:pointer;text-decoration:underline dotted" data-gameid="${g.id}" data-hours="${g.hours_played}" onclick="editHoursById(this, event)" title="Editar horas"><i class="ti ti-clock" style="font-size:12px"></i>${hours}</span>` : `<span><i class="ti ti-clock" style="font-size:12px"></i>${hours}</span>`) : ''}
+            ${g.status !== 'Deseados' ? lastPlayedEl : ''}
+          </div>
         </div>
-        <div></div>
-
-        <div></div>
-        <div style="display:flex;align-items:center;gap:6px;justify-self:end">
-          <div class="sdot s-${g.status}"></div>
-          <select class="status-sel status-select" onchange="changeStatus('${g.id}',this.value)" style="color:${STATUS_DOT_COLORS[g.status]||''}">
-            ${statusOptionsHtml(g.status)}
-          </select>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="display:flex;align-items:center;gap:6px">
+            <div class="sdot s-${g.status}"></div>
+            <select class="status-sel status-select" onchange="changeStatus('${g.id}',this.value)" style="color:${STATUS_DOT_COLORS[g.status]||''}">
+              ${statusOptionsHtml(g.status)}
+            </select>
+          </div>
+          <button class="play-btn" data-gid="${g.id}" onclick="togglePlaySession('${g.id}')" title="Registrar sesión de juego"
+            style="width:34px;height:34px;min-width:34px;border-radius:50%;border:1.5px solid #1D9E75;background:transparent;color:#1D9E75;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;padding:0">▶</button>
         </div>
-
-        ${g.status !== 'Deseados' ? `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><div id="stars-${g.id}">${starPickerHtml(g.id, g.user_rating || 0)}</div><span id="community-${g.id}" style="${communityStyle};align-items:center;gap:3px;font-size:11px;color:var(--text2)">${communityHtml}</span></div>` : '<div></div>'}
-        <div></div>
-
-        <div class="game-foot">
-          ${g.status !== 'Deseados' ? (canEditHoursWeb(g) ? `<span style="cursor:pointer;text-decoration:underline dotted" data-gameid="${g.id}" data-hours="${g.hours_played}" onclick="editHoursById(this, event)" title="Editar horas"><i class="ti ti-clock" style="font-size:12px"></i>${hours}</span>` : `<span><i class="ti ti-clock" style="font-size:12px"></i>${hours}</span>`) : ''}
-          ${g.status !== 'Deseados' ? lastPlayedEl : ''}
-        </div>
-        <button onclick="toggleGameActionsMenu('${g.id}', ${g.hidden}, event, ${hideLupa ? 'true' : 'false'})" title="Más opciones" style="justify-self:end;font-size:12px;padding:2px 10px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-weight:700">•••</button>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:4px">
+        <button onclick="toggleGameActionsMenu('${g.id}', ${g.hidden}, event, ${hideLupa ? 'true' : 'false'})" title="Más opciones" style="font-size:12px;padding:2px 10px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-weight:700">•••</button>
       </div>
     </div>
   </div>`;
@@ -4351,6 +4353,7 @@ function setView(view) {
   }
   if (isNovedades) {
     loadNovedadesView();
+    markNovedadesSeenWeb();
     return;
   }
 
@@ -6484,6 +6487,7 @@ async function addFriendByUsername() {
     msg.textContent = data.status === 'accepted' ? t('alreadyFriends') : t('requestSentWaiting');
     checkAchievements();
     await loadFriendsList();
+    loadWidgetFriends();
   } catch(e) {
     msg.style.display = 'block';
     msg.style.color = 'var(--red)';
@@ -6498,6 +6502,8 @@ async function acceptFriendRequest(username) {
   });
   checkAchievements();
   await loadFriendsList();
+  loadWidgetFriends();
+  loadNotificationsSummary();
 }
 
 async function removeFriendByUsername(username) {
@@ -6507,6 +6513,7 @@ async function removeFriendByUsername(username) {
     headers: { 'Authorization': `Bearer ${authToken}` }
   });
   await loadFriendsList();
+  loadWidgetFriends();
 }
 
 async function blockFriendByUsername(username) {
@@ -6517,6 +6524,7 @@ async function blockFriendByUsername(username) {
     body: JSON.stringify({ username }),
   });
   await loadFriendsList();
+  loadWidgetFriends();
 }
 
 async function openFriendProfile(username) {
@@ -8008,7 +8016,7 @@ async function closeAnnouncementPopup() {
   _currentAnnouncementId = null;
 }
 
-let notifState = { friend_requests: 0, unseen_period_summary: false };
+let notifState = { friend_requests: 0, unseen_period_summary: false, has_new_novedades: false };
 
 async function loadNotificationsSummary() {
   try {
@@ -8025,6 +8033,12 @@ function renderNotifBell() {
   const dot = document.getElementById('notif-bell-dot');
   if (dot) dot.style.display = notifState.has_any ? 'block' : 'none';
 
+  // Puntos rojos en la seccion correspondiente, ademas del de la campana.
+  const friendsDot = document.getElementById('friends-btn-dot');
+  if (friendsDot) friendsDot.style.display = notifState.friend_requests > 0 ? 'block' : 'none';
+  const novedadesDot = document.getElementById('novedades-btn-dot');
+  if (novedadesDot) novedadesDot.style.display = notifState.has_new_novedades ? 'block' : 'none';
+
   const list = document.getElementById('notif-dropdown-list');
   if (!list) return;
   const items = [];
@@ -8038,6 +8052,12 @@ function renderNotifBell() {
     items.push(`<button onclick="openStatsFromNotif()" class="steam-menu-item" style="width:100%;text-align:left">
       <i class="ti ti-chart-bar" style="font-size:14px;color:#66C0F4"></i>
       ${t('newPeriodSummaryAvailable')}
+    </button>`);
+  }
+  if (notifState.has_new_novedades) {
+    items.push(`<button onclick="openNovedadesFromNotif()" class="steam-menu-item" style="width:100%;text-align:left">
+      <i class="ti ti-sparkles" style="font-size:14px;color:#1D9E75"></i>
+      ${t('novedades')}
     </button>`);
   }
   list.innerHTML = items.length ? items.join('') : `<div style="padding:16px;text-align:center;font-size:12px;color:var(--text2)">${t('noNotifications')}</div>`;
@@ -8076,6 +8096,23 @@ async function markNotificationsRead() {
   } catch (e) {}
   notifState.unseen_period_summary = false;
   renderNotifBell();
+}
+
+function openNovedadesFromNotif() {
+  closeNotifDropdown();
+  setView('novedades');
+}
+
+async function markNovedadesSeenWeb() {
+  if (!notifState.has_new_novedades) return;
+  notifState.has_new_novedades = false;
+  renderNotifBell();
+  try {
+    await fetch(`${apiBase()}/api/v1/notifications/novedades/seen`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+  } catch (e) {}
 }
 
 document.addEventListener('click', (e) => {
@@ -9676,6 +9713,12 @@ async function onLoginSuccess() {
 async function loadSidebarWidgets() {
   loadWidgetFriends();
   loadWidgetReleases();
+  // Sync periodico del widget de amigos (nueva amistad aceptada del otro
+  // lado, se puso/dejo de estar en sesion) sin depender de que el usuario
+  // recargue la pagina a mano.
+  if (!window._widgetFriendsInterval) {
+    window._widgetFriendsInterval = setInterval(loadWidgetFriends, 45000);
+  }
 }
 
 async function loadWidgetFriends() {
@@ -9690,6 +9733,7 @@ async function loadWidgetFriends() {
       <div class="sidebar-widget-row" style="cursor:pointer" onclick="openFriendProfile('${jsAttrEsc(f.username)}')">
         <div style="width:30px;height:30px;border-radius:50%;overflow:hidden;background:var(--bg3);flex-shrink:0;position:relative">
           <div style="width:30px;height:30px;position:relative;transform:translateY(-11.7%)">${_friendAvatarHtml(f, 30)}</div>
+          ${f.in_session ? `<div style="position:absolute;bottom:-1px;right:-1px;width:13px;height:13px;border-radius:50%;background:#1D9E75;border:1.5px solid var(--bg);display:flex;align-items:center;justify-content:center" title="${t('inSession')}"><i class="ti ti-player-play-filled" style="font-size:7px;color:#fff"></i></div>` : ''}
         </div>
         <div class="sidebar-widget-row-text">
           <div class="sidebar-widget-row-name">${esc(f.username)}</div>
