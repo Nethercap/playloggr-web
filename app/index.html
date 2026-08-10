@@ -62,7 +62,10 @@
        usaba mobile, #mobile-sidebar). En mobile (<=640px) se mantiene el
        header compacto + drawer "...". ── */
     @media (min-width:641px) {
-      body { padding-left:236px; padding-right:280px; }
+      /* padding-top: el header ahora es full-width y position:fixed (fuera
+         del flujo), asi que sin este padding el contenido normal (stats-row,
+         game-list) arrancaba en y:0 y quedaba tapado debajo del header. */
+      body { padding-left:236px; padding-right:280px; padding-top:88px; }
 
       .header {
         position:fixed; top:20px; left:20px; right:20px; z-index:81;
@@ -77,9 +80,20 @@
       }
       #notif-bell-wrap { width:auto; }
 
-      /* Conectores/Soporte/Salir no viven como icono suelto en la barra —
-         se accede via "...", igual que en mobile. */
-      #connector-row, #support-link, #logout-btn-header { display:none !important; }
+      /* Conectores (Steam/PSN/GOG/Xbox/Epic) SI se ven como icono suelto en
+         la barra — display:contents saca la caja de #connector-row (que
+         tiene width:100% inline, pensado para el layout viejo) y de
+         #connector-buttons (host de GOG/Xbox/Epic generado por JS) sin
+         tocar el HTML: sus hijos pasan a ser items directos del flex de
+         .header-right. Soporte/Salir siguen sin entrar comodos como icono
+         suelto — se acceden via "...", igual que en mobile. */
+      #connector-row, #connector-buttons { display:contents !important; }
+      #steam-menu-btn, #psn-menu-btn, #connector-buttons .add-btn {
+        padding:5px 10px !important; font-size:12px !important; border-radius:6px !important;
+        border:0.5px solid var(--border) !important; background:var(--bg2) !important; color:var(--text2) !important;
+        margin-left:0 !important; gap:0 !important;
+      }
+      #support-link, #logout-btn-header { display:none !important; }
       #header-more-wrap { display:inline-block !important; }
       #header-more-btn { display:inline-flex !important; }
 
@@ -664,15 +678,15 @@
       <div style="width:100%;display:flex;flex-wrap:wrap;justify-content:flex-start;gap:8px" id="connector-row">
 
       <div style="position:relative;display:inline-block;margin-left:4px" id="steam-menu-wrap">
-        <button class="add-btn" onclick="toggleSteamMenu()" id="steam-menu-btn">
-          <i class="ti ti-brand-steam"></i> Steam ▾
+        <button class="add-btn" onclick="toggleSteamMenu()" id="steam-menu-btn" title="Sincronizar Steam">
+          <i class="ti ti-brand-steam"></i> <span class="sidebar-only-label">Steam ▾</span>
         </button>
       </div>
 
       <!-- PSN (beta) -->
       <div style="position:relative;display:inline-block;margin-left:4px" id="psn-menu-wrap">
-        <button class="add-btn" onclick="togglePsnMenu()" id="psn-menu-btn">
-          <img src="https://cdn.simpleicons.org/playstation/ffffff" style="width:13px;height:13px;vertical-align:-2px"> PSN ▾
+        <button class="add-btn" onclick="togglePsnMenu()" id="psn-menu-btn" title="Sincronizar PSN">
+          <img src="https://cdn.simpleicons.org/playstation/ffffff" style="width:13px;height:13px;vertical-align:-2px"> <span class="sidebar-only-label">PSN ▾</span>
         </button>
       </div>
 
@@ -809,8 +823,8 @@
   <!-- View selector + filters -->
   <div id="library-toolbar" style="border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:60;background:var(--bg3);padding-top:6px;margin-top:-6px">
     <button id="toolbar-collapse-btn" onclick="toggleToolbarCollapsed()" title="Ocultar filtros" data-i18n-title="hideFilters"
-      style="display:none;position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;align-items:center;justify-content:center;padding:0">
-      <i class="ti ti-chevron-left" style="font-size:13px"></i>
+      style="display:none;order:-2;align-self:flex-end;margin-bottom:8px;width:26px;height:26px;border-radius:6px;border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);cursor:pointer;align-items:center;justify-content:center;padding:0;flex-shrink:0">
+      <i class="ti ti-chevron-left" style="font-size:15px"></i>
     </button>
     <!-- Add button — en desktop va primero (ver #library-toolbar en la
          media query, order:-1); en mobile no se ve (es el FAB en su lugar). -->
@@ -7166,8 +7180,8 @@ function renderConnectorMenus() {
   if (!btnHost || !menuHost) return;
   btnHost.innerHTML = Object.entries(CONNECTORS).map(([p, c]) => `
     <div style="position:relative;display:inline-block;margin-left:4px" id="${p}-menu-wrap">
-      <button class="add-btn" onclick="toggleConnectorMenu('${p}')" id="${p}-menu-btn">
-        ${_connIcon(c)} ${c.label} ▾
+      <button class="add-btn" onclick="toggleConnectorMenu('${p}')" id="${p}-menu-btn" title="Sincronizar ${c.label}">
+        ${_connIcon(c)} <span class="sidebar-only-label">${c.label} ▾</span>
       </button>
     </div>
   `).join('');
