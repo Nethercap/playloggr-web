@@ -1219,6 +1219,14 @@
           <label>Color de card</label>
           <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px" id="cfg-cardcolor-options"></div>
         </div>
+        <div class="modal-group full">
+          <label data-i18n="suggestionSettingsLabel">Sugerencia "¿Qué juego hoy?"</label>
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <button class="cfg-choice-btn" data-group="suggestion" data-value="daily" onclick="setSuggestionCfgChoice('daily')"><i class="ti ti-calendar-event"></i> <span data-i18n="suggestionDaily">Diario</span></button>
+            <button class="cfg-choice-btn" data-group="suggestion" data-value="weekly" onclick="setSuggestionCfgChoice('weekly')"><i class="ti ti-calendar-week"></i> <span data-i18n="suggestionWeekly">Semanal</span></button>
+            <button class="cfg-choice-btn" data-group="suggestion" data-value="off" onclick="setSuggestionCfgChoice('off')"><i class="ti ti-eye-off"></i> <span data-i18n="suggestionDisable">Desactivada</span></button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1792,6 +1800,9 @@ const I18N = {
     pendingFriendRequests: 'solicitudes de amistad pendientes',
     friendRequestReceived: 'Quiere ser tu amigo', accept: 'Aceptar', reject: 'Rechazar',
     hideFilters: 'Ocultar filtros', showFilters: 'Mostrar filtros', more: 'Más opciones',
+    suggestionTitle: 'Sugerencia del día', suggestionWeeklyTitle: 'Sugerencia de la semana',
+    suggestionDaily: 'Diario', suggestionWeekly: 'Semanal', suggestionDisable: 'Desactivar',
+    suggestionSettingsLabel: 'Sugerencia "¿Qué juego hoy?"', registerSession: 'Jugar',
     newPeriodSummaryAvailable: 'Nuevo resumen de período disponible',
     noNotifications: 'No tenés notificaciones',
     verifyEmailTitle: 'Confirmá tu cuenta', verifyEmailHint: 'Te enviamos un código de 6 dígitos a tu email. Ingresalo para activar tu cuenta.',
@@ -1953,6 +1964,9 @@ const I18N = {
     pendingFriendRequests: 'pending friend requests',
     friendRequestReceived: 'Wants to be your friend', accept: 'Accept', reject: 'Reject',
     hideFilters: 'Hide filters', showFilters: 'Show filters', more: 'More options',
+    suggestionTitle: 'Suggestion of the day', suggestionWeeklyTitle: 'Suggestion of the week',
+    suggestionDaily: 'Daily', suggestionWeekly: 'Weekly', suggestionDisable: 'Disable',
+    suggestionSettingsLabel: '"What should I play?" suggestion', registerSession: 'Play',
     newPeriodSummaryAvailable: 'New period summary available',
     noNotifications: 'No notifications',
     verifyEmailTitle: 'Confirm your account', verifyEmailHint: 'We sent a 6-digit code to your email. Enter it to activate your account.',
@@ -2114,6 +2128,9 @@ const I18N = {
     pendingFriendRequests: 'solicitações de amizade pendentes',
     friendRequestReceived: 'Quer ser seu amigo', accept: 'Aceitar', reject: 'Rejeitar',
     hideFilters: 'Ocultar filtros', showFilters: 'Mostrar filtros', more: 'Mais opções',
+    suggestionTitle: 'Sugestão do dia', suggestionWeeklyTitle: 'Sugestão da semana',
+    suggestionDaily: 'Diário', suggestionWeekly: 'Semanal', suggestionDisable: 'Desativar',
+    suggestionSettingsLabel: 'Sugestão "Qual jogo hoje?"', registerSession: 'Jogar',
     newPeriodSummaryAvailable: 'Novo resumo de período disponível',
     noNotifications: 'Você não tem notificações',
     verifyEmailTitle: 'Confirme sua conta', verifyEmailHint: 'Enviamos um código de 6 dígitos para o seu email. Digite-o para ativar sua conta.',
@@ -4971,6 +4988,13 @@ async function openConfigPanel() {
     document.querySelector(`input[name="cfg-visibility"][value="${vis}"]`).checked = true;
   } catch(e) {}
 
+  if (!_suggestionData) {
+    try {
+      const sres = await fetch(`${apiBase()}/api/v1/suggestion/today`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+      _suggestionData = sres.ok ? await sres.json() : null;
+    } catch (e) {}
+  }
+
   applyPremiumUI();
   await loadAvatarConfig();
   switchConfigTab('profile');
@@ -5011,6 +5035,11 @@ function renderAppearanceTab() {
     || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   document.querySelectorAll('.cfg-choice-btn[data-group="theme"]').forEach(b => {
     b.classList.toggle('active', b.dataset.value === currentTheme);
+  });
+
+  const suggestionValue = (_suggestionData && _suggestionData.enabled === false) ? 'off' : ((_suggestionData && _suggestionData.frequency) || 'daily');
+  document.querySelectorAll('.cfg-choice-btn[data-group="suggestion"]').forEach(b => {
+    b.classList.toggle('active', b.dataset.value === suggestionValue);
   });
 
   const isFixed = STATUS_DOT_COLORS.hasOwnProperty(cardColorMode);
@@ -5071,6 +5100,22 @@ async function setCfgChoice(group, value) {
       body: JSON.stringify(body),
     });
   } catch(e) {}
+}
+
+async function setSuggestionCfgChoice(value) {
+  const body = value === 'off' ? { enabled: false } : { enabled: true, frequency: value };
+  _suggestionData = { ..._suggestionData, ...body };
+  renderAppearanceTab();
+  try {
+    await fetch(`${apiBase()}/api/v1/suggestion/settings`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const sres = await fetch(`${apiBase()}/api/v1/suggestion/today`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    _suggestionData = sres.ok ? await sres.json() : null;
+    _suggestionIndex = (_suggestionData && _suggestionData.default_index) || 0;
+  } catch (e) {}
 }
 
 async function saveConfig() {
@@ -6047,6 +6092,8 @@ function _novedadesSectionHtml(icon, title, innerHtml) {
 }
 
 let _novedadesReviews = [];
+let _suggestionData = null;
+let _suggestionIndex = 0;
 
 async function loadNovedadesView() {
   const el = document.getElementById('novedades-content');
@@ -6063,11 +6110,118 @@ async function loadNovedadesView() {
       const rd = await rres.json();
       _novedadesReviews = rres.ok ? (rd.reviews || []) : [];
     } catch (e) { _novedadesReviews = []; }
+    try {
+      const sres = await fetch(`${apiBase()}/api/v1/suggestion/today`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+      _suggestionData = sres.ok ? await sres.json() : null;
+      _suggestionIndex = (_suggestionData && _suggestionData.default_index) || 0;
+    } catch (e) { _suggestionData = null; }
     _renderNovedades();
   } catch (e) {
     el.innerHTML = `<div style="color:var(--red);padding:16px">${e.message || t('novedadesError')}</div>`;
   }
 }
+
+function selectSuggestionCard(i) {
+  _suggestionIndex = i;
+  document.querySelectorAll('#suggestion-scroll-row [data-suggestion-idx]').forEach(el => {
+    el.style.opacity = Number(el.dataset.suggestionIdx) === i ? '1' : '0.55';
+  });
+}
+
+function _suggestionCardHtml(g, i) {
+  const active = i === _suggestionIndex;
+  return `
+    <div style="width:120px;flex-shrink:0;scroll-snap-align:start;cursor:pointer;${active ? '' : 'opacity:0.55'}" data-suggestion-idx="${i}" onclick="selectSuggestionCard(${i})">
+      <div style="width:120px;height:148px;border-radius:8px;overflow:hidden;background:var(--bg3)">
+        <img src="${g.cover_url || ''}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'" />
+      </div>
+      <div style="font-size:12px;font-weight:600;line-height:1.25;margin-top:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(g.name || '')}</div>
+      <div style="font-size:10.5px;color:var(--text2);margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(g.reason || '')}</div>
+      <button onclick="event.stopPropagation();togglePlaySession('${jsAttrEsc(g.game_id)}')" style="margin-top:6px;width:100%;font-size:11px;padding:5px 0;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;font-weight:600">
+        <i class="ti ti-player-play"></i> ${t('registerSession')}
+      </button>
+    </div>`;
+}
+
+function _suggestionSectionHtml() {
+  const s = _suggestionData;
+  if (!s || !s.enabled || !s.candidates || !s.candidates.length) return '';
+  const minimized = !!s.minimized;
+  const freqLabel = s.frequency === 'weekly' ? t('suggestionWeeklyTitle') : t('suggestionTitle');
+  return `
+    <div style="margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;cursor:pointer" onclick="toggleSuggestionSection()">
+        <i class="ti ti-device-gamepad-2" style="font-size:16px;color:var(--green)"></i>
+        <span style="font-size:14px;font-weight:700;flex:1">${freqLabel}</span>
+        <i class="ti ${minimized ? 'ti-chevron-down' : 'ti-chevron-up'}" style="font-size:14px;color:var(--text2)"></i>
+        <div style="position:relative" onclick="event.stopPropagation()">
+          <button onclick="toggleSuggestionSettingsMenu()" title="${t('config')}" style="width:24px;height:24px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">
+            <i class="ti ti-dots-vertical" style="font-size:13px"></i>
+          </button>
+          <div id="suggestion-settings-menu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:100;min-width:170px;box-shadow:0 4px 16px rgba(0,0,0,0.3);padding:4px 0">
+            <button onclick="setSuggestionFrequencyFromWidget('daily')" class="steam-menu-item" style="width:100%;text-align:left">${t('suggestionDaily')}</button>
+            <button onclick="setSuggestionFrequencyFromWidget('weekly')" class="steam-menu-item" style="width:100%;text-align:left">${t('suggestionWeekly')}</button>
+            <button onclick="disableSuggestionFromWidget()" class="steam-menu-item" style="width:100%;text-align:left;color:var(--red)">${t('suggestionDisable')}</button>
+          </div>
+        </div>
+      </div>
+      ${minimized ? '' : `<div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scroll-snap-type:x proximity" id="suggestion-scroll-row">
+        ${s.candidates.map((g, i) => _suggestionCardHtml(g, i)).join('')}
+      </div>`}
+    </div>`;
+}
+
+function toggleSuggestionSection() {
+  if (!_suggestionData) return;
+  _suggestionData.minimized = !_suggestionData.minimized;
+  _renderNovedades();
+  fetch(`${apiBase()}/api/v1/suggestion/settings`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ minimized: _suggestionData.minimized }),
+  }).catch(() => {});
+}
+
+function toggleSuggestionSettingsMenu() {
+  const menu = document.getElementById('suggestion-settings-menu');
+  if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+async function setSuggestionFrequencyFromWidget(freq) {
+  toggleSuggestionSettingsMenu();
+  try {
+    await fetch(`${apiBase()}/api/v1/suggestion/settings`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ frequency: freq }),
+    });
+    const sres = await fetch(`${apiBase()}/api/v1/suggestion/today`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    _suggestionData = sres.ok ? await sres.json() : null;
+    _suggestionIndex = (_suggestionData && _suggestionData.default_index) || 0;
+    _renderNovedades();
+  } catch (e) {}
+}
+
+async function disableSuggestionFromWidget() {
+  toggleSuggestionSettingsMenu();
+  try {
+    await fetch(`${apiBase()}/api/v1/suggestion/settings`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled: false }),
+    });
+    _suggestionData = { enabled: false };
+    _renderNovedades();
+  } catch (e) {}
+}
+
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('suggestion-settings-menu');
+  if (!menu || menu.style.display === 'none') return;
+  if (!e.target.closest('#suggestion-settings-menu') && e.target.id !== 'suggestion-settings-menu') {
+    if (!e.target.closest('button[onclick="toggleSuggestionSettingsMenu()"]')) menu.style.display = 'none';
+  }
+});
 
 function _novedadesReviewTileHtml(r) {
   const name = r.is_anonymous ? t('reviewAnonymousLabel') : esc(r.username || '?');
@@ -6100,13 +6254,14 @@ function _renderNovedades() {
   const upcoming = (d.releases && d.releases.upcoming) || [];
   const freeGames = d.free_games || {};
   const freeGamesEmpty = !Object.values(freeGames).some(list => (list || []).length);
+  const hasSuggestion = _suggestionData && _suggestionData.enabled && _suggestionData.candidates && _suggestionData.candidates.length;
 
-  if (!friendsPlaying.length && !popularWishlist.length && !mostHours.length && !recent.length && !upcoming.length && freeGamesEmpty && !(_novedadesReviews || []).length) {
+  if (!hasSuggestion && !friendsPlaying.length && !popularWishlist.length && !mostHours.length && !recent.length && !upcoming.length && freeGamesEmpty && !(_novedadesReviews || []).length) {
     el.innerHTML = `<div style="text-align:center;padding:40px 16px;color:var(--text2)"><i class="ti ti-sparkles" style="font-size:32px"></i><div style="margin-top:10px">${t('novedadesEmpty')}</div></div>`;
     return;
   }
 
-  let html = '';
+  let html = _suggestionSectionHtml();
   if (friendsPlaying.length) {
     html += _novedadesSectionHtml('ti-users', t('novedadesFriendsPlaying'),
       friendsPlaying.map(g => _novedadesSimpleTileHtml(g.name, (g.friend_usernames || []).join(', '), g.friend_count)).join(''));
@@ -6124,6 +6279,12 @@ function _renderNovedades() {
   if ((_novedadesReviews || []).length) html += _novedadesSectionHtml('ti-message-star', t('recentReviews'), _novedadesReviews.map(_novedadesReviewTileHtml).join(''));
   if (!freeGamesEmpty) html += _novedadesSectionHtml('ti-gift', t('novedadesFreeGames'), _novedadesFreeGamesHtml(freeGames));
   el.innerHTML = html;
+
+  const row = document.getElementById('suggestion-scroll-row');
+  if (row) {
+    const activeCard = row.querySelector(`[data-suggestion-idx="${_suggestionIndex}"]`);
+    if (activeCard) activeCard.scrollIntoView({ block: 'nearest', inline: 'start' });
+  }
 }
 
 let _novedadesAddRelease = null;
