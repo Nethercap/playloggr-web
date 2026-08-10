@@ -31,13 +31,13 @@
     .header { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:14px 18px; display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
 
     /* ── Sidebar mobile (reemplaza el dropdown "..." — mismas opciones que
-       el drawer de la app, no un popup chico) ── */
+       el drawer de la app: se abre desde la DERECHA, no un popup chico) ── */
     .mobile-sidebar-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:598; }
     .mobile-sidebar-backdrop.open { display:block; }
     .mobile-sidebar {
-      position:fixed; top:0; left:0; bottom:0; width:78%; max-width:300px;
-      background:var(--bg); z-index:599; box-shadow:2px 0 16px rgba(0,0,0,.3);
-      transform:translateX(-100%); transition:transform .25s ease;
+      position:fixed; top:0; right:0; bottom:0; width:78%; max-width:300px;
+      background:var(--bg); z-index:599; box-shadow:-2px 0 16px rgba(0,0,0,.3);
+      transform:translateX(100%); transition:transform .25s ease;
       overflow-y:auto; padding-bottom:12px;
     }
     .mobile-sidebar.open { transform:translateX(0); }
@@ -53,53 +53,36 @@
     #toolbar-collapse-btn, #toolbar-reopen-tab { display:none; }
     .nav-divider { display:none; }
 
-    /* ── Desktop/tablet (>640px): titulo anclado arriba a todo el ancho, y
-       debajo un sidebar de navegacion vertical (icono + texto, mismo
-       listado que el drawer de mobile/app: Notificaciones..Salir, incluidos
-       conectores) — como estaba antes de probar el header horizontal con
-       iconos sueltos. Panel de perfil fijo a la derecha. En mobile
-       (<=640px) se mantiene el header compacto + drawer "...". ── */
+    /* ── Desktop/tablet (>640px): titulo anclado arriba a todo el ancho +
+       campana de notificaciones + boton "..." que abre el mismo drawer que
+       usa mobile (#mobile-sidebar, ahora alineado a la derecha en vez de
+       izquierda para las dos resoluciones — mismo comportamiento que el
+       endDrawer de la app). Panel de perfil fijo a la derecha. ── */
     @media (min-width:641px) {
       /* padding-top: el titulo es full-width y position:fixed (fuera del
          flujo), asi que sin este padding el contenido normal (stats-row,
          game-list) arrancaba en y:0 y quedaba tapado debajo. */
-      body { padding-left:452px; padding-right:280px; padding-top:88px; }
+      body { padding-left:236px; padding-right:280px; padding-top:88px; }
 
       .header {
         position:fixed; top:20px; left:20px; right:20px; z-index:81;
-        display:flex; align-items:center;
+        display:flex; align-items:center; justify-content:space-between;
         background:var(--bg); border:1.5px solid var(--green); border-radius:var(--radius-lg);
         padding:12px 16px; margin:0; overflow:visible;
       }
       .header-title { flex-shrink:0; }
-      .header-right {
-        position:fixed; top:88px; left:20px; bottom:20px; width:200px; z-index:80;
-        flex-direction:column; align-items:stretch; gap:5px; flex-wrap:nowrap;
-        background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg);
-        padding:10px 0; overflow-y:auto; overflow-x:hidden;
-      }
-      .header-right > button, .header-right > a, .header-right > #notif-bell-wrap > button {
-        display:flex !important; width:100% !important; justify-content:flex-start !important;
-        text-align:left !important; margin-left:0 !important;
-        border:none !important; border-radius:0 !important; background:transparent !important; box-shadow:none !important;
-        padding:9px 16px !important; gap:12px !important; font-size:13px !important;
-      }
-      .header-right > button:hover, .header-right > a:hover, .header-right > #notif-bell-wrap > button:hover { background:var(--bg2) !important; }
-      #notif-bell-wrap { width:100%; }
-      .sidebar-only-label { display:inline; }
+      .header-right { display:flex; align-items:center; gap:8px; }
 
-      #connector-row {
-        flex-direction:column; flex-wrap:nowrap !important; width:100%; gap:5px; margin-top:14px !important;
-        padding-top:14px; border-top:0.5px solid var(--border); display:flex !important;
+      /* Solo campana + "..." quedan sueltos en el header — el resto (Novedades,
+         Amigos, Logros, Juego del mes, Mis reseñas, Configuracion, conectores,
+         Soporte, Salir) vive en el drawer que abre el "...", igual que mobile. */
+      .nav-divider,
+      #novedades-icon-btn, #achievements-btn, #gom-icon-btn, #myreviews-icon-btn,
+      #friends-btn, #config-btn, #connector-row, #support-link, #logout-btn-header {
+        display:none !important;
       }
-      #connector-row div { display:block; width:100%; margin-left:0 !important; }
-      #connector-row .add-btn {
-        display:flex !important; width:100% !important; justify-content:flex-start !important;
-        text-align:left !important; border:none !important; border-radius:0 !important; padding:9px 16px !important;
-      }
-      #connector-row .add-btn:hover { background:var(--bg2) !important; }
-
-      #header-more-wrap { display:none !important; }
+      #header-more-wrap { display:inline-block !important; }
+      #header-more-btn { display:inline-flex !important; }
 
       #right-sidebar {
         position:fixed; top:88px; right:32px; bottom:20px; width:220px; z-index:80;
@@ -130,11 +113,10 @@
       .sidebar-widget-empty { font-size:11px; color:var(--text2); text-align:center; padding:8px 0; }
 
       /* ── Sidebar de filtros (Biblioteca-Deseados-Rankings-Carpetas,
-         filtros, lista/cuadricula, ocultos, orden, buscar), fijo a la
-         izquierda, al lado del sidebar de navegacion (left:236 = 20 margen +
-         200 ancho del nav + 16 gap). ── */
+         filtros, lista/cuadricula, ocultos, orden, buscar), UNICO sidebar
+         fijo a la izquierda ahora que la nav vive en el drawer del "...". ── */
       #library-toolbar {
-        position:fixed !important; top:88px !important; left:236px !important; bottom:20px !important; width:196px !important;
+        position:fixed !important; top:88px !important; left:20px !important; bottom:20px !important; width:196px !important;
         border-bottom:none !important; background:var(--bg) !important; border:0.5px solid var(--border) !important;
         border-radius:var(--radius-lg); padding:16px 14px; margin-top:0 !important;
         overflow-y:auto; z-index:70; display:flex !important; flex-direction:column;
@@ -163,23 +145,18 @@
       #search-input { width:100% !important; }
       #sort-sel { text-align:left; }
 
-      /* ── Divisores entre grupos del sidebar de navegacion (notificaciones/
-         social, contenido, cuenta) — linea horizontal, para el sidebar
-         vertical. ── */
-      .nav-divider { display:block; height:0.5px; background:var(--border); margin:6px 16px; }
-
       /* ── Colapsar el sidebar de filtros: en pantallas de ~1366px de ancho
-         los 3 elementos fijos (nav + filtros + sidebar derecho) dejan poco
-         lugar para las cards. #toolbar-collapse-btn vive DENTRO del toolbar
-         (siempre visible ahi) y #toolbar-reopen-tab es la pestaña angosta
-         que aparece pegada al sidebar de nav cuando esta colapsado, para
-         volver a abrirlo sin tener que ir a buscarlo. ── */
+         el sidebar de filtros deja poco lugar para las cards.
+         #toolbar-collapse-btn vive DENTRO del toolbar (siempre visible ahi)
+         y #toolbar-reopen-tab es la pestaña angosta que aparece pegada al
+         borde cuando esta colapsado, para volver a abrirlo sin tener que ir
+         a buscarlo. ── */
       #toolbar-collapse-btn { display:flex !important; }
       #toolbar-reopen-tab { display:none; }
-      body.toolbar-collapsed { padding-left:236px !important; }
+      body.toolbar-collapsed { padding-left:20px !important; }
       body.toolbar-collapsed #library-toolbar { display:none !important; }
       body.toolbar-collapsed #toolbar-reopen-tab {
-        display:flex !important; position:fixed; top:88px; left:236px; bottom:20px; width:22px;
+        display:flex !important; position:fixed; top:88px; left:20px; bottom:20px; width:22px;
         align-items:center; justify-content:center; background:var(--bg); border:0.5px solid var(--border);
         border-radius:var(--radius-lg); z-index:70; cursor:pointer; color:var(--text2);
       }
