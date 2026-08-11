@@ -6136,10 +6136,7 @@ function _suggestionCardHtml(g, i) {
         <img src="${g.cover_url || ''}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'" />
       </div>
       <div style="font-size:12px;font-weight:600;line-height:1.25;margin-top:5px;height:30px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(g.name || '')}</div>
-      <div style="font-size:10.5px;color:var(--text2);margin-top:2px;height:28px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(g.reason || '')}</div>
-      <button onclick="event.stopPropagation();togglePlaySession('${jsAttrEsc(g.game_id)}')" style="margin-top:auto;width:100%;font-size:11px;padding:5px 0;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;font-weight:600">
-        <i class="ti ti-player-play"></i> ${t('registerSession')}
-      </button>
+      <div style="font-size:10.5px;color:var(--text2);margin-top:2px;height:40px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-style:italic">${esc(g.reason || '')}</div>
     </div>`;
 }
 
