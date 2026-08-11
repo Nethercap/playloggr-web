@@ -4948,9 +4948,15 @@ function _renderActivityGrid(start, end) {
     }
     weeks.push(week);
   }
+  // Labels de mes solo tienen sentido en la vista Año — en Mes el rango ya
+  // es un solo mes (el titulo de arriba dice "Ago 2026") y la primera
+  // semana de la grilla arranca en el mes anterior para completar la
+  // semana lun-dom, lo que mostraba un "Jul Ago" confuso.
+  const showMonthLabels = _activityRange === 'year';
   const monthNames = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   let lastMonth = -1;
   const monthLabels = weeks.map(week => {
+    if (!showMonthLabels) return '';
     const m = week[0].getMonth();
     if (m !== lastMonth) { lastMonth = m; return monthNames[m]; }
     return '';
