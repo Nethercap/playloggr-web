@@ -1871,7 +1871,7 @@ const I18N = {
     pendingFriendRequests: 'solicitudes de amistad pendientes',
     friendRequestReceived: 'Quiere ser tu amigo', accept: 'Aceptar', reject: 'Rechazar',
     hideFilters: 'Ocultar filtros', showFilters: 'Mostrar filtros', more: 'Más opciones',
-    suggestionTitle: 'Sugerencia del día', suggestionWeeklyTitle: 'Sugerencia de la semana',
+    suggestionTitle: 'Sugerencia del día', suggestionWeeklyTitle: 'Sugerencia de la semana', suggestionNoRating: 'Sin calificar',
     suggestionDaily: 'Diario', suggestionWeekly: 'Semanal', suggestionDisable: 'Desactivar',
     suggestionSettingsLabel: 'Sugerencia "¿Qué juego hoy?"', registerSession: 'Jugar',
     newPeriodSummaryAvailable: 'Nuevo resumen de período disponible',
@@ -2057,7 +2057,7 @@ const I18N = {
     pendingFriendRequests: 'pending friend requests',
     friendRequestReceived: 'Wants to be your friend', accept: 'Accept', reject: 'Reject',
     hideFilters: 'Hide filters', showFilters: 'Show filters', more: 'More options',
-    suggestionTitle: 'Suggestion of the day', suggestionWeeklyTitle: 'Suggestion of the week',
+    suggestionTitle: 'Suggestion of the day', suggestionWeeklyTitle: 'Suggestion of the week', suggestionNoRating: 'Not rated',
     suggestionDaily: 'Daily', suggestionWeekly: 'Weekly', suggestionDisable: 'Disable',
     suggestionSettingsLabel: '"What should I play?" suggestion', registerSession: 'Play',
     newPeriodSummaryAvailable: 'New period summary available',
@@ -2243,7 +2243,7 @@ const I18N = {
     pendingFriendRequests: 'solicitações de amizade pendentes',
     friendRequestReceived: 'Quer ser seu amigo', accept: 'Aceitar', reject: 'Rejeitar',
     hideFilters: 'Ocultar filtros', showFilters: 'Mostrar filtros', more: 'Mais opções',
-    suggestionTitle: 'Sugestão do dia', suggestionWeeklyTitle: 'Sugestão da semana',
+    suggestionTitle: 'Sugestão do dia', suggestionWeeklyTitle: 'Sugestão da semana', suggestionNoRating: 'Sem avaliação',
     suggestionDaily: 'Diário', suggestionWeekly: 'Semanal', suggestionDisable: 'Desativar',
     suggestionSettingsLabel: 'Sugestão "Qual jogo hoje?"', registerSession: 'Jogar',
     newPeriodSummaryAvailable: 'Novo resumo de período disponível',
@@ -6427,24 +6427,92 @@ async function loadNovedadesView() {
       _suggestionIndex = (_suggestionData && _suggestionData.default_index) || 0;
     } catch (e) { _suggestionData = null; }
     _renderNovedades();
+    if (_suggestionData && _suggestionData.candidates && _suggestionData.candidates.length) {
+      _loadSuggestionScores(_suggestionData.candidates);
+    }
   } catch (e) {
     el.innerHTML = `<div style="color:var(--red);padding:16px">${e.message || t('novedadesError')}</div>`;
   }
 }
 
+function _suggestionScoreBadgeHtml(g) {
+  // Mismo criterio que scoreBadgeHtml() de biblioteca (Steam % con fallback
+  // a IGDB %) pero con id propio (sugg-score-*) para no pisar los badges
+  // de la grilla de biblioteca si ambas quedan en el DOM a la vez.
+  const rawScore = g._steamScoreRaw || g.steam_score;
+  const info = rawScore ? steamScoreLabel[rawScore] : null;
+  const scoreText = (info && g._steamScorePct != null) ? `${g._steamScorePct}%` : null;
+  if (info && scoreText && g.platform === 'Steam') {
+    return `<span id="sugg-score-${g.game_id}" class="steam-score ${info.cls}" style="position:absolute;top:5px;left:5px" title="${esc(info.label)}">${scoreText}</span>`;
+  }
+  if (g._igdbRatingPct != null) {
+    return `<span id="sugg-score-${g.game_id}" class="steam-score" style="position:absolute;top:5px;left:5px;background:${igdbScoreClass(g._igdbRatingPct)};color:#fff" title="Puntaje IGDB (crítica + comunidad)">${g._igdbRatingPct}%</span>`;
+  }
+  return `<span id="sugg-score-${g.game_id}"></span>`;
+}
+
 function _suggestionCardHtml(g, i) {
+  const communityText = g.community_count > 0 ? `${g.community_avg.toFixed(1)}★ (${g.community_count})` : t('suggestionNoRating');
   return `
     <div style="width:120px;flex-shrink:0;scroll-snap-align:start;display:flex;flex-direction:column" data-suggestion-idx="${i}">
       <div style="width:120px;height:148px;border-radius:8px;overflow:hidden;background:var(--bg3);flex-shrink:0;position:relative">
         <img src="${g.cover_url || ''}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'" />
+        ${_suggestionScoreBadgeHtml(g)}
         ${g.has_reviews ? `
           <button onclick="openReviewsList('${jsAttrEsc(g.game_id)}')" style="position:absolute;left:0;right:0;bottom:0;padding:4px 0;font-size:9.5px;font-weight:600;text-align:center;background:rgba(0,0,0,0.65);color:#fff;border:none;cursor:pointer">
             <i class="ti ti-messages" style="font-size:10px"></i> ${t('viewReviews')}
           </button>` : ''}
       </div>
       <div style="font-size:12px;font-weight:600;line-height:1.25;margin-top:5px;height:30px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(g.name || '')}</div>
-      <div style="font-size:10.5px;color:var(--text2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(g.reason || '')}</div>
+      <div style="font-size:10.5px;color:var(--text2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${g.hours}h · ${communityText}</div>
     </div>`;
+}
+
+async function _loadSuggestionScores(candidates) {
+  const toFetch = candidates.filter(g => g.platform === 'Steam' && g.app_id && !g._steamScoreRaw);
+  if (toFetch.length > 0) {
+    try {
+      const appIds = toFetch.map(g => g.app_id).join(',');
+      const res = await fetch(`${apiBase()}/api/v1/steam/reviews/batch?app_ids=${encodeURIComponent(appIds)}`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+      if (res.ok) {
+        const scores = await res.json();
+        toFetch.forEach(g => {
+          const score = scores[g.app_id];
+          if (!score) return;
+          const info = steamScoreLabel[score.review_score_desc];
+          if (!info) return;
+          g._steamScoreRaw = score.review_score_desc;
+          g._steamScorePct = score.total_reviews > 0 ? Math.round(100 * score.total_positive / score.total_reviews) : null;
+          const el = document.getElementById(`sugg-score-${g.game_id}`);
+          if (el) el.outerHTML = _suggestionScoreBadgeHtml(g);
+        });
+      }
+    } catch (e) {}
+  }
+  const toFetchIgdb = candidates.filter(g => {
+    const hasSteamScore = g.platform === 'Steam' && (g._steamScoreRaw || g.steam_score);
+    return !hasSteamScore && g._igdbRatingPct == null;
+  });
+  if (toFetchIgdb.length > 0) {
+    try {
+      const names = toFetchIgdb.map(g => g.name).join(',');
+      const res = await fetch(`${apiBase()}/api/v1/igdb/rating/batch?names=${encodeURIComponent(names)}`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+      if (res.ok) {
+        const ratings = await res.json();
+        toFetchIgdb.forEach(g => {
+          const pct = ratings[g.name];
+          if (pct == null) return;
+          g._igdbRatingPct = pct;
+          const el = document.getElementById(`sugg-score-${g.game_id}`);
+          if (el) el.outerHTML = _suggestionScoreBadgeHtml(g);
+        });
+      }
+    } catch (e) {}
+  }
 }
 
 function _suggestionSectionHtml() {
