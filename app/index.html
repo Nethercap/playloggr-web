@@ -4990,10 +4990,18 @@ function _activityBounds() {
   return { start, end, label: `${_fmtDate(start)} → ${_fmtDate(end)}` };
 }
 
+let _activityLoadSeq = 0;
+
 async function loadActivityHeatmap() {
+  // Guard contra requests pisados: si el usuario cambia de rango (Año→Mes)
+  // antes de que el fetch anterior resuelva, la respuesta vieja podia
+  // llegar despues y sobreescribir el grid nuevo con el rango equivocado
+  // (ej. quedaba el grid de Año renderizado aunque el boton ya dijera Mes).
+  const seq = ++_activityLoadSeq;
   const el = document.getElementById('activity-content');
   el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>${t('loading')}</div>`;
   document.getElementById('activity-detail').textContent = t('activityDetailHint');
+  const range = _activityRange;
   const { start, end, label } = _activityBounds();
   document.getElementById('activity-range-label').textContent = label;
   try {
@@ -5002,11 +5010,13 @@ async function loadActivityHeatmap() {
     });
     const d = await res.json();
     if (!res.ok) throw new Error(d.detail || 'Error');
+    if (seq !== _activityLoadSeq) return; // llego tarde, ya hay un request mas nuevo en curso
     _activityDaysByDate = {};
     (d.days || []).forEach(day => { _activityDaysByDate[day.date] = day; });
-    if (_activityRange === 'week') _renderActivityWeek(start);
+    if (range === 'week') _renderActivityWeek(start);
     else _renderActivityGrid(start, end);
   } catch (e) {
+    if (seq !== _activityLoadSeq) return;
     el.innerHTML = `<div class="empty"><i class="ti ti-mood-sad"></i>${t('errorLoadingStats')}</div>`;
   }
 }
@@ -5048,8 +5058,13 @@ function _renderActivityGrid(start, end) {
   });
   const cell = 12, gap = 3;
   const width = weeks.length * (cell + gap);
+  // En Año la grilla es mas ancha que el contenedor y necesita scroll
+  // horizontal (justify-content:center rompe eso, "esconde" el arranque
+  // del scroll) — en Mes/Semana es mucho mas angosta que el contenedor y
+  // sin centrar quedaba pegada a la izquierda con un hueco enorme al lado.
+  const centerGrid = _activityRange !== 'year';
   el.innerHTML = `
-    <div style="overflow-x:auto;padding-bottom:6px">
+    <div style="overflow-x:auto;padding-bottom:6px${centerGrid ? ';display:flex;justify-content:center' : ''}">
       <svg width="${width}" height="${18 + 7*(cell+gap)}" style="display:block">
         ${monthLabels.map((m, i) => m ? `<text x="${i*(cell+gap)}" y="10" font-size="10" fill="var(--text2)">${m}</text>` : '').join('')}
         ${weeks.map((week, wi) => week.map((day, di) => {
@@ -5063,7 +5078,7 @@ function _renderActivityGrid(start, end) {
         }).join('')).join('')}
       </svg>
     </div>
-    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);margin-top:6px;justify-content:flex-end">
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);margin-top:6px;justify-content:${centerGrid ? 'center' : 'flex-end'}">
       <span>${t('activityLess')}</span>
       ${_ACTIVITY_COLORS.map(c => `<span style="width:11px;height:11px;border-radius:2px;background:${c}"></span>`).join('')}
       <span>${t('activityMore')}</span>
