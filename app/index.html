@@ -1859,6 +1859,7 @@ const I18N = {
     resumeOrRestartHint: 'Ya jugaste {hours}hs de este juego. ¿Querés empezar de nuevo o retomar desde ahí?',
     resumeChoiceResume: 'Retomar', resumeChoiceRestart: 'Empezar de nuevo',
     planError: 'Ocurrió un error al cargar el plan.',
+    planTotalPct: 'Progreso del plan', planTotalHours: 'Horas totales del plan', planHoursPlayed: 'Horas jugadas del plan',
     periodLastWeek: 'Última semana', periodLastMonth: 'Último mes',
     periodNoData: 'Todavía no hay datos para este período', periodNoStatusChanges: 'Sin cambios de estado',
     periodTotalHours: 'Horas jugadas totales', periodByStatus: 'Cambios de estado',
@@ -2043,6 +2044,7 @@ const I18N = {
     resumeOrRestartHint: "You've already played {hours}hs of this game. Do you want to start over or resume from there?",
     resumeChoiceResume: 'Resume', resumeChoiceRestart: 'Start over',
     planError: 'An error occurred loading the plan.',
+    planTotalPct: 'Plan progress', planTotalHours: 'Total plan hours', planHoursPlayed: 'Plan hours played',
     periodLastWeek: 'Last week', periodLastMonth: 'Last month',
     periodNoData: 'No data yet for this period', periodNoStatusChanges: 'No status changes',
     periodTotalHours: 'Total hours played', periodByStatus: 'Status changes',
@@ -2227,6 +2229,7 @@ const I18N = {
     resumeOrRestartHint: 'Você já jogou {hours}hs deste jogo. Quer começar de novo ou retomar dali?',
     resumeChoiceResume: 'Retomar', resumeChoiceRestart: 'Começar de novo',
     planError: 'Ocorreu um erro ao carregar o plano.',
+    planTotalPct: 'Progresso do plano', planTotalHours: 'Horas totais do plano', planHoursPlayed: 'Horas jogadas do plano',
     periodLastWeek: 'Última semana', periodLastMonth: 'Último mês',
     periodNoData: 'Ainda não há dados para este período', periodNoStatusChanges: 'Sem mudanças de status',
     periodTotalHours: 'Horas jogadas totais', periodByStatus: 'Mudanças de status',
@@ -6541,7 +6544,7 @@ function _renderPlanList() {
 
 function _planCardHtml(p) {
   const step = p.active_step;
-  const pct = step ? Math.round(step.plan_pct || 0) : 0;
+  const pct = Math.round(p.total_plan_pct || 0);
   const statusLabel = { active: t('planStatusActive'), completed: t('planStatusCompleted'), abandoned: t('planStatusAbandoned') }[p.status] || p.status;
   return `
     <div onclick="openPlanDetail(${p.id})" style="display:flex;gap:12px;padding:12px;border-radius:var(--radius-lg);background:var(--bg2);margin-bottom:10px;cursor:pointer;align-items:center">
@@ -6551,12 +6554,10 @@ function _planCardHtml(p) {
       <div style="flex:1;min-width:0">
         <div style="font-size:13.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(step ? step.game_name || '' : '')}</div>
         <div style="font-size:11.5px;color:var(--text2);margin-top:2px">${statusLabel} · ${p.steps_count} ${p.steps_count === 1 ? t('gameSingular') : t('gamesPlural')}</div>
-        ${step ? `
-          <div style="height:5px;border-radius:3px;background:var(--bg3);margin-top:6px;overflow:hidden">
-            <div style="height:100%;width:${pct}%;background:var(--green)"></div>
-          </div>
-          <div style="font-size:11px;color:var(--text2);margin-top:3px">${pct}% · ${t('estimatedFinish')}: ${step.estimated_end_date || '—'}</div>
-        ` : ''}
+        <div style="height:5px;border-radius:3px;background:var(--bg3);margin-top:6px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:var(--green)"></div>
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">${pct}% · ${p.total_hours_played}h / ${p.total_estimated_hours}h · ${t('estimatedFinish')}: ${p.estimated_finish_date || '—'}</div>
       </div>
       <i class="ti ti-chevron-right" style="color:var(--text2)"></i>
     </div>`;
@@ -6590,7 +6591,19 @@ function _renderPlanDetail() {
   const el = document.getElementById('plan-detail-content');
   const stepsHtml = p.steps.map(_planStepTimelineHtml).join('');
   const activeStep = p.steps.find(s => s.status === 'active');
+  const totalPct = Math.round(p.total_plan_pct || 0);
   el.innerHTML = `
+    <div style="padding:12px 14px;border-radius:var(--radius-lg);background:var(--bg2);margin-bottom:14px">
+      <div style="height:6px;border-radius:3px;background:var(--bg3);overflow:hidden;margin-bottom:8px">
+        <div style="height:100%;width:${totalPct}%;background:var(--green)"></div>
+      </div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--text2)">
+        <span>${t('planTotalPct')}: <strong style="color:var(--text)">${totalPct}%</strong></span>
+        <span>${t('planTotalHours')}: <strong style="color:var(--text)">${p.total_estimated_hours}h</strong></span>
+        <span>${t('planHoursPlayed')}: <strong style="color:var(--text)">${p.total_hours_played}h</strong></span>
+        <span>${t('estimatedFinish')}: <strong style="color:var(--text)">${p.estimated_finish_date || '—'}</strong></span>
+      </div>
+    </div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
       <span style="font-size:12px;color:var(--text2)">${t('hoursPerWeek')}: <strong style="color:var(--text)">${p.hours_per_week}h</strong></span>
       <button onclick="_promptEditHoursPerWeek()" style="padding:4px 10px;font-size:11.5px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer">${t('edit')}</button>
