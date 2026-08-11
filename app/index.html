@@ -8282,6 +8282,13 @@ function renderPagination() {
   bar.appendChild(next);
 
   document.getElementById('game-list').after(bar);
+  // Si un refresh en segundo plano recrea la barra mientras el usuario esta
+  // en Estadisticas/Rankings/Novedades (no en Biblioteca/Deseados), el
+  // elemento nuevo nace visible y no hereda el display:none que setView()
+  // le habia puesto al anterior — quedaba flotando arriba de esas vistas.
+  if (currentView === 'stats' || currentView === 'rankings' || currentView === 'novedades') {
+    bar.style.display = 'none';
+  }
 }
 
 // ── Swipe horizontal en biblioteca/deseados = cambiar de pagina (mobile) ──
