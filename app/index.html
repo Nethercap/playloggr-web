@@ -7029,7 +7029,7 @@ async function _submitPlanStep(resumeChoice) {
     if (isNewPlan) { openPlanDetail(d.id); }
     else { openPlanDetail(w.planId); }
   } catch (e) {
-    alert(e.message || t('planError'));
+    showToast(e.message || t('planError'), true);
   }
 }
 
