@@ -1860,6 +1860,7 @@ const I18N = {
     resumeChoiceResume: 'Retomar', resumeChoiceRestart: 'Empezar de nuevo',
     planError: 'Ocurrió un error al cargar el plan.',
     planTotalPct: 'Progreso del plan', planTotalHours: 'Horas totales del plan', planHoursPlayed: 'Horas jugadas del plan',
+    resumePlan: 'Reanudar plan', deletePlan: 'Eliminar plan', deletePlanConfirm: '¿Eliminar este plan? No se puede deshacer.',
     periodLastWeek: 'Última semana', periodLastMonth: 'Último mes',
     periodNoData: 'Todavía no hay datos para este período', periodNoStatusChanges: 'Sin cambios de estado',
     periodTotalHours: 'Horas jugadas totales', periodByStatus: 'Cambios de estado',
@@ -2045,6 +2046,7 @@ const I18N = {
     resumeChoiceResume: 'Resume', resumeChoiceRestart: 'Start over',
     planError: 'An error occurred loading the plan.',
     planTotalPct: 'Plan progress', planTotalHours: 'Total plan hours', planHoursPlayed: 'Plan hours played',
+    resumePlan: 'Resume plan', deletePlan: 'Delete plan', deletePlanConfirm: 'Delete this plan? This cannot be undone.',
     periodLastWeek: 'Last week', periodLastMonth: 'Last month',
     periodNoData: 'No data yet for this period', periodNoStatusChanges: 'No status changes',
     periodTotalHours: 'Total hours played', periodByStatus: 'Status changes',
@@ -2230,6 +2232,7 @@ const I18N = {
     resumeChoiceResume: 'Retomar', resumeChoiceRestart: 'Começar de novo',
     planError: 'Ocorreu um erro ao carregar o plano.',
     planTotalPct: 'Progresso do plano', planTotalHours: 'Horas totais do plano', planHoursPlayed: 'Horas jogadas do plano',
+    resumePlan: 'Retomar plano', deletePlan: 'Excluir plano', deletePlanConfirm: 'Excluir este plano? Não pode ser desfeito.',
     periodLastWeek: 'Última semana', periodLastMonth: 'Último mês',
     periodNoData: 'Ainda não há dados para este período', periodNoStatusChanges: 'Sem mudanças de status',
     periodTotalHours: 'Horas jogadas totais', periodByStatus: 'Mudanças de status',
@@ -6607,7 +6610,11 @@ function _renderPlanDetail() {
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
       <span style="font-size:12px;color:var(--text2)">${t('hoursPerWeek')}: <strong style="color:var(--text)">${p.hours_per_week}h</strong></span>
       <button onclick="_promptEditHoursPerWeek()" style="padding:4px 10px;font-size:11.5px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer">${t('edit')}</button>
-      ${p.status === 'active' ? `<button onclick="_abandonPlan()" style="margin-left:auto;padding:4px 10px;font-size:11.5px;border-radius:6px;border:0.5px solid var(--red);background:transparent;color:var(--red);cursor:pointer">${t('abandonPlan')}</button>` : ''}
+      <div style="margin-left:auto;display:flex;gap:8px">
+        ${p.status === 'active' ? `<button onclick="_abandonPlan()" style="padding:4px 10px;font-size:11.5px;border-radius:6px;border:0.5px solid var(--red);background:transparent;color:var(--red);cursor:pointer">${t('abandonPlan')}</button>` : ''}
+        ${p.status === 'abandoned' ? `<button onclick="_resumePlan()" style="padding:4px 10px;font-size:11.5px;border-radius:6px;border:0.5px solid var(--green);background:transparent;color:var(--green);cursor:pointer">${t('resumePlan')}</button>` : ''}
+        <button onclick="_deletePlan()" title="${esc(t('deletePlan'))}" style="padding:4px 8px;font-size:11.5px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer"><i class="ti ti-trash"></i></button>
+      </div>
     </div>
     <div>${stepsHtml}</div>
     ${p.status === 'active' ? `
@@ -6622,7 +6629,9 @@ function _renderPlanDetail() {
 function _planStepTimelineHtml(s) {
   const isActive = s.status === 'active';
   const isDone = s.status === 'done';
-  const opacity = s.status === 'pending' ? '0.55' : '1';
+  const isPending = s.status === 'pending';
+  const opacity = isPending ? '0.55' : '1';
+  const syncKey = _planSyncKeyForGameId(s.game_id);
   const weeksHtml = (s.week_progress || []).map(w => `
     <div style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:11.5px;color:var(--text2)">
       <span style="width:56px;flex-shrink:0">${t('week')} ${w.week_number}</span>
@@ -6640,11 +6649,14 @@ function _planStepTimelineHtml(s) {
         <div style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px">
           ${isDone ? '<i class="ti ti-circle-check" style="color:var(--green)"></i>' : ''}
           ${esc(s.game_name || s.game_id)}
+          ${s.platform ? `<span style="font-size:10px;font-weight:500;color:var(--text2);border:0.5px solid var(--border2);border-radius:4px;padding:1px 5px">${esc(s.platform)}</span>` : ''}
         </div>
         <div style="font-size:11px;color:var(--text2);margin-top:2px">
           ${s.resumed ? `${t('resumeChoiceResume')} (${s.baseline_hours}h) · ` : ''}${t('estimatedHours')}: ${s.estimated_hours}h
+          ${!isPending ? ` · ${t('hoursPlayed')}: ${s.hours_played}h` : ''}
           ${isActive && s.estimated_end_date ? ` · ${t('estimatedFinish')}: ${s.estimated_end_date}` : ''}
         </div>
+        ${isActive && syncKey ? `<button onclick="_syncPlanStep('${jsAttrEsc(s.game_id)}', this)" style="margin-top:6px;padding:3px 9px;font-size:10.5px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer"><i class="ti ti-refresh"></i> ${t('sync')}</button>` : ''}
         ${isActive && weeksHtml ? `<div style="margin-top:8px">${weeksHtml}</div>` : ''}
       </div>
     </div>`;
@@ -6682,6 +6694,55 @@ async function _abandonPlan() {
     });
     openPlanDetail(_planDetailId);
   } catch (e) {}
+}
+
+async function _resumePlan() {
+  try {
+    await fetch(`${apiBase()}/api/v1/plans/${_planDetailId}`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'active' }),
+    });
+    openPlanDetail(_planDetailId);
+  } catch (e) {}
+}
+
+async function _deletePlan() {
+  if (!confirm(t('deletePlanConfirm'))) return;
+  try {
+    await fetch(`${apiBase()}/api/v1/plans/${_planDetailId}`, {
+      method: 'DELETE', headers: { 'Authorization': `Bearer ${authToken}` },
+    });
+    closePlanDetail();
+  } catch (e) {}
+}
+
+function _planSyncKeyForGameId(gameId) {
+  if (gameId.startsWith('steam_')) return 'steam';
+  if (gameId.startsWith('psn_')) return 'psn';
+  if (gameId.startsWith('gog_')) return 'gog';
+  if (gameId.startsWith('xbox_')) return 'xbox';
+  if (gameId.startsWith('epic_')) return 'epic';
+  return null;
+}
+
+async function _syncPlanStep(gameId, btnEl) {
+  const key = _planSyncKeyForGameId(gameId);
+  if (!key) return;
+  const originalHtml = btnEl.innerHTML;
+  btnEl.disabled = true;
+  btnEl.innerHTML = `<i class="ti ti-loader-2"></i> ${t('syncing')}`;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/${key}/sync-library`, { method: 'POST', headers: { 'Authorization': `Bearer ${authToken}` } });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    await fetch(`${apiBase()}/api/v1/plans/refresh-hours`, { method: 'POST', headers: { 'Authorization': `Bearer ${authToken}` } });
+    openPlanDetail(_planDetailId);
+  } catch (e) {
+    showToast(e.message || t('planError'), true);
+    btnEl.disabled = false;
+    btnEl.innerHTML = originalHtml;
+  }
 }
 
 // ── Wizard: elegir juego → HLTB → (resume/restart) → (horas/semana + fecha) ──
