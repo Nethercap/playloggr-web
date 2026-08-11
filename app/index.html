@@ -554,6 +554,7 @@
 <div class="mobile-sidebar" id="mobile-sidebar">
   <div class="mobile-sidebar-header"><i class="ti ti-device-gamepad-2" style="color:#1D9E75"></i> Playloggr</div>
   <button onclick="setView('novedades');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-sparkles"></i> <span data-i18n="novedades">Novedades</span></button>
+  <button onclick="setView('plan');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-route"></i> <span data-i18n="gamePlan">Plan de juego</span></button>
   <button onclick="openGomPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-stars"></i> <span data-i18n="gameOfMonth">Juego del mes</span></button>
   <button onclick="openMyReviewsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-message-star"></i> <span data-i18n="myReviews">Mis reseñas</span></button>
   <button onclick="openFriendsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-users"></i> <span data-i18n="friends">Amigos</span></button>
@@ -966,6 +967,26 @@
   <div id="novedades-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
     <div style="padding:16px;max-width:720px;width:100%;margin:0 auto;box-sizing:border-box">
       <div id="novedades-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
+    </div>
+  </div>
+
+  <!-- Plan de juego view (full page) -->
+  <div id="plan-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
+    <!-- Lista de planes -->
+    <div id="plan-list-panel" style="padding:16px;max-width:820px;width:100%;margin:0 auto;box-sizing:border-box">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <strong style="font-size:16px" data-i18n="gamePlan">Plan de juego</strong>
+        <button onclick="openGameStepWizard({mode:'new_plan'})" style="margin-left:auto;padding:6px 14px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">
+          <i class="ti ti-plus"></i> <span data-i18n="newPlan">Nuevo plan</span>
+        </button>
+      </div>
+      <div id="plan-list-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
+    </div>
+
+    <!-- Detalle de plan -->
+    <div id="plan-detail-panel" style="display:none;padding:16px;max-width:820px;width:100%;margin:0 auto;box-sizing:border-box">
+      <a onclick="closePlanDetail()" style="font-size:12px;color:var(--text2);cursor:pointer" data-i18n="backToPlans">← Volver a Plan de juego</a>
+      <div id="plan-detail-content" style="margin-top:12px"></div>
     </div>
   </div>
 
@@ -1821,6 +1842,23 @@ const I18N = {
     activityTab: 'Actividad', activityDetailHint: 'Hacé click en un día para ver el detalle.',
     activityLess: 'Menos', activityMore: 'Más', activityNoData: 'sin actividad',
     mon: 'Lun', tue: 'Mar', wed: 'Mié', thu: 'Jue', fri: 'Vie', sat: 'Sáb', sun: 'Dom',
+    gamePlan: 'Plan de juego', newPlan: 'Nuevo plan', backToPlans: '← Volver a Plan de juego',
+    noPlans: 'No tenés planes todavía. Creá uno para estimar cuándo vas a terminar tus juegos.',
+    planStatusActive: 'Activo', planStatusCompleted: 'Completado', planStatusAbandoned: 'Abandonado',
+    gameSingular: 'juego', gamesPlural: 'juegos', estimatedFinish: 'Fin estimado',
+    hoursPerWeek: 'Horas por semana', edit: 'Editar', abandonPlan: 'Abandonar plan',
+    abandonPlanConfirm: '¿Seguro que querés abandonar este plan?',
+    finishThisGame: 'Terminé este juego', finishThisGameConfirm: '¿Marcar este juego como terminado?',
+    addGameToChain: 'Agregar juego a la cadena', week: 'Semana', estimatedHours: 'Horas estimadas',
+    chooseGame: 'Elegí un juego', searchGame: 'Buscar juego...', chooseTime: 'Elegí el tiempo estimado',
+    hltbSearching: 'Buscando en HowLongToBeat...', hltbNotFound: 'No encontramos este juego en HowLongToBeat.',
+    enterHoursManually: 'Cargar horas manualmente', mainStory: 'Historia principal',
+    mainExtra: 'Historia + extras', completionist: 'Completista',
+    planDetailsTitle: 'Horas y fecha de inicio', startDate: 'Fecha de inicio', createPlan: 'Crear plan',
+    resumeOrRestart: '¿Empezar de nuevo o retomar?',
+    resumeOrRestartHint: 'Ya jugaste {hours}hs de este juego. ¿Querés empezar de nuevo o retomar desde ahí?',
+    resumeChoiceResume: 'Retomar', resumeChoiceRestart: 'Empezar de nuevo',
+    planError: 'Ocurrió un error al cargar el plan.',
     periodLastWeek: 'Última semana', periodLastMonth: 'Último mes',
     periodNoData: 'Todavía no hay datos para este período', periodNoStatusChanges: 'Sin cambios de estado',
     periodTotalHours: 'Horas jugadas totales', periodByStatus: 'Cambios de estado',
@@ -1988,6 +2026,23 @@ const I18N = {
     activityTab: 'Activity', activityDetailHint: 'Click a day to see the detail.',
     activityLess: 'Less', activityMore: 'More', activityNoData: 'no activity',
     mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat', sun: 'Sun',
+    gamePlan: 'Game plan', newPlan: 'New plan', backToPlans: '← Back to Game plan',
+    noPlans: "You don't have any plans yet. Create one to estimate when you'll finish your games.",
+    planStatusActive: 'Active', planStatusCompleted: 'Completed', planStatusAbandoned: 'Abandoned',
+    gameSingular: 'game', gamesPlural: 'games', estimatedFinish: 'Estimated finish',
+    hoursPerWeek: 'Hours per week', edit: 'Edit', abandonPlan: 'Abandon plan',
+    abandonPlanConfirm: 'Are you sure you want to abandon this plan?',
+    finishThisGame: 'Finish this game', finishThisGameConfirm: 'Mark this game as finished?',
+    addGameToChain: 'Add game to chain', week: 'Week', estimatedHours: 'Estimated hours',
+    chooseGame: 'Choose a game', searchGame: 'Search game...', chooseTime: 'Choose the estimated time',
+    hltbSearching: 'Searching HowLongToBeat...', hltbNotFound: "We couldn't find this game on HowLongToBeat.",
+    enterHoursManually: 'Enter hours manually', mainStory: 'Main story',
+    mainExtra: 'Main + extras', completionist: 'Completionist',
+    planDetailsTitle: 'Hours and start date', startDate: 'Start date', createPlan: 'Create plan',
+    resumeOrRestart: 'Start over or resume?',
+    resumeOrRestartHint: "You've already played {hours}hs of this game. Do you want to start over or resume from there?",
+    resumeChoiceResume: 'Resume', resumeChoiceRestart: 'Start over',
+    planError: 'An error occurred loading the plan.',
     periodLastWeek: 'Last week', periodLastMonth: 'Last month',
     periodNoData: 'No data yet for this period', periodNoStatusChanges: 'No status changes',
     periodTotalHours: 'Total hours played', periodByStatus: 'Status changes',
@@ -2155,6 +2210,23 @@ const I18N = {
     activityTab: 'Atividade', activityDetailHint: 'Clique em um dia para ver o detalhe.',
     activityLess: 'Menos', activityMore: 'Mais', activityNoData: 'sem atividade',
     mon: 'Seg', tue: 'Ter', wed: 'Qua', thu: 'Qui', fri: 'Sex', sat: 'Sáb', sun: 'Dom',
+    gamePlan: 'Plano de jogo', newPlan: 'Novo plano', backToPlans: '← Voltar ao Plano de jogo',
+    noPlans: 'Você ainda não tem planos. Crie um para estimar quando vai terminar seus jogos.',
+    planStatusActive: 'Ativo', planStatusCompleted: 'Concluído', planStatusAbandoned: 'Abandonado',
+    gameSingular: 'jogo', gamesPlural: 'jogos', estimatedFinish: 'Fim estimado',
+    hoursPerWeek: 'Horas por semana', edit: 'Editar', abandonPlan: 'Abandonar plano',
+    abandonPlanConfirm: 'Tem certeza que quer abandonar este plano?',
+    finishThisGame: 'Terminei este jogo', finishThisGameConfirm: 'Marcar este jogo como concluído?',
+    addGameToChain: 'Adicionar jogo à cadeia', week: 'Semana', estimatedHours: 'Horas estimadas',
+    chooseGame: 'Escolha um jogo', searchGame: 'Buscar jogo...', chooseTime: 'Escolha o tempo estimado',
+    hltbSearching: 'Buscando no HowLongToBeat...', hltbNotFound: 'Não encontramos esse jogo no HowLongToBeat.',
+    enterHoursManually: 'Inserir horas manualmente', mainStory: 'História principal',
+    mainExtra: 'História + extras', completionist: 'Completista',
+    planDetailsTitle: 'Horas e data de início', startDate: 'Data de início', createPlan: 'Criar plano',
+    resumeOrRestart: 'Começar de novo ou retomar?',
+    resumeOrRestartHint: 'Você já jogou {hours}hs deste jogo. Quer começar de novo ou retomar dali?',
+    resumeChoiceResume: 'Retomar', resumeChoiceRestart: 'Começar de novo',
+    planError: 'Ocorreu um erro ao carregar o plano.',
     periodLastWeek: 'Última semana', periodLastMonth: 'Último mês',
     periodNoData: 'Ainda não há dados para este período', periodNoStatusChanges: 'Sem mudanças de status',
     periodTotalHours: 'Horas jogadas totais', periodByStatus: 'Mudanças de status',
@@ -4378,11 +4450,13 @@ function setView(view) {
   const isStats     = view === 'stats';
   const isRankings  = view === 'rankings';
   const isNovedades = view === 'novedades';
-  const hideNormal = isStats || isRankings || isNovedades;
+  const isPlan      = view === 'plan';
+  const hideNormal = isStats || isRankings || isNovedades || isPlan;
   const gameList     = document.getElementById('game-list');
   const statsView    = document.getElementById('stats-view');
   const rankingsView = document.getElementById('rankings-view');
   const novedadesView = document.getElementById('novedades-view');
+  const planView      = document.getElementById('plan-view');
   const filterBar  = document.getElementById('filter-bar');
   const footer     = document.querySelector('.footer');
   const pagBar     = document.getElementById('pagination-bar');
@@ -4390,6 +4464,7 @@ function setView(view) {
   if (statsView)     statsView.style.display     = isStats ? 'flex' : 'none';
   if (rankingsView)  rankingsView.style.display  = isRankings ? 'flex' : 'none';
   if (novedadesView) novedadesView.style.display = isNovedades ? 'flex' : 'none';
+  if (planView)      planView.style.display      = isPlan ? 'flex' : 'none';
   if (filterBar)    filterBar.style.display    = hideNormal ? 'none' : '';
   if (footer)       footer.style.display       = hideNormal ? 'none' : '';
   if (pagBar)       pagBar.style.display       = hideNormal ? 'none' : '';
@@ -4420,6 +4495,10 @@ function setView(view) {
   if (isNovedades) {
     loadNovedadesView();
     markNovedadesSeenWeb();
+    return;
+  }
+  if (isPlan) {
+    loadPlanListView();
     return;
   }
 
@@ -6426,6 +6505,385 @@ document.addEventListener('click', (e) => {
     if (!e.target.closest('button[onclick="toggleSuggestionSettingsMenu()"]')) menu.style.display = 'none';
   }
 });
+
+// ============================================================
+// Plan de juego
+// ============================================================
+
+let _planListData = [];
+let _planDetailId = null;
+let _planDetailData = null;
+
+async function loadPlanListView() {
+  document.getElementById('plan-list-panel').style.display = '';
+  document.getElementById('plan-detail-panel').style.display = 'none';
+  const el = document.getElementById('plan-list-content');
+  el.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>${t('loading')}</div>`;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/plans`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    _planListData = d.plans || [];
+    _renderPlanList();
+  } catch (e) {
+    el.innerHTML = `<div style="color:var(--red);padding:16px">${esc(e.message || t('planError'))}</div>`;
+  }
+}
+
+function _renderPlanList() {
+  const el = document.getElementById('plan-list-content');
+  if (!_planListData.length) {
+    el.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text2);font-size:13px">${t('noPlans')}</div>`;
+    return;
+  }
+  el.innerHTML = _planListData.map(_planCardHtml).join('');
+}
+
+function _planCardHtml(p) {
+  const step = p.active_step;
+  const pct = step ? Math.round(step.plan_pct || 0) : 0;
+  const statusLabel = { active: t('planStatusActive'), completed: t('planStatusCompleted'), abandoned: t('planStatusAbandoned') }[p.status] || p.status;
+  return `
+    <div onclick="openPlanDetail(${p.id})" style="display:flex;gap:12px;padding:12px;border-radius:var(--radius-lg);background:var(--bg2);margin-bottom:10px;cursor:pointer;align-items:center">
+      <div style="width:50px;height:66px;border-radius:6px;overflow:hidden;background:var(--bg3);flex-shrink:0">
+        ${step && step.cover_url ? `<img src="${esc(step.cover_url)}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">` : ''}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(step ? step.game_name || '' : '')}</div>
+        <div style="font-size:11.5px;color:var(--text2);margin-top:2px">${statusLabel} · ${p.steps_count} ${p.steps_count === 1 ? t('gameSingular') : t('gamesPlural')}</div>
+        ${step ? `
+          <div style="height:5px;border-radius:3px;background:var(--bg3);margin-top:6px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:var(--green)"></div>
+          </div>
+          <div style="font-size:11px;color:var(--text2);margin-top:3px">${pct}% · ${t('estimatedFinish')}: ${step.estimated_end_date || '—'}</div>
+        ` : ''}
+      </div>
+      <i class="ti ti-chevron-right" style="color:var(--text2)"></i>
+    </div>`;
+}
+
+async function openPlanDetail(planId) {
+  _planDetailId = planId;
+  document.getElementById('plan-list-panel').style.display = 'none';
+  document.getElementById('plan-detail-panel').style.display = '';
+  const el = document.getElementById('plan-detail-content');
+  el.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>${t('loading')}</div>`;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/plans/${planId}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    _planDetailData = d;
+    _renderPlanDetail();
+  } catch (e) {
+    el.innerHTML = `<div style="color:var(--red);padding:16px">${esc(e.message || t('planError'))}</div>`;
+  }
+}
+
+function closePlanDetail() {
+  _planDetailId = null;
+  _planDetailData = null;
+  loadPlanListView();
+}
+
+function _renderPlanDetail() {
+  const p = _planDetailData;
+  const el = document.getElementById('plan-detail-content');
+  const stepsHtml = p.steps.map(_planStepTimelineHtml).join('');
+  const activeStep = p.steps.find(s => s.status === 'active');
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <span style="font-size:12px;color:var(--text2)">${t('hoursPerWeek')}: <strong style="color:var(--text)">${p.hours_per_week}h</strong></span>
+      <button onclick="_promptEditHoursPerWeek()" style="padding:4px 10px;font-size:11.5px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer">${t('edit')}</button>
+      ${p.status === 'active' ? `<button onclick="_abandonPlan()" style="margin-left:auto;padding:4px 10px;font-size:11.5px;border-radius:6px;border:0.5px solid var(--red);background:transparent;color:var(--red);cursor:pointer">${t('abandonPlan')}</button>` : ''}
+    </div>
+    <div>${stepsHtml}</div>
+    ${p.status === 'active' ? `
+      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+        ${activeStep ? `<button class="btn-save" onclick="_completePlanStep(${activeStep.id})">${t('finishThisGame')}</button>` : ''}
+        <button onclick="openGameStepWizard({mode:'add_step', planId:${p.id}})" style="padding:8px 14px;font-size:12.5px;border-radius:8px;border:0.5px solid var(--border2);background:transparent;color:var(--text);cursor:pointer">
+          <i class="ti ti-plus"></i> ${t('addGameToChain')}
+        </button>
+      </div>` : ''}`;
+}
+
+function _planStepTimelineHtml(s) {
+  const isActive = s.status === 'active';
+  const isDone = s.status === 'done';
+  const opacity = s.status === 'pending' ? '0.55' : '1';
+  const weeksHtml = (s.week_progress || []).map(w => `
+    <div style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:11.5px;color:var(--text2)">
+      <span style="width:56px;flex-shrink:0">${t('week')} ${w.week_number}</span>
+      <div style="flex:1;height:5px;border-radius:3px;background:var(--bg3);overflow:hidden">
+        <div style="height:100%;width:${Math.round(w.week_pct || 0)}%;background:var(--green)"></div>
+      </div>
+      <span style="width:96px;text-align:right;flex-shrink:0">${w.hours_played ?? 0}h (${Math.round(w.week_pct || 0)}%)</span>
+    </div>`).join('');
+  return `
+    <div style="display:flex;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--border);opacity:${opacity}">
+      <div style="width:44px;height:58px;border-radius:6px;overflow:hidden;background:var(--bg3);flex-shrink:0">
+        ${s.cover_url ? `<img src="${esc(s.cover_url)}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">` : ''}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px">
+          ${isDone ? '<i class="ti ti-circle-check" style="color:var(--green)"></i>' : ''}
+          ${esc(s.game_name || s.game_id)}
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">
+          ${s.resumed ? `${t('resumeChoiceResume')} (${s.baseline_hours}h) · ` : ''}${t('estimatedHours')}: ${s.estimated_hours}h
+          ${isActive && s.estimated_end_date ? ` · ${t('estimatedFinish')}: ${s.estimated_end_date}` : ''}
+        </div>
+        ${isActive && weeksHtml ? `<div style="margin-top:8px">${weeksHtml}</div>` : ''}
+      </div>
+    </div>`;
+}
+
+async function _completePlanStep(stepId) {
+  if (!confirm(t('finishThisGameConfirm'))) return;
+  try {
+    await fetch(`${apiBase()}/api/v1/plans/${_planDetailId}/steps/${stepId}/complete`, {
+      method: 'POST', headers: { 'Authorization': `Bearer ${authToken}` },
+    });
+    openPlanDetail(_planDetailId);
+  } catch (e) {}
+}
+
+function _promptEditHoursPerWeek() {
+  const val = prompt(t('hoursPerWeek'), _planDetailData.hours_per_week);
+  if (val === null) return;
+  const hpw = parseFloat(val);
+  if (!hpw || hpw <= 0) return;
+  fetch(`${apiBase()}/api/v1/plans/${_planDetailId}`, {
+    method: 'PATCH',
+    headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ hours_per_week: hpw }),
+  }).then(() => openPlanDetail(_planDetailId)).catch(() => {});
+}
+
+async function _abandonPlan() {
+  if (!confirm(t('abandonPlanConfirm'))) return;
+  try {
+    await fetch(`${apiBase()}/api/v1/plans/${_planDetailId}`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'abandoned' }),
+    });
+    openPlanDetail(_planDetailId);
+  } catch (e) {}
+}
+
+// ── Wizard: elegir juego → HLTB → (resume/restart) → (horas/semana + fecha) ──
+
+let _planWizard = null;
+let _planPickerTimer = null;
+
+function openGameStepWizard(opts) {
+  _planWizard = {
+    mode: opts.mode, planId: opts.planId || null,
+    gameId: null, gameName: null, coverUrl: null,
+    hltbMode: null, estimatedHours: null,
+    hoursPerWeek: 5, startDate: new Date().toISOString().slice(0, 10),
+    pickerSearch: '', pickerPage: 1,
+  };
+  const overlay = document.createElement('div');
+  overlay.id = 'plan-wizard-overlay';
+  overlay.className = 'modal-overlay open';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:440px;max-height:82vh;display:flex;flex-direction:column">
+      <div class="modal-title" id="plan-wizard-title"></div>
+      <div id="plan-wizard-body" style="overflow-y:auto;flex:1;min-height:0"></div>
+      <div class="modal-actions" id="plan-wizard-actions"></div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) _closePlanWizard(); });
+  _renderPlanWizardStep1();
+}
+
+function _closePlanWizard() {
+  const el = document.getElementById('plan-wizard-overlay');
+  if (el) el.remove();
+  _planWizard = null;
+}
+
+function _renderPlanWizardStep1() {
+  document.getElementById('plan-wizard-title').textContent = t('chooseGame');
+  document.getElementById('plan-wizard-body').innerHTML = `
+    <input id="plan-picker-search" type="text" placeholder="${esc(t('searchGame'))}"
+      style="width:100%;padding:8px 10px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text);font-size:13px;margin-bottom:10px">
+    <div id="plan-picker-results"></div>
+    <div id="plan-picker-pagination" style="display:flex;align-items:center;justify-content:center;gap:12px;padding-top:10px"></div>`;
+  document.getElementById('plan-wizard-actions').innerHTML = `<button class="btn-cancel" onclick="_closePlanWizard()">${t('cancel')}</button>`;
+  document.getElementById('plan-picker-search').addEventListener('input', (e) => {
+    clearTimeout(_planPickerTimer);
+    _planPickerTimer = setTimeout(() => {
+      _planWizard.pickerSearch = e.target.value;
+      _planWizard.pickerPage = 1;
+      _loadPlanPickerResults();
+    }, 300);
+  });
+  _loadPlanPickerResults();
+}
+
+async function _loadPlanPickerResults() {
+  const el = document.getElementById('plan-picker-results');
+  const pag = document.getElementById('plan-picker-pagination');
+  el.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text2)"><div class="spinner" style="margin:0 auto"></div></div>`;
+  pag.innerHTML = '';
+  try {
+    const params = new URLSearchParams({ sort: 'name', order: 'asc', page: String(_planWizard.pickerPage), per_page: '20' });
+    if (_planWizard.pickerSearch) params.set('search', _planWizard.pickerSearch);
+    const res = await fetch(`${apiBase()}/api/v1/backlog?${params}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const d = await res.json();
+    const games = d.games || [];
+    if (!games.length) { el.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text2)">—</div>`; return; }
+    el.innerHTML = games.map(g => `
+      <div onclick="_planWizardPickGame('${jsAttrEsc(g.id)}','${jsAttrEsc(g.name)}','${jsAttrEsc(g.cover_url || '')}')"
+        style="display:flex;align-items:center;gap:10px;padding:8px 4px;cursor:pointer;border-bottom:0.5px solid var(--border)">
+        <div style="width:32px;height:40px;border-radius:4px;overflow:hidden;background:var(--bg3);flex-shrink:0">
+          <img src="${esc(g.cover_url || '')}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">
+        </div>
+        <div style="font-size:13px">${esc(g.name)}</div>
+      </div>`).join('');
+    const totalPages = d.total_pages || 1;
+    if (totalPages > 1) {
+      pag.innerHTML = `
+        <button onclick="_planPickerGoTo(${_planWizard.pickerPage - 1})" ${_planWizard.pickerPage <= 1 ? 'disabled' : ''}
+          style="padding:4px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text);cursor:pointer">‹</button>
+        <span style="font-size:12px;color:var(--text2)">${_planWizard.pickerPage} / ${totalPages}</span>
+        <button onclick="_planPickerGoTo(${_planWizard.pickerPage + 1})" ${_planWizard.pickerPage >= totalPages ? 'disabled' : ''}
+          style="padding:4px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text);cursor:pointer">›</button>`;
+    }
+  } catch (e) { el.innerHTML = ''; }
+}
+
+function _planPickerGoTo(page) { _planWizard.pickerPage = page; _loadPlanPickerResults(); }
+
+function _planWizardPickGame(gameId, gameName, coverUrl) {
+  _planWizard.gameId = gameId; _planWizard.gameName = gameName; _planWizard.coverUrl = coverUrl;
+  _renderPlanWizardStep2();
+}
+
+async function _renderPlanWizardStep2() {
+  document.getElementById('plan-wizard-title').textContent = t('chooseTime');
+  const body = document.getElementById('plan-wizard-body');
+  body.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 10px"></div>${t('hltbSearching')}</div>`;
+  document.getElementById('plan-wizard-actions').innerHTML = `<button class="btn-cancel" onclick="_closePlanWizard()">${t('cancel')}</button>`;
+  let data = { found: false };
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/hltb/search?name=${encodeURIComponent(_planWizard.gameName)}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    data = await res.json();
+  } catch (e) {}
+
+  if (!data.found || !data.results || !data.results.length) {
+    body.innerHTML = `
+      <div style="font-size:12.5px;color:var(--text2);margin-bottom:10px">${t('hltbNotFound')}</div>
+      <label style="font-size:12px;color:var(--text2)">${t('enterHoursManually')}</label>
+      <input id="plan-manual-hours" type="number" min="1" step="0.5" placeholder="0"
+        style="width:100%;padding:8px 10px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text);font-size:13px;margin-top:6px">`;
+    document.getElementById('plan-wizard-actions').innerHTML = `
+      <button class="btn-cancel" onclick="_closePlanWizard()">${t('cancel')}</button>
+      <button class="btn-save" onclick="_planWizardConfirmManualHours()">${t('continueBtn')}</button>`;
+    return;
+  }
+
+  const best = data.results[0];
+  body.innerHTML = `
+    <div style="font-size:12.5px;color:var(--text2);margin-bottom:10px">${esc(best.name)}</div>
+    ${['main_story', 'main_extra', 'completionist'].map(k => best[k] ? `
+      <div onclick="_planWizardPickHltb('${k}', ${best[k]})" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:8px;background:var(--bg2);margin-bottom:8px;cursor:pointer">
+        <span style="font-size:13px">${t(k === 'main_story' ? 'mainStory' : k === 'main_extra' ? 'mainExtra' : 'completionist')}</span>
+        <strong style="font-size:13px">${best[k]}h</strong>
+      </div>` : '').join('')}
+    <a onclick="_planWizardShowManualHours()" style="display:block;text-align:center;font-size:11.5px;color:var(--text2);cursor:pointer;margin-top:6px">${t('enterHoursManually')}</a>`;
+}
+
+function _planWizardShowManualHours() {
+  const body = document.getElementById('plan-wizard-body');
+  body.innerHTML += `
+    <div style="margin-top:10px">
+      <input id="plan-manual-hours" type="number" min="1" step="0.5" placeholder="0"
+        style="width:100%;padding:8px 10px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text);font-size:13px">
+    </div>`;
+  document.getElementById('plan-wizard-actions').innerHTML = `
+    <button class="btn-cancel" onclick="_closePlanWizard()">${t('cancel')}</button>
+    <button class="btn-save" onclick="_planWizardConfirmManualHours()">${t('continueBtn')}</button>`;
+}
+
+function _planWizardConfirmManualHours() {
+  const val = parseFloat(document.getElementById('plan-manual-hours').value);
+  if (!val || val <= 0) return;
+  _planWizard.hltbMode = 'manual';
+  _planWizard.estimatedHours = val;
+  _planWizardNextAfterHours();
+}
+
+function _planWizardPickHltb(mode, hours) {
+  _planWizard.hltbMode = mode;
+  _planWizard.estimatedHours = hours;
+  _planWizardNextAfterHours();
+}
+
+function _planWizardNextAfterHours() {
+  if (_planWizard.mode === 'new_plan') _renderPlanWizardStep3();
+  else _submitPlanStep(null);
+}
+
+function _renderPlanWizardStep3() {
+  document.getElementById('plan-wizard-title').textContent = t('planDetailsTitle');
+  document.getElementById('plan-wizard-body').innerHTML = `
+    <label style="font-size:12px;color:var(--text2)">${t('hoursPerWeek')}</label>
+    <input id="plan-hpw-input" type="number" min="1" step="0.5" value="${_planWizard.hoursPerWeek}"
+      style="width:100%;padding:8px 10px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text);font-size:13px;margin:6px 0 14px">
+    <label style="font-size:12px;color:var(--text2)">${t('startDate')}</label>
+    <input id="plan-start-input" type="date" value="${_planWizard.startDate}"
+      style="width:100%;padding:8px 10px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text);font-size:13px;margin-top:6px">`;
+  document.getElementById('plan-wizard-actions').innerHTML = `
+    <button class="btn-cancel" onclick="_closePlanWizard()">${t('cancel')}</button>
+    <button class="btn-save" onclick="_planWizardConfirmDetails()">${t('createPlan')}</button>`;
+}
+
+function _planWizardConfirmDetails() {
+  const hpw = parseFloat(document.getElementById('plan-hpw-input').value);
+  const start = document.getElementById('plan-start-input').value;
+  if (!hpw || hpw <= 0 || !start) return;
+  _planWizard.hoursPerWeek = hpw;
+  _planWizard.startDate = start;
+  _submitPlanStep(null);
+}
+
+async function _submitPlanStep(resumeChoice) {
+  const w = _planWizard;
+  const stepBody = { game_id: w.gameId, hltb_mode: w.hltbMode, estimated_hours: w.estimatedHours, resume_choice: resumeChoice };
+  const isNewPlan = w.mode === 'new_plan';
+  const url = isNewPlan ? `${apiBase()}/api/v1/plans` : `${apiBase()}/api/v1/plans/${w.planId}/steps`;
+  const body = isNewPlan ? { start_date: w.startDate, hours_per_week: w.hoursPerWeek, first_step: stepBody } : stepBody;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const d = await res.json();
+    if (res.status === 409 && d.detail && d.detail.needs_resume_choice) {
+      _renderPlanResumeChoiceDialog(d.detail.current_hours);
+      return;
+    }
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    _closePlanWizard();
+    if (isNewPlan) { openPlanDetail(d.id); }
+    else { openPlanDetail(w.planId); }
+  } catch (e) {
+    alert(e.message || t('planError'));
+  }
+}
+
+function _renderPlanResumeChoiceDialog(currentHours) {
+  document.getElementById('plan-wizard-title').textContent = t('resumeOrRestart');
+  document.getElementById('plan-wizard-body').innerHTML = `
+    <div style="font-size:13px;color:var(--text2);margin-bottom:14px">${t('resumeOrRestartHint').replace('{hours}', currentHours)}</div>
+    <button onclick="_submitPlanStep('resume')" style="width:100%;padding:12px;border-radius:8px;border:none;background:var(--green);color:#fff;font-size:13px;cursor:pointer;margin-bottom:8px">${t('resumeChoiceResume')}</button>
+    <button onclick="_submitPlanStep('restart')" style="width:100%;padding:12px;border-radius:8px;border:0.5px solid var(--border2);background:transparent;color:var(--text);font-size:13px;cursor:pointer">${t('resumeChoiceRestart')}</button>`;
+  document.getElementById('plan-wizard-actions').innerHTML = `<button class="btn-cancel" onclick="_closePlanWizard()">${t('cancel')}</button>`;
+}
 
 function _novedadesReviewTileHtml(r) {
   const name = r.is_anonymous ? t('reviewAnonymousLabel') : esc(r.username || '?');
