@@ -7042,14 +7042,14 @@ function _renderPlanResumeChoiceDialog(currentHours) {
   document.getElementById('plan-wizard-actions').innerHTML = `<button class="btn-cancel" onclick="_closePlanWizard()">${t('cancel')}</button>`;
 }
 
-function _novedadesReviewTileHtml(r) {
+function _novedadesReviewTileHtml(r, i) {
   const name = r.is_anonymous ? t('reviewAnonymousLabel') : esc(r.username || '?');
   const rating = r.rating > 0 ? `<span style="color:var(--amber)">★</span> ${r.rating.toFixed(1)}` : '';
   const cover = r.cover_url
     ? `<img src="${r.cover_url}" style="width:34px;height:44px;object-fit:cover;border-radius:6px" onerror="this.style.display='none'">`
     : `<div style="width:34px;height:44px;border-radius:6px;background:var(--bg3);display:flex;align-items:center;justify-content:center">🎮</div>`;
   return `
-    <div style="display:flex;gap:10px;padding:10px;margin-bottom:6px;border-radius:10px;background:var(--bg3)">
+    <div onclick="_showNovedadesReviewDetail(${i})" style="display:flex;gap:10px;padding:10px;margin-bottom:6px;border-radius:10px;background:var(--bg3);cursor:pointer">
       ${cover}
       <div style="flex:1;min-width:0">
         <div style="display:flex;justify-content:space-between;gap:6px">
@@ -7060,6 +7060,35 @@ function _novedadesReviewTileHtml(r) {
         <div style="font-size:11px;color:var(--text2);margin-top:2px">${name} · ${_formatReviewDate(r.updated_at)}</div>
       </div>
     </div>`;
+}
+
+function _showNovedadesReviewDetail(i) {
+  const r = (_novedadesReviews || [])[i];
+  if (!r) return;
+  const name = r.is_anonymous ? t('reviewAnonymousLabel') : esc(r.username || '?');
+  const rating = r.rating > 0 ? `<span style="color:var(--amber)">★</span> ${r.rating.toFixed(1)}` : '';
+  const cover = r.cover_url
+    ? `<img src="${r.cover_url}" style="width:54px;height:70px;object-fit:cover;border-radius:8px" onerror="this.style.display='none'">`
+    : `<div style="width:54px;height:70px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:22px">🎮</div>`;
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay open';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:420px;max-height:85vh;display:flex;flex-direction:column">
+      <div style="display:flex;gap:12px;margin-bottom:12px;flex-shrink:0">
+        ${cover}
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:15px">${esc(r.game_name)}</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px">${name} · ${_formatReviewDate(r.updated_at)}</div>
+          ${rating ? `<div style="font-size:13px;margin-top:4px">${rating}</div>` : ''}
+        </div>
+      </div>
+      <div style="font-size:13.5px;line-height:1.55;white-space:pre-wrap;overflow-y:auto;flex:1;min-height:0">${esc(r.text)}</div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="this.closest('.modal-overlay').remove()">${t('close')}</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 }
 
 function _renderNovedades() {
@@ -7095,7 +7124,7 @@ function _renderNovedades() {
   }
   if (recent.length) html += _novedadesSectionHtml('ti-sparkles', t('novedadesRecentReleases'), _novedadesCoverRowHtml(recent));
   if (upcoming.length) html += _novedadesSectionHtml('ti-calendar-event', t('novedadesUpcomingReleases'), _novedadesCoverRowHtml(upcoming));
-  if ((_novedadesReviews || []).length) html += _novedadesSectionHtml('ti-message-star', t('recentReviews'), _novedadesReviews.map(_novedadesReviewTileHtml).join(''));
+  if ((_novedadesReviews || []).length) html += _novedadesSectionHtml('ti-message-star', t('recentReviews'), _novedadesReviews.map((r, i) => _novedadesReviewTileHtml(r, i)).join(''));
   if (!freeGamesEmpty) html += _novedadesSectionHtml('ti-gift', t('novedadesFreeGames'), _novedadesFreeGamesHtml(freeGames));
   el.innerHTML = html;
 
