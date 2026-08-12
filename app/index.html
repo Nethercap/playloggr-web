@@ -1269,10 +1269,9 @@
           <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px" id="cfg-cardcolor-options"></div>
         </div>
         <div class="modal-group full">
-          <label data-i18n="suggestionSettingsLabel">Sugerencia "¿Qué juego hoy?"</label>
+          <label data-i18n="suggestionSettingsLabel">Sugerencia de la semana</label>
           <div style="display:flex;gap:8px;margin-top:6px">
-            <button class="cfg-choice-btn" data-group="suggestion" data-value="daily" onclick="setSuggestionCfgChoice('daily')"><i class="ti ti-calendar-event"></i> <span data-i18n="suggestionDaily">Diario</span></button>
-            <button class="cfg-choice-btn" data-group="suggestion" data-value="weekly" onclick="setSuggestionCfgChoice('weekly')"><i class="ti ti-calendar-week"></i> <span data-i18n="suggestionWeekly">Semanal</span></button>
+            <button class="cfg-choice-btn" data-group="suggestion" data-value="weekly" onclick="setSuggestionCfgChoice('weekly')"><i class="ti ti-calendar-week"></i> <span data-i18n="suggestionWeekly">Activada</span></button>
             <button class="cfg-choice-btn" data-group="suggestion" data-value="off" onclick="setSuggestionCfgChoice('off')"><i class="ti ti-eye-off"></i> <span data-i18n="suggestionDisable">Desactivada</span></button>
           </div>
         </div>
@@ -1860,6 +1859,7 @@ const I18N = {
     resumeChoiceResume: 'Retomar', resumeChoiceRestart: 'Empezar de nuevo',
     planError: 'Ocurrió un error al cargar el plan.',
     planTotalPct: 'Progreso del plan', planTotalHours: 'Horas totales del plan', planHoursPlayed: 'Horas jugadas del plan',
+    planName: 'Nombre del plan (opcional)', planNamePrompt: 'Nombre del plan',
     resumePlan: 'Reanudar plan', deletePlan: 'Eliminar plan', deletePlanConfirm: '¿Eliminar este plan? No se puede deshacer.',
     periodLastWeek: 'Última semana', periodLastMonth: 'Último mes',
     periodNoData: 'Todavía no hay datos para este período', periodNoStatusChanges: 'Sin cambios de estado',
@@ -1872,7 +1872,7 @@ const I18N = {
     friendRequestReceived: 'Quiere ser tu amigo', accept: 'Aceptar', reject: 'Rechazar',
     hideFilters: 'Ocultar filtros', showFilters: 'Mostrar filtros', more: 'Más opciones',
     suggestionTitle: 'Sugerencia del día', suggestionWeeklyTitle: 'Sugerencia de la semana', suggestionNoRating: 'Sin calificar',
-    suggestionDaily: 'Diario', suggestionWeekly: 'Semanal', suggestionDisable: 'Desactivar',
+    suggestionDaily: 'Diario', suggestionWeekly: 'Activada', suggestionDisable: 'Desactivar',
     suggestionSettingsLabel: 'Sugerencia "¿Qué juego hoy?"', registerSession: 'Jugar',
     newPeriodSummaryAvailable: 'Nuevo resumen de período disponible',
     noNotifications: 'No tenés notificaciones',
@@ -2046,6 +2046,7 @@ const I18N = {
     resumeChoiceResume: 'Resume', resumeChoiceRestart: 'Start over',
     planError: 'An error occurred loading the plan.',
     planTotalPct: 'Plan progress', planTotalHours: 'Total plan hours', planHoursPlayed: 'Plan hours played',
+    planName: 'Plan name (optional)', planNamePrompt: 'Plan name',
     resumePlan: 'Resume plan', deletePlan: 'Delete plan', deletePlanConfirm: 'Delete this plan? This cannot be undone.',
     periodLastWeek: 'Last week', periodLastMonth: 'Last month',
     periodNoData: 'No data yet for this period', periodNoStatusChanges: 'No status changes',
@@ -2058,7 +2059,7 @@ const I18N = {
     friendRequestReceived: 'Wants to be your friend', accept: 'Accept', reject: 'Reject',
     hideFilters: 'Hide filters', showFilters: 'Show filters', more: 'More options',
     suggestionTitle: 'Suggestion of the day', suggestionWeeklyTitle: 'Suggestion of the week', suggestionNoRating: 'Not rated',
-    suggestionDaily: 'Daily', suggestionWeekly: 'Weekly', suggestionDisable: 'Disable',
+    suggestionDaily: 'Daily', suggestionWeekly: 'Enabled', suggestionDisable: 'Disable',
     suggestionSettingsLabel: '"What should I play?" suggestion', registerSession: 'Play',
     newPeriodSummaryAvailable: 'New period summary available',
     noNotifications: 'No notifications',
@@ -2232,6 +2233,7 @@ const I18N = {
     resumeChoiceResume: 'Retomar', resumeChoiceRestart: 'Começar de novo',
     planError: 'Ocorreu um erro ao carregar o plano.',
     planTotalPct: 'Progresso do plano', planTotalHours: 'Horas totais do plano', planHoursPlayed: 'Horas jogadas do plano',
+    planName: 'Nome do plano (opcional)', planNamePrompt: 'Nome do plano',
     resumePlan: 'Retomar plano', deletePlan: 'Excluir plano', deletePlanConfirm: 'Excluir este plano? Não pode ser desfeito.',
     periodLastWeek: 'Última semana', periodLastMonth: 'Último mês',
     periodNoData: 'Ainda não há dados para este período', periodNoStatusChanges: 'Sem mudanças de status',
@@ -2244,7 +2246,7 @@ const I18N = {
     friendRequestReceived: 'Quer ser seu amigo', accept: 'Aceitar', reject: 'Rejeitar',
     hideFilters: 'Ocultar filtros', showFilters: 'Mostrar filtros', more: 'Mais opções',
     suggestionTitle: 'Sugestão do dia', suggestionWeeklyTitle: 'Sugestão da semana', suggestionNoRating: 'Sem avaliação',
-    suggestionDaily: 'Diário', suggestionWeekly: 'Semanal', suggestionDisable: 'Desativar',
+    suggestionDaily: 'Diário', suggestionWeekly: 'Ativada', suggestionDisable: 'Desativar',
     suggestionSettingsLabel: 'Sugestão "Qual jogo hoje?"', registerSession: 'Jogar',
     newPeriodSummaryAvailable: 'Novo resumo de período disponível',
     noNotifications: 'Você não tem notificações',
@@ -5348,7 +5350,7 @@ function renderAppearanceTab() {
     b.classList.toggle('active', b.dataset.value === currentTheme);
   });
 
-  const suggestionValue = (_suggestionData && _suggestionData.enabled === false) ? 'off' : ((_suggestionData && _suggestionData.frequency) || 'daily');
+  const suggestionValue = (_suggestionData && _suggestionData.enabled === false) ? 'off' : 'weekly';
   document.querySelectorAll('.cfg-choice-btn[data-group="suggestion"]').forEach(b => {
     b.classList.toggle('active', b.dataset.value === suggestionValue);
   });
@@ -6519,7 +6521,7 @@ function _suggestionSectionHtml() {
   const s = _suggestionData;
   if (!s || !s.enabled || !s.candidates || !s.candidates.length) return '';
   const minimized = !!s.minimized;
-  const freqLabel = s.frequency === 'weekly' ? t('suggestionWeeklyTitle') : t('suggestionTitle');
+  const freqLabel = t('suggestionWeeklyTitle');
   return `
     <div style="margin-bottom:20px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;cursor:pointer" onclick="toggleSuggestionSection()">
@@ -6531,8 +6533,6 @@ function _suggestionSectionHtml() {
             <i class="ti ti-dots-vertical" style="font-size:13px"></i>
           </button>
           <div id="suggestion-settings-menu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:100;min-width:170px;box-shadow:0 4px 16px rgba(0,0,0,0.3);padding:4px 0">
-            <button onclick="setSuggestionFrequencyFromWidget('daily')" class="steam-menu-item" style="width:100%;text-align:left">${t('suggestionDaily')}</button>
-            <button onclick="setSuggestionFrequencyFromWidget('weekly')" class="steam-menu-item" style="width:100%;text-align:left">${t('suggestionWeekly')}</button>
             <button onclick="disableSuggestionFromWidget()" class="steam-menu-item" style="width:100%;text-align:left;color:var(--red)">${t('suggestionDisable')}</button>
           </div>
         </div>
@@ -6638,8 +6638,8 @@ function _planCardHtml(p) {
         ${step && step.cover_url ? `<img src="${esc(step.cover_url)}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">` : ''}
       </div>
       <div style="flex:1;min-width:0">
-        <div style="font-size:13.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(step ? step.game_name || '' : '')}</div>
-        <div style="font-size:11.5px;color:var(--text2);margin-top:2px">${statusLabel} · ${p.steps_count} ${p.steps_count === 1 ? t('gameSingular') : t('gamesPlural')}</div>
+        <div style="font-size:13.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.name || (step ? step.game_name : '') || '')}</div>
+        <div style="font-size:11.5px;color:var(--text2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${statusLabel} · ${p.steps_count} ${p.steps_count === 1 ? t('gameSingular') : t('gamesPlural')}${step && step.game_name && step.game_name !== p.name ? ` · ${esc(step.game_name)}` : ''}</div>
         <div style="height:5px;border-radius:3px;background:var(--bg3);margin-top:6px;overflow:hidden">
           <div style="height:100%;width:${pct}%;background:var(--green)"></div>
         </div>
@@ -6679,6 +6679,10 @@ function _renderPlanDetail() {
   const activeStep = p.steps.find(s => s.status === 'active');
   const totalPct = Math.round(p.total_plan_pct || 0);
   el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <strong style="font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.name || '')}</strong>
+      <button onclick="_promptRenamePlan()" title="${esc(t('edit'))}" style="padding:3px 6px;border-radius:6px;border:none;background:transparent;color:var(--text2);cursor:pointer;flex-shrink:0"><i class="ti ti-pencil" style="font-size:14px"></i></button>
+    </div>
     <div style="padding:12px 14px;border-radius:var(--radius-lg);background:var(--bg2);margin-bottom:14px">
       <div style="height:6px;border-radius:3px;background:var(--bg3);overflow:hidden;margin-bottom:8px">
         <div style="height:100%;width:${totalPct}%;background:var(--green)"></div>
@@ -6764,6 +6768,18 @@ function _promptEditHoursPerWeek() {
     method: 'PATCH',
     headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ hours_per_week: hpw }),
+  }).then(() => openPlanDetail(_planDetailId)).catch(() => {});
+}
+
+function _promptRenamePlan() {
+  const val = prompt(t('planNamePrompt'), _planDetailData.name || '');
+  if (val === null) return;
+  const name = val.trim();
+  if (!name) return;
+  fetch(`${apiBase()}/api/v1/plans/${_planDetailId}`, {
+    method: 'PATCH',
+    headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
   }).then(() => openPlanDetail(_planDetailId)).catch(() => {});
 }
 
@@ -6987,6 +7003,9 @@ function _planWizardNextAfterHours() {
 function _renderPlanWizardStep3() {
   document.getElementById('plan-wizard-title').textContent = t('planDetailsTitle');
   document.getElementById('plan-wizard-body').innerHTML = `
+    <label style="font-size:12px;color:var(--text2)">${t('planName')}</label>
+    <input id="plan-name-input" type="text" placeholder="${esc(_planWizard.gameName || '')}" maxlength="100"
+      style="width:100%;padding:8px 10px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text);font-size:13px;margin:6px 0 14px">
     <label style="font-size:12px;color:var(--text2)">${t('hoursPerWeek')}</label>
     <input id="plan-hpw-input" type="number" min="1" step="0.5" value="${_planWizard.hoursPerWeek}"
       style="width:100%;padding:8px 10px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text);font-size:13px;margin:6px 0 14px">
@@ -7004,6 +7023,7 @@ function _planWizardConfirmDetails() {
   if (!hpw || hpw <= 0 || !start) return;
   _planWizard.hoursPerWeek = hpw;
   _planWizard.startDate = start;
+  _planWizard.name = document.getElementById('plan-name-input').value.trim() || null;
   _submitPlanStep(null);
 }
 
@@ -7012,7 +7032,7 @@ async function _submitPlanStep(resumeChoice) {
   const stepBody = { game_id: w.gameId, hltb_mode: w.hltbMode, estimated_hours: w.estimatedHours, resume_choice: resumeChoice };
   const isNewPlan = w.mode === 'new_plan';
   const url = isNewPlan ? `${apiBase()}/api/v1/plans` : `${apiBase()}/api/v1/plans/${w.planId}/steps`;
-  const body = isNewPlan ? { start_date: w.startDate, hours_per_week: w.hoursPerWeek, first_step: stepBody } : stepBody;
+  const body = isNewPlan ? { start_date: w.startDate, hours_per_week: w.hoursPerWeek, name: w.name || null, first_step: stepBody } : stepBody;
   try {
     const res = await fetch(url, {
       method: 'POST',
