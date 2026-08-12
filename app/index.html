@@ -2612,6 +2612,22 @@ function igdbScoreClass(pct) {
 }
 
 function apiBase() { return (document.getElementById('api-url').value || 'http://localhost:8000').replace(/\/$/, ''); }
+
+// Marca todo request al backend como "web" (header X-Platform) para que el
+// panel de admin pueda mostrar si un usuario entra por web, por la app, o
+// ambas — sin tener que tocar cada uno de los fetch() sueltos del archivo.
+(function () {
+  const _origFetch = window.fetch.bind(window);
+  window.fetch = (input, init) => {
+    const url = typeof input === 'string' ? input : (input && input.url) || '';
+    if (url.startsWith(apiBase())) {
+      init = { ...(init || {}) };
+      init.headers = { ...(init.headers || {}), 'X-Platform': 'web' };
+    }
+    return _origFetch(input, init);
+  };
+})();
+
 function showError(m) { const b=document.getElementById('error-banner'); b.textContent=m; b.style.display='block'; }
 function hideError() { document.getElementById('error-banner').style.display='none'; }
 

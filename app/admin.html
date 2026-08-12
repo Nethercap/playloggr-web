@@ -271,7 +271,7 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>Usuario</th><th>Email</th><th>Nivel</th><th>Biblioteca</th><th>Plataformas</th><th>Última vez</th><th></th><th></th><th></th></tr>
+            <tr><th>Usuario</th><th>Email</th><th>Nivel</th><th>Biblioteca</th><th>Plataformas</th><th>Web/App</th><th>Última vez</th><th></th><th></th><th></th></tr>
           </thead>
           <tbody id="users-tbody">
             <tr><td colspan="9" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>
@@ -708,6 +708,7 @@ async function loadUsers() {
           <td>${u.level} · <span class="badge ${u.is_premium ? 'badge-premium' : 'badge-free'}">${u.is_premium ? 'Premium' : 'Gratis'}</span></td>
           <td>${u.library_count}</td>
           <td>${(u.synced_platforms && u.synced_platforms.length) ? u.synced_platforms.join(', ') : '<span style="color:var(--text2)">—</span>'}</td>
+          <td>${formatWebAppUsage(u.last_seen_web_at, u.last_seen_app_at)}</td>
           <td>${formatLastSeen(u.last_seen_at)}</td>
           <td><button class="btn-secondary" style="padding:4px 8px; font-size:11px" onclick="adminTogglePremium('${u.email}', ${!u.is_premium})">${u.is_premium ? 'Marcar Gratis' : 'Marcar Premium'}</button></td>
           <td><button class="icon-btn" title="Restablecer contraseña" onclick="adminResetPassword('${u.email}')">🔑</button></td>
@@ -733,6 +734,16 @@ function formatLastSeen(iso) {
   if (diffMin < 60) return 'Hace ' + Math.max(1, Math.round(diffMin)) + ' min';
   if (diffMin < 24 * 60) return 'Hace ' + Math.round(diffMin / 60) + ' h';
   return d.toLocaleDateString('es-AR') + ' ' + d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function formatWebAppUsage(webIso, appIso) {
+  const badge = (label, color) =>
+    `<span style="display:inline-block;padding:1px 6px;border-radius:10px;font-size:11px;font-weight:600;color:#fff;background:${color};margin-right:3px">${label}</span>`;
+  const parts = [];
+  if (webIso) parts.push(badge('Web', '#378ADD'));
+  if (appIso) parts.push(badge('App', '#1D9E75'));
+  if (!parts.length) return '<span style="color:var(--text2)">—</span>';
+  return parts.join('');
 }
 
 async function adminResetPassword(email) {
