@@ -1861,6 +1861,7 @@ const I18N = {
     planTotalPct: 'Progreso del plan', planTotalHours: 'Horas totales del plan', planHoursPlayed: 'Horas jugadas del plan',
     planName: 'Nombre del plan (opcional)', planNamePrompt: 'Nombre del plan',
     premiumRequiredTitle: 'Función premium', planPremiumRequired: 'Plan de juego requiere la versión premium', buyPremium: 'Hacerse Premium',
+    premiumLevelHint: 'subí hasta nivel 150',
     resumePlan: 'Reanudar plan', deletePlan: 'Eliminar plan', deletePlanConfirm: '¿Eliminar este plan? No se puede deshacer.',
     periodLastWeek: 'Última semana', periodLastMonth: 'Último mes',
     periodNoData: 'Todavía no hay datos para este período', periodNoStatusChanges: 'Sin cambios de estado',
@@ -2049,6 +2050,7 @@ const I18N = {
     planTotalPct: 'Plan progress', planTotalHours: 'Total plan hours', planHoursPlayed: 'Plan hours played',
     planName: 'Plan name (optional)', planNamePrompt: 'Plan name',
     premiumRequiredTitle: 'Premium feature', planPremiumRequired: 'Game plan requires the premium version', buyPremium: 'Go Premium',
+    premiumLevelHint: 'level up to 150',
     resumePlan: 'Resume plan', deletePlan: 'Delete plan', deletePlanConfirm: 'Delete this plan? This cannot be undone.',
     periodLastWeek: 'Last week', periodLastMonth: 'Last month',
     periodNoData: 'No data yet for this period', periodNoStatusChanges: 'No status changes',
@@ -2237,6 +2239,7 @@ const I18N = {
     planTotalPct: 'Progresso do plano', planTotalHours: 'Horas totais do plano', planHoursPlayed: 'Horas jogadas do plano',
     planName: 'Nome do plano (opcional)', planNamePrompt: 'Nome do plano',
     premiumRequiredTitle: 'Função premium', planPremiumRequired: 'Plano de jogo requer a versão premium', buyPremium: 'Tornar-se Premium',
+    premiumLevelHint: 'suba até o nível 150',
     resumePlan: 'Retomar plano', deletePlan: 'Excluir plano', deletePlanConfirm: 'Excluir este plano? Não pode ser desfeito.',
     periodLastWeek: 'Última semana', periodLastMonth: 'Último mês',
     periodNoData: 'Ainda não há dados para este período', periodNoStatusChanges: 'Sem mudanças de status',
@@ -6107,6 +6110,7 @@ function renderAchievementsPanel() {
         ${d.all_completed ? '<i class="ti ti-trophy" style="font-size:26px;color:#EF9F27"></i>' : ''}
       </div>
       <div style="font-size:11px;color:var(--text2);margin-top:10px">${d.unlocked_count} ${t('of')} ${d.total_count} ${t('achievementsUnlocked')}</div>
+      ${!isPremium ? `<button onclick="startPaddleCheckout()" style="width:100%;margin-top:10px;padding:8px;border-radius:8px;border:none;background:var(--green);color:#fff;font-size:12px;font-weight:600;cursor:pointer">✨ ${t('buyPremium')} — ${t('premiumLevelHint')}</button>` : ''}
     </div>
     ${categoriesHtml || (_achievementsOnlyLocked ? `<div style="text-align:center;padding:24px;color:var(--text2)">¡Desbloqueaste todos los logros disponibles!</div>` : '')}
   `;
