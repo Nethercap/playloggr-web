@@ -554,7 +554,7 @@
 <div class="mobile-sidebar" id="mobile-sidebar">
   <div class="mobile-sidebar-header"><i class="ti ti-device-gamepad-2" style="color:#1D9E75"></i> Playloggr</div>
   <button onclick="setView('novedades');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-sparkles"></i> <span data-i18n="novedades">Novedades</span></button>
-  <button onclick="setView('plan');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-route"></i> <span data-i18n="gamePlan">Plan de juego</span></button>
+  <button onclick="setView('plan');toggleHeaderMoreMenu()" class="mobile-sidebar-item" style="display:flex;align-items:center;justify-content:space-between"><span><i class="ti ti-route"></i> <span data-i18n="gamePlan">Plan de juego</span></span><i class="ti ti-lock" id="plan-nav-lock-icon" style="display:none;font-size:13px;color:var(--text2)"></i></button>
   <button onclick="openGomPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-stars"></i> <span data-i18n="gameOfMonth">Juego del mes</span></button>
   <button onclick="openMyReviewsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-message-star"></i> <span data-i18n="myReviews">Mis reseñas</span></button>
   <button onclick="openFriendsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-users"></i> <span data-i18n="friends">Amigos</span></button>
@@ -1860,6 +1860,7 @@ const I18N = {
     planError: 'Ocurrió un error al cargar el plan.',
     planTotalPct: 'Progreso del plan', planTotalHours: 'Horas totales del plan', planHoursPlayed: 'Horas jugadas del plan',
     planName: 'Nombre del plan (opcional)', planNamePrompt: 'Nombre del plan',
+    premiumRequiredTitle: 'Función premium', planPremiumRequired: 'Plan de juego requiere la versión premium', buyPremium: 'Hacerse Premium',
     resumePlan: 'Reanudar plan', deletePlan: 'Eliminar plan', deletePlanConfirm: '¿Eliminar este plan? No se puede deshacer.',
     periodLastWeek: 'Última semana', periodLastMonth: 'Último mes',
     periodNoData: 'Todavía no hay datos para este período', periodNoStatusChanges: 'Sin cambios de estado',
@@ -2047,6 +2048,7 @@ const I18N = {
     planError: 'An error occurred loading the plan.',
     planTotalPct: 'Plan progress', planTotalHours: 'Total plan hours', planHoursPlayed: 'Plan hours played',
     planName: 'Plan name (optional)', planNamePrompt: 'Plan name',
+    premiumRequiredTitle: 'Premium feature', planPremiumRequired: 'Game plan requires the premium version', buyPremium: 'Go Premium',
     resumePlan: 'Resume plan', deletePlan: 'Delete plan', deletePlanConfirm: 'Delete this plan? This cannot be undone.',
     periodLastWeek: 'Last week', periodLastMonth: 'Last month',
     periodNoData: 'No data yet for this period', periodNoStatusChanges: 'No status changes',
@@ -2234,6 +2236,7 @@ const I18N = {
     planError: 'Ocorreu um erro ao carregar o plano.',
     planTotalPct: 'Progresso do plano', planTotalHours: 'Horas totais do plano', planHoursPlayed: 'Horas jogadas do plano',
     planName: 'Nome do plano (opcional)', planNamePrompt: 'Nome do plano',
+    premiumRequiredTitle: 'Função premium', planPremiumRequired: 'Plano de jogo requer a versão premium', buyPremium: 'Tornar-se Premium',
     resumePlan: 'Retomar plano', deletePlan: 'Excluir plano', deletePlanConfirm: 'Excluir este plano? Não pode ser desfeito.',
     periodLastWeek: 'Última semana', periodLastMonth: 'Último mês',
     periodNoData: 'Ainda não há dados para este período', periodNoStatusChanges: 'Sem mudanças de status',
@@ -7060,6 +7063,10 @@ async function _submitPlanStep(resumeChoice) {
       _renderPlanResumeChoiceDialog(d.detail.current_hours);
       return;
     }
+    if (res.status === 403) {
+      _renderPlanPremiumRequiredDialog();
+      return;
+    }
     if (!res.ok) throw new Error(d.detail || 'Error');
     _closePlanWizard();
     if (isNewPlan) { openPlanDetail(d.id); }
@@ -7067,6 +7074,17 @@ async function _submitPlanStep(resumeChoice) {
   } catch (e) {
     showToast(e.message || t('planError'), true);
   }
+}
+
+function _renderPlanPremiumRequiredDialog() {
+  document.getElementById('plan-wizard-title').textContent = t('premiumRequiredTitle');
+  document.getElementById('plan-wizard-body').innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--bg3);border-radius:8px;color:var(--text2);font-size:12px;margin-bottom:14px">
+      <i class="ti ti-lock"></i> ${t('planPremiumRequired')}
+    </div>`;
+  document.getElementById('plan-wizard-actions').innerHTML = `
+    <button class="btn-cancel" onclick="_closePlanWizard()">${t('cancel')}</button>
+    <button class="btn-save" style="background:var(--green)" onclick="_closePlanWizard();startPaddleCheckout()">✨ ${t('buyPremium')}</button>`;
 }
 
 function _renderPlanResumeChoiceDialog(currentHours) {
@@ -9466,6 +9484,9 @@ function _endTour() {
 }
 
 function applyPremiumUI() {
+  const planLockIcon = document.getElementById('plan-nav-lock-icon');
+  if (planLockIcon) planLockIcon.style.display = isPremium ? 'none' : '';
+
   // Rediseño de premium: sincronizar Steam/PSN/GOG/Xbox/Epic pasa a ser
   // gratis para todos — se sacan los candados/toasts de bloqueo, siempre
   // quedan con el onclick real de abrir el menu de conexion.
@@ -9505,6 +9526,8 @@ function applyPremiumUI() {
     badge.textContent = isPremium ? 'Premium' : 'Gratis';
     badge.style.background = isPremium ? 'rgba(29,158,117,0.15)' : 'rgba(136,135,128,0.25)';
     badge.style.color      = isPremium ? 'var(--green)' : 'var(--text2)';
+    badge.style.cursor     = isPremium ? 'default' : 'pointer';
+    badge.onclick = isPremium ? null : startPaddleCheckout;
   });
   const upgradeBtn = document.getElementById('cfg-upgrade-btn');
   if (upgradeBtn) upgradeBtn.style.display = isPremium ? 'none' : 'block';
@@ -9544,7 +9567,10 @@ function renderCosmeticPickers() {
   if (!frameEl || !fontEl) return;
 
   if (!isPremium) {
-    const lockedMsg = `<div style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--bg3);border-radius:8px;color:var(--text2);font-size:12px"><i class="ti ti-lock"></i>Requiere la versión premium</div>`;
+    const lockedMsg = `<div style="display:flex;flex-direction:column;gap:8px;padding:10px;background:var(--bg3);border-radius:8px">
+      <div style="display:flex;align-items:center;gap:8px;color:var(--text2);font-size:12px"><i class="ti ti-lock"></i>Requiere la versión premium</div>
+      <button onclick="startPaddleCheckout()" style="padding:8px;border-radius:8px;border:none;background:var(--green);color:#fff;font-size:12px;font-weight:600;cursor:pointer">✨ ${t('buyPremium')}</button>
+    </div>`;
     frameEl.innerHTML = lockedMsg;
     fontEl.innerHTML  = lockedMsg;
     return;
