@@ -554,7 +554,7 @@
 <div class="mobile-sidebar" id="mobile-sidebar">
   <div class="mobile-sidebar-header"><i class="ti ti-device-gamepad-2" style="color:#1D9E75"></i> Playloggr</div>
   <button onclick="setView('novedades');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-sparkles"></i> <span data-i18n="novedades">Novedades</span></button>
-  <button onclick="setView('plan');toggleHeaderMoreMenu()" class="mobile-sidebar-item" style="display:flex;align-items:center;justify-content:space-between"><span><i class="ti ti-route"></i> <span data-i18n="gamePlan">Plan de juego</span></span><i class="ti ti-lock" id="plan-nav-lock-icon" style="display:none;font-size:13px;color:var(--text2)"></i></button>
+  <button onclick="setView('plan');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-route"></i> <span data-i18n="gamePlan" style="flex:1">Plan de juego</span><i class="ti ti-lock" id="plan-nav-lock-icon" style="display:none;font-size:13px;color:var(--text2)"></i></button>
   <button onclick="openGomPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-stars"></i> <span data-i18n="gameOfMonth">Juego del mes</span></button>
   <button onclick="openMyReviewsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-message-star"></i> <span data-i18n="myReviews">Mis reseñas</span></button>
   <button onclick="openFriendsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-users"></i> <span data-i18n="friends">Amigos</span></button>
@@ -4472,6 +4472,10 @@ function toggleFilterDropdown(key, options, wrap, btn) {
 }
 
 function setView(view) {
+  if (view === 'plan' && !isPremium) {
+    _showPlanPremiumGate();
+    return;
+  }
   currentView = view;
 
   const isStats     = view === 'stats';
@@ -5558,14 +5562,23 @@ function renderAvatarPreview() {
 function renderRacePicker() {
   const wrap = document.getElementById('avatar-race-picker');
   wrap.innerHTML = `<div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:2px">${
-    AVATAR_BODY_OPTIONS.map(r => {
+    AVATAR_BODY_OPTIONS.map((r, i) => {
       const active = currentAvatarConfig.body === r;
-      return `<div onclick="setAvatarRace('${r}')" title="${r}" style="width:44px;height:44px;flex-shrink:0;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid ${active ? 'var(--green)' : 'transparent'};overflow:hidden">
-        <img src="avatar_pixel/body/${r}.png" style="width:40px;height:40px;image-rendering:pixelated" /></div>`;
+      const locked = !isPremium && i > 0;
+      return `<div onclick="${locked ? 'startPaddleCheckout()' : `setAvatarRace('${r}')`}" title="${locked ? t('buyPremium') : r}" style="width:44px;height:44px;flex-shrink:0;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid ${active ? 'var(--green)' : 'transparent'};overflow:hidden;position:relative;opacity:${locked ? 0.35 : 1}">
+        <img src="avatar_pixel/body/${r}.png" style="width:40px;height:40px;image-rendering:pixelated" />
+        ${locked ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35)"><i class="ti ti-lock" style="font-size:16px;color:#fff"></i></div>` : ''}
+      </div>`;
     }).join('')
   }</div>`;
 }
-function setAvatarRace(r) { currentAvatarConfig.body = r; refreshAvatarControls(); }
+function setAvatarRace(r) {
+  if (!isPremium && r !== AVATAR_BODY_OPTIONS[0]) { startPaddleCheckout(); return; }
+  currentAvatarConfig.body = r;
+  refreshAvatarControls();
+}
+
+const AVATAR_FREE_COLOR = 'black';
 
 function renderColorOnlyPicker(containerId, category, style, colors) {
   const wrap = document.getElementById(containerId);
@@ -5574,11 +5587,13 @@ function renderColorOnlyPicker(containerId, category, style, colors) {
   wrap.innerHTML = `<div style="display:flex;gap:6px;flex-wrap:wrap">${
     colors.map(c => {
       const active = c === currentColor;
-      return `<button onclick="setAvatarColorOnly('${category}','${style}','${c}')" title="${c}" style="width:26px;height:26px;border-radius:50%;background:${AVATAR_COLOR_SWATCH[c]};border:2px solid ${active ? 'var(--text)' : 'transparent'};cursor:pointer;padding:0"></button>`;
+      const locked = !isPremium && c !== AVATAR_FREE_COLOR;
+      return `<button onclick="${locked ? 'startPaddleCheckout()' : `setAvatarColorOnly('${category}','${style}','${c}')`}" title="${locked ? t('buyPremium') : c}" style="width:26px;height:26px;border-radius:50%;background:${AVATAR_COLOR_SWATCH[c]};border:2px solid ${active ? 'var(--text)' : 'transparent'};cursor:pointer;padding:0;position:relative;opacity:${locked ? 0.35 : 1}">${locked ? '<i class="ti ti-lock" style="font-size:10px;color:#fff"></i>' : ''}</button>`;
     }).join('')
   }</div>`;
 }
 function setAvatarColorOnly(category, style, color) {
+  if (!isPremium && color !== AVATAR_FREE_COLOR) { startPaddleCheckout(); return; }
   currentAvatarConfig[category] = `${style}_${color}`;
   refreshAvatarControls();
 }
@@ -5605,12 +5620,15 @@ function renderLayerPicker(containerId, category, styleColorMap, allowNone) {
   html += styles.map(s => {
     const firstColor = styleColorMap[s][0];
     const active = !!value && s === currentStyle;
-    return `<div onclick="setAvatarLayerStyle('${category}', '${s}')" title="${s}" style="width:44px;height:44px;flex-shrink:0;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid ${active ? 'var(--green)' : 'transparent'};overflow:hidden">
-      <img src="avatar_pixel/${category}/${s}_${firstColor}.png" style="width:40px;height:40px;image-rendering:pixelated" /></div>`;
+    const locked = !isPremium;
+    return `<div onclick="${locked ? 'startPaddleCheckout()' : `setAvatarLayerStyle('${category}', '${s}')`}" title="${locked ? t('buyPremium') : s}" style="width:44px;height:44px;flex-shrink:0;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid ${active ? 'var(--green)' : 'transparent'};overflow:hidden;position:relative;opacity:${locked ? 0.35 : 1}">
+      <img src="avatar_pixel/${category}/${s}_${firstColor}.png" style="width:40px;height:40px;image-rendering:pixelated" />
+      ${locked ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35)"><i class="ti ti-lock" style="font-size:16px;color:#fff"></i></div>` : ''}
+    </div>`;
   }).join('');
   html += `</div>`;
 
-  if (value) {
+  if (value && isPremium) {
     html += `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${
       colors.map(c => {
         const active = c === currentColor;
@@ -5627,15 +5645,18 @@ const AVATAR_CATEGORY_MAPS = {
 };
 
 function setAvatarLayer(category, value) {
+  if (!isPremium && value !== null) { startPaddleCheckout(); return; }
   currentAvatarConfig[category] = value;
   refreshAvatarControls();
 }
 function setAvatarLayerStyle(category, style) {
+  if (!isPremium) { startPaddleCheckout(); return; }
   const color = AVATAR_CATEGORY_MAPS[category][style][0];
   currentAvatarConfig[category] = `${style}_${color}`;
   refreshAvatarControls();
 }
 function setAvatarLayerColor(category, color) {
+  if (!isPremium) { startPaddleCheckout(); return; }
   const style = currentAvatarConfig[category].split('_')[0];
   currentAvatarConfig[category] = `${style}_${color}`;
   refreshAvatarControls();
@@ -6621,6 +6642,24 @@ document.addEventListener('click', (e) => {
 let _planListData = [];
 let _planDetailId = null;
 let _planDetailData = null;
+
+function _showPlanPremiumGate() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay open';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:380px">
+      <div class="modal-title">${t('premiumRequiredTitle')}</div>
+      <div style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--bg3);border-radius:8px;color:var(--text2);font-size:12px;margin-bottom:14px">
+        <i class="ti ti-lock"></i> ${t('planPremiumRequired')}
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="this.closest('.modal-overlay').remove()">${t('cancel')}</button>
+        <button class="btn-save" style="background:var(--green)" onclick="this.closest('.modal-overlay').remove();startPaddleCheckout()">✨ ${t('buyPremium')}</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+}
 
 async function loadPlanListView() {
   document.getElementById('plan-list-panel').style.display = '';
