@@ -8590,6 +8590,7 @@ function loginWithGoogle() {
       // mismo criterio que isRegister en submitAuth().
       if (typeof window.gtag === 'function') {
         window.gtag('event', 'sign_up', { method: 'google' });
+        window.gtag('event', 'conversion', { send_to: ADS_SIGNUP_CONVERSION_LABEL });
       }
       localStorage.setItem('gb_needs_username', 'true');
       document.getElementById('set-username-input').value = '';
@@ -9767,6 +9768,7 @@ async function submitAuth() {
     // detecta el registro de forma confiable.
     if (isRegister && typeof window.gtag === 'function') {
       window.gtag('event', 'sign_up', { method: 'email' });
+      window.gtag('event', 'conversion', { send_to: ADS_SIGNUP_CONVERSION_LABEL });
     }
 
     if (data.verification_required) {
@@ -11119,10 +11121,14 @@ async function syncAll(page = 1, silent = false) {
   }
 }
 
-// ── Google Analytics (GA4) — misma property que la landing, carga diferida
-// hasta que el usuario acepte cookies. El consentimiento se comparte con
-// playloggr.com porque localStorage es por origen, no por path.
+// ── Google Analytics (GA4) + Google Ads — misma property/cuenta que la
+// landing, carga diferida hasta que el usuario acepte cookies. El
+// consentimiento se comparte con playloggr.com porque localStorage es por
+// origen, no por path. Google Ads reusa el mismo gtag.js de GA4 (un solo
+// script, dos config) en vez de cargar un segundo tag aparte.
 const GA_MEASUREMENT_ID = 'G-G24M6XTDJ1';
+const ADS_CONVERSION_ID = 'AW-18389805723';
+const ADS_SIGNUP_CONVERSION_LABEL = 'AW-18389805723/FaUECOn3z-EcEJvV-MBE';
 
 function loadGoogleAnalytics() {
   if (window.__gaLoaded) return;
@@ -11136,6 +11142,7 @@ function loadGoogleAnalytics() {
   window.gtag = gtag;
   gtag('js', new Date());
   gtag('config', GA_MEASUREMENT_ID, { anonymize_ip: true });
+  gtag('config', ADS_CONVERSION_ID);
 }
 
 function setCookieConsent(accepted) {
