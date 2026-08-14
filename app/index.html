@@ -25,6 +25,43 @@
        cargar segun la preferencia guardada en el backend. */
     :root[data-theme="light"] { --bg:#ffffff; --bg2:#f5f5f5; --bg3:#eeeeee; --text:#1a1a1a; --text2:#666666; --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22); }
     :root[data-theme="dark"]  { --bg:#1a1a1a; --bg2:#242424; --bg3:#2e2e2e; --text:#f0f0f0; --text2:#999; --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2); }
+
+    /* ── Temas de videojuego (Apariencia > Tema de videojuego) — portados de
+       la app Flutter (ver lib/theme/game_theme.dart), solo visibles/usables
+       para la cuenta que los pidio (ver GAME_THEME_ALLOWED_EMAIL en el JS).
+       Pisan las mismas variables que ya usa toda la UI (bg, text, border,
+       green), asi que no hace falta tocar componente por componente. */
+    :root[data-game-theme="cyberpunk"] {
+      --bg:#0C0707; --bg2:#160A0A; --bg3:#1F0F0F; --text:#E8828C; --text2:#A65A62;
+      --border:rgba(232,16,42,0.35); --border2:rgba(232,16,42,0.55);
+      --green:#17F1F1; --green-dark:#0FB8B8;
+    }
+    :root[data-game-theme="atomicGreen"] {
+      --bg:#050805; --bg2:#073605; --bg3:#0E4E0B; --text:#199515; --text2:#146C11;
+      --border:rgba(20,91,17,0.6); --border2:rgba(20,91,17,0.85);
+      --green:#199515; --green-dark:#145B11;
+    }
+    :root[data-game-theme="atomicAmbar"] {
+      --bg:#1A130D; --bg2:#1A130D; --bg3:#4F2B1B; --text:#F3A770; --text2:#8F1B15;
+      --border:rgba(143,27,21,0.6); --border2:rgba(143,27,21,0.85);
+      --green:#8F1B15; --green-dark:#6A140F;
+    }
+    :root[data-game-theme="erdtree"] {
+      --bg:#0C0D0A; --bg2:#13251C; --bg3:#1D3327; --text:#E1E2D6; --text2:#1F648D;
+      --border:rgba(237,138,9,0.5); --border2:rgba(237,138,9,0.7);
+      --green:#ED8A09; --green-dark:#6B4A0F;
+    }
+    :root[data-game-theme="oldShooter"] {
+      --bg:#1B1C13; --bg2:#4B5240; --bg3:#5A6250; --text:#C7C4B4; --text2:#8EB1B8;
+      --border:rgba(96,92,72,0.7); --border2:rgba(237,234,218,0.4);
+      --green:#D9A3A3; --green-dark:#B77E7E;
+    }
+    :root[data-game-theme="cyberpunk"] body       { font-family:'Play', -apple-system, sans-serif; }
+    :root[data-game-theme="atomicGreen"] body,
+    :root[data-game-theme="atomicAmbar"] body      { font-family:'Share Tech Mono', monospace; }
+    :root[data-game-theme="erdtree"] body          { font-family:'EB Garamond', serif; }
+    :root[data-game-theme="oldShooter"] body       { font-family:'PT Sans', -apple-system, sans-serif; }
+
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; padding: 20px; }
     .container { max-width: 980px; margin: 0 auto; }
 
@@ -1270,6 +1307,13 @@
           <label>Color de card</label>
           <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px" id="cfg-cardcolor-options"></div>
         </div>
+        <div class="modal-group full" id="cfg-gametheme-group" style="display:none">
+          <label>Tema de videojuego
+            <span style="font-size:10px;color:var(--amber);background:rgba(239,159,39,0.15);padding:2px 6px;border-radius:6px;margin-left:6px">Experimental</span>
+          </label>
+          <div style="font-size:12px;color:var(--text2);margin-top:4px">Cambia toda la estética de la app: colores y tipografía. Solo visible en tu cuenta.</div>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px" id="cfg-gametheme-options"></div>
+        </div>
         <div class="modal-group full">
           <label data-i18n="suggestionSettingsLabel">Sugerencia de la semana</label>
           <div style="display:flex;gap:8px;margin-top:6px">
@@ -2435,6 +2479,51 @@ async function loadAppearanceSettings() {
     if (data.card_color_mode) cardColorMode = data.card_color_mode;
   } catch(e) {}
 }
+
+// ── Temas de videojuego (experimental) — solo local (no via /settings,
+// mismo criterio que la app Flutter: se guarda en localStorage, no se
+// sincroniza al backend), y restringido a una sola cuenta.
+const GAME_THEME_ALLOWED_EMAIL = 'freue.tomas@hotmail.com';
+const GAME_THEMES = [
+  ['none',        'Playloggr (por defecto)'],
+  ['cyberpunk',   'Cyberpunk'],
+  ['atomicGreen', 'Atomic Green — inspirado en Fallout 3'],
+  ['atomicAmbar', 'Atomic Ambar — inspirado en Fallout: New Vegas'],
+  ['erdtree',     'Erdtree — inspirado en Elden Ring'],
+  ['oldShooter',  'Old Shooter — inspirado en Counter-Strike 1.6'],
+];
+
+function ensureGameThemeFontsLoaded() {
+  if (document.getElementById('game-theme-fonts')) return;
+  const link = document.createElement('link');
+  link.id = 'game-theme-fonts';
+  link.rel = 'stylesheet';
+  link.href = 'https://fonts.googleapis.com/css2?family=Play:wght@400;700&family=VT323&family=Share+Tech+Mono&family=Cinzel:wght@600;700&family=EB+Garamond&family=Mulish:wght@600;700&family=PT+Sans&display=swap';
+  document.head.appendChild(link);
+}
+
+function applyGameTheme(key) {
+  if (key && key !== 'none') {
+    document.documentElement.dataset.gameTheme = key;
+    localStorage.setItem('pl_game_theme', key);
+    ensureGameThemeFontsLoaded();
+  } else {
+    delete document.documentElement.dataset.gameTheme;
+    localStorage.removeItem('pl_game_theme');
+  }
+  renderAppearanceTab();
+}
+
+// Restaurar de inmediato (antes de saber el email real) para evitar flash —
+// se revierte en loadPremiumStatus() si la cuenta logueada no es la
+// habilitada para este feature.
+try {
+  const savedGameTheme = localStorage.getItem('pl_game_theme');
+  if (savedGameTheme && savedGameTheme !== 'none') {
+    document.documentElement.dataset.gameTheme = savedGameTheme;
+    ensureGameThemeFontsLoaded();
+  }
+} catch (e) {}
 
 function applyThemeMode(mode) {
   // null/undefined = sin preferencia guardada, se deja que
@@ -5412,6 +5501,19 @@ function renderAppearanceTab() {
       `).join('')}
     </div>
   ` : '');
+
+  const gtGroup = document.getElementById('cfg-gametheme-group');
+  if (gtGroup) {
+    const allowed = userEmail === GAME_THEME_ALLOWED_EMAIL;
+    gtGroup.style.display = allowed ? '' : 'none';
+    if (allowed) {
+      const current = document.documentElement.dataset.gameTheme || 'none';
+      document.getElementById('cfg-gametheme-options').innerHTML = GAME_THEMES.map(([key, label]) => `
+        <button type="button" class="cfg-choice-btn ${current === key ? 'active' : ''}" style="justify-content:flex-start;text-align:left"
+          onclick="applyGameTheme('${key}')">${label}</button>
+      `).join('');
+    }
+  }
 }
 
 function onCardColorChoice(key) {
@@ -9278,6 +9380,14 @@ async function loadPremiumStatus() {
     userUnlockedFonts  = d.unlocked_fonts || ['default'];
     userTrophy = d.trophy || false;
     userEmail  = d.email || '';
+    // El tema de videojuego (ver applyGameTheme) es feature de una sola
+    // cuenta — si se restauro desde localStorage antes de saber el email
+    // real (ver el "try" cerca de applyThemeMode) y la cuenta logueada no
+    // es la habilitada, se revierte.
+    if (document.documentElement.dataset.gameTheme && userEmail !== GAME_THEME_ALLOWED_EMAIL) {
+      delete document.documentElement.dataset.gameTheme;
+      localStorage.removeItem('pl_game_theme');
+    }
     if (d.language === 'en' || d.language === 'es' || d.language === 'pt') {
       currentLang = d.language;
       localStorage.setItem('gb_lang', currentLang);
