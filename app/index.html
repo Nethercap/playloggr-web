@@ -82,6 +82,60 @@
     :root[data-game-theme] .play-btn { border-color:var(--accent-play) !important; color:var(--accent-play) !important; }
     :root[data-game-theme] .game-foot { color:var(--accent-meta); }
 
+    /* ── Marcos/bordes decorativos por tema — equivalentes en CSS puro de
+       los ShapeBorder custom de Flutter (ver game_theme.dart: _BracketBorder,
+       _GradientBorder, _BevelBorder). Se aplican a .game-card y
+       .lib-grid-tile (lista y grilla, como en la app); Erdtree ademas al
+       drawer y Old Shooter ademas al boton de play, igual que en Flutter. */
+
+    /* Brackets (esquinas en L) — Cyberpunk/Atomic Green/Atomic Ambar. 8
+       gradientes en capas (2 tiras por esquina) via `background`, sin
+       pseudo-elementos — un elemento solo tiene ::before/::after y hacen
+       falta 4 esquinas. */
+    :root[data-game-theme="cyberpunk"] .game-card,
+    :root[data-game-theme="cyberpunk"] .lib-grid-tile,
+    :root[data-game-theme="atomicGreen"] .game-card,
+    :root[data-game-theme="atomicGreen"] .lib-grid-tile,
+    :root[data-game-theme="atomicAmbar"] .game-card,
+    :root[data-game-theme="atomicAmbar"] .lib-grid-tile {
+      background-image:
+        linear-gradient(to right, var(--accent-sidebar), var(--accent-sidebar)),
+        linear-gradient(to bottom, var(--accent-sidebar), var(--accent-sidebar)),
+        linear-gradient(to left,  var(--accent-sidebar), var(--accent-sidebar)),
+        linear-gradient(to bottom, var(--accent-sidebar), var(--accent-sidebar)),
+        linear-gradient(to right, var(--accent-sidebar), var(--accent-sidebar)),
+        linear-gradient(to top,   var(--accent-sidebar), var(--accent-sidebar)),
+        linear-gradient(to left,  var(--accent-sidebar), var(--accent-sidebar)),
+        linear-gradient(to top,   var(--accent-sidebar), var(--accent-sidebar));
+      background-repeat: no-repeat;
+      background-size: 12px 2px, 2px 12px, 12px 2px, 2px 12px, 12px 2px, 2px 12px, 12px 2px, 2px 12px;
+      background-position: top left, top left, top right, top right, bottom left, bottom left, bottom right, bottom right;
+    }
+
+    /* Degrade real en el borde — Erdtree */
+    :root[data-game-theme="erdtree"] .game-card,
+    :root[data-game-theme="erdtree"] .lib-grid-tile {
+      border-width: 1.4px; border-style: solid; border-color: transparent;
+      border-image: linear-gradient(135deg, var(--green-dark), var(--green), var(--green-dark)) 1;
+    }
+    :root[data-game-theme="erdtree"] .mobile-sidebar {
+      border-left: 1.4px solid var(--green);
+    }
+
+    /* Relieve 3D estilo Windows 98 — Old Shooter. border-color admite 4
+       valores (arriba derecha abajo izquierda): claro arriba-izq, oscuro
+       abajo-der simula el bisel sin gradientes ni box-shadow. */
+    :root[data-game-theme="oldShooter"] .game-card,
+    :root[data-game-theme="oldShooter"] .lib-grid-tile {
+      border-width: 2px; border-style: solid;
+      border-color: #EDEADA #605C48 #605C48 #EDEADA;
+    }
+    :root[data-game-theme="oldShooter"] .play-btn {
+      border-width: 2px !important; border-style: solid !important;
+      border-color: #EDEADA #605C48 #605C48 #EDEADA !important;
+      border-radius: 3px !important;
+    }
+
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; padding: 20px; }
     .container { max-width: 980px; margin: 0 auto; }
 
