@@ -9753,6 +9753,16 @@ async function submitAuth() {
       throw new Error((typeof data.detail === 'string' && data.detail) || 'Error de autenticación');
     }
 
+    // Evento real de registro para Google Analytics / Google Ads — se dispara
+    // una sola vez, justo cuando el backend confirma que la cuenta se creo
+    // (con o sin verificacion de email pendiente), nunca en el flujo de login.
+    // No usamos el "manual_event_SIGNUP" armado a mano en GA4 porque esta app
+    // es una SPA sin cambio de URL, asi que un evento basado en URL nunca
+    // detecta el registro de forma confiable.
+    if (isRegister && typeof window.gtag === 'function') {
+      window.gtag('event', 'sign_up', { method: 'email' });
+    }
+
     if (data.verification_required) {
       openVerifyEmail(data.email || email);
       return;
