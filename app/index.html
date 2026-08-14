@@ -8585,6 +8585,12 @@ function loginWithGoogle() {
     localStorage.setItem('gb_token', authToken);
     localStorage.setItem('gb_user',  authUser);
     if (e.data.needs_username) {
+      // needs_username solo viene la primera vez que esta cuenta de Google
+      // entra (todavia no eligio username) — es la senal de cuenta nueva,
+      // mismo criterio que isRegister en submitAuth().
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'sign_up', { method: 'google' });
+      }
       localStorage.setItem('gb_needs_username', 'true');
       document.getElementById('set-username-input').value = '';
       document.getElementById('set-username-err').style.display = 'none';
