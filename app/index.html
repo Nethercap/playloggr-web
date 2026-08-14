@@ -41,7 +41,7 @@
     :root[data-game-theme="cyberpunk"] {
       --bg:#160A0A; --bg2:#1F0F0F; --bg3:#0C0707; --text:#E8828C; --text2:#A65A62;
       --border:rgba(232,16,42,0.35); --border2:rgba(232,16,42,0.55);
-      --green:#FCEE0A; --green-dark:#C9BE08;
+      --green:#17F1F1; --green-dark:#0FB8B8;
       --accent-sidebar:#17F1F1; --accent-play:#17F1F1; --accent-meta:#17F1F1; --accent-unselected:#17F1F1;
     }
     :root[data-game-theme="atomicGreen"] {
@@ -2487,6 +2487,12 @@ let showHidden = false;
 let modalStarVal = 0;
 // Apariencia — sincronizada con /settings (mismo valor en la app y la web).
 let cardColorMode = 'theme';
+// Cambios de Apariencia sin confirmar todavia — se aplican al toque (mismo
+// feedback visual instantaneo de siempre) pero solo se persisten a
+// /settings al tocar Guardar; Cancelar los revierte (ver switchConfigTab /
+// saveAppearanceConfig / closeConfigPanel).
+let _appearanceSnapshot = null;
+let _appearancePendingBody = {};
 
 async function loadAppearanceSettings() {
   try {
@@ -5455,8 +5461,39 @@ async function openConfigPanel() {
 }
 
 function closeConfigPanel() {
+  // Si habia cambios de Apariencia sin confirmar (Cancelar, click afuera del
+  // modal, o la X) se revierten a como estaban al abrir la tab — Guardar
+  // limpia _appearanceSnapshot antes de llegar aca, asi que en ese caso no
+  // pasa nada.
+  if (_appearanceSnapshot) {
+    const s = _appearanceSnapshot;
+    setLibraryViewMode(s.view);
+    applyThemeMode(s.theme);
+    cardColorMode = s.cardColor;
+    renderGames();
+    applyGameTheme(s.gameTheme);
+    _appearanceSnapshot = null;
+    _appearancePendingBody = {};
+  }
   document.getElementById('config-overlay').classList.remove('open');
   document.getElementById('cfg-profile-msg').style.display = 'none';
+}
+
+async function saveAppearanceConfig() {
+  if (Object.keys(_appearancePendingBody).length) {
+    try {
+      await fetch(`${apiBase()}/api/v1/settings`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(_appearancePendingBody),
+      });
+    } catch(e) {}
+  }
+  // El tema de videojuego ya se persistio en localStorage al tocar la opcion
+  // (ver applyGameTheme) — es local, no via /settings, no hace falta re-enviarlo.
+  _appearanceSnapshot = null;
+  _appearancePendingBody = {};
+  closeConfigPanel();
 }
 
 function switchConfigTab(tab) {
@@ -5465,9 +5502,20 @@ function switchConfigTab(tab) {
   document.getElementById('config-account').style.display    = tab === 'account'    ? '' : 'none';
   document.getElementById('config-appearance').style.display = tab === 'appearance' ? '' : 'none';
   const saveBtn = document.getElementById('cfg-save-btn');
-  saveBtn.style.display = (tab === 'account' || tab === 'appearance') ? 'none' : '';
-  saveBtn.onclick = tab === 'avatar' ? saveAvatarConfig : saveConfig;
-  if (tab === 'appearance') renderAppearanceTab();
+  saveBtn.style.display = tab === 'account' ? 'none' : '';
+  saveBtn.onclick = tab === 'avatar' ? saveAvatarConfig : (tab === 'appearance' ? saveAppearanceConfig : saveConfig);
+  if (tab === 'appearance') {
+    // Snapshot de lo que hay confirmado ahora — si el usuario toca opciones
+    // y despues cancela, se vuelve a esto (ver closeConfigPanel).
+    _appearanceSnapshot = {
+      view: libraryViewMode,
+      theme: document.documentElement.dataset.theme || null,
+      cardColor: cardColorMode,
+      gameTheme: document.documentElement.dataset.gameTheme || 'none',
+    };
+    _appearancePendingBody = {};
+    renderAppearanceTab();
+  }
   ['profile','avatar','account','appearance'].forEach(t => {
     const btn = document.getElementById(`tab-${t}`);
     if (!btn) return;
@@ -5544,28 +5592,22 @@ function onCardColorChoice(key) {
   }
 }
 
-async function setCfgChoice(group, value) {
+function setCfgChoice(group, value) {
+  // Aplica ya (preview instantaneo, igual que antes) pero NO persiste a
+  // /settings todavia — eso queda pendiente hasta Guardar (ver
+  // saveAppearanceConfig). Cancelar descarta _appearancePendingBody entero.
   if (group === 'view') {
     setLibraryViewMode(value); // ya existe: re-renderiza + guarda localStorage
+    _appearancePendingBody.default_view = value;
   } else if (group === 'theme') {
     applyThemeMode(value);
+    _appearancePendingBody.theme_mode = value;
   } else if (group === 'cardColor') {
     cardColorMode = value;
     renderGames();
+    _appearancePendingBody.card_color_mode = value;
   }
   renderAppearanceTab();
-
-  const body = {};
-  if (group === 'view') body.default_view = value;
-  if (group === 'theme') body.theme_mode = value;
-  if (group === 'cardColor') body.card_color_mode = value;
-  try {
-    await fetch(`${apiBase()}/api/v1/settings`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-  } catch(e) {}
 }
 
 async function setSuggestionCfgChoice(value) {
