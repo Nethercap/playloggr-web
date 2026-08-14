@@ -65,7 +65,11 @@
     :root[data-game-theme="oldShooter"] {
       --bg:#4B5240; --bg2:#5A6250; --bg3:#1B1C13; --text:#C7C4B4; --text2:#8EB1B8;
       --border:rgba(96,92,72,0.7); --border2:rgba(237,234,218,0.4);
-      --green:#D9A3A3; --green-dark:#B77E7E;
+      /* --green es generico (botones/CTAs de TODA la web, no solo los roles
+         puntuales de la app) — en la app el rosa esta acotado a sidebar/play/
+         titulo, asi que aca usamos el teal (el otro acento real del tema,
+         "celeste-oliva") para que no todo el sitio quede rosa. */
+      --green:#8EB1B8; --green-dark:#6C929A;
       --accent-sidebar:#D9A3A3; --accent-play:#D9A3A3; --accent-meta:#8EB1B8; --accent-unselected:#C7C4B4;
     }
     :root[data-game-theme="cyberpunk"] body       { font-family:'Play', -apple-system, sans-serif; }
@@ -81,6 +85,8 @@
     :root[data-game-theme] .mobile-sidebar-item i { color:var(--accent-sidebar) !important; }
     :root[data-game-theme] .play-btn { border-color:var(--accent-play) !important; color:var(--accent-play) !important; }
     :root[data-game-theme] .game-foot { color:var(--accent-meta); }
+    :root[data-game-theme] .game-card,
+    :root[data-game-theme] .lib-grid-tile { border-radius: 0; }
 
     /* ── Marcos/bordes decorativos por tema — equivalentes en CSS puro de
        los ShapeBorder custom de Flutter (ver game_theme.dart: _BracketBorder,
@@ -3675,7 +3681,7 @@ async function loadGlobalStats() {
     document.getElementById('g-playing').textContent   = data.by_status?.['Jugando']    || 0;
     document.getElementById('g-completed').textContent = data.by_status?.['Completado'] || 0;
     document.getElementById('g-backlog').textContent   = data.by_status?.['Backlog']    || 0;
-    document.getElementById('g-hours').textContent     = Math.round(data.total_hours || 0).toLocaleString('es-AR') + ' hs';
+    document.getElementById('g-hours').textContent     = Math.round(data.total_hours || 0).toLocaleString('es-AR');
     const wEl = document.getElementById('g-wishlist');
     if (wEl) wEl.textContent = data.wishlist_count || 0;
   } catch(e) {}
