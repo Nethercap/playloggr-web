@@ -30,37 +30,57 @@
        la app Flutter (ver lib/theme/game_theme.dart), solo visibles/usables
        para la cuenta que los pidio (ver GAME_THEME_ALLOWED_EMAIL en el JS).
        Pisan las mismas variables que ya usa toda la UI (bg, text, border,
-       green), asi que no hace falta tocar componente por componente. */
+       green), asi que no hace falta tocar componente por componente.
+       OJO con los roles: a diferencia de Flutter, en esta UI --bg (no --bg3)
+       es el fondo de card/header y --bg3 es el fondo de pagina/body — hay
+       que mapear invertido respecto al bg/surface de Flutter o quedan los
+       fondos al reves (bug ya encontrado una vez, no repetir).
+       --accent-sidebar/-play/-meta/-unselected replican los roles de
+       GameThemeAccents que en Flutter difieren de --green (selected) en
+       algunos temas — ver abajo donde se aplican. */
     :root[data-game-theme="cyberpunk"] {
-      --bg:#0C0707; --bg2:#160A0A; --bg3:#1F0F0F; --text:#E8828C; --text2:#A65A62;
+      --bg:#160A0A; --bg2:#1F0F0F; --bg3:#0C0707; --text:#E8828C; --text2:#A65A62;
       --border:rgba(232,16,42,0.35); --border2:rgba(232,16,42,0.55);
-      --green:#17F1F1; --green-dark:#0FB8B8;
+      --green:#FCEE0A; --green-dark:#C9BE08;
+      --accent-sidebar:#17F1F1; --accent-play:#17F1F1; --accent-meta:#17F1F1; --accent-unselected:#17F1F1;
     }
     :root[data-game-theme="atomicGreen"] {
-      --bg:#050805; --bg2:#073605; --bg3:#0E4E0B; --text:#199515; --text2:#146C11;
+      --bg:#073605; --bg2:#0E4E0B; --bg3:#050805; --text:#199515; --text2:#146C11;
       --border:rgba(20,91,17,0.6); --border2:rgba(20,91,17,0.85);
       --green:#199515; --green-dark:#145B11;
+      --accent-sidebar:#199515; --accent-play:#199515; --accent-meta:#146C11; --accent-unselected:#146C11;
     }
     :root[data-game-theme="atomicAmbar"] {
-      --bg:#1A130D; --bg2:#1A130D; --bg3:#4F2B1B; --text:#F3A770; --text2:#8F1B15;
+      --bg:#1A130D; --bg2:#4F2B1B; --bg3:#1A130D; --text:#F3A770; --text2:#8F1B15;
       --border:rgba(143,27,21,0.6); --border2:rgba(143,27,21,0.85);
-      --green:#8F1B15; --green-dark:#6A140F;
+      --green:#F3A770; --green-dark:#C98650;
+      --accent-sidebar:#F3A770; --accent-play:#8F1B15; --accent-meta:#8F1B15; --accent-unselected:#8F1B15;
     }
     :root[data-game-theme="erdtree"] {
-      --bg:#0C0D0A; --bg2:#13251C; --bg3:#1D3327; --text:#E1E2D6; --text2:#1F648D;
+      --bg:#13251C; --bg2:#1D3327; --bg3:#0C0D0A; --text:#E1E2D6; --text2:#1F648D;
       --border:rgba(237,138,9,0.5); --border2:rgba(237,138,9,0.7);
       --green:#ED8A09; --green-dark:#6B4A0F;
+      --accent-sidebar:#ED8A09; --accent-play:#ED8A09; --accent-meta:#1F648D; --accent-unselected:#E1E2D6;
     }
     :root[data-game-theme="oldShooter"] {
-      --bg:#1B1C13; --bg2:#4B5240; --bg3:#5A6250; --text:#C7C4B4; --text2:#8EB1B8;
+      --bg:#4B5240; --bg2:#5A6250; --bg3:#1B1C13; --text:#C7C4B4; --text2:#8EB1B8;
       --border:rgba(96,92,72,0.7); --border2:rgba(237,234,218,0.4);
       --green:#D9A3A3; --green-dark:#B77E7E;
+      --accent-sidebar:#D9A3A3; --accent-play:#D9A3A3; --accent-meta:#8EB1B8; --accent-unselected:#C7C4B4;
     }
     :root[data-game-theme="cyberpunk"] body       { font-family:'Play', -apple-system, sans-serif; }
     :root[data-game-theme="atomicGreen"] body,
     :root[data-game-theme="atomicAmbar"] body      { font-family:'Share Tech Mono', monospace; }
     :root[data-game-theme="erdtree"] body          { font-family:'EB Garamond', serif; }
     :root[data-game-theme="oldShooter"] body       { font-family:'PT Sans', -apple-system, sans-serif; }
+
+    /* Roles que en el resto de la UI no leen --green (sidebar/drawer, boton
+       de play, horas/fecha de la card) — solo se pisan cuando hay un tema de
+       videojuego activo; sin tema, siguen con su color de siempre. */
+    :root[data-game-theme] .mobile-sidebar-item,
+    :root[data-game-theme] .mobile-sidebar-item i { color:var(--accent-sidebar) !important; }
+    :root[data-game-theme] .play-btn { border-color:var(--accent-play) !important; color:var(--accent-play) !important; }
+    :root[data-game-theme] .game-foot { color:var(--accent-meta); }
 
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; padding: 20px; }
     .container { max-width: 980px; margin: 0 auto; }
