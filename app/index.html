@@ -72,11 +72,23 @@
       --green:#8EB1B8; --green-dark:#6C929A;
       --accent-sidebar:#D9A3A3; --accent-play:#D9A3A3; --accent-meta:#8EB1B8; --accent-unselected:#C7C4B4;
     }
+    :root[data-game-theme="pacman"] {
+      /* Negro absoluto tanto para pagina como para cards (page = card, como
+         el laberinto real) — se distinguen por el glow neon del borde, no
+         por el fondo. --text2 usa Inky (cian) igual que --accent-meta, para
+         que los detalles secundarios ya salgan del color de fantasma sin
+         pisar nada aparte. */
+      --bg:#000000; --bg2:#0D0D2B; --bg3:#000000; --text:#FFFFFF; --text2:#46BFEE;
+      --border:rgba(33,33,222,0.7); --border2:rgba(33,33,222,0.95);
+      --green:#FFFF00; --green-dark:#C9C900;
+      --accent-sidebar:#FFFF00; --accent-play:#FFFF00; --accent-meta:#46BFEE; --accent-unselected:#EA82E5;
+    }
     :root[data-game-theme="cyberpunk"] body       { font-family:'Play', -apple-system, sans-serif; }
     :root[data-game-theme="atomicGreen"] body,
     :root[data-game-theme="atomicAmbar"] body      { font-family:'Share Tech Mono', monospace; }
     :root[data-game-theme="erdtree"] body          { font-family:'EB Garamond', serif; }
     :root[data-game-theme="oldShooter"] body       { font-family:'PT Sans', -apple-system, sans-serif; }
+    :root[data-game-theme="pacman"] body           { font-family:'Silkscreen', monospace; }
 
     /* Roles que en el resto de la UI no leen --green (sidebar/drawer, boton
        de play, horas/fecha de la card) — solo se pisan cuando hay un tema de
@@ -217,6 +229,18 @@
       border-width: 2px !important; border-style: solid !important;
       border-color: #EDEADA #605C48 #605C48 #EDEADA !important;
       border-radius: 3px !important;
+    }
+
+    /* Glow neon real (box-shadow, mas directo en CSS que el blur pintado a
+       mano en Flutter) — Guaca-Guaca. Azul laberinto en cards/sidebar. */
+    :root[data-game-theme="pacman"] .game-card,
+    :root[data-game-theme="pacman"] .lib-grid-tile {
+      border: 1.6px solid var(--border2);
+      box-shadow: 0 0 6px var(--border2), inset 0 0 3px var(--border2);
+    }
+    :root[data-game-theme="pacman"] .mobile-sidebar {
+      border-left: 1.6px solid var(--border2);
+      box-shadow: -6px 0 12px var(--border2);
     }
 
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; padding: 20px; }
@@ -2657,6 +2681,7 @@ const GAME_THEMES = [
   ['atomicAmbar', 'Atomic Ambar — inspirado en Fallout: New Vegas'],
   ['erdtree',     'Erdtree — inspirado en Elden Ring'],
   ['oldShooter',  'Old Shooter — inspirado en Counter-Strike 1.6'],
+  ['pacman',      'Guaca-Guaca — inspirado en Pac-Man'],
 ];
 
 function ensureGameThemeFontsLoaded() {
@@ -2664,7 +2689,7 @@ function ensureGameThemeFontsLoaded() {
   const link = document.createElement('link');
   link.id = 'game-theme-fonts';
   link.rel = 'stylesheet';
-  link.href = 'https://fonts.googleapis.com/css2?family=Play:wght@400;700&family=VT323&family=Share+Tech+Mono&family=Cinzel:wght@600;700&family=EB+Garamond&family=Mulish:wght@600;700&family=PT+Sans&display=swap';
+  link.href = 'https://fonts.googleapis.com/css2?family=Play:wght@400;700&family=VT323&family=Share+Tech+Mono&family=Cinzel:wght@600;700&family=EB+Garamond&family=Mulish:wght@600;700&family=PT+Sans&family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap';
   document.head.appendChild(link);
 }
 
