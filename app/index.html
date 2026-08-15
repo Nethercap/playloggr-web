@@ -920,8 +920,8 @@
             <div style="display:flex;gap:6px">
               <input id="steam-id-input" type="text" placeholder="Steam ID o URL..." data-i18n-placeholder="steamId"
                 style="flex:1;padding:5px 8px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);min-width:0"
-                onkeydown="if(event.key==='Enter') saveSteamId()" />
-              <button onclick="saveSteamId()" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;white-space:nowrap" data-i18n="save">Guardar</button>
+                onkeydown="if(event.key==='Enter') searchSteamProfile()" />
+              <button id="steam-id-search-btn" onclick="searchSteamProfile()" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;white-space:nowrap" data-i18n="searchAction">Buscar</button>
             </div>
             <div style="font-size:10px;color:var(--text2);margin-top:4px">Lo encontrás en la URL de tu perfil de Steam o en "Detalles de la cuenta".</div>
             <div id="steam-id-current" style="font-size:10px;color:var(--text2);margin-top:4px"></div>
@@ -958,8 +958,8 @@
             <div style="display:flex;gap:6px">
               <input id="psn-id-input" type="text" placeholder="Tu Online ID de PSN..."
                 style="flex:1;padding:5px 8px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);min-width:0"
-                onkeydown="if(event.key==='Enter') savePsnId()" />
-              <button onclick="savePsnId()" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;white-space:nowrap" data-i18n="save">Guardar</button>
+                onkeydown="if(event.key==='Enter') searchPsnProfile()" />
+              <button id="psn-id-search-btn" onclick="searchPsnProfile()" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;white-space:nowrap" data-i18n="searchAction">Buscar</button>
             </div>
             <div id="psn-id-current" style="font-size:10px;color:var(--text2);margin-top:4px"></div>
           </div>
@@ -1743,6 +1743,21 @@
   </div>
 </div>
 
+<!-- Conectar Steam/PSN: modal de confirmacion de perfil (Buscar -> muestra
+     nombre+foto -> Confirmar recien ahi sincroniza) -->
+<div class="modal-overlay" id="connect-profile-overlay">
+  <div class="modal" style="max-width:360px;text-align:center">
+    <div class="modal-title" id="connect-profile-title" style="justify-content:center"><i class="ti ti-user-search"></i> <span data-i18n="isThisYourAccount">¿Es esta tu cuenta?</span></div>
+    <img id="connect-profile-avatar" src="" alt=""
+      style="width:88px;height:88px;border-radius:50%;object-fit:cover;margin:8px auto;display:block;border:2px solid var(--border2);background:var(--bg3)" />
+    <div id="connect-profile-username" style="font-size:16px;font-weight:600;margin-top:4px"></div>
+    <div class="modal-actions" style="justify-content:center;margin-top:18px">
+      <button class="btn-cancel" onclick="closeConnectProfileModal()" data-i18n="cancel">Cancelar</button>
+      <button class="btn-save" id="connect-profile-confirm-btn" data-i18n="confirm">Confirmar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Create Folder Modal -->
 <div class="modal-overlay" id="folder-create-overlay">
   <div class="modal" style="max-width:340px">
@@ -2044,7 +2059,8 @@ const I18N = {
     status: 'Estado', searchGame: 'Buscar juego...', connectingBackend: 'Conectando con el backend...',
     myStats: 'Mis stats', loading: 'Cargando...', folders: 'Carpetas',
     addToWishlist: 'Agregar a deseados', searchGameLabel: 'Buscar juego', searchYourGame: 'Buscá tu juego...',
-    cancel: 'Cancelar', add: 'Agregar', changeCover: 'Cambiar portada',
+    cancel: 'Cancelar', add: 'Agregar', changeCover: 'Cambiar portada', searchAction: 'Buscar', confirm: 'Confirmar',
+    isThisYourAccount: '¿Es esta tu cuenta?',
     imageUrl: 'URL de la imagen', preview: 'Vista previa', settings: 'Configuración',
     profileTab: 'Perfil', avatarTab: 'Avatar', accountTab: 'Cuenta', username: 'Nombre de usuario',
     usernameFont: 'Fuente de nombre de usuario', language: 'Idioma', profileVisibility: 'Perfil',
@@ -2234,7 +2250,8 @@ const I18N = {
     status: 'Status', searchGame: 'Search game...', connectingBackend: 'Connecting to backend...',
     myStats: 'My stats', loading: 'Loading...', folders: 'Folders',
     addToWishlist: 'Add to wishlist', searchGameLabel: 'Search game', searchYourGame: 'Search your game...',
-    cancel: 'Cancel', add: 'Add', changeCover: 'Change cover',
+    cancel: 'Cancel', add: 'Add', changeCover: 'Change cover', searchAction: 'Search', confirm: 'Confirm',
+    isThisYourAccount: 'Is this your account?',
     imageUrl: 'Image URL', preview: 'Preview', settings: 'Settings',
     profileTab: 'Profile', avatarTab: 'Avatar', accountTab: 'Account', username: 'Username',
     usernameFont: 'Username font', language: 'Language', profileVisibility: 'Profile',
@@ -2424,7 +2441,8 @@ const I18N = {
     status: 'Status', searchGame: 'Buscar jogo...', connectingBackend: 'Conectando ao backend...',
     myStats: 'Minhas estatísticas', loading: 'Carregando...', folders: 'Pastas',
     addToWishlist: 'Adicionar aos desejados', searchGameLabel: 'Buscar jogo', searchYourGame: 'Busque seu jogo...',
-    cancel: 'Cancelar', add: 'Adicionar', changeCover: 'Trocar capa',
+    cancel: 'Cancelar', add: 'Adicionar', changeCover: 'Trocar capa', searchAction: 'Buscar', confirm: 'Confirmar',
+    isThisYourAccount: 'Esta é a sua conta?',
     imageUrl: 'URL da imagem', preview: 'Prévia', settings: 'Configurações',
     profileTab: 'Perfil', avatarTab: 'Avatar', accountTab: 'Conta', username: 'Nome de usuário',
     usernameFont: 'Fonte do nome de usuário', language: 'Idioma', profileVisibility: 'Perfil',
@@ -8287,9 +8305,28 @@ async function loadSteamIdIntoMenu() {
   } catch(e) {}
 }
 
-async function saveSteamId() {
-  const input   = document.getElementById('steam-id-input');
-  const userid  = input.value.trim();
+// Guarda el ID + dispara el sync — ya NO se llama directo desde el boton
+// (ver searchSteamProfile/searchPsnProfile): ahora es el paso "Confirmar"
+// del modal de "¿es esta tu cuenta?", despues de mostrar nombre y foto.
+async function _saveSteamIdToServer(steamId) {
+  const res = await fetch(`${apiBase()}/api/v1/settings`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ steam_user_id: steamId }),
+  });
+  if (!res.ok) throw new Error();
+  const cur = document.getElementById('steam-id-current');
+  cur.textContent = `✓ Guardado: ${steamId}`;
+  cur.style.color = 'var(--green)';
+}
+
+function closeConnectProfileModal() {
+  document.getElementById('connect-profile-overlay').classList.remove('open');
+}
+
+async function searchSteamProfile() {
+  const input  = document.getElementById('steam-id-input');
+  const userid = input.value.trim();
   if (!userid) return;
 
   // Extract numeric ID from URL if pasted
@@ -8297,20 +8334,31 @@ async function saveSteamId() {
   const steamId = match ? (match[1] || match[2]) : userid;
   input.value = steamId;
 
+  const btn = document.getElementById('steam-id-search-btn');
+  const cur = document.getElementById('steam-id-current');
+  btn.disabled = true;
+  cur.textContent = 'Buscando...';
+  cur.style.color = 'var(--text2)';
   try {
-    const res = await fetch(`${apiBase()}/api/v1/settings`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ steam_user_id: steamId }),
+    const res = await fetch(`${apiBase()}/api/v1/steam/resolve-profile?steam_id=${encodeURIComponent(steamId)}`, {
+      headers: { 'Authorization': `Bearer ${authToken}` },
     });
-    if (!res.ok) throw new Error();
-    const cur = document.getElementById('steam-id-current');
-    cur.textContent = `✓ Guardado: ${steamId}`;
-    cur.style.color = 'var(--green)';
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'No se encontró el perfil');
+    cur.textContent = '';
+    document.getElementById('connect-profile-avatar').src = data.avatar_url || '';
+    document.getElementById('connect-profile-username').textContent = data.username || steamId;
+    document.getElementById('connect-profile-confirm-btn').onclick = async () => {
+      closeConnectProfileModal();
+      await _saveSteamIdToServer(steamId);
+      syncSteamLibrary();
+    };
+    document.getElementById('connect-profile-overlay').classList.add('open');
   } catch(e) {
-    const cur = document.getElementById('steam-id-current');
-    cur.textContent = t('saveError');
+    cur.textContent = e.message || 'No se encontró el perfil';
     cur.style.color = 'var(--red)';
+  } finally {
+    btn.disabled = false;
   }
 }
 
@@ -8468,24 +8516,47 @@ async function loadPsnIdIntoMenu() {
   } catch(e) {}
 }
 
-async function savePsnId() {
+async function _savePsnIdToServer(id) {
+  const res = await fetch(`${apiBase()}/api/v1/settings`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ psn_online_id: id }),
+  });
+  if (!res.ok) throw new Error();
+  const cur = document.getElementById('psn-id-current');
+  cur.textContent = `✓ Guardado: ${id}`;
+  cur.style.color = 'var(--green)';
+}
+
+async function searchPsnProfile() {
   const input = document.getElementById('psn-id-input');
   const id    = input.value.trim();
   if (!id) return;
+  const btn = document.getElementById('psn-id-search-btn');
+  const cur = document.getElementById('psn-id-current');
+  btn.disabled = true;
+  cur.textContent = 'Buscando...';
+  cur.style.color = 'var(--text2)';
   try {
-    const res = await fetch(`${apiBase()}/api/v1/settings`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ psn_online_id: id }),
+    const res = await fetch(`${apiBase()}/api/v1/psn/resolve-profile?online_id=${encodeURIComponent(id)}`, {
+      headers: { 'Authorization': `Bearer ${authToken}` },
     });
-    if (!res.ok) throw new Error();
-    const cur = document.getElementById('psn-id-current');
-    cur.textContent = `✓ Guardado: ${id}`;
-    cur.style.color = 'var(--green)';
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'No se encontró el perfil');
+    cur.textContent = '';
+    document.getElementById('connect-profile-avatar').src = data.avatar_url || '';
+    document.getElementById('connect-profile-username').textContent = data.online_id || id;
+    document.getElementById('connect-profile-confirm-btn').onclick = async () => {
+      closeConnectProfileModal();
+      await _savePsnIdToServer(data.online_id || id);
+      syncPsnLibrary();
+    };
+    document.getElementById('connect-profile-overlay').classList.add('open');
   } catch(e) {
-    const cur = document.getElementById('psn-id-current');
-    cur.textContent = t('saveError');
+    cur.textContent = e.message || 'No se encontró el perfil';
     cur.style.color = 'var(--red)';
+  } finally {
+    btn.disabled = false;
   }
 }
 
