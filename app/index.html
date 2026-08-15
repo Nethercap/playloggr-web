@@ -1745,7 +1745,7 @@
 
 <!-- Conectar Steam/PSN: modal de confirmacion de perfil (Buscar -> muestra
      nombre+foto -> Confirmar recien ahi sincroniza) -->
-<div class="modal-overlay" id="connect-profile-overlay">
+<div class="modal-overlay" id="connect-profile-overlay" style="z-index:1000">
   <div class="modal" style="max-width:360px;text-align:center">
     <div class="modal-title" id="connect-profile-title" style="justify-content:center"><i class="ti ti-user-search"></i> <span data-i18n="isThisYourAccount">¿Es esta tu cuenta?</span></div>
     <img id="connect-profile-avatar" src="" alt=""
@@ -8353,6 +8353,12 @@ async function searchSteamProfile() {
       await _saveSteamIdToServer(steamId);
       syncSteamLibrary();
     };
+    // El dropdown de Steam queda con z-index mas alto que el overlay del
+    // modal (bug real: el modal se abria tapado atras del menu) — se cierra
+    // antes de mostrar el modal en vez de solo subir el z-index, asi no
+    // queda un dropdown fantasma abierto detras.
+    document.getElementById('steam-menu').style.display = 'none';
+    _steamMenuOpen = false;
     document.getElementById('connect-profile-overlay').classList.add('open');
   } catch(e) {
     cur.textContent = e.message || 'No se encontró el perfil';
@@ -8551,6 +8557,8 @@ async function searchPsnProfile() {
       await _savePsnIdToServer(data.online_id || id);
       syncPsnLibrary();
     };
+    document.getElementById('psn-menu').style.display = 'none';
+    _psnMenuOpen = false;
     document.getElementById('connect-profile-overlay').classList.add('open');
   } catch(e) {
     cur.textContent = e.message || 'No se encontró el perfil';
