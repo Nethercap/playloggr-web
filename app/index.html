@@ -28,7 +28,7 @@
 
     /* ── Temas de videojuego (Apariencia > Tema de videojuego) — portados de
        la app Flutter (ver lib/theme/game_theme.dart), solo visibles/usables
-       para la cuenta que los pidio (ver GAME_THEME_ALLOWED_EMAIL en el JS).
+       para la cuenta que los pidio (gate server-side, ver game_themes_beta).
        Pisan las mismas variables que ya usa toda la UI (bg, text, border,
        green), asi que no hace falta tocar componente por componente.
        OJO con los roles: a diferencia de Flutter, en esta UI --bg (no --bg3)
@@ -2645,8 +2645,11 @@ async function loadAppearanceSettings() {
 
 // ── Temas de videojuego (experimental) — solo local (no via /settings,
 // mismo criterio que la app Flutter: se guarda en localStorage, no se
-// sincroniza al backend), y restringido a una sola cuenta.
-const GAME_THEME_ALLOWED_EMAIL = 'freue.tomas@hotmail.com';
+// sincroniza al backend), y restringido a una sola cuenta. El gate en si
+// (que email esta habilitado) vive server-side (ver game_themes_beta en
+// /user/profile) — este repo es publico, asi que el email nunca debe
+// hardcodearse aca.
+let gameThemesBeta = false;
 const GAME_THEMES = [
   ['none',        'Playloggr (por defecto)'],
   ['cyberpunk',   'Cyberpunk'],
@@ -5709,7 +5712,7 @@ function renderAppearanceTab() {
 
   const gtGroup = document.getElementById('cfg-gametheme-group');
   if (gtGroup) {
-    const allowed = userEmail === GAME_THEME_ALLOWED_EMAIL;
+    const allowed = gameThemesBeta;
     gtGroup.style.display = allowed ? '' : 'none';
     if (allowed) {
       const current = document.documentElement.dataset.gameTheme || 'none';
@@ -9580,10 +9583,13 @@ async function loadPremiumStatus() {
     userTrophy = d.trophy || false;
     userEmail  = d.email || '';
     // El tema de videojuego (ver applyGameTheme) es feature de una sola
-    // cuenta — si se restauro desde localStorage antes de saber el email
-    // real (ver el "try" cerca de applyThemeMode) y la cuenta logueada no
-    // es la habilitada, se revierte.
-    if (document.documentElement.dataset.gameTheme && userEmail !== GAME_THEME_ALLOWED_EMAIL) {
+    // cuenta — el chequeo lo hace el backend (game_themes_beta, en base a
+    // GAME_THEMES_BETA_EMAIL server-side) para no tener el email hardcodeado
+    // en el JS publico del repo. Si se restauro desde localStorage antes de
+    // saber esto (ver el "try" cerca de applyThemeMode) y la cuenta logueada
+    // no esta habilitada, se revierte.
+    gameThemesBeta = d.game_themes_beta === true;
+    if (document.documentElement.dataset.gameTheme && !gameThemesBeta) {
       delete document.documentElement.dataset.gameTheme;
       localStorage.removeItem('pl_game_theme');
     }
