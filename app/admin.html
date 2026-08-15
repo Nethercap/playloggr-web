@@ -353,7 +353,11 @@
 
 <script>
 const API = 'https://api.playloggr.com/api/v1';
-let adminKey = localStorage.getItem('admin_key') || '';
+// sessionStorage (no localStorage): la key no debe sobrevivir mas alla de
+// la pestaña/sesion — este repo es publico, y localStorage persiste
+// indefinidamente entre sesiones si esta maquina o un XSS futuro quedaran
+// comprometidos.
+let adminKey = sessionStorage.getItem('admin_key') || '';
 
 function headers() {
   return { 'X-Admin-Key': adminKey, 'Content-Type': 'application/json' };
@@ -377,7 +381,7 @@ async function tryLogin() {
   adminKey = key;
   const res = await fetch(`${API}/admin/metrics`, { headers: headers() });
   if (res.ok) {
-    localStorage.setItem('admin_key', adminKey);
+    sessionStorage.setItem('admin_key', adminKey);
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     renderMetrics(await res.json());
@@ -398,7 +402,7 @@ function toggleCard(id) {
 }
 
 function logout() {
-  localStorage.removeItem('admin_key');
+  sessionStorage.removeItem('admin_key');
   location.reload();
 }
 
@@ -880,7 +884,7 @@ if (adminKey) {
       loadAdminReviews();
       return res.json().then(renderMetrics);
     } else {
-      localStorage.removeItem('admin_key');
+      sessionStorage.removeItem('admin_key');
     }
   }).catch(() => {});
 }
