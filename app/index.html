@@ -83,6 +83,29 @@
        videojuego activo; sin tema, siguen con su color de siempre. */
     :root[data-game-theme] .mobile-sidebar-item,
     :root[data-game-theme] .mobile-sidebar-item i { color:var(--accent-sidebar) !important; }
+
+    /* Iconos SVG custom del sidebar de Cyberpunk (assets ya usados en la app
+       Flutter, copiados a app/icons/cyberpunk) — pisan el glifo de Tabler
+       Icons via mask (asi heredan var(--accent-sidebar) como background-color
+       en vez de un <img> de color fijo). Solo Cyberpunk tiene set propio en
+       la web por ahora; los demas temas siguen con el icono generico. */
+    :root[data-game-theme="cyberpunk"] .mobile-sidebar-item i[data-cp-icon]::before { content: none; }
+    :root[data-game-theme="cyberpunk"] .mobile-sidebar-item i[data-cp-icon] {
+      display: inline-block; width: 20px; height: 20px;
+      background-color: var(--accent-sidebar);
+      -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+      -webkit-mask-position: center; mask-position: center;
+      -webkit-mask-size: contain; mask-size: contain;
+    }
+    :root[data-game-theme="cyberpunk"] .mobile-sidebar-item i[data-cp-icon="novedades"]     { -webkit-mask-image: url(icons/cyberpunk/novedades.svg); mask-image: url(icons/cyberpunk/novedades.svg); }
+    :root[data-game-theme="cyberpunk"] .mobile-sidebar-item i[data-cp-icon="plan_de_juego"] { -webkit-mask-image: url(icons/cyberpunk/plan_de_juego.svg); mask-image: url(icons/cyberpunk/plan_de_juego.svg); }
+    :root[data-game-theme="cyberpunk"] .mobile-sidebar-item i[data-cp-icon="juego_del_mes"] { -webkit-mask-image: url(icons/cyberpunk/juego_del_mes.svg); mask-image: url(icons/cyberpunk/juego_del_mes.svg); }
+    :root[data-game-theme="cyberpunk"] .mobile-sidebar-item i[data-cp-icon="mis_resenas"]   { -webkit-mask-image: url(icons/cyberpunk/mis_resenas.svg); mask-image: url(icons/cyberpunk/mis_resenas.svg); }
+    :root[data-game-theme="cyberpunk"] .mobile-sidebar-item i[data-cp-icon="amigos"]        { -webkit-mask-image: url(icons/cyberpunk/amigos.svg); mask-image: url(icons/cyberpunk/amigos.svg); }
+    :root[data-game-theme="cyberpunk"] .mobile-sidebar-item i[data-cp-icon="logros"]        { -webkit-mask-image: url(icons/cyberpunk/logros.svg); mask-image: url(icons/cyberpunk/logros.svg); }
+    :root[data-game-theme="cyberpunk"] .mobile-sidebar-item i[data-cp-icon="configuracion"] { -webkit-mask-image: url(icons/cyberpunk/configuracion.svg); mask-image: url(icons/cyberpunk/configuracion.svg); }
+    :root[data-game-theme="cyberpunk"] .mobile-sidebar-item i[data-cp-icon="soporte"]       { -webkit-mask-image: url(icons/cyberpunk/soporte.svg); mask-image: url(icons/cyberpunk/soporte.svg); }
+    :root[data-game-theme="cyberpunk"] .mobile-sidebar-item i[data-cp-icon="cerrar_sesion"] { -webkit-mask-image: url(icons/cyberpunk/cerrar_sesion.svg); mask-image: url(icons/cyberpunk/cerrar_sesion.svg); }
     :root[data-game-theme] .play-btn { border-color:var(--accent-play) !important; color:var(--accent-play) !important; }
     :root[data-game-theme] .game-foot { color:var(--accent-meta); }
     :root[data-game-theme] .game-card,
@@ -672,13 +695,13 @@
   <div class="mobile-sidebar-header"><i class="ti ti-device-gamepad-2" style="color:#1D9E75"></i> Playloggr</div>
   <a href="https://play.google.com/store/apps/details?id=com.playloggr.app" target="_blank" rel="noopener" class="mobile-sidebar-item" style="text-decoration:none"><img src="https://cdn.simpleicons.org/googleplay/888887" style="width:16px;height:16px"> <span data-i18n="downloadApp">Descargar la app</span></a>
   <div class="mobile-sidebar-divider"></div>
-  <button onclick="setView('novedades');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-sparkles"></i> <span data-i18n="novedades">Novedades</span></button>
-  <button onclick="setView('plan');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-route"></i> <span data-i18n="gamePlan" style="flex:1">Plan de juego</span><i class="ti ti-lock" id="plan-nav-lock-icon" style="display:none;font-size:13px;color:var(--text2)"></i></button>
-  <button onclick="openGomPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-stars"></i> <span data-i18n="gameOfMonth">Juego del mes</span></button>
-  <button onclick="openMyReviewsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-message-star"></i> <span data-i18n="myReviews">Mis reseñas</span></button>
-  <button onclick="openFriendsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-users"></i> <span data-i18n="friends">Amigos</span></button>
-  <button onclick="openAchievementsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-trophy"></i> <span data-i18n="achievements">Logros</span></button>
-  <button onclick="openConfigPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-settings"></i> <span data-i18n="config">Configuración</span></button>
+  <button onclick="setView('novedades');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-sparkles" data-cp-icon="novedades"></i> <span data-i18n="novedades">Novedades</span></button>
+  <button onclick="setView('plan');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-route" data-cp-icon="plan_de_juego"></i> <span data-i18n="gamePlan" style="flex:1">Plan de juego</span><i class="ti ti-lock" id="plan-nav-lock-icon" style="display:none;font-size:13px;color:var(--text2)"></i></button>
+  <button onclick="openGomPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-stars" data-cp-icon="juego_del_mes"></i> <span data-i18n="gameOfMonth">Juego del mes</span></button>
+  <button onclick="openMyReviewsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-message-star" data-cp-icon="mis_resenas"></i> <span data-i18n="myReviews">Mis reseñas</span></button>
+  <button onclick="openFriendsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-users" data-cp-icon="amigos"></i> <span data-i18n="friends">Amigos</span></button>
+  <button onclick="openAchievementsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-trophy" data-cp-icon="logros"></i> <span data-i18n="achievements">Logros</span></button>
+  <button onclick="openConfigPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-settings" data-cp-icon="configuracion"></i> <span data-i18n="config">Configuración</span></button>
   <div class="mobile-sidebar-divider"></div>
   <button id="mobile-steam-menu-btn" onclick="toggleHeaderMoreMenu();toggleSteamMenu()" class="mobile-sidebar-item"><i class="ti ti-brand-steam"></i> Steam</button>
   <button id="mobile-psn-menu-btn" onclick="toggleHeaderMoreMenu();togglePsnMenu()" class="mobile-sidebar-item"><img src="https://cdn.simpleicons.org/playstation/888887"> PSN</button>
@@ -686,8 +709,8 @@
   <button id="mobile-xbox-menu-btn" onclick="toggleHeaderMoreMenu();toggleConnectorMenu('xbox')" class="mobile-sidebar-item"><i class="ti ti-brand-xbox"></i> Xbox</button>
   <button id="mobile-epic-menu-btn" onclick="toggleHeaderMoreMenu();toggleConnectorMenu('epic')" class="mobile-sidebar-item"><img src="https://cdn.simpleicons.org/epicgames/888887"> Epic</button>
   <div class="mobile-sidebar-divider"></div>
-  <a href="mailto:nether.appdev@gmail.com" class="mobile-sidebar-item"><i class="ti ti-lifebuoy"></i> <span data-i18n="support">Soporte</span></a>
-  <button onclick="logout()" class="mobile-sidebar-item"><i class="ti ti-logout"></i> <span data-i18n="logout">Salir</span></button>
+  <a href="mailto:nether.appdev@gmail.com" class="mobile-sidebar-item"><i class="ti ti-lifebuoy" data-cp-icon="soporte"></i> <span data-i18n="support">Soporte</span></a>
+  <button onclick="logout()" class="mobile-sidebar-item"><i class="ti ti-logout" data-cp-icon="cerrar_sesion"></i> <span data-i18n="logout">Salir</span></button>
 </div>
 
 <div class="container">
