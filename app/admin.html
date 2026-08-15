@@ -131,6 +131,9 @@
       <div id="announcement-active-box" style="font-size:12px; color:var(--text2); margin-bottom:12px">
         <div class="spinner"></div> Cargando...
       </div>
+      <p style="font-size:11px; color:var(--text2); margin-bottom:4px">
+        Castellano — obligatorio, es el fallback si falta la traducción para el idioma de un usuario.
+      </p>
       <div class="row">
         <div>
           <label>Título (opcional)</label>
@@ -142,6 +145,37 @@
         <textarea id="announcement-message" rows="3" placeholder="Escribí el aviso para los usuarios..."
           style="font-size:13px; padding:8px 10px; border-radius:8px; border:0.5px solid var(--border2); background:var(--bg3); color:var(--text); width:100%; font-family:inherit; resize:vertical"></textarea>
       </div>
+
+      <p style="font-size:11px; color:var(--text2); margin-top:16px; margin-bottom:4px">
+        English — optional, only sent to users with that language.
+      </p>
+      <div class="row">
+        <div>
+          <label>Title (optional)</label>
+          <input type="text" id="announcement-title-en" placeholder="Ex: Scheduled maintenance" />
+        </div>
+      </div>
+      <div style="margin-top:8px">
+        <label>Message</label>
+        <textarea id="announcement-message-en" rows="3" placeholder="Write the announcement in English..."
+          style="font-size:13px; padding:8px 10px; border-radius:8px; border:0.5px solid var(--border2); background:var(--bg3); color:var(--text); width:100%; font-family:inherit; resize:vertical"></textarea>
+      </div>
+
+      <p style="font-size:11px; color:var(--text2); margin-top:16px; margin-bottom:4px">
+        Português — opcional, só é enviado para usuários nesse idioma.
+      </p>
+      <div class="row">
+        <div>
+          <label>Título (opcional)</label>
+          <input type="text" id="announcement-title-pt" placeholder="Ex: Manutenção programada" />
+        </div>
+      </div>
+      <div style="margin-top:8px">
+        <label>Mensagem</label>
+        <textarea id="announcement-message-pt" rows="3" placeholder="Escreva o aviso em português..."
+          style="font-size:13px; padding:8px 10px; border-radius:8px; border:0.5px solid var(--border2); background:var(--bg3); color:var(--text); width:100%; font-family:inherit; resize:vertical"></textarea>
+      </div>
+
       <div class="row" style="margin-top:12px">
         <button class="btn-primary" onclick="publishAnnouncement()">Publicar</button>
       </div>
@@ -229,6 +263,9 @@
       <p style="font-size:11px; color:var(--text2); margin-bottom:12px">
         Manda una notificación con título y texto libre a todos los usuarios con la app instalada. Al tocarla, simplemente abre la app.
       </p>
+      <p style="font-size:11px; color:var(--text2); margin-bottom:4px">
+        Castellano — obligatorio, es el fallback si falta la traducción para el idioma de un usuario.
+      </p>
       <div class="row">
         <div>
           <label>Título</label>
@@ -240,6 +277,37 @@
         <textarea id="custom-push-body" rows="2" placeholder="Escribí el mensaje..."
           style="font-size:13px; padding:8px 10px; border-radius:8px; border:0.5px solid var(--border2); background:var(--bg3); color:var(--text); width:100%; font-family:inherit; resize:vertical"></textarea>
       </div>
+
+      <p style="font-size:11px; color:var(--text2); margin-top:16px; margin-bottom:4px">
+        English — optional, only sent to users with that language.
+      </p>
+      <div class="row">
+        <div>
+          <label>Title</label>
+          <input type="text" id="custom-push-title-en" placeholder="Ex: New feature!" />
+        </div>
+      </div>
+      <div style="margin-top:8px">
+        <label>Text</label>
+        <textarea id="custom-push-body-en" rows="2" placeholder="Write the message..."
+          style="font-size:13px; padding:8px 10px; border-radius:8px; border:0.5px solid var(--border2); background:var(--bg3); color:var(--text); width:100%; font-family:inherit; resize:vertical"></textarea>
+      </div>
+
+      <p style="font-size:11px; color:var(--text2); margin-top:16px; margin-bottom:4px">
+        Português — opcional, só é enviado para usuários nesse idioma.
+      </p>
+      <div class="row">
+        <div>
+          <label>Título</label>
+          <input type="text" id="custom-push-title-pt" placeholder="Ex: Nova função!" />
+        </div>
+      </div>
+      <div style="margin-top:8px">
+        <label>Texto</label>
+        <textarea id="custom-push-body-pt" rows="2" placeholder="Escreva a mensagem..."
+          style="font-size:13px; padding:8px 10px; border-radius:8px; border:0.5px solid var(--border2); background:var(--bg3); color:var(--text); width:100%; font-family:inherit; resize:vertical"></textarea>
+      </div>
+
       <div class="row" style="margin-top:12px">
         <button class="btn-primary" onclick="sendCustomPush()">Enviar a todos</button>
       </div>
@@ -552,6 +620,10 @@ async function triggerPush(pushType) {
 async function sendCustomPush() {
   const title = document.getElementById('custom-push-title').value.trim();
   const body  = document.getElementById('custom-push-body').value.trim();
+  const titleEn = document.getElementById('custom-push-title-en').value.trim();
+  const bodyEn  = document.getElementById('custom-push-body-en').value.trim();
+  const titlePt = document.getElementById('custom-push-title-pt').value.trim();
+  const bodyPt  = document.getElementById('custom-push-body-pt').value.trim();
   const msg   = document.getElementById('custom-push-msg');
   if (!title || !body) { alert('Completá título y texto'); return; }
   msg.style.display = 'block';
@@ -559,7 +631,11 @@ async function sendCustomPush() {
   msg.textContent = 'Enviando...';
   try {
     const res = await fetch(`${API}/admin/push/custom`, {
-      method: 'POST', headers: headers(), body: JSON.stringify({ title, body }),
+      method: 'POST', headers: headers(), body: JSON.stringify({
+        title, body,
+        title_en: titleEn || null, body_en: bodyEn || null,
+        title_pt: titlePt || null, body_pt: bodyPt || null,
+      }),
     });
     const d = await res.json();
     if (!res.ok) throw new Error(d.detail || 'Error');
@@ -567,6 +643,10 @@ async function sendCustomPush() {
     msg.textContent = `Enviado a ${d.users_notified} usuarios.`;
     document.getElementById('custom-push-title').value = '';
     document.getElementById('custom-push-body').value = '';
+    document.getElementById('custom-push-title-en').value = '';
+    document.getElementById('custom-push-body-en').value = '';
+    document.getElementById('custom-push-title-pt').value = '';
+    document.getElementById('custom-push-body-pt').value = '';
   } catch (e) {
     msg.style.color = 'var(--red)';
     msg.textContent = e.message || 'No se pudo enviar';
@@ -602,6 +682,10 @@ async function loadAnnouncements() {
 async function publishAnnouncement() {
   const title = document.getElementById('announcement-title').value.trim();
   const message = document.getElementById('announcement-message').value.trim();
+  const titleEn = document.getElementById('announcement-title-en').value.trim();
+  const messageEn = document.getElementById('announcement-message-en').value.trim();
+  const titlePt = document.getElementById('announcement-title-pt').value.trim();
+  const messagePt = document.getElementById('announcement-message-pt').value.trim();
   const msg = document.getElementById('announcement-msg');
   if (!message) { alert('Escribí un mensaje'); return; }
   msg.style.display = 'block';
@@ -609,7 +693,11 @@ async function publishAnnouncement() {
   msg.textContent = 'Publicando...';
   try {
     const res = await fetch(`${API}/admin/announcements`, {
-      method: 'POST', headers: headers(), body: JSON.stringify({ title: title || null, message }),
+      method: 'POST', headers: headers(), body: JSON.stringify({
+        title: title || null, message,
+        title_en: titleEn || null, message_en: messageEn || null,
+        title_pt: titlePt || null, message_pt: messagePt || null,
+      }),
     });
     const d = await res.json();
     if (!res.ok) throw new Error(d.detail || 'Error');
@@ -617,6 +705,10 @@ async function publishAnnouncement() {
     msg.textContent = '✓ Anuncio publicado';
     document.getElementById('announcement-title').value = '';
     document.getElementById('announcement-message').value = '';
+    document.getElementById('announcement-title-en').value = '';
+    document.getElementById('announcement-message-en').value = '';
+    document.getElementById('announcement-title-pt').value = '';
+    document.getElementById('announcement-message-pt').value = '';
     loadAnnouncements();
   } catch (e) {
     msg.style.color = 'var(--red)';
