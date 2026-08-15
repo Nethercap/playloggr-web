@@ -106,6 +106,60 @@
     :root[data-game-theme="cyberpunk"] .mobile-sidebar-item i[data-cp-icon="configuracion"] { -webkit-mask-image: url(icons/cyberpunk/configuracion.svg); mask-image: url(icons/cyberpunk/configuracion.svg); }
     :root[data-game-theme="cyberpunk"] .mobile-sidebar-item i[data-cp-icon="soporte"]       { -webkit-mask-image: url(icons/cyberpunk/soporte.svg); mask-image: url(icons/cyberpunk/soporte.svg); }
     :root[data-game-theme="cyberpunk"] .mobile-sidebar-item i[data-cp-icon="cerrar_sesion"] { -webkit-mask-image: url(icons/cyberpunk/cerrar_sesion.svg); mask-image: url(icons/cyberpunk/cerrar_sesion.svg); }
+
+    /* Mismo mecanismo para Atomic Green/Ambar — comparten set de iconos
+       ("atomic"), igual que en la app. Faltan 'novedades' y 'plan_de_juego'
+       (los SVG que mando el usuario para esos dos vinieron vacios), asi que
+       esos dos quedan afuera de la lista y siguen con el glifo de Tabler de
+       siempre en estos dos temas. */
+    :root[data-game-theme="atomicGreen"] .mobile-sidebar-item i[data-cp-icon="juego_del_mes"]::before,
+    :root[data-game-theme="atomicGreen"] .mobile-sidebar-item i[data-cp-icon="mis_resenas"]::before,
+    :root[data-game-theme="atomicGreen"] .mobile-sidebar-item i[data-cp-icon="amigos"]::before,
+    :root[data-game-theme="atomicGreen"] .mobile-sidebar-item i[data-cp-icon="logros"]::before,
+    :root[data-game-theme="atomicGreen"] .mobile-sidebar-item i[data-cp-icon="configuracion"]::before,
+    :root[data-game-theme="atomicGreen"] .mobile-sidebar-item i[data-cp-icon="soporte"]::before,
+    :root[data-game-theme="atomicGreen"] .mobile-sidebar-item i[data-cp-icon="cerrar_sesion"]::before,
+    :root[data-game-theme="atomicAmbar"] .mobile-sidebar-item i[data-cp-icon="juego_del_mes"]::before,
+    :root[data-game-theme="atomicAmbar"] .mobile-sidebar-item i[data-cp-icon="mis_resenas"]::before,
+    :root[data-game-theme="atomicAmbar"] .mobile-sidebar-item i[data-cp-icon="amigos"]::before,
+    :root[data-game-theme="atomicAmbar"] .mobile-sidebar-item i[data-cp-icon="logros"]::before,
+    :root[data-game-theme="atomicAmbar"] .mobile-sidebar-item i[data-cp-icon="configuracion"]::before,
+    :root[data-game-theme="atomicAmbar"] .mobile-sidebar-item i[data-cp-icon="soporte"]::before,
+    :root[data-game-theme="atomicAmbar"] .mobile-sidebar-item i[data-cp-icon="cerrar_sesion"]::before { content: none; }
+    :root[data-game-theme="atomicGreen"] .mobile-sidebar-item i[data-cp-icon="juego_del_mes"],
+    :root[data-game-theme="atomicGreen"] .mobile-sidebar-item i[data-cp-icon="mis_resenas"],
+    :root[data-game-theme="atomicGreen"] .mobile-sidebar-item i[data-cp-icon="amigos"],
+    :root[data-game-theme="atomicGreen"] .mobile-sidebar-item i[data-cp-icon="logros"],
+    :root[data-game-theme="atomicGreen"] .mobile-sidebar-item i[data-cp-icon="configuracion"],
+    :root[data-game-theme="atomicGreen"] .mobile-sidebar-item i[data-cp-icon="soporte"],
+    :root[data-game-theme="atomicGreen"] .mobile-sidebar-item i[data-cp-icon="cerrar_sesion"],
+    :root[data-game-theme="atomicAmbar"] .mobile-sidebar-item i[data-cp-icon="juego_del_mes"],
+    :root[data-game-theme="atomicAmbar"] .mobile-sidebar-item i[data-cp-icon="mis_resenas"],
+    :root[data-game-theme="atomicAmbar"] .mobile-sidebar-item i[data-cp-icon="amigos"],
+    :root[data-game-theme="atomicAmbar"] .mobile-sidebar-item i[data-cp-icon="logros"],
+    :root[data-game-theme="atomicAmbar"] .mobile-sidebar-item i[data-cp-icon="configuracion"],
+    :root[data-game-theme="atomicAmbar"] .mobile-sidebar-item i[data-cp-icon="soporte"],
+    :root[data-game-theme="atomicAmbar"] .mobile-sidebar-item i[data-cp-icon="cerrar_sesion"] {
+      display: inline-block; width: 20px; height: 20px;
+      background-color: var(--accent-sidebar);
+      -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+      -webkit-mask-position: center; mask-position: center;
+      -webkit-mask-size: contain; mask-size: contain;
+    }
+    :root[data-game-theme="atomicGreen"] .mobile-sidebar-item i[data-cp-icon="juego_del_mes"],
+    :root[data-game-theme="atomicAmbar"] .mobile-sidebar-item i[data-cp-icon="juego_del_mes"] { -webkit-mask-image: url(icons/atomic/juego_del_mes.svg); mask-image: url(icons/atomic/juego_del_mes.svg); }
+    :root[data-game-theme="atomicGreen"] .mobile-sidebar-item i[data-cp-icon="mis_resenas"],
+    :root[data-game-theme="atomicAmbar"] .mobile-sidebar-item i[data-cp-icon="mis_resenas"] { -webkit-mask-image: url(icons/atomic/mis_resenas.svg); mask-image: url(icons/atomic/mis_resenas.svg); }
+    :root[data-game-theme="atomicGreen"] .mobile-sidebar-item i[data-cp-icon="amigos"],
+    :root[data-game-theme="atomicAmbar"] .mobile-sidebar-item i[data-cp-icon="amigos"] { -webkit-mask-image: url(icons/atomic/amigos.svg); mask-image: url(icons/atomic/amigos.svg); }
+    :root[data-game-theme="atomicGreen"] .mobile-sidebar-item i[data-cp-icon="logros"],
+    :root[data-game-theme="atomicAmbar"] .mobile-sidebar-item i[data-cp-icon="logros"] { -webkit-mask-image: url(icons/atomic/logros.svg); mask-image: url(icons/atomic/logros.svg); }
+    :root[data-game-theme="atomicGreen"] .mobile-sidebar-item i[data-cp-icon="configuracion"],
+    :root[data-game-theme="atomicAmbar"] .mobile-sidebar-item i[data-cp-icon="configuracion"] { -webkit-mask-image: url(icons/atomic/configuracion.svg); mask-image: url(icons/atomic/configuracion.svg); }
+    :root[data-game-theme="atomicGreen"] .mobile-sidebar-item i[data-cp-icon="soporte"],
+    :root[data-game-theme="atomicAmbar"] .mobile-sidebar-item i[data-cp-icon="soporte"] { -webkit-mask-image: url(icons/atomic/soporte.svg); mask-image: url(icons/atomic/soporte.svg); }
+    :root[data-game-theme="atomicGreen"] .mobile-sidebar-item i[data-cp-icon="cerrar_sesion"],
+    :root[data-game-theme="atomicAmbar"] .mobile-sidebar-item i[data-cp-icon="cerrar_sesion"] { -webkit-mask-image: url(icons/atomic/cerrar_sesion.svg); mask-image: url(icons/atomic/cerrar_sesion.svg); }
     :root[data-game-theme] .play-btn { border-color:var(--accent-play) !important; color:var(--accent-play) !important; }
     :root[data-game-theme] .game-foot { color:var(--accent-meta); }
     :root[data-game-theme] .game-card,
