@@ -419,6 +419,20 @@
     }
     .game-card { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:11px 14px; display:grid; grid-template-columns:54px minmax(0,1fr) auto; gap:12px; align-items:center; }
     .game-card:hover { border-color:var(--border2); }
+
+    /* ── Modo compacto (Apariencia > Densidad) — reusa .game-card/.lib-grid-tile
+       (no una clase nueva) para heredar fondo/borde/radius Y los marcos
+       decorativos de cada tema de videojuego (brackets/glow/bisel, ver mas
+       arriba) sin duplicar esos selectores. ── */
+    .game-card.compact { display:flex; align-items:center; gap:10px; cursor:pointer; }
+    .lib-grid-tile.compact { cursor:pointer; }
+    .compact-name { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600; font-size:13px; }
+    .compact-status { font-size:12px; font-weight:600; white-space:nowrap; flex-shrink:0; }
+    .compact-hours { font-size:11px; color:var(--text2); white-space:nowrap; flex-shrink:0; }
+    /* Grilla compacta: siempre 3 por fila (no 5, como la grilla normal en
+       desktop) porque cada celda es mucho mas baja — 5 angostas de 2 lineas
+       quedaban demasiado chicas para leer. */
+    .game-list.grid-view.compact-grid { grid-template-columns:repeat(3,1fr); }
     .game-card-grid { display:grid; grid-template-columns:1fr auto; gap:7px 10px; align-items:center; margin-top:4px; }
     .game-status-col { display:flex; flex-direction:column; align-items:flex-end; gap:7px; min-width:0; }
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -1475,6 +1489,14 @@
           <div style="display:flex;gap:8px;margin-top:6px">
             <button class="cfg-choice-btn" data-group="view" data-value="list" onclick="setCfgChoice('view','list')"><i class="ti ti-list"></i> Lista</button>
             <button class="cfg-choice-btn" data-group="view" data-value="grid" onclick="setCfgChoice('view','grid')"><i class="ti ti-layout-grid"></i> Cuadrícula</button>
+          </div>
+        </div>
+        <div class="modal-group full">
+          <label>Densidad</label>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">Modo compacto: una línea por juego (o 2 en cuadrícula), tocá para expandirlo.</div>
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <button class="cfg-choice-btn" data-group="density" data-value="normal" onclick="setCompactMode(false)"><i class="ti ti-list-details"></i> Normal</button>
+            <button class="cfg-choice-btn" data-group="density" data-value="compact" onclick="setCompactMode(true)"><i class="ti ti-baseline-density-medium"></i> Compacta</button>
           </div>
         </div>
         <div class="modal-group full">
@@ -3975,6 +3997,10 @@ function cardColorStyle(status) {
 
 function gameCardHtml(g, opts) {
   const hideLupa = opts && opts.hideLupa;
+  // collapsible: viene de expandCompactItem — un click en espacio vacio
+  // (no un control) la vuelve a comprimir. Las cards normales (modo no
+  // compacto) no llevan este onclick.
+  const collapseAttr = opts && opts.collapsible ? ` onclick="handleExpandedCardClick('${g.id}', false, event)"` : '';
   const hours = g.hours_played != null ? `${parseFloat(g.hours_played).toFixed(1)} hs` : '— hs';
   const lastPlayedLabel = lastPlayedDisplay(g.last_played);
   const lastPlayedEl = canEditLastPlayedWeb(g)
@@ -3992,7 +4018,7 @@ function gameCardHtml(g, opts) {
   const communityHtml = `<i class="ti ti-users" style="font-size:11px"></i> ${cs ? `${cs.rating_count > 0 ? cs.avg_rating : '0.0'} (${cs.rating_count})` : '…'}`;
   const communityStyle = 'display:inline-flex';
 
-  return `<div class="game-card" id="card-${g.id}" style="${cardColorStyle(g.status)}" ondblclick="handleCardDoubleTap('${g.id}', event)">
+  return `<div class="game-card" id="card-${g.id}" style="${cardColorStyle(g.status)}" ondblclick="handleCardDoubleTap('${g.id}', event)"${collapseAttr}>
     <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0">
       <div class="game-cover" data-gid="${g.id}" onclick="openCoverEditFromCard(this)" style="cursor:pointer;position:relative" title="Click para cambiar portada">${cover}<div class="cover-edit-hint" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);opacity:0;transition:opacity 0.15s;font-size:18px">✏️</div></div>
       ${bulkCheckHtml(g.id)}
@@ -4063,7 +4089,10 @@ async function renderGames() {
     renderGamesGrid(items);
   } else {
     list.className = 'game-list';
-    list.innerHTML = items.map(gameCardHtml).join('');
+    list.innerHTML = items.map(g => {
+      if (compactMode && !compactExpandedIds.has(g.id)) return compactRowHtml(g);
+      return gameCardHtml(g, { collapsible: compactMode });
+    }).join('');
   }
 
   // Cargar scores de Steam en background — UN solo request batch
@@ -4154,6 +4183,79 @@ function setLibraryViewMode(mode) {
   renderGames();
 }
 
+// ── Modo compacto (Apariencia > Densidad) — local, no via /settings, mismo
+// criterio que en la app: cada dispositivo/navegador elige el suyo.
+let compactMode = localStorage.getItem('gb_compact_mode') === '1';
+// Que items estan expandidos (venian compactos, se tocaron) — un Set en vez
+// de un bool por card para que sobreviva a un renderGames() (cambio de
+// estado, sync, etc.) sin volver todo a compacto de nuevo, mismo
+// comportamiento que en la app (ver ValueKey en _CompactableGameCard).
+let compactExpandedIds = new Set();
+
+function setCompactMode(v) {
+  compactMode = v;
+  localStorage.setItem('gb_compact_mode', v ? '1' : '0');
+  compactExpandedIds.clear();
+  renderAppearanceTab();
+  renderGames();
+}
+
+function expandCompactItem(gameId, isGrid) {
+  compactExpandedIds.add(gameId);
+  const g = allGames.find(x => x.id === gameId);
+  if (!g) return;
+  const el = document.getElementById((isGrid ? 'gridcard-' : 'card-') + gameId);
+  if (!el) return;
+  el.outerHTML = isGrid ? gridTileHtml(g, {collapsible: true}) : gameCardHtml(g, {collapsible: true});
+}
+
+function collapseCompactItem(gameId, isGrid) {
+  compactExpandedIds.delete(gameId);
+  const g = allGames.find(x => x.id === gameId);
+  if (!g) return;
+  const el = document.getElementById((isGrid ? 'gridcard-' : 'card-') + gameId);
+  if (!el) return;
+  el.outerHTML = isGrid ? compactGridTileHtml(g) : compactRowHtml(g);
+}
+
+// Tocar un espacio vacio de la card ya expandida (no un control interactivo
+// — boton, select, input, etc.) la vuelve a comprimir, mismo criterio que
+// en la app.
+function handleExpandedCardClick(gameId, isGrid, event) {
+  if (event.target.closest('button, select, a, input, textarea, .bulk-check, .cover-edit-hint')) return;
+  collapseCompactItem(gameId, isGrid);
+}
+
+function compactRowHtml(g) {
+  const statusColor = STATUS_DOT_COLORS[g.status] || '';
+  const hours = g.status !== 'Deseados' && g.hours_played != null
+    ? `<span class="compact-hours">${parseFloat(g.hours_played).toFixed(1)}h</span>` : '';
+  return `<div class="game-card compact" id="card-${g.id}" style="${cardColorStyle(g.status)}"
+      onclick="expandCompactItem('${g.id}', false)" ondblclick="handleCardDoubleTap('${g.id}', event)">
+    <div class="compact-name" title="${esc(g.name)}">${esc(g.name)}</div>
+    ${platIconOnly(g.platform, true)}
+    <span class="compact-status" style="color:${statusColor}">${statusLabel(g.status)}</span>
+    ${hours}
+  </div>`;
+}
+
+function compactGridTileHtml(g) {
+  const statusColor = STATUS_DOT_COLORS[g.status] || '';
+  const hours = g.status !== 'Deseados' && g.hours_played != null
+    ? `<span class="compact-hours">${parseFloat(g.hours_played).toFixed(1)}h</span>` : '';
+  return `<div class="lib-grid-tile compact" id="gridcard-${g.id}" style="${cardColorStyle(g.status)}"
+      onclick="expandCompactItem('${g.id}', true)" ondblclick="handleCardDoubleTap('${g.id}', event)">
+    <div style="padding:8px 10px">
+      <div class="compact-name" title="${esc(g.name)}">${esc(g.name)}</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:6px;overflow:hidden">
+        ${platIconOnly(g.platform, true)}
+        <span class="compact-status" style="color:${statusColor}">${statusLabel(g.status)}</span>
+        ${hours}
+      </div>
+    </div>
+  </div>`;
+}
+
 function updateLibraryViewToggle() {
   const listBtn = document.getElementById('view-mode-list');
   const gridBtn = document.getElementById('view-mode-grid');
@@ -4162,13 +4264,11 @@ function updateLibraryViewToggle() {
   gridBtn.classList.toggle('active', libraryViewMode === 'grid');
 }
 
-function renderGamesGrid(items) {
-  const list = document.getElementById('game-list');
-  list.className = 'game-list grid-view';
-  list.innerHTML = items.map(g => {
-    const hours = g.hours_played != null ? `${parseFloat(g.hours_played).toFixed(1)} hs` : '— hs';
-    const cover = steamCoverHtml(g, 'width:100%;height:100%;object-fit:cover');
-    return `<div class="lib-grid-tile" id="gridcard-${g.id}" style="${cardColorStyle(g.status)}" ondblclick="handleCardDoubleTap('${g.id}', event)">
+function gridTileHtml(g, opts) {
+  const collapseAttr = opts && opts.collapsible ? ` onclick="handleExpandedCardClick('${g.id}', true, event)"` : '';
+  const hours = g.hours_played != null ? `${parseFloat(g.hours_played).toFixed(1)} hs` : '— hs';
+  const cover = steamCoverHtml(g, 'width:100%;height:100%;object-fit:cover');
+  return `<div class="lib-grid-tile" id="gridcard-${g.id}" style="${cardColorStyle(g.status)}" ondblclick="handleCardDoubleTap('${g.id}', event)"${collapseAttr}>
       <div style="position:relative">
         <div style="width:100%;aspect-ratio:2/3;background:var(--bg3);overflow:hidden">${cover}</div>
         <div style="position:absolute;top:6px;left:6px;display:flex;align-items:center;gap:4px;max-width:calc(100% - 36px);overflow:hidden">
@@ -4196,6 +4296,14 @@ function renderGamesGrid(items) {
         </div>
       </div>
     </div>`;
+}
+
+function renderGamesGrid(items) {
+  const list = document.getElementById('game-list');
+  list.className = 'game-list grid-view' + (compactMode ? ' compact-grid' : '');
+  list.innerHTML = items.map(g => {
+    if (compactMode && !compactExpandedIds.has(g.id)) return compactGridTileHtml(g);
+    return gridTileHtml(g, { collapsible: compactMode });
   }).join('');
 }
 
@@ -5714,6 +5822,9 @@ function switchConfigTab(tab) {
 function renderAppearanceTab() {
   document.querySelectorAll('.cfg-choice-btn[data-group="view"]').forEach(b => {
     b.classList.toggle('active', b.dataset.value === libraryViewMode);
+  });
+  document.querySelectorAll('.cfg-choice-btn[data-group="density"]').forEach(b => {
+    b.classList.toggle('active', b.dataset.value === (compactMode ? 'compact' : 'normal'));
   });
   const currentTheme = document.documentElement.dataset.theme
     || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
