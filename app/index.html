@@ -242,6 +242,16 @@
       border-left: 1.6px solid var(--border2);
       box-shadow: -6px 0 12px var(--border2);
     }
+    /* --green es amarillo en este tema (ver arriba) — texto blanco sobre
+       fondo amarillo da muy mal contraste (WCAG fail). Los botones
+       "activos"/primarios (nav pills, toggles, guardar) usan --bg2 (azul
+       marino oscuro) en vez de blanco para el texto solo en este tema. */
+    :root[data-game-theme="pacman"] .nav-pill.active,
+    :root[data-game-theme="pacman"] .view-mode-btn.active,
+    :root[data-game-theme="pacman"] .fbtn.active,
+    :root[data-game-theme="pacman"] .btn-save {
+      color: var(--bg2) !important;
+    }
 
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; padding: 20px; }
     /* Los form controls (select/input/button) no heredan font-family del
@@ -421,6 +431,8 @@
     .lib-grid-tile { background:var(--bg2); border:0.5px solid var(--border); border-radius:10px; overflow:hidden; }
     .view-mode-btn { padding:4px 8px; font-size:12px; border:none; background:var(--bg2); color:var(--text2); cursor:pointer; }
     .view-mode-btn.active { background:var(--green); color:#fff; }
+    .nav-pill.active { color:#fff; }
+    .nav-pill:not(.active) { color:var(--text2); }
     @media (max-width: 900px) {
       .game-list.grid-view { grid-template-columns:repeat(3,1fr); }
       .stats-row { grid-template-columns:repeat(3,1fr); }
@@ -1058,29 +1070,29 @@
     <!-- Add button — en desktop va primero (ver #library-toolbar en la
          media query, order:-1); en mobile no se ve (es el FAB en su lugar). -->
     <div id="add-game-btn-wrap" style="margin-left:auto;display:flex;gap:6px;align-items:center">
-      <button id="add-game-btn" onclick="openModal()" style="display:none;padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">
+      <button id="add-game-btn" class="nav-pill active" onclick="openModal()" style="display:none;padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:var(--green);cursor:pointer">
         <i class="ti ti-plus"></i> <span data-i18n="addGame">Agregar juego</span>
       </button>
-      <button id="add-wishlist-btn" onclick="openWishlistModal()" style="display:none;padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:#EF9F27;color:#fff;cursor:pointer">
+      <button id="add-wishlist-btn" class="nav-pill active" onclick="openWishlistModal()" style="display:none;padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:#EF9F27;cursor:pointer">
         <i class="ti ti-star"></i> <span data-i18n="addWishlistGame">Agregar juego deseado</span>
       </button>
     </div>
     <!-- Main selector: Biblioteca / Deseados -->
     <div id="view-selector-row" style="display:flex;padding:8px 0;gap:8px;align-items:center">
-      <button id="view-library"  onclick="setView('library')"
-        style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--green);color:#fff;display:inline-flex;align-items:center;gap:5px">
+      <button id="view-library" class="nav-pill active" onclick="setView('library')"
+        style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--green);display:inline-flex;align-items:center;gap:5px">
         <i class="ti ti-books" style="font-size:14px"></i> <span data-i18n="library">Biblioteca</span>
       </button>
-      <button id="view-wishlist" onclick="setView('wishlist')"
-        style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);color:var(--text2);display:inline-flex;align-items:center;gap:5px">
+      <button id="view-wishlist" class="nav-pill" onclick="setView('wishlist')"
+        style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);display:inline-flex;align-items:center;gap:5px">
         <i class="ti ti-bookmark" style="font-size:14px"></i> <span data-i18n="wishlist">Deseados</span>
       </button>
-      <button id="view-stats" onclick="setView('stats')" data-i18n-title="stats" title="Estadísticas"
-        style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);color:var(--text2);display:inline-flex;align-items:center;gap:5px;flex-shrink:0">
+      <button id="view-stats" class="nav-pill" onclick="setView('stats')" data-i18n-title="stats" title="Estadísticas"
+        style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);display:inline-flex;align-items:center;gap:5px;flex-shrink:0">
         <i class="ti ti-chart-bar" style="font-size:14px"></i> <span data-i18n="stats">Estadísticas</span>
       </button>
-      <button id="view-rankings" onclick="setView('rankings')"
-        style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);color:var(--text2);display:inline-flex;align-items:center;gap:5px">
+      <button id="view-rankings" class="nav-pill" onclick="setView('rankings')"
+        style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);display:inline-flex;align-items:center;gap:5px">
         <i class="ti ti-medal" style="font-size:14px"></i> <span data-i18n="rankings">Rankings</span>
       </button>
 
@@ -4949,10 +4961,10 @@ function setView(view) {
   const wishBtn      = document.getElementById('view-wishlist');
   const statsBtn     = document.getElementById('view-stats');
   const rankingsBtn  = document.getElementById('view-rankings');
-  if (libBtn)      { libBtn.style.background      = view === 'library'  ? 'var(--green)' : 'var(--bg2)';  libBtn.style.color      = view === 'library'  ? '#fff' : 'var(--text2)'; }
-  if (wishBtn)     { wishBtn.style.background     = view === 'wishlist' ? '#EF9F27'      : 'var(--bg2)';  wishBtn.style.color     = view === 'wishlist' ? '#fff' : 'var(--text2)'; }
-  if (statsBtn)    { statsBtn.style.background    = isStats             ? 'var(--green)' : 'var(--bg2)';  statsBtn.style.color    = isStats             ? '#fff' : 'var(--text2)'; }
-  if (rankingsBtn) { rankingsBtn.style.background = isRankings          ? 'var(--green)' : 'var(--bg2)';  rankingsBtn.style.color = isRankings          ? '#fff' : 'var(--text2)'; }
+  if (libBtn)      { libBtn.style.background      = view === 'library'  ? 'var(--green)' : 'var(--bg2)';  libBtn.classList.toggle('active', view === 'library'); }
+  if (wishBtn)     { wishBtn.style.background     = view === 'wishlist' ? '#EF9F27'      : 'var(--bg2)';  wishBtn.classList.toggle('active', view === 'wishlist'); }
+  if (statsBtn)    { statsBtn.style.background    = isStats             ? 'var(--green)' : 'var(--bg2)';  statsBtn.classList.toggle('active', isStats); }
+  if (rankingsBtn) { rankingsBtn.style.background = isRankings          ? 'var(--green)' : 'var(--bg2)';  rankingsBtn.classList.toggle('active', isRankings); }
 
   if (isStats) {
     switchStatsTab('user');
