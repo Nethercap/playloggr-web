@@ -7868,34 +7868,20 @@ function closeFriendsPanel() {
 
 const _badgeTierColors = { bronce: '#CD7F32', plata: '#B0B0B8', oro: '#E0B84C', prisma: '#8E7CE8' };
 
-function _polygonPoints(n, startDeg, outerR, innerR) {
-  const pts = [];
-  for (let i = 0; i < n; i++) {
-    const r = (innerR != null && i % 2 === 1) ? innerR : outerR;
-    const angle = (Math.PI / 180) * (startDeg + (360 / n) * i);
-    pts.push(`${(50 + r * Math.cos(angle)).toFixed(1)}% ${(50 + r * Math.sin(angle)).toFixed(1)}%`);
-  }
-  return pts.join(', ');
-}
-// bronce = circulo (1-50), plata = hexagono (51-100), oro = estrella (101-149), prisma = diamante (150)
-const _badgeClipPaths = {
-  plata:  `polygon(${_polygonPoints(6, -90, 50)})`,
-  oro:    `polygon(${_polygonPoints(10, -90, 50, 22)})`,
-  prisma: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
-};
-
+// Antes esto dibujaba una insignia con forma (circulo/hexagono/estrella/
+// diamante segun el tier) y el numero en blanco adentro — a pedido se saco
+// la forma y se dejo solo el numero, coloreado segun el tier (bronce/
+// plata/oro/prisma), sin fondo ni recorte.
 function levelBadgeHtml(levelInfo, size = 18) {
   if (!levelInfo) return '';
   const tier = levelInfo.badge_tier;
   const color = _badgeTierColors[tier] || _badgeTierColors.bronce;
-  const clip = _badgeClipPaths[tier];
-  const shapeStyle = clip ? `clip-path:${clip};-webkit-clip-path:${clip}` : 'border-radius:50%';
-  // El trofeo se muestra al lado del badge (y por lo tanto, al lado del
+  // El trofeo se muestra al lado del numero (y por lo tanto, al lado del
   // nombre de usuario donde se renderizan juntos), no superpuesto encima.
   const trophy = levelInfo.trophy
-    ? `<i class="ti ti-trophy" style="font-size:${Math.round(size*0.55)}px;color:#EF9F27;margin-right:4px"></i>`
+    ? `<i class="ti ti-trophy" style="font-size:${Math.round(size*0.85)}px;color:#EF9F27;margin-right:4px"></i>`
     : '';
-  return `<span style="display:inline-flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;${shapeStyle};background:${color};color:#fff;font-size:${Math.round(size*0.42)}px;font-weight:700;flex-shrink:0">${levelInfo.level}</span>${trophy}<span style="display:inline-block;width:6px"></span>`;
+  return `<span style="color:${color};font-weight:700;font-size:${size}px;flex-shrink:0">${levelInfo.level}</span>${trophy}<span style="display:inline-block;width:6px"></span>`;
 }
 
 const kFrameTiers = [
@@ -10146,7 +10132,7 @@ function applyPremiumUI() {
   const headerUpgradeBtn = document.getElementById('header-upgrade-btn');
   if (headerUpgradeBtn) headerUpgradeBtn.style.display = isPremium ? 'none' : 'inline-block';
   const homeBadge = document.getElementById('user-level-badge');
-  if (homeBadge) homeBadge.innerHTML = levelBadgeHtml({ level: userLevel, badge_tier: userBadgeTier, trophy: userTrophy }, 28);
+  if (homeBadge) homeBadge.innerHTML = levelBadgeHtml({ level: userLevel, badge_tier: userBadgeTier, trophy: userTrophy }, 13);
   const cfgBadge = document.getElementById('cfg-level-badge');
   if (cfgBadge) cfgBadge.innerHTML = levelBadgeHtml({ level: userLevel, badge_tier: userBadgeTier, trophy: userTrophy }, 20);
 
@@ -11382,7 +11368,10 @@ async function onLoginSuccess() {
     </div>
     <div class="profile-panel-info">
       <div class="profile-panel-name">
-        <span id="user-level-badge"></span><span id="user-name-span">${authUser}</span>
+        <span id="user-name-span">${authUser}</span>
+      </div>
+      <div class="profile-panel-level" style="font-size:11px;color:var(--text2);display:flex;align-items:center;gap:3px">
+        <span data-i18n="levelLabel">Nivel</span> <span id="user-level-badge"></span>
       </div>
       <div class="profile-panel-sub">
         <span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px"></span>
