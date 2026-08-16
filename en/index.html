@@ -49,7 +49,7 @@
   :root {
     --bg: #111111; --bg2: #1a1a1a; --bg3: #1f1f1f; --border: #2a2a2a;
     --text: #f0f0f0; --text2: #9a9a9a; --green: #1D9E75; --green-dim: rgba(29,158,117,0.15);
-    --amber: #EF9F27; --red: #E24B4A;
+    --amber: #EF9F27; --amber-dim: rgba(239,159,39,0.15); --red: #E24B4A;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
@@ -155,8 +155,23 @@
     width: 40px; height: 40px; border-radius: 10px; background: var(--green-dim); color: var(--green);
     display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 14px;
   }
-  .feature-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .feature-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .feature-card p { font-size: 13px; color: var(--text2); line-height: 1.55; }
+  .feature-card ul { list-style: none; margin-top: 10px; }
+  .feature-card ul li {
+    font-size: 13px; color: var(--text2); line-height: 1.5; padding: 6px 0 6px 20px; position: relative;
+    border-bottom: 1px solid var(--border);
+  }
+  .feature-card ul li:last-child { border-bottom: none; padding-bottom: 0; }
+  .feature-card ul li:first-child { padding-top: 0; }
+  .feature-card ul li::before { content: "\2013"; position: absolute; left: 0; color: var(--green); font-weight: 700; }
+  .feature-card ul li strong { color: var(--text); font-weight: 600; }
+  .badge-beta, .badge-premium {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
+    padding: 2px 8px; border-radius: 20px; vertical-align: middle;
+  }
+  .badge-beta { color: var(--green); background: var(--green-dim); }
+  .badge-premium { color: var(--amber); background: var(--amber-dim); }
 
   /* ── Pricing table ── */
   .plans { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 760px; margin: 0 auto; }
@@ -348,27 +363,38 @@
       <div class="feature-card">
         <div class="f-icon">📚</div>
         <h3>Library and wishlist</h3>
-        <p>Organize your games by status (playing, completed, backlog, dropped) and keep a separate wishlist.</p>
+        <ul>
+          <li>Statuses: <strong>playing, completed, backlog, dropped, on hold</strong>, plus a separate wishlist</li>
+          <li>Filters by status, platform, hours, and rating</li>
+          <li>List or grid view, with a <strong>compact mode</strong></li>
+          <li>Custom folders by series, platform, or priority</li>
+          <li>Live play session with a timer</li>
+        </ul>
       </div>
       <div class="feature-card">
         <div class="f-icon">🔄</div>
-        <h3>Steam sync</h3>
-        <p>Connect your Steam account and automatically sync your library, your wishlist, and community reviews.</p>
-      </div>
-      <div class="feature-card">
-        <div class="f-icon">🎮</div>
-        <h3>PlayStation sync <span style="font-size:11px;font-weight:600;color:var(--green);background:var(--green-dim);padding:2px 8px;border-radius:20px;vertical-align:middle">BETA</span></h3>
-        <p>Connect your PSN Online ID and bring in your PS4, PS5, PS3, and Vita library with playtime and cover art, automatically.</p>
+        <h3>Platform sync</h3>
+        <ul>
+          <li><strong>Steam</strong>: library, wishlist, and community reviews</li>
+          <li><strong>PlayStation</strong> <span class="badge-beta">Beta</span>: PS4, PS5, PS3, and Vita, with playtime and cover art</li>
+          <li><strong>GOG</strong> <span class="badge-beta">Beta</span>, <strong>Xbox</strong> <span class="badge-beta">Beta</span>, and <strong>Epic Games</strong> <span class="badge-beta">Beta</span>: automatic library with cover art</li>
+          <li>Daily automatic sync, no need to open the app</li>
+        </ul>
       </div>
       <div class="feature-card">
         <div class="f-icon">🏆</div>
         <h3>Achievements and levels</h3>
-        <p>139 achievements to unlock, an XP system, levels, avatar frames, and exclusive fonts as you progress.</p>
+        <p>139 achievements to unlock, plus an XP and leveling system as you progress.</p>
       </div>
       <div class="feature-card">
         <div class="f-icon">📊</div>
-        <h3>Real statistics</h3>
-        <p>Hours played, ratings, breakdown by platform, recent activity, and global rankings.</p>
+        <h3>Statistics and rankings</h3>
+        <ul>
+          <li>Hours played, ratings, and breakdown by platform</li>
+          <li>Activity heatmap by day (year, month, or week)</li>
+          <li>Community-wide global rankings</li>
+          <li>Your own custom rankings — top 10 RPGs, favorites of the year, whatever you want</li>
+        </ul>
       </div>
       <div class="feature-card">
         <div class="f-icon">👥</div>
@@ -376,19 +402,19 @@
         <p>Add friends, see what they're playing in real time, and compare libraries.</p>
       </div>
       <div class="feature-card">
-        <div class="f-icon">🗂️</div>
-        <h3>Custom folders</h3>
-        <p>Group your games however you like: by series, by platform, by priority — whatever makes sense to you.</p>
-      </div>
-      <div class="feature-card">
-        <div class="f-icon">📋</div>
-        <h3>Custom rankings</h3>
-        <p>Build your own rankings — your top 10 RPGs, your favorites of the year, whatever you want — and sort your games your way.</p>
-      </div>
-      <div class="feature-card">
         <div class="f-icon">🧑‍🎨</div>
-        <h3>Customizable avatar</h3>
+        <h3>Customizable avatar <span class="badge-premium">Premium</span></h3>
         <p>Build your pixel-art avatar with outfits, frames, and exclusive fonts you unlock as you level up.</p>
+      </div>
+      <div class="feature-card">
+        <div class="f-icon">🗺️</div>
+        <h3>Game plan <span class="badge-premium">Premium</span></h3>
+        <p>Chain games together with duration estimates from HowLongToBeat, set how many hours you play per week, and track your progress week by week until you finish them.</p>
+      </div>
+      <div class="feature-card">
+        <div class="f-icon">🎨</div>
+        <h3>Premium themes <span class="badge-premium">Premium</span></h3>
+        <p>Change the whole look of Playloggr — colors, typography, and borders — with themes inspired by your favorite games: Cyberpunk, Atomic Green, Atomic Amber, Erdtree, Old Shooter, and Guaca-Guaca.</p>
       </div>
     </div>
 

@@ -49,7 +49,7 @@
   :root {
     --bg: #111111; --bg2: #1a1a1a; --bg3: #1f1f1f; --border: #2a2a2a;
     --text: #f0f0f0; --text2: #9a9a9a; --green: #1D9E75; --green-dim: rgba(29,158,117,0.15);
-    --amber: #EF9F27; --red: #E24B4A;
+    --amber: #EF9F27; --amber-dim: rgba(239,159,39,0.15); --red: #E24B4A;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
@@ -155,8 +155,23 @@
     width: 40px; height: 40px; border-radius: 10px; background: var(--green-dim); color: var(--green);
     display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 14px;
   }
-  .feature-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .feature-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .feature-card p { font-size: 13px; color: var(--text2); line-height: 1.55; }
+  .feature-card ul { list-style: none; margin-top: 10px; }
+  .feature-card ul li {
+    font-size: 13px; color: var(--text2); line-height: 1.5; padding: 6px 0 6px 20px; position: relative;
+    border-bottom: 1px solid var(--border);
+  }
+  .feature-card ul li:last-child { border-bottom: none; padding-bottom: 0; }
+  .feature-card ul li:first-child { padding-top: 0; }
+  .feature-card ul li::before { content: "\2013"; position: absolute; left: 0; color: var(--green); font-weight: 700; }
+  .feature-card ul li strong { color: var(--text); font-weight: 600; }
+  .badge-beta, .badge-premium {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
+    padding: 2px 8px; border-radius: 20px; vertical-align: middle;
+  }
+  .badge-beta { color: var(--green); background: var(--green-dim); }
+  .badge-premium { color: var(--amber); background: var(--amber-dim); }
 
   /* ── Pricing table ── */
   .plans { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 760px; margin: 0 auto; }
@@ -347,42 +362,38 @@
       <div class="feature-card">
         <div class="f-icon">📚</div>
         <h3>Biblioteca y deseados</h3>
-        <p>Organizá tus juegos por estado (jugando, completado, backlog, abandonado) y llevá una lista de deseados separada.</p>
+        <ul>
+          <li>Estados: <strong>jugando, completado, backlog, abandonado, intermitente</strong> y lista de deseados separada</li>
+          <li>Filtros por estado, plataforma, horas y calificación</li>
+          <li>Vista lista o cuadrícula, con <strong>modo compacto</strong></li>
+          <li>Carpetas personalizadas por saga, plataforma o prioridad</li>
+          <li>Sesión de juego en vivo con cronómetro</li>
+        </ul>
       </div>
       <div class="feature-card">
         <div class="f-icon">🔄</div>
-        <h3>Sincronización con Steam</h3>
-        <p>Conectá tu cuenta de Steam y sincronizá tu biblioteca, tu wishlist y las reviews de la comunidad automáticamente.</p>
-      </div>
-      <div class="feature-card">
-        <div class="f-icon">🎮</div>
-        <h3>Sincronización con PlayStation <span style="font-size:11px;font-weight:600;color:var(--green);background:var(--green-dim);padding:2px 8px;border-radius:20px;vertical-align:middle">BETA</span></h3>
-        <p>Conectá tu Online ID de PSN y traé tu biblioteca de PS4, PS5, PS3 y Vita con horas jugadas y portadas, automáticamente.</p>
-      </div>
-      <div class="feature-card">
-        <div class="f-icon">💿</div>
-        <h3>Sincronización con GOG <span style="font-size:11px;font-weight:600;color:var(--green);background:var(--green-dim);padding:2px 8px;border-radius:20px;vertical-align:middle">BETA</span></h3>
-        <p>Conectá tu cuenta de GOG y traé tu biblioteca automáticamente, con portadas incluidas.</p>
-      </div>
-      <div class="feature-card">
-        <div class="f-icon">🕹️</div>
-        <h3>Sincronización con Xbox <span style="font-size:11px;font-weight:600;color:var(--green);background:var(--green-dim);padding:2px 8px;border-radius:20px;vertical-align:middle">BETA</span></h3>
-        <p>Conectá tu cuenta de Xbox y traé tu biblioteca con portadas y última vez jugado, automáticamente.</p>
-      </div>
-      <div class="feature-card">
-        <div class="f-icon">🛒</div>
-        <h3>Sincronización con Epic Games <span style="font-size:11px;font-weight:600;color:var(--green);background:var(--green-dim);padding:2px 8px;border-radius:20px;vertical-align:middle">BETA</span></h3>
-        <p>Conectá tu cuenta de Epic Games y traé tu biblioteca automáticamente. <strong>La conexión inicial es solo desde la app</strong> (no desde el navegador) — una vez conectada, podés sincronizar también desde la web.</p>
+        <h3>Sincronización de plataformas</h3>
+        <ul>
+          <li><strong>Steam</strong>: biblioteca, wishlist y reseñas de la comunidad</li>
+          <li><strong>PlayStation</strong> <span class="badge-beta">Beta</span>: PS4, PS5, PS3 y Vita, con horas y portadas</li>
+          <li><strong>GOG</strong> <span class="badge-beta">Beta</span>, <strong>Xbox</strong> <span class="badge-beta">Beta</span> y <strong>Epic Games</strong> <span class="badge-beta">Beta</span>: biblioteca automática con portadas</li>
+          <li>Sincronización automática diaria, sin necesidad de abrir la app</li>
+        </ul>
       </div>
       <div class="feature-card">
         <div class="f-icon">🏆</div>
         <h3>Logros y niveles</h3>
-        <p>139 logros para desbloquear, sistema de XP, niveles, marcos de avatar y fuentes exclusivas a medida que avanzás.</p>
+        <p>139 logros para desbloquear, sistema de XP y niveles a medida que avanzás.</p>
       </div>
       <div class="feature-card">
         <div class="f-icon">📊</div>
-        <h3>Estadísticas reales</h3>
-        <p>Horas jugadas, calificaciones, distribución por plataforma, actividad reciente y rankings globales.</p>
+        <h3>Estadísticas y rankings</h3>
+        <ul>
+          <li>Horas jugadas, calificaciones y distribución por plataforma</li>
+          <li>Mapa de actividad por día (año, mes o semana)</li>
+          <li>Rankings globales de la comunidad</li>
+          <li>Rankings personalizados propios — tu top 10 de RPGs, favoritos del año, lo que quieras</li>
+        </ul>
       </div>
       <div class="feature-card">
         <div class="f-icon">👥</div>
@@ -390,24 +401,19 @@
         <p>Agregá amigos, mirá qué están jugando en tiempo real y comparen bibliotecas.</p>
       </div>
       <div class="feature-card">
-        <div class="f-icon">🗂️</div>
-        <h3>Carpetas personalizadas</h3>
-        <p>Agrupá tus juegos como quieras: por saga, por plataforma, por prioridad — lo que tenga sentido para vos.</p>
-      </div>
-      <div class="feature-card">
-        <div class="f-icon">📋</div>
-        <h3>Rankings personalizados</h3>
-        <p>Armá tus propios rankings — tu top 10 de RPGs, tus favoritos del año, lo que quieras — y ordená tus juegos a tu manera.</p>
-      </div>
-      <div class="feature-card">
         <div class="f-icon">🧑‍🎨</div>
-        <h3>Avatar personalizable</h3>
+        <h3>Avatar personalizable <span class="badge-premium">Premium</span></h3>
         <p>Armá tu avatar pixel-art con outfits, marcos y fuentes exclusivas que desbloqueás a medida que subís de nivel.</p>
       </div>
       <div class="feature-card">
         <div class="f-icon">🗺️</div>
-        <h3>Plan de juego</h3>
+        <h3>Plan de juego <span class="badge-premium">Premium</span></h3>
         <p>Armá una cadena de juegos con tiempos estimados de HowLongToBeat, definí cuántas horas jugás por semana y seguí tu progreso semana a semana hasta terminarlos.</p>
+      </div>
+      <div class="feature-card">
+        <div class="f-icon">🎨</div>
+        <h3>Temas premium <span class="badge-premium">Premium</span></h3>
+        <p>Cambiá toda la estética de Playloggr — colores, tipografía y bordes — con temas inspirados en tus juegos favoritos: Cyberpunk, Atomic Green, Atomic Ambar, Erdtree, Old Shooter y Guaca-Guaca.</p>
       </div>
     </div>
 
