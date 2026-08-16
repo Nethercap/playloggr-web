@@ -244,6 +244,12 @@
     }
 
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; padding: 20px; }
+    /* Los form controls (select/input/button) no heredan font-family del
+       body por default en la mayoria de los browsers (usan la fuente nativa
+       del OS) — sin esto, temas con tipografia propia como Guaca-Guaca
+       dejaban el dropdown de estado con la fuente del sistema en vez de la
+       pixel font del tema. */
+    select, input, button, textarea { font-family: inherit; }
     .container { max-width: 980px; margin: 0 auto; }
 
     .header { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:14px 18px; display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
