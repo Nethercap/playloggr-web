@@ -27,8 +27,8 @@
     :root[data-theme="dark"]  { --bg:#1a1a1a; --bg2:#242424; --bg3:#2e2e2e; --text:#f0f0f0; --text2:#999; --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2); }
 
     /* ── Temas de videojuego (Apariencia > Tema de videojuego) — portados de
-       la app Flutter (ver lib/theme/game_theme.dart), solo visibles/usables
-       para la cuenta que los pidio (gate server-side, ver game_themes_beta).
+       la app Flutter (ver lib/theme/game_theme.dart), disponibles para
+       cualquier cuenta igual que en la app (sin gate de premium/beta).
        Pisan las mismas variables que ya usa toda la UI (bg, text, border,
        green), asi que no hace falta tocar componente por componente.
        OJO con los roles: a diferencia de Flutter, en esta UI --bg (no --bg3)
@@ -409,7 +409,7 @@
     .fbtn.active { background:var(--green); border-color:var(--green); color:#fff; font-weight:500; }
 
     .game-list { display:flex; flex-direction:column; gap:7px; }
-    .game-list.grid-view { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
+    .game-list.grid-view { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; align-items:start; }
     .lib-grid-tile { background:var(--bg2); border:0.5px solid var(--border); border-radius:10px; overflow:hidden; }
     .view-mode-btn { padding:4px 8px; font-size:12px; border:none; background:var(--bg2); color:var(--text2); cursor:pointer; }
     .view-mode-btn.active { background:var(--green); color:#fff; }
@@ -2709,11 +2709,7 @@ async function loadAppearanceSettings() {
 
 // ── Temas de videojuego (experimental) — solo local (no via /settings,
 // mismo criterio que la app Flutter: se guarda en localStorage, no se
-// sincroniza al backend), y restringido a una sola cuenta. El gate en si
-// (que email esta habilitado) vive server-side (ver game_themes_beta en
-// /user/profile) — este repo es publico, asi que el email nunca debe
-// hardcodearse aca.
-let gameThemesBeta = false;
+// sincroniza al backend), disponible para cualquier cuenta.
 const GAME_THEMES = [
   ['none',        'Playloggr (por defecto)'],
   ['cyberpunk',   'Cyberpunk'],
@@ -3842,11 +3838,14 @@ function sortedFiltered() {
     else if (ratingFilter) mr = g.user_rating >= parseFloat(ratingFilter);
     return ms && mp && mq && mr;
   });
+  const statusOrder = Object.keys(STATUS_DOT_COLORS);
   items.sort((a, b) => {
     let cmp = 0;
     if (sortMode === 'hours')       cmp = (a.hours_played||0) - (b.hours_played||0);
     else if (sortMode === 'rating-desc') cmp = (b.user_rating||0) - (a.user_rating||0);
     else if (sortMode === 'rating-asc')  cmp = (a.user_rating||0) - (b.user_rating||0);
+    else if (sortMode === 'status')  cmp = statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
+    else if (sortMode === 'platform') cmp = (a.platform||'').localeCompare(b.platform||'');
     else                            cmp = a.name.localeCompare(b.name);
     return sortDir === 'desc' ? -cmp : cmp;
   });
@@ -5866,7 +5865,7 @@ function renderAppearanceTab() {
 
   const gtGroup = document.getElementById('cfg-gametheme-group');
   if (gtGroup) {
-    const allowed = gameThemesBeta;
+    const allowed = true;
     gtGroup.style.display = allowed ? '' : 'none';
     if (allowed) {
       const current = document.documentElement.dataset.gameTheme || 'none';
@@ -9797,17 +9796,6 @@ async function loadPremiumStatus() {
     userUnlockedFonts  = d.unlocked_fonts || ['default'];
     userTrophy = d.trophy || false;
     userEmail  = d.email || '';
-    // El tema de videojuego (ver applyGameTheme) es feature de una sola
-    // cuenta — el chequeo lo hace el backend (game_themes_beta, en base a
-    // GAME_THEMES_BETA_EMAIL server-side) para no tener el email hardcodeado
-    // en el JS publico del repo. Si se restauro desde localStorage antes de
-    // saber esto (ver el "try" cerca de applyThemeMode) y la cuenta logueada
-    // no esta habilitada, se revierte.
-    gameThemesBeta = d.game_themes_beta === true;
-    if (document.documentElement.dataset.gameTheme && !gameThemesBeta) {
-      delete document.documentElement.dataset.gameTheme;
-      localStorage.removeItem('pl_game_theme');
-    }
     if (d.language === 'en' || d.language === 'es' || d.language === 'pt') {
       currentLang = d.language;
       localStorage.setItem('gb_lang', currentLang);
