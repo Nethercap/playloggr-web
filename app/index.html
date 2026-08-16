@@ -365,6 +365,8 @@
       #filter-bar-row1b { order:3; flex-direction:column; align-items:stretch; margin-top:14px !important; padding-top:14px !important; }
       #view-mode-toggle { width:100%; }
       #view-mode-toggle button { flex:1; }
+      #density-toggle { display:flex !important; width:100%; margin-top:6px; }
+      #density-toggle button { flex:1; font-size:11px; }
       #btn-hidden { width:100%; justify-content:center; margin-top:6px; }
       #filter-bar-row2 { order:4; flex-direction:column; align-items:stretch; margin-top:14px !important; padding-top:14px !important; }
       #search-input { width:100% !important; }
@@ -1110,6 +1112,14 @@
           <button id="view-mode-grid" class="view-mode-btn" onclick="setLibraryViewMode('grid')" title="Cuadrícula"><i class="ti ti-layout-grid" style="font-size:12px"></i></button>
         </div>
 
+        <!-- Densidad (Normal/Compacta) — solo desktop, ver #density-toggle
+             en la media query (min-width:641px); en mobile ya existe el
+             mismo control en Apariencia > Densidad. -->
+        <div id="density-toggle" style="display:none;border:0.5px solid var(--border);border-radius:6px;overflow:hidden">
+          <button id="density-normal" class="view-mode-btn active" onclick="setCompactMode(false)" data-i18n="densityNormal">Normal</button>
+          <button id="density-compact" class="view-mode-btn" onclick="setCompactMode(true)" data-i18n="densityCompact">Compacta</button>
+        </div>
+
         <!-- Hidden toggle -->
         <button id="btn-hidden" onclick="toggleShowHidden()"
           style="padding:4px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;display:none;align-items:center;gap:4px">
@@ -1119,7 +1129,7 @@
 
       <!-- Row 2: sort + search -->
       <div id="filter-bar-row2" style="display:flex;align-items:center;gap:6px;margin-top:18px;padding-top:14px;border-top:0.5px solid var(--border)">
-        <select id="sort-sel" onchange="applyFilters()" style="font-size:12px;padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text)">
+        <select id="sort-sel" onchange="applyFilters()" style="font-size:12px;padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text2)">
           <option value="name" data-i18n="name">Nombre</option>
           <option value="hours" data-i18n="hours">Horas</option>
           <option value="rating" data-i18n="rating">Calificación</option>
@@ -2077,6 +2087,7 @@ const I18N = {
     totalHours: 'Horas totales', wishlist: 'Deseados', seeWishlist: 'Ver deseados',
     customizeAvatar: 'Personalizar avatar', library: 'Biblioteca', globalTab: 'Global',
     hidden: 'Ocultos', addGame: 'Agregar juego', addWishlistGame: 'Agregar juego deseado',
+    densityNormal: 'Normal', densityCompact: 'Compacta',
     name: 'Nombre', hours: 'Horas', rating: 'Calificación', platform: 'Plataforma',
     status: 'Estado', searchGame: 'Buscar juego...', connectingBackend: 'Conectando con el backend...',
     myStats: 'Mis stats', loading: 'Cargando...', folders: 'Carpetas',
@@ -2268,6 +2279,7 @@ const I18N = {
     totalHours: 'Total hours', wishlist: 'Wishlist', seeWishlist: 'View wishlist',
     customizeAvatar: 'Customize avatar', library: 'Library', globalTab: 'Global',
     hidden: 'Hidden', addGame: 'Add game', addWishlistGame: 'Add wishlist game',
+    densityNormal: 'Normal', densityCompact: 'Compact',
     name: 'Name', hours: 'Hours', rating: 'Rating', platform: 'Platform',
     status: 'Status', searchGame: 'Search game...', connectingBackend: 'Connecting to backend...',
     myStats: 'My stats', loading: 'Loading...', folders: 'Folders',
@@ -2459,6 +2471,7 @@ const I18N = {
     totalHours: 'Horas totais', wishlist: 'Desejados', seeWishlist: 'Ver desejados',
     customizeAvatar: 'Personalizar avatar', library: 'Biblioteca', globalTab: 'Global',
     hidden: 'Ocultos', addGame: 'Adicionar jogo', addWishlistGame: 'Adicionar jogo desejado',
+    densityNormal: 'Normal', densityCompact: 'Compacta',
     name: 'Nome', hours: 'Horas', rating: 'Avaliação', platform: 'Plataforma',
     status: 'Status', searchGame: 'Buscar jogo...', connectingBackend: 'Conectando ao backend...',
     myStats: 'Minhas estatísticas', loading: 'Carregando...', folders: 'Pastas',
@@ -4196,6 +4209,7 @@ function setCompactMode(v) {
   localStorage.setItem('gb_compact_mode', v ? '1' : '0');
   compactExpandedIds.clear();
   renderAppearanceTab();
+  updateLibraryViewToggle();
   renderGames();
 }
 
@@ -4258,9 +4272,16 @@ function compactGridTileHtml(g) {
 function updateLibraryViewToggle() {
   const listBtn = document.getElementById('view-mode-list');
   const gridBtn = document.getElementById('view-mode-grid');
-  if (!listBtn || !gridBtn) return;
-  listBtn.classList.toggle('active', libraryViewMode === 'list');
-  gridBtn.classList.toggle('active', libraryViewMode === 'grid');
+  if (listBtn && gridBtn) {
+    listBtn.classList.toggle('active', libraryViewMode === 'list');
+    gridBtn.classList.toggle('active', libraryViewMode === 'grid');
+  }
+  const normalBtn  = document.getElementById('density-normal');
+  const compactBtn = document.getElementById('density-compact');
+  if (normalBtn && compactBtn) {
+    normalBtn.classList.toggle('active', !compactMode);
+    compactBtn.classList.toggle('active', compactMode);
+  }
 }
 
 function gridTileHtml(g, opts) {
@@ -4721,7 +4742,7 @@ function renderFilterDropdowns() {
     const btn = document.createElement('button');
     btn.id = `filter-btn-${key}`;
     btn.innerHTML = `${label}${hasActive ? ` <span style="background:var(--green);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px">${active.size}</span>` : ' ▾'}`;
-    btn.style.cssText = `padding:4px 10px;font-size:12px;border-radius:6px;border:0.5px solid ${hasActive ? 'var(--green)' : 'var(--border)'};background:var(--bg2);color:${hasActive ? 'var(--green)' : 'var(--text)'};cursor:pointer`;
+    btn.style.cssText = `padding:4px 10px;font-size:12px;border-radius:6px;border:0.5px solid ${hasActive ? 'var(--green)' : 'var(--border)'};background:var(--bg2);color:${hasActive ? 'var(--green)' : 'var(--text2)'};cursor:pointer`;
     btn.onclick = (e) => { e.stopPropagation(); toggleFilterDropdown(key, options, wrap, btn); };
 
     wrap.appendChild(btn);
