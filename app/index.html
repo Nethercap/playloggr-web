@@ -27,8 +27,9 @@
     :root[data-theme="dark"]  { --bg:#1a1a1a; --bg2:#242424; --bg3:#2e2e2e; --text:#f0f0f0; --text2:#999; --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2); }
 
     /* ── Temas de videojuego (Apariencia > Tema de videojuego) — portados de
-       la app Flutter (ver lib/theme/game_theme.dart), disponibles para
-       cualquier cuenta igual que en la app (sin gate de premium/beta).
+       la app Flutter (ver lib/theme/game_theme.dart). Feature Premium (ver
+       gate en renderAppearanceTab, isPremium) — el free ve la lista con
+       candado y CTA a Paddle, igual que avatar/frames/fuentes.
        Pisan las mismas variables que ya usa toda la UI (bg, text, border,
        green), asi que no hace falta tocar componente por componente.
        OJO con los roles: a diferencia de Flutter, en esta UI --bg (no --bg3)
@@ -2738,9 +2739,9 @@ async function loadAppearanceSettings() {
   } catch(e) {}
 }
 
-// ── Temas de videojuego (experimental) — solo local (no via /settings,
-// mismo criterio que la app Flutter: se guarda en localStorage, no se
-// sincroniza al backend), disponible para cualquier cuenta.
+// ── Temas de videojuego (experimental, Premium) — solo local (no via
+// /settings, mismo criterio que la app Flutter: se guarda en localStorage,
+// no se sincroniza al backend).
 const GAME_THEMES = [
   ['none',        'Playloggr (por defecto)'],
   ['cyberpunk',   'Cyberpunk'],
@@ -5904,15 +5905,16 @@ function renderAppearanceTab() {
 
   const gtGroup = document.getElementById('cfg-gametheme-group');
   if (gtGroup) {
-    const allowed = true;
-    gtGroup.style.display = allowed ? '' : 'none';
-    if (allowed) {
-      const current = document.documentElement.dataset.gameTheme || 'none';
-      document.getElementById('cfg-gametheme-options').innerHTML = GAME_THEMES.map(([key, label]) => `
-        <button type="button" class="cfg-choice-btn ${current === key ? 'active' : ''}" style="justify-content:flex-start;text-align:left"
-          onclick="applyGameTheme('${key}')">${label}</button>
-      `).join('');
-    }
+    gtGroup.style.display = '';
+    const current = document.documentElement.dataset.gameTheme || 'none';
+    document.getElementById('cfg-gametheme-options').innerHTML = GAME_THEMES.map(([key, label]) => {
+      const locked = !isPremium && key !== 'none';
+      return `
+        <button type="button" class="cfg-choice-btn ${current === key ? 'active' : ''}" style="justify-content:flex-start;text-align:left;opacity:${locked ? 0.5 : 1}"
+          title="${locked ? t('buyPremium') : ''}"
+          onclick="${locked ? 'startPaddleCheckout()' : `applyGameTheme('${key}')`}">${locked ? '<i class="ti ti-lock" style="font-size:12px;margin-right:4px"></i>' : ''}${label}</button>
+      `;
+    }).join('');
   }
 }
 
@@ -9807,6 +9809,14 @@ async function loadPremiumStatus() {
     });
     const d = await res.json();
     isPremium = d.is_premium === true;
+    // Los temas de videojuego (ver applyGameTheme) son Premium — si se
+    // restauro un tema desde localStorage antes de saber esto (ver el
+    // "try" cerca de applyGameTheme, que aplica de inmediato para evitar
+    // flash) y la cuenta no es premium, se revierte.
+    if (!isPremium && document.documentElement.dataset.gameTheme) {
+      delete document.documentElement.dataset.gameTheme;
+      localStorage.removeItem('pl_game_theme');
+    }
     if (d.username) {
       authUser = d.username;
       localStorage.setItem('gb_user', authUser);
