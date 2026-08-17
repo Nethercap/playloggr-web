@@ -11570,6 +11570,18 @@ let _rankingPickerAllGames = [];
 let _rankingPickerSearch  = '';
 let _rankingPickerSelected = new Set();
 
+async function loadRankings() {
+  const sort = document.getElementById('rankings-sort-sel')?.value || 'name';
+  try {
+    const res  = await fetch(`${apiBase()}/api/v1/rankings?sort=${sort}`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    currentRankings = data.rankings || [];
+  } catch(e) { currentRankings = []; }
+  renderRankingsList();
+}
+
 let _rankingTab = 'mine'; // 'mine' | 'global'
 
 function switchRankingTab(tab) {
