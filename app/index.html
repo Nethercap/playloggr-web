@@ -11405,6 +11405,8 @@ let _folderPickerSortCol  = 'name';
 let _folderPickerSortDir  = 'asc';
 let _folderPickerSearch   = '';
 
+let _folderPickerSection = 'library', _folderPickerTab = 'list';
+
 async function openFolderAddGamePicker(folderId) {
   _folderPickerId     = folderId;
   _folderPickerAdd    = new Set();
@@ -11412,18 +11414,96 @@ async function openFolderAddGamePicker(folderId) {
   _folderPickerSearch = '';
   _folderPickerSortCol = 'name';
   _folderPickerSortDir = 'asc';
+  _folderPickerTab = 'list';
 
   const res  = await fetch(`${apiBase()}/api/v1/folders/${folderId}/available-games`, {
     headers: { 'Authorization': `Bearer ${authToken}` }
   });
   const data = await res.json();
   _folderPickerAllGames = data.games || [];
+  _folderPickerSection = data.section || 'library';
   renderFolderGamePicker();
   document.getElementById('folder-add-game-overlay').classList.add('open');
 }
 
+function switchFolderPickerTab(tab) {
+  _folderPickerTab = tab;
+  renderFolderGamePicker();
+}
+
+// "Otro (externo)" — buscar en el catalogo de Steam/IGDB y crear un juego
+// manual nuevo (que el usuario no tiene en su cuenta todavia), agregandolo
+// directo a esta lista. Mismo endpoint que usa el modal de "Agregar juego"
+// principal (steam/search) y el mismo POST /game para crearlo.
+let _folderExtSearchTimer = null;
+async function searchFolderExternalCatalog(q) {
+  const results = document.getElementById('folder-ext-results');
+  if (!results) return;
+  if (q.length < 2) { results.innerHTML = ''; return; }
+  clearTimeout(_folderExtSearchTimer);
+  _folderExtSearchTimer = setTimeout(async () => {
+    try {
+      const res = await fetch(`${apiBase()}/api/v1/steam/search?q=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      if (!data.results?.length) { results.innerHTML = `<div style="padding:12px;color:var(--text2);font-size:12px">${t('noResults')}</div>`; return; }
+      window._folderExtResults = {};
+      data.results.forEach(r => { window._folderExtResults[r.appid || r.community_id] = r; });
+      results.innerHTML = data.results.map(r => {
+        const key = r.appid || r.community_id;
+        return `<div onclick="addExternalGameToFolder('${key}')"
+          style="padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:8px"
+          onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
+          ${r.cover_url ? `<img src="${r.cover_url}" style="width:28px;height:37px;object-fit:cover;border-radius:3px;flex-shrink:0">` : ''}
+          <span>${esc(r.name)}</span>
+        </div>`;
+      }).join('');
+    } catch(e) {}
+  }, 300);
+}
+
+async function addExternalGameToFolder(key) {
+  const r = (window._folderExtResults || {})[key];
+  if (!r) return;
+  const appid = r.appid || null;
+  const gameId = appid ? `steam_${appid}` : 'manual_' + Date.now();
+  const status = _folderPickerSection === 'wishlist' ? 'Deseados' : 'Backlog';
+  try {
+    await fetch(`${apiBase()}/api/v1/game`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: gameId, name: r.name, platform: 'Steam', status, hours_played: 0, cover_url: r.cover_url || null, user_rating: 0, app_id: appid }),
+    });
+    await fetch(`${apiBase()}/api/v1/folders/${_folderPickerId}/games`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ game_id: gameId }),
+    });
+    showToast(`${r.name} agregado`);
+    document.getElementById('folder-ext-search').value = '';
+    document.getElementById('folder-ext-results').innerHTML = '';
+    await loadFolders();
+    syncAll(1);
+  } catch(e) {
+    showToast('No se pudo agregar el juego', true);
+  }
+}
+
 function renderFolderGamePicker() {
   const list   = document.getElementById('folder-add-game-list');
+  const tabsHtml = `<div style="display:flex;gap:6px;padding:8px 12px 0">
+    <button onclick="switchFolderPickerTab('list')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${_folderPickerTab==='list'?'var(--green)':'var(--bg2)'};color:${_folderPickerTab==='list'?'#fff':'var(--text2)'}">${_folderPickerSection==='wishlist' ? 'Deseados' : 'Biblioteca'}</button>
+    <button onclick="switchFolderPickerTab('external')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${_folderPickerTab==='external'?'var(--green)':'var(--bg2)'};color:${_folderPickerTab==='external'?'#fff':'var(--text2)'}">Otro (externo)</button>
+  </div>`;
+  if (_folderPickerTab === 'external') {
+    list.innerHTML = tabsHtml + `
+      <div style="padding:10px 12px">
+        <input type="text" id="folder-ext-search" placeholder="Buscar juego en Steam..." oninput="searchFolderExternalCatalog(this.value)"
+          style="width:100%;box-sizing:border-box;padding:6px 10px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text)" />
+        <div style="font-size:11px;color:var(--text2);margin-top:6px">Se agrega como juego nuevo a tu cuenta y a esta lista.</div>
+      </div>
+      <div id="folder-ext-results" style="max-height:360px;overflow-y:auto"></div>`;
+    return;
+  }
   const q      = _folderPickerSearch.toLowerCase();
   let games    = _folderPickerAllGames.filter(g => !q || g.name.toLowerCase().includes(q));
 
@@ -11443,7 +11523,7 @@ function renderFolderGamePicker() {
     return `<span onclick="sortFolderPicker('${key}')" style="cursor:pointer;${active?'color:var(--green)':''}">${label}${arrow}</span>`;
   };
 
-  list.innerHTML = `
+  list.innerHTML = tabsHtml + `
     <div style="padding:6px 12px 8px;border-bottom:0.5px solid var(--border)">
       <input type="text" placeholder="Buscar juego..." data-i18n-placeholder="searchGame" value="${_folderPickerSearch}"
         oninput="_folderPickerSearch=this.value;renderFolderGamePicker()"
@@ -11816,31 +11896,112 @@ async function confirmDeleteRanking() {
   loadRankings();
 }
 
+let _rankingPickerTab = 'library'; // 'library' | 'wishlist' | 'external'
+
 async function openRankingAddGame() {
   _rankingPickerSearch   = '';
   _rankingPickerSelected = new Set();
+  _rankingPickerTab = 'library';
   const searchEl = document.getElementById('ranking-picker-search');
   if (searchEl) searchEl.value = '';
+  await _loadRankingPickerSection('library');
+  document.getElementById('ranking-add-game-overlay').classList.add('open');
+}
+
+async function _loadRankingPickerSection(section) {
   try {
-    const res  = await fetch(`${apiBase()}/api/v1/rankings/${activeRankingId}/available-games`, {
+    const res  = await fetch(`${apiBase()}/api/v1/rankings/${activeRankingId}/available-games?section=${section}`, {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
     const data = await res.json();
     _rankingPickerAllGames = (data.games || []).filter(g => !g.in_ranking);
   } catch(e) { _rankingPickerAllGames = []; }
   renderRankingGamePicker();
-  document.getElementById('ranking-add-game-overlay').classList.add('open');
+}
+
+async function switchRankingPickerTab(tab) {
+  _rankingPickerTab = tab;
+  if (tab === 'external') { renderRankingGamePicker(); return; }
+  await _loadRankingPickerSection(tab);
+}
+
+let _rankingExtSearchTimer = null;
+async function searchRankingExternalCatalog(q) {
+  const results = document.getElementById('ranking-ext-results');
+  if (!results) return;
+  if (q.length < 2) { results.innerHTML = ''; return; }
+  clearTimeout(_rankingExtSearchTimer);
+  _rankingExtSearchTimer = setTimeout(async () => {
+    try {
+      const res = await fetch(`${apiBase()}/api/v1/steam/search?q=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      if (!data.results?.length) { results.innerHTML = `<div style="padding:12px;color:var(--text2);font-size:12px">${t('noResults')}</div>`; return; }
+      window._rankingExtResults = {};
+      data.results.forEach(r => { window._rankingExtResults[r.appid || r.community_id] = r; });
+      results.innerHTML = data.results.map(r => {
+        const key = r.appid || r.community_id;
+        return `<div onclick="addExternalGameToRanking('${key}')"
+          style="padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:8px"
+          onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
+          ${r.cover_url ? `<img src="${r.cover_url}" style="width:28px;height:37px;object-fit:cover;border-radius:3px;flex-shrink:0">` : ''}
+          <span>${esc(r.name)}</span>
+        </div>`;
+      }).join('');
+    } catch(e) {}
+  }, 300);
+}
+
+async function addExternalGameToRanking(key) {
+  const r = (window._rankingExtResults || {})[key];
+  if (!r) return;
+  if (activeRankingGames.length >= MAX_RANKING_GAMES) { showToast(t('rankingLimitReached'), true); return; }
+  const appid = r.appid || null;
+  const gameId = appid ? `steam_${appid}` : 'manual_' + Date.now();
+  try {
+    await fetch(`${apiBase()}/api/v1/game`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: gameId, name: r.name, platform: 'Steam', status: 'Backlog', hours_played: 0, cover_url: r.cover_url || null, user_rating: 0, app_id: appid }),
+    });
+    await fetch(`${apiBase()}/api/v1/rankings/${activeRankingId}/games`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ game_id: gameId }),
+    });
+    showToast(`${r.name} agregado`);
+    document.getElementById('ranking-ext-search').value = '';
+    document.getElementById('ranking-ext-results').innerHTML = '';
+    closeRankingAddGame();
+    await openRanking(activeRankingId);
+  } catch(e) {
+    showToast('No se pudo agregar el juego', true);
+  }
+}
+
+function _rankingPickerTabsHtml() {
+  const tab = (key, label) => `<button onclick="switchRankingPickerTab('${key}')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${_rankingPickerTab===key?'var(--green)':'var(--bg2)'};color:${_rankingPickerTab===key?'#fff':'var(--text2)'}">${label}</button>`;
+  return `<div style="display:flex;gap:6px;margin-bottom:8px">
+    ${tab('library','Biblioteca')}${tab('wishlist','Deseados')}${tab('external','Otro (externo)')}
+  </div>`;
 }
 
 function renderRankingGamePicker() {
   const list  = document.getElementById('ranking-picker-list');
+  if (_rankingPickerTab === 'external') {
+    list.innerHTML = _rankingPickerTabsHtml() + `
+      <input type="text" id="ranking-ext-search" placeholder="Buscar juego en Steam..." oninput="searchRankingExternalCatalog(this.value)"
+        style="width:100%;box-sizing:border-box;padding:6px 10px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);margin-bottom:6px" />
+      <div style="font-size:11px;color:var(--text2);margin-bottom:6px">Se agrega como juego nuevo a tu cuenta y a este ranking.</div>
+      <div id="ranking-ext-results" style="max-height:320px;overflow-y:auto"></div>`;
+    return;
+  }
   const q     = _rankingPickerSearch.toLowerCase();
   const games = _rankingPickerAllGames.filter(g => !q || g.name.toLowerCase().includes(q));
   if (!games.length) {
-    list.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text2);font-size:13px">${t('noResults')}</div>`;
+    list.innerHTML = _rankingPickerTabsHtml() + `<div style="padding:20px;text-align:center;color:var(--text2);font-size:13px">${t('noResults')}</div>`;
     return;
   }
-  list.innerHTML = games.map(g => `
+  list.innerHTML = _rankingPickerTabsHtml() + games.map(g => `
     <label style="display:flex;align-items:center;gap:10px;padding:8px 4px;cursor:pointer;font-size:13px;border-bottom:0.5px solid var(--border)">
       <input type="checkbox" data-gid="${g.id}" ${_rankingPickerSelected.has(g.id) ? 'checked' : ''}
         onchange="toggleRankingPickerGame('${g.id}', this.checked)" style="accent-color:var(--green)">
