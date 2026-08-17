@@ -3682,18 +3682,20 @@ function renderGameDetailContent(d) {
     ? `<span style="cursor:pointer;text-decoration:underline dotted" onclick="editLastPlayed('${gameId}', '${d.last_played_date || ''}')">${d.last_played_date || t('never') || 'Nunca'} <i class="ti ti-pencil" style="font-size:11px"></i></span>`
     : `<span>${d.last_played_date || '—'}</span>`;
 
-  const hltbHtml = (() => {
+  // Texto compacto de HowLongToBeat para mostrar en linea, debajo de Horas
+  // (antes era un cuadro aparte — a pedido pasa a ser solo texto).
+  const hltbInline = (() => {
     if (d.hltb.source === 'plan' && d.hltb.hours != null) {
       const modeLabel = { main_story: t('mainStory'), main_extra: t('mainExtra'), completionist: t('completionist') }[d.hltb.mode] || d.hltb.mode;
-      return `<div style="font-size:13px">${modeLabel}: <strong>${d.hltb.hours} hs</strong> <span style="color:var(--text2);font-size:11px">(${t('fromGamePlan') || 'de tu Plan de juego'})</span></div>`;
+      return `${modeLabel} ${d.hltb.hours} hs <span style="color:var(--text2);font-size:11px">(${t('fromGamePlan') || 'de tu Plan de juego'})</span>`;
     }
     const r = d.hltb.results;
-    if (!r || !r.length) return `<div style="font-size:12px;color:var(--text2)">${t('hltbNotFound') || 'No se encontró en HowLongToBeat'}</div>`;
-    const best = r[0];
-    const rows = [['main_story', best.main_story, t('mainStory') || 'Historia'], ['main_extra', best.main_extra, t('mainExtra') || 'Historia + Extras'], ['completionist', best.completionist, t('completionist') || 'Completista']]
+    const best = r && r[0];
+    if (!best) return null;
+    const parts = [['main_story', best.main_story, t('mainStory') || 'Historia'], ['main_extra', best.main_extra, t('mainExtra') || 'Historia + Extras'], ['completionist', best.completionist, t('completionist') || 'Completista']]
       .filter(([, h]) => h != null)
-      .map(([, h, label]) => `<div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0"><span>${label}</span><strong>${h} hs</strong></div>`).join('');
-    return rows || `<div style="font-size:12px;color:var(--text2)">${t('hltbNotFound') || 'No se encontró en HowLongToBeat'}</div>`;
+      .map(([, h, label]) => `${label} ${h}hs`);
+    return parts.length ? parts.join(' · ') : null;
   })();
 
   const foldersHtml = d.folders.length
@@ -3712,8 +3714,9 @@ function renderGameDetailContent(d) {
         <select onchange="changeStatus('${gameId}', this.value)" style="font-size:13px;padding:6px 10px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text);margin-bottom:8px">
           ${statusOpts}
         </select>
-        <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--text2);margin-top:6px">
+        <div style="display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--text2);margin-top:6px">
           <div>${t('hours') || 'Horas'}: ${hoursHtml}</div>
+          ${hltbInline ? `<div style="font-size:12px">HowLongToBeat: ${hltbInline}</div>` : ''}
           <div>${t('lastPlayed') || 'Última vez jugado'}: ${lastPlayedHtml}</div>
         </div>
       </div>
@@ -3723,15 +3726,9 @@ function renderGameDetailContent(d) {
       ${ratingDetailModalBody(gameId)}
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-      <div style="background:var(--bg2);border-radius:10px;padding:14px">
-        <div style="font-weight:700;font-size:13px;margin-bottom:8px">HowLongToBeat</div>
-        ${hltbHtml}
-      </div>
-      <div style="background:var(--bg2);border-radius:10px;padding:14px">
-        <div style="font-weight:700;font-size:13px;margin-bottom:8px">${t('achievements') || 'Logros'}</div>
-        <div id="game-detail-achievements">${d.platform === 'Steam' && d.app_id ? `<div style="font-size:12px;color:var(--text2)">${t('loading')}</div>` : `<div style="font-size:12px;color:var(--text2)">${t('onlySteam') || 'Solo disponible para juegos de Steam'}</div>`}</div>
-      </div>
+    <div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px">
+      <div style="font-weight:700;font-size:13px;margin-bottom:8px">${t('achievements') || 'Logros'}</div>
+      <div id="game-detail-achievements">${d.platform === 'Steam' && d.app_id ? `<div style="font-size:12px;color:var(--text2)">${t('loading')}</div>` : `<div style="font-size:12px;color:var(--text2)">${t('onlySteam') || 'Solo disponible para juegos de Steam'}</div>`}</div>
     </div>
 
     <div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px">
@@ -3777,13 +3774,13 @@ async function loadGameDetailAchievements(gameId, appId) {
       <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:10px">
         <div style="height:100%;width:${data.pct}%;background:var(--green)"></div>
       </div>
-      <div style="max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:6px">
-        ${unlockedFirst.slice(0, 20).map(a => `
-          <div style="display:flex;align-items:center;gap:8px;opacity:${a.achieved ? 1 : 0.45}">
-            ${a.icon_url ? `<img src="${a.icon_url}" style="width:28px;height:28px;border-radius:4px;flex-shrink:0">` : ''}
+      <div style="max-height:520px;overflow-y:auto;display:flex;flex-direction:column;gap:8px">
+        ${unlockedFirst.map(a => `
+          <div style="display:flex;align-items:center;gap:10px;opacity:${a.achieved ? 1 : 0.45}">
+            ${a.icon_url ? `<img src="${a.icon_url}" style="width:36px;height:36px;border-radius:4px;flex-shrink:0">` : ''}
             <div style="min-width:0">
-              <div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(a.name)}</div>
-              <div style="font-size:10px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(a.description || '')}</div>
+              <div style="font-size:13px;font-weight:600">${esc(a.name)}</div>
+              <div style="font-size:11px;color:var(--text2)">${esc(a.description || '')}</div>
             </div>
           </div>`).join('')}
       </div>`;
