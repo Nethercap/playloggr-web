@@ -1660,6 +1660,7 @@
         <option value="date_asc" data-i18n="reviewsSortDate">Fecha ↑</option>
         <option value="rating_desc" data-i18n="reviewsSortRating">Calificación ↓</option>
         <option value="rating_asc" data-i18n="reviewsSortRating">Calificación ↑</option>
+        <option value="votes_desc" data-i18n="reviewsSortVotes">Popularidad ↓</option>
       </select>
     </div>
     <div style="display:flex;gap:6px;padding:0 2px 8px">
@@ -2233,7 +2234,7 @@ const I18N = {
     reviewVisibilityPublic: 'Pública', reviewVisibilityPrivate: 'Privada', reviewPostAnonymous: 'Publicar como anónimo',
     reviewSave: 'Guardar', reviewDelete: 'Eliminar reseña', reviewDeleteConfirm: '¿Eliminar tu reseña de este juego?',
     reviewSaveError: 'No se pudo guardar la reseña', reviewDeleteError: 'No se pudo eliminar la reseña',
-    reviewAnonymousLabel: 'Anónimo', reviewsTitle: 'Reseñas', reviewsSortDate: 'Fecha', reviewsSortRating: 'Calificación',
+    reviewAnonymousLabel: 'Anónimo', reviewsTitle: 'Reseñas', reviewsSortDate: 'Fecha', reviewsSortRating: 'Calificación', reviewsSortVotes: 'Popularidad',
     reviewsEmpty: 'Todavía no hay reseñas para este juego.', reviewReport: 'Reportar', reviewReportSent: 'Reseña reportada',
     reviewReportConfirm: '¿Reportar esta reseña por contenido inapropiado?', recentReviews: 'Últimas reseñas',
     recentReviewsEmpty: 'Todavía no hay reseñas recientes.', myReviewsEmpty: 'Todavía no escribiste ninguna reseña.',
@@ -2428,7 +2429,7 @@ const I18N = {
     reviewVisibilityPublic: 'Public', reviewVisibilityPrivate: 'Private', reviewPostAnonymous: 'Post anonymously',
     reviewSave: 'Save', reviewDelete: 'Delete review', reviewDeleteConfirm: 'Delete your review for this game?',
     reviewSaveError: "Couldn't save the review", reviewDeleteError: "Couldn't delete the review",
-    reviewAnonymousLabel: 'Anonymous', reviewsTitle: 'Reviews', reviewsSortDate: 'Date', reviewsSortRating: 'Rating',
+    reviewAnonymousLabel: 'Anonymous', reviewsTitle: 'Reviews', reviewsSortDate: 'Date', reviewsSortRating: 'Rating', reviewsSortVotes: 'Popularity',
     reviewsEmpty: 'No reviews yet for this game.', reviewReport: 'Report', reviewReportSent: 'Review reported',
     reviewReportConfirm: 'Report this review for inappropriate content?', recentReviews: 'Recent reviews',
     recentReviewsEmpty: 'No recent reviews yet.', myReviewsEmpty: "You haven't written any reviews yet.",
@@ -2623,7 +2624,7 @@ const I18N = {
     reviewVisibilityPublic: 'Pública', reviewVisibilityPrivate: 'Privada', reviewPostAnonymous: 'Publicar como anônimo',
     reviewSave: 'Salvar', reviewDelete: 'Excluir resenha', reviewDeleteConfirm: 'Excluir sua resenha deste jogo?',
     reviewSaveError: 'Não foi possível salvar a resenha', reviewDeleteError: 'Não foi possível excluir a resenha',
-    reviewAnonymousLabel: 'Anônimo', reviewsTitle: 'Resenhas', reviewsSortDate: 'Data', reviewsSortRating: 'Avaliação',
+    reviewAnonymousLabel: 'Anônimo', reviewsTitle: 'Resenhas', reviewsSortDate: 'Data', reviewsSortRating: 'Avaliação', reviewsSortVotes: 'Popularidade',
     reviewsEmpty: 'Ainda não há resenhas para este jogo.', reviewReport: 'Denunciar', reviewReportSent: 'Resenha denunciada',
     reviewReportConfirm: 'Denunciar esta resenha por conteúdo inadequado?', recentReviews: 'Últimas resenhas',
     recentReviewsEmpty: 'Ainda não há resenhas recentes.', myReviewsEmpty: 'Você ainda não escreveu nenhuma resenha.',
@@ -3324,7 +3325,10 @@ async function _loadReviewsList(gameId) {
             <div style="display:flex;align-items:center;gap:8px;font-size:12px">${rating}${reportBtn}</div>
           </div>
           <div style="font-size:13px;margin-top:4px">${esc(r.text)}</div>
-          <div style="font-size:11px;color:var(--text2);margin-top:4px">${_formatReviewDate(r.updated_at)}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+            <span style="font-size:11px;color:var(--text2)">${_formatReviewDate(r.updated_at)}</span>
+            ${_voteBtnHtml('review', r.id, r.vote_count, r.voted_by_me)}
+          </div>
         </div>`;
     }).join('');
   } catch (e) {
@@ -3423,6 +3427,28 @@ async function _allReviewsRefresh() {
   }
 }
 
+// Pulgar arriba generico — mismo endpoint /votes/toggle sirve para
+// reseñas/listas/rankings (target_type distingue). "seamless": el propio
+// boton se re-renderiza con el count nuevo sin recargar toda la lista.
+async function _toggleVote(targetType, targetId, btnEl) {
+  btnEl.disabled = true;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/votes/toggle`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ target_type: targetType, target_id: String(targetId) }),
+    });
+    const d = await res.json();
+    btnEl.outerHTML = _voteBtnHtml(targetType, targetId, d.count, d.voted);
+  } catch (e) {} finally { btnEl.disabled = false; }
+}
+function _voteBtnHtml(targetType, targetId, count, votedByMe) {
+  return `<button id="vote-${targetType}-${targetId}" onclick="_toggleVote('${targetType}','${targetId}',this)"
+      style="background:none;border:none;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:4px;color:${votedByMe ? 'var(--green)' : 'var(--text2)'}">
+      <i class="ti ${votedByMe ? 'ti-thumb-up-filled' : 'ti-thumb-up'}"></i> ${count || 0}
+    </button>`;
+}
+
 function _renderAllReviewsItems(reviews) {
   return reviews.map(r => {
     const name = r.is_anonymous ? t('reviewAnonymousLabel') : esc(r.username || '?');
@@ -3437,7 +3463,10 @@ function _renderAllReviewsItems(reviews) {
         <div style="font-size:13px;margin-top:4px">${esc(r.text)}</div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
           <span style="font-size:11px;color:var(--text2)">${_formatReviewDate(r.updated_at)}</span>
-          <button onclick="_reportReview(${r.id})" title="${esc(t('reviewReport'))}" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:14px"><i class="ti ti-flag"></i></button>
+          <div style="display:flex;align-items:center;gap:10px">
+            ${_voteBtnHtml('review', r.id, r.vote_count, r.voted_by_me)}
+            <button onclick="_reportReview(${r.id})" title="${esc(t('reviewReport'))}" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:14px"><i class="ti ti-flag"></i></button>
+          </div>
         </div>
       </div>`;
   }).join('');
