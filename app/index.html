@@ -1655,13 +1655,14 @@
   <div class="modal" style="max-width:480px;max-height:85vh;display:flex;flex-direction:column">
     <div class="modal-title" style="display:flex;align-items:center;justify-content:space-between">
       <span><i class="ti ti-message-star"></i> <span data-i18n="myReviews">Reseñas</span></span>
-      <select id="myreviews-sort" onchange="_myReviewsSortChange()" style="font-size:12px;padding:4px 6px;border-radius:6px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text)">
-        <option value="date_desc" data-i18n="reviewsSortDate">Fecha ↓</option>
-        <option value="date_asc" data-i18n="reviewsSortDate">Fecha ↑</option>
-        <option value="rating_desc" data-i18n="reviewsSortRating">Calificación ↓</option>
-        <option value="rating_asc" data-i18n="reviewsSortRating">Calificación ↑</option>
-        <option value="votes_desc" data-i18n="reviewsSortVotes">Popularidad ↓</option>
-      </select>
+      <div style="display:flex;gap:4px">
+        <select id="myreviews-sort" onchange="_myReviewsSortChange()" style="font-size:12px;padding:4px 6px;border-radius:6px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text)">
+          <option value="date" data-i18n="reviewsSortDate">Fecha</option>
+          <option value="rating" data-i18n="reviewsSortRating">Calificación</option>
+          <option value="votes" data-i18n="reviewsSortVotes">Popularidad</option>
+        </select>
+        <button id="myreviews-sort-dir-btn" onclick="_myReviewsSortDirToggle()" style="padding:4px 8px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:6px;cursor:pointer;font-size:13px;color:var(--text)">↓</button>
+      </div>
     </div>
     <div style="display:flex;gap:6px;padding:0 2px 8px">
       <button id="reviews-tab-all" onclick="switchReviewsTab('all')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:var(--green);color:#fff">
@@ -3400,8 +3401,14 @@ function _initReviewsSwipe() {
 }
 
 function _myReviewsSortChange() {
-  const v = document.getElementById('myreviews-sort').value.split('_');
-  _myReviewsSort = v[0]; _myReviewsOrder = v[1];
+  _myReviewsSort = document.getElementById('myreviews-sort').value;
+  if (_reviewsTab === 'mine') _myReviewsRefresh();
+  else { _allReviewsOffset = 0; _allReviewsRefresh(); }
+}
+
+function _myReviewsSortDirToggle() {
+  _myReviewsOrder = _myReviewsOrder === 'desc' ? 'asc' : 'desc';
+  document.getElementById('myreviews-sort-dir-btn').textContent = _myReviewsOrder === 'asc' ? '↑' : '↓';
   if (_reviewsTab === 'mine') _myReviewsRefresh();
   else { _allReviewsOffset = 0; _allReviewsRefresh(); }
 }
