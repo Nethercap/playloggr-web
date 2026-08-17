@@ -3777,7 +3777,7 @@ async function loadGameDetailAchievements(gameId, appId) {
       <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:10px">
         <div style="height:100%;width:${data.pct}%;background:var(--green)"></div>
       </div>
-      <div style="max-height:520px;overflow-y:auto;display:flex;flex-direction:column;gap:8px">
+      <div style="height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:8px">
         ${unlockedFirst.map(a => `
           <div style="display:flex;align-items:center;gap:10px;opacity:${a.achieved ? 1 : 0.45}">
             ${a.icon_url ? `<img src="${a.icon_url}" style="width:36px;height:36px;border-radius:4px;flex-shrink:0">` : ''}
