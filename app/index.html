@@ -1844,6 +1844,17 @@
 </div>
 
 <!-- Create Folder Modal -->
+<!-- Visor de solo lectura de una lista publica de otro usuario -->
+<div class="modal-overlay" id="public-folder-viewer-overlay">
+  <div class="modal" style="max-width:420px;max-height:80vh;display:flex;flex-direction:column">
+    <div class="modal-title"><i class="ti ti-folder"></i> <span id="public-folder-viewer-title">Lista</span></div>
+    <div id="public-folder-viewer-body" style="overflow-y:auto;flex:1;min-height:0"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closePublicFolderViewer()" data-i18n="close">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="folder-create-overlay">
   <div class="modal" style="max-width:340px">
     <div class="modal-title"><i class="ti ti-folder-plus"></i> <span data-i18n="newFolder">Nueva lista</span></div>
@@ -1852,6 +1863,10 @@
         <label data-i18n="name">Nombre</label>
         <input type="text" id="folder-name-input" placeholder="Ej: RPGs 2024" maxlength="100"
           onkeydown="if(event.key==='Enter') saveFolderCreate()" />
+      </div>
+      <div class="modal-group full" style="flex-direction:row;align-items:center;gap:6px">
+        <input type="checkbox" id="folder-private-input" style="accent-color:var(--green)">
+        <label for="folder-private-input" style="font-size:12px;color:var(--text2)">Privada (no aparece en Listas globales)</label>
       </div>
     </div>
     <div class="modal-actions">
@@ -10980,6 +10995,104 @@ function exitFolder() {
 }
 
 // Render folder list (the -1 state — show all folders as cards)
+let _folderTab = 'mine'; // 'mine' | 'global'
+
+function switchFolderTab(tab) {
+  _folderTab = tab;
+  if (tab === 'global') renderPublicFolderList();
+  else renderFolderList();
+}
+
+function _folderTabsHtml() {
+  return `<div style="padding:12px 16px 0;display:flex;gap:6px">
+    <button onclick="switchFolderTab('mine')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${_folderTab==='mine'?'var(--green)':'var(--bg2)'};color:${_folderTab==='mine'?'#fff':'var(--text2)'}">Mis listas</button>
+    <button onclick="switchFolderTab('global')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${_folderTab==='global'?'var(--green)':'var(--bg2)'};color:${_folderTab==='global'?'#fff':'var(--text2)'}">Globales</button>
+  </div>`;
+}
+
+async function renderPublicFolderList() {
+  const gameList = document.getElementById('game-list');
+  if (!gameList) return;
+  const _pgbar = document.getElementById('pagination-bar');
+  if (_pgbar) _pgbar.remove();
+  const _fb = document.getElementById('filter-bar');
+  if (_fb) _fb.style.display = 'none';
+  const section = currentView === 'wishlist' ? 'wishlist' : 'library';
+  gameList.innerHTML = _folderTabsHtml() + `
+    <div style="padding:12px 16px 0;display:flex;gap:8px">
+      <button onclick="currentView='library';switchFolderTab('global')"
+        style="padding:6px 14px;border-radius:20px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${section==='library'?'var(--green)':'var(--bg2)'};color:${section==='library'?'#fff':'var(--text2)'}">
+        <i class="ti ti-books" style="font-size:13px"></i> Biblioteca
+      </button>
+      <button onclick="currentView='wishlist';switchFolderTab('global')"
+        style="padding:6px 14px;border-radius:20px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${section==='wishlist'?'#EF9F27':'var(--bg2)'};color:${section==='wishlist'?'#fff':'var(--text2)'}">
+        <i class="ti ti-bookmark" style="font-size:13px"></i> Deseados
+      </button>
+    </div>
+    <div id="public-folders-content" style="padding:16px;text-align:center;color:var(--text2)"><div class="spinner" style="margin:0 auto"></div></div>`;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/folders/public?section=${section}&sort=votes&order=desc`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const d = await res.json();
+    const folders = d.folders || [];
+    const el = document.getElementById('public-folders-content');
+    if (!el) return;
+    if (!folders.length) {
+      el.innerHTML = '<div class="empty"><i class="ti ti-folder-off" style="font-size:32px;display:block;margin-bottom:8px"></i>Todavía no hay listas públicas en esta sección.</div>';
+      el.style.textAlign = '';
+      return;
+    }
+    el.style.textAlign = '';
+    el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px">
+      ${folders.map(f => `
+        <div onclick="openPublicFolderViewer(${f.id})" style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius-md);padding:14px 16px;cursor:pointer">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <i class="ti ti-folder" style="font-size:20px;color:var(--green)"></i>
+            <span onclick="event.stopPropagation()">${_voteBtnHtml('list', f.id, f.vote_count, f.voted_by_me)}</span>
+          </div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:2px">${esc(f.name)}</div>
+          <div style="font-size:11px;color:var(--text2)">por ${esc(f.username)}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px">${f.game_count} juegos</div>
+        </div>
+      `).join('')}
+    </div>`;
+  } catch (e) {
+    const el = document.getElementById('public-folders-content');
+    if (el) el.innerHTML = `<div style="color:var(--red)">${e.message || 'Error'}</div>`;
+  }
+}
+
+async function openPublicFolderViewer(folderId) {
+  const overlay = document.getElementById('public-folder-viewer-overlay');
+  overlay.classList.add('open');
+  const body = document.getElementById('public-folder-viewer-body');
+  body.innerHTML = `<div style="text-align:center;padding:20px"><div class="spinner" style="margin:0 auto"></div></div>`;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/folders/${folderId}/public-games`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    document.getElementById('public-folder-viewer-title').textContent = `${d.folder_name} — por ${d.username}`;
+    if (!d.games.length) {
+      body.innerHTML = '<div class="empty">Esta lista todavía no tiene juegos.</div>';
+      return;
+    }
+    body.innerHTML = d.games.map(g => `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)">
+        ${g.cover_url ? `<img src="${g.cover_url}" style="width:34px;height:44px;object-fit:cover;border-radius:6px" onerror="this.style.display='none'">` : ''}
+        <div style="min-width:0;flex:1">
+          <div style="font-size:13px;font-weight:600">${esc(g.name)}</div>
+          <div style="font-size:11px;color:var(--text2)">${esc(g.platform || '')}</div>
+        </div>
+        ${g.my_status ? `<span style="font-size:11px;padding:3px 8px;border-radius:12px;background:var(--bg3);color:var(--text2)">Ya en tu ${g.my_status === 'Deseados' ? 'lista de deseados' : 'biblioteca'}</span>` : ''}
+      </div>
+    `).join('');
+  } catch (e) {
+    body.innerHTML = `<div style="color:var(--red)">${e.message || 'Error'}</div>`;
+  }
+}
+function closePublicFolderViewer() {
+  document.getElementById('public-folder-viewer-overlay').classList.remove('open');
+}
+
 function renderFolderList() {
   if (activeFolderId !== -1) return;
   // Remove pagination immediately
@@ -11005,7 +11118,7 @@ function renderFolderList() {
 
   const section = currentView === 'wishlist' ? 'wishlist' : 'library';
 
-  gameList.innerHTML = `
+  gameList.innerHTML = _folderTabsHtml() + `
     <div style="padding:12px 16px 0;display:flex;gap:8px">
       <button onclick="switchFolderSection('library')"
         style="padding:6px 14px;border-radius:20px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${section==='library'?'var(--green)':'var(--bg2)'};color:${section==='library'?'#fff':'var(--text2)'}">
@@ -11062,6 +11175,7 @@ function renderFolderList() {
 // Create folder
 function openCreateFolder() {
   document.getElementById('folder-name-input').value = '';
+  document.getElementById('folder-private-input').checked = false;
   document.getElementById('folder-dropdown').classList.remove('open');
   document.getElementById('folder-create-overlay').classList.add('open');
   setTimeout(() => document.getElementById('folder-name-input').focus(), 100);
@@ -11072,12 +11186,13 @@ function closeFolderCreate() {
 async function saveFolderCreate() {
   const name = document.getElementById('folder-name-input').value.trim();
   if (!name) return;
+  const is_public = !document.getElementById('folder-private-input').checked;
   const section = currentView === 'wishlist' ? 'wishlist' : 'library';
   try {
     const res  = await fetch(`${apiBase()}/api/v1/folders`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, section }),
+      body: JSON.stringify({ name, section, is_public }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Error');
@@ -11379,6 +11494,7 @@ function openListsPanel() {
   if (currentView !== 'library' && currentView !== 'wishlist') {
     setView('library');
   }
+  _folderTab = 'mine';
   activeFolderId = -1;
   const fb = document.getElementById('filter-bar');
   if (fb) fb.style.display = 'none';
