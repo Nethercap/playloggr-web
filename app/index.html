@@ -3632,6 +3632,23 @@ async function refreshGameDetail() {
     document.getElementById('game-detail-content').innerHTML = `<div class="empty"><i class="ti ti-alert-triangle"></i>${t('errorLoading') || 'Error al cargar'}</div>`;
     return;
   }
+  // ratingDetailModalBody/bigStarPickerHtml/starClick etc. leen y escriben
+  // sobre allGames — si el juego abierto no esta en la pagina/vista
+  // actualmente cargada (ej. se abrio desde busqueda, Novedades, u otra
+  // pagina de paginado) esos widgets quedaban vacios. Lo insertamos/
+  // actualizamos en allGames con los datos frescos del agregador para que
+  // funcionen igual sea cual sea el origen desde el que se abrio el detalle.
+  const d = _detailData;
+  let g = allGames.find(x => x.id === d.game_id);
+  if (!g) { g = { id: d.game_id }; allGames.push(g); }
+  Object.assign(g, {
+    name: d.name, cover_url: d.cover_url, platform: d.platform, status: d.status,
+    hidden: d.hidden, is_manual: d.is_manual, app_id: d.app_id,
+    hours_played: d.hours_played, hours_synced: d.hours_synced,
+    user_rating: d.rating.general,
+    rating_gameplay: d.rating.gameplay, rating_story: d.rating.story, rating_art: d.rating.art,
+    rating_optimization: d.rating.optimization, rating_music: d.rating.music,
+  });
   renderGameDetailContent(_detailData);
   loadRatingDetailCommunityStats(_detailData.game_id);
   if (_detailData.platform === 'Steam' && _detailData.app_id) {
