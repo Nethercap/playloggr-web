@@ -1268,13 +1268,17 @@
   <div id="rankings-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
     <!-- Rankings list -->
     <div id="rankings-list-panel" style="padding:16px;max-width:960px;width:100%;margin:0 auto;box-sizing:border-box">
+      <div style="display:flex;gap:6px;margin-bottom:12px;max-width:340px">
+        <button id="rankings-tab-mine" onclick="switchRankingTab('mine')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:var(--green);color:#fff">Mis rankings</button>
+        <button id="rankings-tab-global" onclick="switchRankingTab('global')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:var(--bg2);color:var(--text2)">Globales</button>
+      </div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
         <select id="rankings-sort-sel" onchange="loadRankings()" style="font-size:12px;padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text)">
           <option value="name" data-i18n="name">Nombre</option>
           <option value="created_at" data-i18n="date">Fecha</option>
           <option value="game_count" data-i18n="quantity">Cantidad</option>
         </select>
-        <button onclick="openRankingCreate()" style="margin-left:auto;padding:6px 14px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">
+        <button id="rankings-new-btn" onclick="openRankingCreate()" style="margin-left:auto;padding:6px 14px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">
           <i class="ti ti-plus"></i> <span data-i18n="newRanking">Nuevo ranking</span>
         </button>
       </div>
@@ -1872,6 +1876,39 @@
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeFolderCreate()" data-i18n="cancel">Cancelar</button>
       <button class="btn-save" onclick="saveFolderCreate()" data-i18n="create">Crear</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create Ranking Modal -->
+<div class="modal-overlay" id="ranking-create-overlay">
+  <div class="modal" style="max-width:340px">
+    <div class="modal-title"><i class="ti ti-medal"></i> <span data-i18n="newRanking">Nuevo ranking</span></div>
+    <div class="modal-grid">
+      <div class="modal-group full">
+        <label data-i18n="name">Nombre</label>
+        <input type="text" id="ranking-name-input" placeholder="Ej: Mejores RPGs" maxlength="100"
+          onkeydown="if(event.key==='Enter') saveRankingCreate()" />
+      </div>
+      <div class="modal-group full" style="flex-direction:row;align-items:center;gap:6px">
+        <input type="checkbox" id="ranking-private-input" style="accent-color:var(--green)">
+        <label for="ranking-private-input" style="font-size:12px;color:var(--text2)">Privado (no aparece en Rankings globales)</label>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeRankingCreate()" data-i18n="cancel">Cancelar</button>
+      <button class="btn-save" onclick="saveRankingCreate()" data-i18n="create">Crear</button>
+    </div>
+  </div>
+</div>
+
+<!-- Visor de solo lectura de un ranking publico de otro usuario -->
+<div class="modal-overlay" id="public-ranking-viewer-overlay">
+  <div class="modal" style="max-width:420px;max-height:80vh;display:flex;flex-direction:column">
+    <div class="modal-title"><i class="ti ti-medal"></i> <span id="public-ranking-viewer-title">Ranking</span></div>
+    <div id="public-ranking-viewer-body" style="overflow-y:auto;flex:1;min-height:0"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closePublicRankingViewer()" data-i18n="close">Cerrar</button>
     </div>
   </div>
 </div>
@@ -5426,7 +5463,8 @@ function setView(view) {
   }
   if (isRankings) {
     activeRankingId = null;
-    loadRankings();
+    _rankingTab = 'mine';
+    switchRankingTab('mine');
     return;
   }
   if (isNovedades) {
@@ -11522,16 +11560,81 @@ let _rankingPickerAllGames = [];
 let _rankingPickerSearch  = '';
 let _rankingPickerSelected = new Set();
 
-async function loadRankings() {
-  const sort = document.getElementById('rankings-sort-sel')?.value || 'name';
+let _rankingTab = 'mine'; // 'mine' | 'global'
+
+function switchRankingTab(tab) {
+  _rankingTab = tab;
+  const btnMine = document.getElementById('rankings-tab-mine');
+  const btnGlobal = document.getElementById('rankings-tab-global');
+  if (btnMine)   { btnMine.style.background   = tab === 'mine'   ? 'var(--green)' : 'var(--bg2)'; btnMine.style.color   = tab === 'mine'   ? '#fff' : 'var(--text2)'; }
+  if (btnGlobal) { btnGlobal.style.background = tab === 'global' ? 'var(--green)' : 'var(--bg2)'; btnGlobal.style.color = tab === 'global' ? '#fff' : 'var(--text2)'; }
+  const newBtn = document.getElementById('rankings-new-btn');
+  if (newBtn) newBtn.style.display = tab === 'mine' ? '' : 'none';
+  if (tab === 'global') renderPublicRankingsList();
+  else loadRankings();
+}
+
+async function renderPublicRankingsList() {
+  const grid = document.getElementById('rankings-grid');
+  document.getElementById('rankings-list-panel').style.display = '';
+  document.getElementById('ranking-detail-panel').style.display = 'none';
+  grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px"><div class="spinner" style="margin:0 auto"></div></div>`;
   try {
-    const res  = await fetch(`${apiBase()}/api/v1/rankings?sort=${sort}`, {
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    });
-    const data = await res.json();
-    currentRankings = data.rankings || [];
-  } catch(e) { currentRankings = []; }
-  renderRankingsList();
+    const res = await fetch(`${apiBase()}/api/v1/rankings/public?sort=votes&order=desc`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const d = await res.json();
+    const rankings = d.rankings || [];
+    if (!rankings.length) {
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">Todavía no hay rankings públicos.</div>`;
+      return;
+    }
+    grid.innerHTML = rankings.map(r => `
+      <div onclick="openPublicRankingViewer(${r.id})" style="cursor:pointer;background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:8px;min-width:0">
+            <i class="ti ti-medal" style="color:var(--green);font-size:18px;flex-shrink:0"></i>
+            <strong style="font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.name)}</strong>
+          </div>
+          <span onclick="event.stopPropagation()">${_voteBtnHtml('ranking', r.id, r.vote_count, r.voted_by_me)}</span>
+        </div>
+        <div style="font-size:11px;color:var(--text2)">por ${esc(r.username)}</div>
+        <div style="font-size:12px;color:var(--text2)">${r.game_count} ${t('gamesLower')}</div>
+      </div>
+    `).join('');
+  } catch (e) {
+    grid.innerHTML = `<div style="grid-column:1/-1;color:var(--red)">${e.message || 'Error'}</div>`;
+  }
+}
+
+async function openPublicRankingViewer(rankingId) {
+  const overlay = document.getElementById('public-ranking-viewer-overlay');
+  overlay.classList.add('open');
+  const body = document.getElementById('public-ranking-viewer-body');
+  body.innerHTML = `<div style="text-align:center;padding:20px"><div class="spinner" style="margin:0 auto"></div></div>`;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/rankings/${rankingId}/public-games`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    document.getElementById('public-ranking-viewer-title').textContent = `${d.ranking_name} — por ${d.username}`;
+    if (!d.games.length) {
+      body.innerHTML = '<div class="empty">Este ranking todavía no tiene juegos.</div>';
+      return;
+    }
+    body.innerHTML = d.games.map((g, i) => `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)">
+        <span style="font-weight:700;font-size:13px;width:22px;text-align:center;color:var(--green)">${i + 1}</span>
+        ${g.cover_url ? `<img src="${g.cover_url}" style="width:34px;height:44px;object-fit:cover;border-radius:6px" onerror="this.style.display='none'">` : ''}
+        <div style="min-width:0;flex:1">
+          <div style="font-size:13px;font-weight:600">${esc(g.name)}</div>
+          <div style="font-size:11px;color:var(--text2)">${esc(g.platform || '')}</div>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    body.innerHTML = `<div style="color:var(--red)">${e.message || 'Error'}</div>`;
+  }
+}
+function closePublicRankingViewer() {
+  document.getElementById('public-ranking-viewer-overlay').classList.remove('open');
 }
 
 function renderRankingsList() {
@@ -11562,17 +11665,28 @@ function openRankingCreate() {
     showToast(t('rankingFreeLimitReached'), true);
     return;
   }
-  const name = prompt(t('newRankingPrompt'));
-  if (!name || !name.trim()) return;
-  createRanking(name.trim());
+  document.getElementById('ranking-name-input').value = '';
+  document.getElementById('ranking-private-input').checked = false;
+  document.getElementById('ranking-create-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('ranking-name-input').focus(), 100);
+}
+function closeRankingCreate() {
+  document.getElementById('ranking-create-overlay').classList.remove('open');
+}
+function saveRankingCreate() {
+  const name = document.getElementById('ranking-name-input').value.trim();
+  if (!name) return;
+  const is_public = !document.getElementById('ranking-private-input').checked;
+  closeRankingCreate();
+  createRanking(name, is_public);
 }
 
-async function createRanking(name) {
+async function createRanking(name, is_public) {
   try {
     const res  = await fetch(`${apiBase()}/api/v1/rankings`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({ name, is_public }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Error');
