@@ -580,6 +580,7 @@
          resto vive en el sidebar completo que abre el "..." (mismas
          opciones que el drawer de la app, ver #mobile-sidebar). */
       #lang-toggle-btn, #novedades-icon-btn, #achievements-btn, #gom-icon-btn, #myreviews-icon-btn,
+      #lists-icon-btn, #rankings-icon-btn,
       .header-right > button[onclick="openConfigPanel()"],
       #friends-btn, #support-link, #logout-btn-header { display:none !important; }
       #header-more-btn { display:inline-flex !important; }
@@ -1263,11 +1264,13 @@
         <button id="rankings-tab-global" onclick="switchRankingTab('global')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:var(--bg2);color:var(--text2)">Globales</button>
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-        <select id="rankings-sort-sel" onchange="loadRankings()" style="font-size:12px;padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text)">
+        <select id="rankings-sort-sel" onchange="_rankingsSortChange()" style="font-size:12px;padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text)">
+          <option value="votes" id="rankings-sort-opt-votes" style="display:none">Popularidad</option>
           <option value="name" data-i18n="name">Nombre</option>
           <option value="created_at" data-i18n="date">Fecha</option>
           <option value="game_count" data-i18n="quantity">Cantidad</option>
         </select>
+        <button id="rankings-sort-dir-btn" onclick="_rankingsSortDirToggle()" style="padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px;color:var(--text)">↓</button>
         <button id="rankings-new-btn" onclick="openRankingCreate()" style="margin-left:auto;padding:6px 14px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">
           <i class="ti ti-plus"></i> <span data-i18n="newRanking">Nuevo ranking</span>
         </button>
@@ -11056,6 +11059,17 @@ function exitFolder() {
 
 // Render folder list (the -1 state — show all folders as cards)
 let _folderTab = 'mine'; // 'mine' | 'global'
+let _publicFolderSort = 'votes', _publicFolderOrder = 'desc';
+
+function _publicFolderSortChange() {
+  _publicFolderSort = document.getElementById('public-folder-sort-sel').value;
+  renderPublicFolderList();
+}
+function _publicFolderSortDirToggle() {
+  _publicFolderOrder = _publicFolderOrder === 'desc' ? 'asc' : 'desc';
+  document.getElementById('public-folder-sort-dir-btn').textContent = _publicFolderOrder === 'asc' ? '↑' : '↓';
+  renderPublicFolderList();
+}
 
 function switchFolderTab(tab) {
   _folderTab = tab;
@@ -11085,9 +11099,18 @@ async function renderPublicFolderList() {
         <i class="ti ti-bookmark" style="font-size:13px"></i> Deseados
       </button>
     </div>
+    <div style="padding:10px 16px 0;display:flex;gap:4px">
+      <select id="public-folder-sort-sel" onchange="_publicFolderSortChange()" style="font-size:12px;padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text)">
+        <option value="votes" ${_publicFolderSort==='votes'?'selected':''}>Popularidad</option>
+        <option value="name" ${_publicFolderSort==='name'?'selected':''}>Nombre</option>
+        <option value="created_at" ${_publicFolderSort==='created_at'?'selected':''}>Fecha</option>
+        <option value="game_count" ${_publicFolderSort==='game_count'?'selected':''}>Cantidad de juegos</option>
+      </select>
+      <button id="public-folder-sort-dir-btn" onclick="_publicFolderSortDirToggle()" style="padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px;color:var(--text)">${_publicFolderOrder==='asc'?'↑':'↓'}</button>
+    </div>
     <div id="public-folders-content" style="padding:16px;text-align:center;color:var(--text2)"><div class="spinner" style="margin:0 auto"></div></div>`;
   try {
-    const res = await fetch(`${apiBase()}/api/v1/folders/public?section=${section}&sort=votes&order=desc`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const res = await fetch(`${apiBase()}/api/v1/folders/public?section=${section}&sort=${_publicFolderSort}&order=${_publicFolderOrder}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
     const d = await res.json();
     const folders = d.folders || [];
     const el = document.getElementById('public-folders-content');
@@ -11570,10 +11593,23 @@ let _rankingPickerAllGames = [];
 let _rankingPickerSearch  = '';
 let _rankingPickerSelected = new Set();
 
+let _rankingsSort = 'name', _rankingsOrder = 'asc';
+
+function _rankingsSortChange() {
+  _rankingsSort = document.getElementById('rankings-sort-sel').value;
+  if (_rankingTab === 'global') renderPublicRankingsList();
+  else loadRankings();
+}
+function _rankingsSortDirToggle() {
+  _rankingsOrder = _rankingsOrder === 'desc' ? 'asc' : 'desc';
+  document.getElementById('rankings-sort-dir-btn').textContent = _rankingsOrder === 'asc' ? '↑' : '↓';
+  if (_rankingTab === 'global') renderPublicRankingsList();
+  else loadRankings();
+}
+
 async function loadRankings() {
-  const sort = document.getElementById('rankings-sort-sel')?.value || 'name';
   try {
-    const res  = await fetch(`${apiBase()}/api/v1/rankings?sort=${sort}`, {
+    const res  = await fetch(`${apiBase()}/api/v1/rankings?sort=${_rankingsSort}&order=${_rankingsOrder}`, {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
     const data = await res.json();
@@ -11592,6 +11628,14 @@ function switchRankingTab(tab) {
   if (btnGlobal) { btnGlobal.style.background = tab === 'global' ? 'var(--green)' : 'var(--bg2)'; btnGlobal.style.color = tab === 'global' ? '#fff' : 'var(--text2)'; }
   const newBtn = document.getElementById('rankings-new-btn');
   if (newBtn) newBtn.style.display = tab === 'mine' ? '' : 'none';
+  const votesOpt = document.getElementById('rankings-sort-opt-votes');
+  if (votesOpt) votesOpt.style.display = tab === 'global' ? '' : 'none';
+  _rankingsSort = tab === 'global' ? 'votes' : 'name';
+  _rankingsOrder = tab === 'global' ? 'desc' : 'asc';
+  const sel = document.getElementById('rankings-sort-sel');
+  if (sel) sel.value = _rankingsSort;
+  const dirBtn = document.getElementById('rankings-sort-dir-btn');
+  if (dirBtn) dirBtn.textContent = _rankingsOrder === 'asc' ? '↑' : '↓';
   if (tab === 'global') renderPublicRankingsList();
   else loadRankings();
 }
@@ -11602,7 +11646,7 @@ async function renderPublicRankingsList() {
   document.getElementById('ranking-detail-panel').style.display = 'none';
   grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px"><div class="spinner" style="margin:0 auto"></div></div>`;
   try {
-    const res = await fetch(`${apiBase()}/api/v1/rankings/public?sort=votes&order=desc`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const res = await fetch(`${apiBase()}/api/v1/rankings/public?sort=${_rankingsSort}&order=${_rankingsOrder}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
     const d = await res.json();
     const rankings = d.rankings || [];
     if (!rankings.length) {
