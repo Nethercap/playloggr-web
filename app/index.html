@@ -811,7 +811,8 @@
   <button onclick="setView('novedades');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-sparkles" data-cp-icon="novedades"></i> <span data-i18n="novedades">Novedades</span></button>
   <button onclick="setView('plan');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-route" data-cp-icon="plan_de_juego"></i> <span data-i18n="gamePlan" style="flex:1">Plan de juego</span><i class="ti ti-lock" id="plan-nav-lock-icon" style="display:none;font-size:13px;color:var(--text2)"></i></button>
   <button onclick="openGomPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-stars" data-cp-icon="juego_del_mes"></i> <span data-i18n="gameOfMonth">Juego del mes</span></button>
-  <button onclick="openMyReviewsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-message-star" data-cp-icon="mis_resenas"></i> <span data-i18n="myReviews">Mis reseñas</span></button>
+  <button onclick="openMyReviewsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-message-star" data-cp-icon="mis_resenas"></i> <span data-i18n="myReviews">Reseñas</span></button>
+  <button onclick="openListsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-folder" data-cp-icon="carpetas"></i> <span data-i18n="folders">Listas</span></button>
   <button onclick="openFriendsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-users" data-cp-icon="amigos"></i> <span data-i18n="friends">Amigos</span></button>
   <button onclick="openAchievementsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-trophy" data-cp-icon="logros"></i> <span data-i18n="achievements">Logros</span></button>
   <button onclick="openConfigPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-settings" data-cp-icon="configuracion"></i> <span data-i18n="config">Configuración</span></button>
@@ -882,9 +883,15 @@
       </button>
 
       <!-- My reviews button -->
-      <button id="myreviews-icon-btn" onclick="openMyReviewsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="myReviews" title="Mis reseñas">
+      <button id="myreviews-icon-btn" onclick="openMyReviewsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="myReviews" title="Reseñas">
         <i class="ti ti-message-star" style="font-size:14px"></i>
-        <span class="sidebar-only-label" data-i18n="myReviews">Mis reseñas</span>
+        <span class="sidebar-only-label" data-i18n="myReviews">Reseñas</span>
+      </button>
+
+      <!-- Lists button -->
+      <button id="lists-icon-btn" onclick="openListsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="folders" title="Listas">
+        <i class="ti ti-folder" style="font-size:14px"></i>
+        <span class="sidebar-only-label" data-i18n="folders">Listas</span>
       </button>
 
       <div class="nav-divider"></div>
@@ -1102,7 +1109,7 @@
         <div id="folder-filter-btn" style="display:none;align-items:center;border:0.5px solid var(--border);border-radius:20px;overflow:hidden;background:var(--bg2)">
           <button onclick="handleFolderBtnClick()"
             style="padding:6px 10px;font-size:12px;border:none;background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap">
-            <i class="ti ti-folder" style="font-size:12px"></i><span id="folder-btn-label">Carpetas</span>
+            <i class="ti ti-folder" style="font-size:12px"></i><span id="folder-btn-label">Listas</span>
           </button>
           <button onclick="toggleFolderDropdown()"
             style="padding:6px 8px;font-size:11px;border:none;border-left:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer">▾</button>
@@ -1508,7 +1515,7 @@
         </div>
         <button id="cfg-upgrade-btn" onclick="startPaddleCheckout()" style="display:none;padding:12px;border-radius:8px;border:none;background:var(--green);color:#fff;cursor:pointer;font-size:13px;font-weight:600;text-align:left">
           <i class="ti ti-crown"></i> Actualizar a Premium — USD $6.99 (pago único, impuestos según checkout)
-          <div style="font-size:11px;color:rgba(255,255,255,0.85);margin-top:2px;font-weight:400">Desbloqueá logros, XP y nivel, personalización completa de avatar, más carpetas/rankings/amigos, votar Juego del mes y más.</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.85);margin-top:2px;font-weight:400">Desbloqueá logros, XP y nivel, personalización completa de avatar, más listas/rankings/amigos, votar Juego del mes y más.</div>
         </button>
         <button onclick="confirmDeleteLibrary()"
           style="padding:10px;border-radius:8px;border:0.5px solid var(--red);background:transparent;color:var(--red);cursor:pointer;font-size:13px;text-align:left">
@@ -1639,11 +1646,11 @@
   </div>
 </div>
 
-<!-- Mis reseñas Modal -->
+<!-- Reseñas Modal -->
 <div class="modal-overlay" id="myreviews-overlay">
   <div class="modal" style="max-width:480px;max-height:85vh;display:flex;flex-direction:column">
     <div class="modal-title" style="display:flex;align-items:center;justify-content:space-between">
-      <span><i class="ti ti-message-star"></i> <span data-i18n="myReviews">Mis reseñas</span></span>
+      <span><i class="ti ti-message-star"></i> <span data-i18n="myReviews">Reseñas</span></span>
       <select id="myreviews-sort" onchange="_myReviewsSortChange()" style="font-size:12px;padding:4px 6px;border-radius:6px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text)">
         <option value="date_desc" data-i18n="reviewsSortDate">Fecha ↓</option>
         <option value="date_asc" data-i18n="reviewsSortDate">Fecha ↑</option>
@@ -1651,7 +1658,15 @@
         <option value="rating_asc" data-i18n="reviewsSortRating">Calificación ↑</option>
       </select>
     </div>
-    <div style="padding:0 2px 10px">
+    <div style="display:flex;gap:6px;padding:0 2px 8px">
+      <button id="reviews-tab-all" onclick="switchReviewsTab('all')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:var(--green);color:#fff">
+        <span data-i18n="allReviewsTab">Todas</span>
+      </button>
+      <button id="reviews-tab-mine" onclick="switchReviewsTab('mine')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:var(--bg2);color:var(--text2)">
+        <span data-i18n="myReviewsTab">Mis reseñas</span>
+      </button>
+    </div>
+    <div id="myreviews-addbtn-wrap" style="display:none;padding:0 2px 10px">
       <button onclick="openReviewGamePicker()" class="add-btn" style="width:100%;justify-content:center">
         <i class="ti ti-plus"></i> <span data-i18n="addReview">Agregar reseña</span>
       </button>
@@ -1825,7 +1840,7 @@
 <!-- Create Folder Modal -->
 <div class="modal-overlay" id="folder-create-overlay">
   <div class="modal" style="max-width:340px">
-    <div class="modal-title"><i class="ti ti-folder-plus"></i> <span data-i18n="newFolder">Nueva carpeta</span></div>
+    <div class="modal-title"><i class="ti ti-folder-plus"></i> <span data-i18n="newFolder">Nueva lista</span></div>
     <div class="modal-grid">
       <div class="modal-group full">
         <label data-i18n="name">Nombre</label>
@@ -1858,7 +1873,7 @@
 <!-- Add to Folder Modal -->
 <div class="modal-overlay" id="folder-add-game-overlay">
   <div class="modal" style="max-width:720px;width:90vw;display:flex;flex-direction:column;max-height:85vh">
-    <div class="modal-title"><i class="ti ti-folder-plus"></i> <span data-i18n="addToFolder">Agregar a carpeta</span></div>
+    <div class="modal-title"><i class="ti ti-folder-plus"></i> <span data-i18n="addToFolder">Agregar a lista</span></div>
     <div id="folder-add-game-list"></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeFolderAddGame()" data-i18n="cancel">Cancelar</button>
@@ -1901,7 +1916,7 @@
 <!-- Selector de carpeta (popup, no dropdown) -->
 <div class="modal-overlay" id="folder-dropdown">
   <div class="modal" style="max-width:320px;padding:0">
-    <div class="modal-title" style="padding:16px 16px 0"><i class="ti ti-folder" style="color:#1D9E75"></i> <span data-i18n="folders">Carpetas</span></div>
+    <div class="modal-title" style="padding:16px 16px 0"><i class="ti ti-folder" style="color:#1D9E75"></i> <span data-i18n="folders">Listas</span></div>
     <div id="folder-list-items" style="margin-top:8px;max-height:60vh;overflow-y:auto"></div>
     <div style="padding:10px 16px;text-align:right">
       <button class="btn-cancel" onclick="toggleFolderDropdown()" data-i18n="close">Cerrar</button>
@@ -2122,7 +2137,7 @@ const I18N = {
     densityNormal: 'Normal', densityCompact: 'Compacta',
     name: 'Nombre', hours: 'Horas', rating: 'Calificación', platform: 'Plataforma',
     status: 'Estado', searchGame: 'Buscar juego...', connectingBackend: 'Conectando con el backend...',
-    myStats: 'Mis stats', loading: 'Cargando...', folders: 'Carpetas',
+    myStats: 'Mis stats', loading: 'Cargando...', folders: 'Listas',
     addToWishlist: 'Agregar a deseados', searchGameLabel: 'Buscar juego', searchYourGame: 'Buscá tu juego...',
     cancel: 'Cancelar', add: 'Agregar', changeCover: 'Cambiar portada', searchAction: 'Buscar', confirm: 'Confirmar',
     isThisYourAccount: '¿Es esta tu cuenta?',
@@ -2133,7 +2148,7 @@ const I18N = {
     register: 'Registrate', registerBtn: 'Registrarse', login: 'Iniciar sesión', forgotPassword: '¿Olvidaste tu contraseña?',
     backToGoogle: '← Volver a Google', email: 'Email', password: 'Contraseña',
     selected: 'Seleccionados', clearSelection: 'Borrar selección', actions: 'Acciones',
-    bulkFolderHint: 'Se agregan a las carpetas que marques (no se quitan de otras).',
+    bulkFolderHint: 'Se agregan a las listas que marques (no se quitan de otras).',
     confirmBulkDelete: '¿Eliminar {count} juegos seleccionados? Esta acción no se puede deshacer.',
     avatarFrame: 'Marco de avatar', race: 'Raza', hair: 'Pelo', headwear: 'Sombrero/Casco',
     shirt: 'Camisa', pants: 'Pantalón', boots: 'Botas', gloves: 'Guantes', shoulders: 'Hombreras', waist: 'Cinturón',
@@ -2142,7 +2157,7 @@ const I18N = {
     close: 'Cerrar', search: 'Buscar...',
     chooseUsername: 'Elegí tu nombre de usuario',
     usernameHint: 'Solo letras y números, sin espacios ni tildes. Lo van a ver tus amigos.',
-    continueBtn: 'Continuar', newFolder: 'Nueva carpeta', create: 'Crear', addToFolder: 'Agregar a carpeta',
+    continueBtn: 'Continuar', newFolder: 'Nueva lista', create: 'Crear', addToFolder: 'Agregar a lista',
     hoursPlayed: 'Horas jugadas',
     lastPlayed: 'Última vez jugado', clearDate: 'Borrar fecha',
     periodTab: 'Semana/Mes', periodWeek: 'Semana', periodMonth: 'Mes', periodYear: 'Año',
@@ -2209,7 +2224,7 @@ const I18N = {
     gomSearchPlaceholder: 'Buscar juego...', gomSearchHint: 'Buscá entre los juegos lanzados ese mes', gomNoResults: 'Sin resultados',
     gomVoteError: 'No se pudo registrar el voto', gomNoHistoryYet: 'Todavía no hay resultados — el primero sale el día 9.',
     gomVotes: 'votos', gomPodium: 'Podio', gomOwnedLibrary: 'Biblioteca', gomOwnedWishlist: 'Deseados',
-    writeReview: 'Escribir reseña', editReview: 'Editar reseña', viewReviews: 'Ver reseñas', myReviews: 'Mis reseñas',
+    writeReview: 'Escribir reseña', editReview: 'Editar reseña', viewReviews: 'Ver reseñas', myReviews: 'Reseñas', myReviewsTab: 'Mis reseñas', allReviewsTab: 'Todas', loadMore: 'Cargar más',
     reviewHint: '¿Qué te pareció este juego?', reviewVisibility: 'Visibilidad',
     reviewVisibilityPublic: 'Pública', reviewVisibilityPrivate: 'Privada', reviewPostAnonymous: 'Publicar como anónimo',
     reviewSave: 'Guardar', reviewDelete: 'Eliminar reseña', reviewDeleteConfirm: '¿Eliminar tu reseña de este juego?',
@@ -2241,8 +2256,8 @@ const I18N = {
     errorSyncingWishlist: 'Error al sincronizar wishlist', enterGameName: 'Ingresá el nombre del juego',
     errorAdding: 'Error al agregar', errorAddingGame: 'Error al agregar el juego',
     errorShowingGame: 'Error al mostrar el juego', errorHidingGame: 'Error al ocultar el juego',
-    confirmDeleteFolder: '¿Eliminar esta carpeta? Los juegos no se borran.',
-    noFoldersInSection: 'No tenés carpetas en esta sección. Creá una primero.',
+    confirmDeleteFolder: '¿Eliminar esta lista? Los juegos no se borran.',
+    noFoldersInSection: 'No tenés listas en esta sección. Creá una primero.',
     thisGame: 'este juego',
     confirmDeleteSteamGame: '¿Eliminar "{name}" de tu backlog?\nLos juegos de Steam pueden volver al sincronizar si los querés recuperar.',
     confirmDeleteGame: '¿Eliminar "{name}" del backlog?', noResults: 'Sin resultados',
@@ -2255,7 +2270,7 @@ const I18N = {
     syncing: 'Sincronizando...', cannotConnectBackend: 'No se pudo conectar con el backend.',
     backendUnavailable: 'Backend no disponible', retry: 'Reintentar',
     errorLoadingGames: 'Error al cargar los juegos', lastSync: 'última sync',
-    logout: 'Salir', folder: 'Carpeta', clear: 'Limpiar',
+    logout: 'Salir', folder: 'Lista', clear: 'Limpiar',
     loginSubtitle: 'Iniciá sesión para continuar', createAccount: 'Creá tu cuenta',
     continueWithGoogle: 'Continuar con Google', useEmailPassword: 'Usar email y contraseña',
     saveErrorRetry: 'Error al guardar. Intentá de nuevo.', saveError: 'Error al guardar',
@@ -2274,7 +2289,7 @@ const I18N = {
     onboardNext: 'Siguiente', onboardBack: 'Atrás', onboardStart: 'Empezar', onboardSkip: 'Saltar',
     tourTitleSteam: 'Sincronizá tus plataformas', tourBodySteam: 'Tocá acá para conectar Steam, PlayStation, GOG, Xbox o Epic Games y traer tu biblioteca automáticamente.',
     tourTitleAdd: 'Agregá juegos', tourBodyAdd: 'Tocá acá para agregar un juego manualmente a tu biblioteca.',
-    tourTitleFolders: 'Organizá con carpetas', tourBodyFolders: 'Creá carpetas para agrupar tus juegos como quieras.',
+    tourTitleFolders: 'Organizá con listas', tourBodyFolders: 'Creá listas para agrupar tus juegos como quieras.',
     tourTitleStats: 'Mirá tus estadísticas', tourBodyStats: 'Tocá acá para ver tus horas y rankings globales.',
     tourTitleSession: 'Registrá una sesión en vivo', tourBodySession: 'Tocá este botón en cualquier juego para iniciar el cronómetro mientras jugás.',
     tourTitleFilters: 'Filtrá tu biblioteca', tourBodyFilters: 'Filtrá por estado, plataforma, horas y calificación, y buscá por nombre.',
@@ -2317,7 +2332,7 @@ const I18N = {
     densityNormal: 'Normal', densityCompact: 'Compact',
     name: 'Name', hours: 'Hours', rating: 'Rating', platform: 'Platform',
     status: 'Status', searchGame: 'Search game...', connectingBackend: 'Connecting to backend...',
-    myStats: 'My stats', loading: 'Loading...', folders: 'Folders',
+    myStats: 'My stats', loading: 'Loading...', folders: 'Lists',
     addToWishlist: 'Add to wishlist', searchGameLabel: 'Search game', searchYourGame: 'Search your game...',
     cancel: 'Cancel', add: 'Add', changeCover: 'Change cover', searchAction: 'Search', confirm: 'Confirm',
     isThisYourAccount: 'Is this your account?',
@@ -2328,7 +2343,7 @@ const I18N = {
     register: 'Sign up', registerBtn: 'Sign up', login: 'Log in', forgotPassword: 'Forgot your password?',
     backToGoogle: '← Back to Google', email: 'Email', password: 'Password',
     selected: 'Selected', clearSelection: 'Clear selection', actions: 'Actions',
-    bulkFolderHint: 'They get added to the folders you check (not removed from others).',
+    bulkFolderHint: 'They get added to the lists you check (not removed from others).',
     confirmBulkDelete: 'Delete {count} selected games? This action cannot be undone.',
     avatarFrame: 'Avatar frame', race: 'Race', hair: 'Hair', headwear: 'Headwear',
     shirt: 'Shirt', pants: 'Pants', boots: 'Boots', gloves: 'Gloves', shoulders: 'Shoulders', waist: 'Belt',
@@ -2337,7 +2352,7 @@ const I18N = {
     close: 'Close', search: 'Search...',
     chooseUsername: 'Choose your username',
     usernameHint: 'Letters and numbers only, no spaces or accents. Your friends will see it.',
-    continueBtn: 'Continue', newFolder: 'New folder', create: 'Create', addToFolder: 'Add to folder',
+    continueBtn: 'Continue', newFolder: 'New list', create: 'Create', addToFolder: 'Add to list',
     hoursPlayed: 'Hours played',
     lastPlayed: 'Last played', clearDate: 'Clear date',
     periodTab: 'Week/Month', periodWeek: 'Week', periodMonth: 'Month', periodYear: 'Year',
@@ -2404,7 +2419,7 @@ const I18N = {
     gomSearchPlaceholder: 'Search game...', gomSearchHint: 'Search among the games released that month', gomNoResults: 'No results',
     gomVoteError: 'Could not register your vote', gomNoHistoryYet: "There aren't any results yet — the first one comes out on the 9th.",
     gomVotes: 'votes', gomPodium: 'Podium', gomOwnedLibrary: 'Library', gomOwnedWishlist: 'Wishlist',
-    writeReview: 'Write a review', editReview: 'Edit review', viewReviews: 'View reviews', myReviews: 'My reviews',
+    writeReview: 'Write a review', editReview: 'Edit review', viewReviews: 'View reviews', myReviews: 'Reviews', myReviewsTab: 'My reviews', allReviewsTab: 'All', loadMore: 'Load more',
     reviewHint: 'What did you think of this game?', reviewVisibility: 'Visibility',
     reviewVisibilityPublic: 'Public', reviewVisibilityPrivate: 'Private', reviewPostAnonymous: 'Post anonymously',
     reviewSave: 'Save', reviewDelete: 'Delete review', reviewDeleteConfirm: 'Delete your review for this game?',
@@ -2436,8 +2451,8 @@ const I18N = {
     errorSyncingWishlist: 'Error syncing wishlist', enterGameName: 'Enter the game name',
     errorAdding: 'Error adding', errorAddingGame: 'Error adding game',
     errorShowingGame: 'Error showing game', errorHidingGame: 'Error hiding game',
-    confirmDeleteFolder: 'Delete this folder? Games will not be deleted.',
-    noFoldersInSection: "You don't have folders in this section yet. Create one first.",
+    confirmDeleteFolder: 'Delete this list? Games will not be deleted.',
+    noFoldersInSection: "You don't have lists in this section yet. Create one first.",
     thisGame: 'this game',
     confirmDeleteSteamGame: 'Delete "{name}" from your backlog?\nSteam games can come back when you sync if you want to recover them.',
     confirmDeleteGame: 'Delete "{name}" from your backlog?', noResults: 'No results',
@@ -2450,7 +2465,7 @@ const I18N = {
     syncing: 'Syncing...', cannotConnectBackend: 'Could not connect to the backend.',
     backendUnavailable: 'Backend unavailable', retry: 'Retry',
     errorLoadingGames: 'Error loading games', lastSync: 'last sync',
-    logout: 'Log out', folder: 'Folder', clear: 'Clear',
+    logout: 'Log out', folder: 'List', clear: 'Clear',
     loginSubtitle: 'Log in to continue', createAccount: 'Create your account',
     continueWithGoogle: 'Continue with Google', useEmailPassword: 'Use email and password',
     saveErrorRetry: 'Error saving. Please try again.', saveError: 'Error saving',
@@ -2469,7 +2484,7 @@ const I18N = {
     onboardNext: 'Next', onboardBack: 'Back', onboardStart: 'Get started', onboardSkip: 'Skip',
     tourTitleSteam: 'Sync your platforms', tourBodySteam: 'Tap here to connect Steam, PlayStation, GOG, Xbox or Epic Games and bring in your library automatically.',
     tourTitleAdd: 'Add games', tourBodyAdd: 'Tap here to manually add a game to your library.',
-    tourTitleFolders: 'Organize with folders', tourBodyFolders: 'Create folders to group your games however you like.',
+    tourTitleFolders: 'Organize with lists', tourBodyFolders: 'Create lists to group your games however you like.',
     tourTitleStats: 'Check your stats', tourBodyStats: 'Tap here to see your hours and global rankings.',
     tourTitleSession: 'Log a live session', tourBodySession: 'Tap this button on any game to start the timer while you play.',
     tourTitleFilters: 'Filter your library', tourBodyFilters: 'Filter by status, platform, hours and rating, and search by name.',
@@ -2512,7 +2527,7 @@ const I18N = {
     densityNormal: 'Normal', densityCompact: 'Compacta',
     name: 'Nome', hours: 'Horas', rating: 'Avaliação', platform: 'Plataforma',
     status: 'Status', searchGame: 'Buscar jogo...', connectingBackend: 'Conectando ao backend...',
-    myStats: 'Minhas estatísticas', loading: 'Carregando...', folders: 'Pastas',
+    myStats: 'Minhas estatísticas', loading: 'Carregando...', folders: 'Listas',
     addToWishlist: 'Adicionar aos desejados', searchGameLabel: 'Buscar jogo', searchYourGame: 'Busque seu jogo...',
     cancel: 'Cancelar', add: 'Adicionar', changeCover: 'Trocar capa', searchAction: 'Buscar', confirm: 'Confirmar',
     isThisYourAccount: 'Esta é a sua conta?',
@@ -2523,7 +2538,7 @@ const I18N = {
     register: 'Cadastre-se', registerBtn: 'Cadastrar', login: 'Entrar', forgotPassword: 'Esqueceu sua senha?',
     backToGoogle: '← Voltar ao Google', email: 'Email', password: 'Senha',
     selected: 'Selecionados', clearSelection: 'Limpar seleção', actions: 'Ações',
-    bulkFolderHint: 'São adicionados às pastas marcadas (não removidos de outras).',
+    bulkFolderHint: 'São adicionados às listas marcadas (não removidos de outras).',
     confirmBulkDelete: 'Excluir {count} jogos selecionados? Esta ação não pode ser desfeita.',
     avatarFrame: 'Moldura de avatar', race: 'Raça', hair: 'Cabelo', headwear: 'Chapéu/Capacete',
     shirt: 'Camisa', pants: 'Calça', boots: 'Botas', gloves: 'Luvas', shoulders: 'Ombreiras', waist: 'Cinto',
@@ -2532,7 +2547,7 @@ const I18N = {
     close: 'Fechar', search: 'Buscar...',
     chooseUsername: 'Escolha seu nome de usuário',
     usernameHint: 'Somente letras e números, sem espaços ou acentos. Seus amigos vão ver.',
-    continueBtn: 'Continuar', newFolder: 'Nova pasta', create: 'Criar', addToFolder: 'Adicionar à pasta',
+    continueBtn: 'Continuar', newFolder: 'Nova lista', create: 'Criar', addToFolder: 'Adicionar à lista',
     hoursPlayed: 'Horas jogadas',
     lastPlayed: 'Última vez jogado', clearDate: 'Apagar data',
     periodTab: 'Semana/Mês', periodWeek: 'Semana', periodMonth: 'Mês', periodYear: 'Ano',
@@ -2599,7 +2614,7 @@ const I18N = {
     gomSearchPlaceholder: 'Buscar jogo...', gomSearchHint: 'Busque entre os jogos lançados naquele mês', gomNoResults: 'Sem resultados',
     gomVoteError: 'Não foi possível registrar o voto', gomNoHistoryYet: 'Ainda não há resultados — o primeiro sai no dia 9.',
     gomVotes: 'votos', gomPodium: 'Pódio', gomOwnedLibrary: 'Biblioteca', gomOwnedWishlist: 'Desejados',
-    writeReview: 'Escrever resenha', editReview: 'Editar resenha', viewReviews: 'Ver resenhas', myReviews: 'Minhas resenhas',
+    writeReview: 'Escrever resenha', editReview: 'Editar resenha', viewReviews: 'Ver resenhas', myReviews: 'Resenhas', myReviewsTab: 'Minhas resenhas', allReviewsTab: 'Todas', loadMore: 'Carregar mais',
     reviewHint: 'O que você achou deste jogo?', reviewVisibility: 'Visibilidade',
     reviewVisibilityPublic: 'Pública', reviewVisibilityPrivate: 'Privada', reviewPostAnonymous: 'Publicar como anônimo',
     reviewSave: 'Salvar', reviewDelete: 'Excluir resenha', reviewDeleteConfirm: 'Excluir sua resenha deste jogo?',
@@ -2631,8 +2646,8 @@ const I18N = {
     errorSyncingWishlist: 'Erro ao sincronizar desejados', enterGameName: 'Digite o nome do jogo',
     errorAdding: 'Erro ao adicionar', errorAddingGame: 'Erro ao adicionar o jogo',
     errorShowingGame: 'Erro ao exibir o jogo', errorHidingGame: 'Erro ao ocultar o jogo',
-    confirmDeleteFolder: 'Excluir esta pasta? Os jogos não serão apagados.',
-    noFoldersInSection: 'Você não tem pastas nesta seção ainda. Crie uma primeiro.',
+    confirmDeleteFolder: 'Excluir esta lista? Os jogos não serão apagados.',
+    noFoldersInSection: 'Você não tem listas nesta seção ainda. Crie uma primeiro.',
     thisGame: 'este jogo',
     confirmDeleteSteamGame: 'Excluir "{name}" do seu backlog?\nJogos da Steam podem voltar ao sincronizar caso queira recuperá-los.',
     confirmDeleteGame: 'Excluir "{name}" do backlog?', noResults: 'Sem resultados',
@@ -2645,7 +2660,7 @@ const I18N = {
     syncing: 'Sincronizando...', cannotConnectBackend: 'Não foi possível conectar ao backend.',
     backendUnavailable: 'Backend indisponível', retry: 'Tentar novamente',
     errorLoadingGames: 'Erro ao carregar os jogos', lastSync: 'última sincronização',
-    logout: 'Sair', folder: 'Pasta', clear: 'Limpar',
+    logout: 'Sair', folder: 'Lista', clear: 'Limpar',
     loginSubtitle: 'Entre para continuar', createAccount: 'Crie sua conta',
     continueWithGoogle: 'Continuar com o Google', useEmailPassword: 'Usar email e senha',
     saveErrorRetry: 'Erro ao salvar. Tente novamente.', saveError: 'Erro ao salvar',
@@ -2664,7 +2679,7 @@ const I18N = {
     onboardNext: 'Próximo', onboardBack: 'Voltar', onboardStart: 'Começar', onboardSkip: 'Pular',
     tourTitleSteam: 'Sincronize suas plataformas', tourBodySteam: 'Toque aqui para conectar Steam, PlayStation, GOG, Xbox ou Epic Games e trazer sua biblioteca automaticamente.',
     tourTitleAdd: 'Adicione jogos', tourBodyAdd: 'Toque aqui para adicionar um jogo manualmente à sua biblioteca.',
-    tourTitleFolders: 'Organize com pastas', tourBodyFolders: 'Crie pastas para agrupar seus jogos como quiser.',
+    tourTitleFolders: 'Organize com listas', tourBodyFolders: 'Crie listas para agrupar seus jogos como quiser.',
     tourTitleStats: 'Veja suas estatísticas', tourBodyStats: 'Toque aqui para ver suas horas e rankings globais.',
     tourTitleSession: 'Registre uma sessão ao vivo', tourBodySession: 'Toque neste botão em qualquer jogo para iniciar o cronômetro enquanto joga.',
     tourTitleFilters: 'Filtre sua biblioteca', tourBodyFilters: 'Filtre por status, plataforma, horas e avaliação, e busque por nome.',
@@ -3044,7 +3059,7 @@ function toggleGameActionsMenu(gameId, hidden, event, hideLupa) {
 
   const folderItem = document.createElement('button');
   folderItem.className = 'steam-menu-item';
-  folderItem.innerHTML = '<i class="ti ti-folder-plus" style="font-size:14px"></i> ' + (t('addToFolder') || 'Agregar a carpeta');
+  folderItem.innerHTML = '<i class="ti ti-folder-plus" style="font-size:14px"></i> ' + (t('addToFolder') || 'Agregar a lista');
   folderItem.onclick = () => { openCardFolderPicker(gameId); popup.remove(); };
   popup.appendChild(folderItem);
 
@@ -3325,22 +3340,118 @@ async function _reportReview(reviewId) {
   } catch (e) {}
 }
 
-// ── Mis reseñas ──────────────────────────────────────────────────────────
+// ── Reseñas (Todas / Mis reseñas) ────────────────────────────────────────
 let _myReviewsSort = 'date', _myReviewsOrder = 'desc';
+let _reviewsTab = 'all';
+let _allReviewsOffset = 0;
+const _ALL_REVIEWS_PAGE = 20;
 
 function openMyReviewsPanel() {
   document.getElementById('myreviews-overlay').classList.add('open');
-  _myReviewsRefresh();
+  switchReviewsTab('all');
+  _initReviewsSwipe();
 }
 
 function closeMyReviewsPanel() {
   document.getElementById('myreviews-overlay').classList.remove('open');
 }
 
+function switchReviewsTab(tab) {
+  _reviewsTab = tab;
+  const btnAll  = document.getElementById('reviews-tab-all');
+  const btnMine = document.getElementById('reviews-tab-mine');
+  if (btnAll)  { btnAll.style.background  = tab === 'all'  ? 'var(--green)' : 'var(--bg2)'; btnAll.style.color  = tab === 'all'  ? '#fff' : 'var(--text2)'; }
+  if (btnMine) { btnMine.style.background = tab === 'mine' ? 'var(--green)' : 'var(--bg2)'; btnMine.style.color = tab === 'mine' ? '#fff' : 'var(--text2)'; }
+  const addWrap = document.getElementById('myreviews-addbtn-wrap');
+  if (addWrap) addWrap.style.display = tab === 'mine' ? '' : 'none';
+  if (tab === 'mine') _myReviewsRefresh();
+  else { _allReviewsOffset = 0; _allReviewsRefresh(); }
+}
+
+// Swipe horizontal entre las tabs "Todas"/"Mis reseñas" en mobile — mismo
+// criterio/threshold que _initGameListSwipe (linea ~9884).
+function _initReviewsSwipe() {
+  const el = document.getElementById('myreviews-content');
+  if (!el || el.dataset.swipeInit) return;
+  el.dataset.swipeInit = '1';
+  let startX = null, startY = null;
+  el.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+  el.addEventListener('touchend', e => {
+    if (startX === null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx < 0 && _reviewsTab === 'all') switchReviewsTab('mine');
+      else if (dx > 0 && _reviewsTab === 'mine') switchReviewsTab('all');
+    }
+    startX = null; startY = null;
+  }, { passive: true });
+}
+
 function _myReviewsSortChange() {
   const v = document.getElementById('myreviews-sort').value.split('_');
   _myReviewsSort = v[0]; _myReviewsOrder = v[1];
-  _myReviewsRefresh();
+  if (_reviewsTab === 'mine') _myReviewsRefresh();
+  else { _allReviewsOffset = 0; _allReviewsRefresh(); }
+}
+
+async function _allReviewsRefresh() {
+  const el = document.getElementById('myreviews-content');
+  el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>${t('loading')}</div>`;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/reviews/recent?sort=${_myReviewsSort}&order=${_myReviewsOrder}&limit=${_ALL_REVIEWS_PAGE}&offset=0`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    const reviews = d.reviews || [];
+    _allReviewsOffset = reviews.length;
+    if (!reviews.length) {
+      el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text2)">${t('reviewsEmpty')}</div>`;
+      return;
+    }
+    el.innerHTML = _renderAllReviewsItems(reviews) + `<div id="all-reviews-more-wrap" style="padding:10px 4px;text-align:center">
+      ${reviews.length === _ALL_REVIEWS_PAGE ? `<button onclick="_loadMoreAllReviews()" class="btn-cancel" style="font-size:12px">${t('loadMore') || 'Cargar más'}</button>` : ''}
+    </div>`;
+  } catch (e) {
+    el.innerHTML = `<div style="color:var(--red);padding:16px">${e.message || 'Error'}</div>`;
+  }
+}
+
+function _renderAllReviewsItems(reviews) {
+  return reviews.map(r => {
+    const name = r.is_anonymous ? t('reviewAnonymousLabel') : esc(r.username || '?');
+    const rating = r.rating > 0 ? `<span style="color:var(--amber)">★</span> ${r.rating.toFixed(1)}` : '';
+    return `
+      <div style="padding:10px 4px;border-bottom:0.5px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <span onclick="closeMyReviewsPanel();openGameDetailView('${r.game_id}')" style="font-weight:700;font-size:13px;cursor:pointer;text-decoration:underline dotted">${esc(r.game_name)}</span>
+          <span style="font-size:12px;white-space:nowrap">${rating}</span>
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">${name}</div>
+        <div style="font-size:13px;margin-top:4px">${esc(r.text)}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+          <span style="font-size:11px;color:var(--text2)">${_formatReviewDate(r.updated_at)}</span>
+          <button onclick="_reportReview(${r.id})" title="${esc(t('reviewReport'))}" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:14px"><i class="ti ti-flag"></i></button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function _loadMoreAllReviews() {
+  const moreWrap = document.getElementById('all-reviews-more-wrap');
+  if (moreWrap) moreWrap.innerHTML = `<div class="spinner" style="margin:0 auto"></div>`;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/reviews/recent?sort=${_myReviewsSort}&order=${_myReviewsOrder}&limit=${_ALL_REVIEWS_PAGE}&offset=${_allReviewsOffset}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const d = await res.json();
+    const reviews = d.reviews || [];
+    _allReviewsOffset += reviews.length;
+    if (moreWrap) {
+      moreWrap.insertAdjacentHTML('beforebegin', _renderAllReviewsItems(reviews));
+      moreWrap.innerHTML = reviews.length === _ALL_REVIEWS_PAGE ? `<button onclick="_loadMoreAllReviews()" class="btn-cancel" style="font-size:12px">${t('loadMore') || 'Cargar más'}</button>` : '';
+    }
+  } catch (e) {}
 }
 
 async function _myReviewsRefresh() {
@@ -3874,7 +3985,7 @@ function accessibleEditModalBody(gameId) {
     </div>
     <button onclick="closeAccessibleEditModal();openCardFolderPicker('${gameId}')"
       style="width:100%;padding:11px;font-size:15px;border-radius:8px;border:0.5px solid var(--border2);background:transparent;color:var(--text);cursor:pointer;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:6px">
-      <i class="ti ti-folder-plus"></i> ${t('folder') || 'Carpeta'}
+      <i class="ti ti-folder-plus"></i> ${t('folder') || 'Lista'}
     </button>
     <div style="display:flex;gap:10px;margin-bottom:20px">
       <button onclick="closeAccessibleEditModal();openReviewEditor('${gameId}')"
@@ -6664,11 +6775,11 @@ const ACHIEVEMENT_LABELS_EN = {
   sessions_250: { name: 'Session After Session', description: 'Log 250 play sessions' },
   library_800: { name: 'Supreme Collector', description: 'Reach 800 games in your library' },
   wishlist_150: { name: 'Infinite Wishes', description: 'Add 150 games to your wishlist' },
-  folders_15: { name: 'Dedicated Archivist', description: 'Create 15 folders' },
-  big_folder: { name: 'Big Folder', description: 'Have a folder with 10 or more games' },
-  big_folder_25: { name: 'Huge Folder', description: 'Have a folder with 25 or more games' },
-  organizer_50: { name: 'Organizer', description: 'Organize 50 games into folders' },
-  organizer_100: { name: 'Great Organizer', description: 'Organize 100 games into folders' },
+  folders_15: { name: 'Dedicated Archivist', description: 'Create 15 lists' },
+  big_folder: { name: 'Big List', description: 'Have a list with 10 or more games' },
+  big_folder_25: { name: 'Huge List', description: 'Have a list with 25 or more games' },
+  organizer_50: { name: 'Organizer', description: 'Organize 50 games into lists' },
+  organizer_100: { name: 'Great Organizer', description: 'Organize 100 games into lists' },
   add_15_friends: { name: 'Growing Community', description: 'Add 15 friends' },
   popular_20: { name: 'Celebrity', description: 'Receive 20 friend requests' },
   steam_wishlist_10: { name: 'Steam Wishlist', description: 'Have 10 games synced in your Steam wishlist' },
@@ -6799,10 +6910,10 @@ const ACHIEVEMENT_LABELS_PT = {
   sessions_250: { name: 'Sessão Após Sessão', description: 'Registre 250 sessões de jogo' },
   library_800: { name: 'Colecionador Supremo', description: 'Alcance 800 jogos na sua biblioteca' },
   wishlist_150: { name: 'Desejos Infinitos', description: 'Adicione 150 jogos aos seus desejados' },
-  folders_15: { name: 'Arquivista Dedicado', description: 'Crie 15 pastas' },
-  big_folder: { name: 'Pasta Grande', description: 'Tenha uma pasta com 10 ou mais jogos' },
-  big_folder_25: { name: 'Pasta Enorme', description: 'Tenha uma pasta com 25 ou mais jogos' },
-  organizer_50: { name: 'Organizador', description: 'Organize 50 jogos em pastas' },
+  folders_15: { name: 'Arquivista Dedicado', description: 'Crie 15 listas' },
+  big_folder: { name: 'Lista Grande', description: 'Tenha uma lista com 10 ou mais jogos' },
+  big_folder_25: { name: 'Lista Enorme', description: 'Tenha uma lista com 25 ou mais jogos' },
+  organizer_50: { name: 'Organizador', description: 'Organize 50 jogos em listas' },
   organizer_100: { name: 'Grande Organizador', description: 'Organize 100 jogos em pastas' },
   add_15_friends: { name: 'Comunidade Crescente', description: 'Adicione 15 amigos' },
   popular_20: { name: 'Celebridade', description: 'Receba 20 solicitações de amizade' },
@@ -10739,7 +10850,7 @@ function renderFolderDropdownItems() {
 
   list.innerHTML = `
     <div style="padding:6px 14px 4px;display:flex;align-items:center;justify-content:space-between">
-      <span style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px">Mis carpetas</span>
+      <span style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px">Mis listas</span>
       <select id="folder-sort-list" onchange="setFolderSort(this.value)" style="font-size:12px;padding:3px 6px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer">
         <option value="name" ${folderSort==="name"?"selected":""}>Nombre</option>
         <option value="created_at" ${folderSort==="created_at"?"selected":""}>Fecha creación</option>
@@ -10747,7 +10858,7 @@ function renderFolderDropdownItems() {
       </select>
       <button id="folder-sort-list-btn" onclick="toggleFolderSortDir()" style="padding:3px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">${folderSortDir==="asc"?"↑":"↓"}</button>
     </div>
-    ${!folders.length ? '<div style="padding:8px 14px;font-size:12px;color:var(--text2)">Sin carpetas en esta sección</div>' :
+    ${!folders.length ? '<div style="padding:8px 14px;font-size:12px;color:var(--text2)">Sin listas en esta sección</div>' :
       folders.map(f => `
         <div style="display:flex;align-items:center;gap:6px;padding:7px 14px;cursor:pointer;font-size:13px;border-top:0.5px solid var(--border)"
           onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
@@ -10767,7 +10878,7 @@ function renderFolderDropdownItems() {
     }
     <div style="padding:6px 10px;border-top:0.5px solid var(--border)">
       <button onclick="openCreateFolder()" style="width:100%;padding:5px;font-size:12px;border-radius:5px;border:0.5px dashed var(--border);background:transparent;color:var(--text2);cursor:pointer">
-        <i class="ti ti-plus"></i> Nueva carpeta
+        <i class="ti ti-plus"></i> Nueva lista
       </button>
     </div>`;
 }
@@ -10802,8 +10913,8 @@ function showFolderLabel() {
       label.style.cssText = 'padding:4px 16px;font-size:12px;color:var(--green);display:flex;align-items:center;gap:6px;border-bottom:0.5px solid var(--border)';
       document.getElementById('filter-bar').insertAdjacentElement('afterend', label);
     }
-    label.innerHTML = `<i class="ti ti-folder" style="font-size:13px"></i> <strong>${f ? esc(f.name) : 'Carpeta'}</strong>
-      <button onclick="exitFolder()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:11px;margin-left:4px">✕ Salir de carpeta</button>`;
+    label.innerHTML = `<i class="ti ti-folder" style="font-size:13px"></i> <strong>${f ? esc(f.name) : 'Lista'}</strong>
+      <button onclick="exitFolder()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:11px;margin-left:4px">✕ Salir de lista</button>`;
     label.style.display = 'flex';
   } else if (label) {
     label.style.display = 'none';
@@ -10849,11 +10960,11 @@ function renderFolderList() {
     <div style="padding:12px 16px 0;display:flex;gap:8px">
       <button onclick="switchFolderSection('library')"
         style="padding:6px 14px;border-radius:20px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${section==='library'?'var(--green)':'var(--bg2)'};color:${section==='library'?'#fff':'var(--text2)'}">
-        <i class="ti ti-books" style="font-size:13px"></i> Carpetas de Biblioteca
+        <i class="ti ti-books" style="font-size:13px"></i> Listas de Biblioteca
       </button>
       <button onclick="switchFolderSection('wishlist')"
         style="padding:6px 14px;border-radius:20px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${section==='wishlist'?'#EF9F27':'var(--bg2)'};color:${section==='wishlist'?'#fff':'var(--text2)'}">
-        <i class="ti ti-bookmark" style="font-size:13px"></i> Carpetas de Deseados
+        <i class="ti ti-bookmark" style="font-size:13px"></i> Listas de Deseados
       </button>
     </div>
     <div style="padding:12px 16px;display:flex;align-items:center;justify-content:flex-end;border-bottom:0.5px solid var(--border)">
@@ -10868,12 +10979,12 @@ function renderFolderList() {
           style="padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">${folderSortDir==="asc"?"↑":"↓"}</button>
         <button onclick="openCreateFolder()"
           style="padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">
-          <i class="ti ti-plus"></i> Nueva carpeta
+          <i class="ti ti-plus"></i> Nueva lista
         </button>
       </div>
     </div>
     ${!folders.length
-      ? '<div class="empty"><i class="ti ti-folder-off" style="font-size:32px;display:block;margin-bottom:8px"></i>Sin carpetas. Creá una.</div>'
+      ? '<div class="empty"><i class="ti ti-folder-off" style="font-size:32px;display:block;margin-bottom:8px"></i>Sin listas. Creá una.</div>'
       : `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;padding:16px">
           ${folders.map(f => `
             <div onclick="enterFolder(${f.id})" style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius-md);padding:14px 16px;cursor:pointer;transition:border-color 0.15s"
@@ -10928,7 +11039,7 @@ async function saveFolderCreate() {
     else updateFolderBtn();
     loadAvailableFilters();
   } catch(e) {
-    showToast(e.message || 'No se pudo crear la carpeta', true);
+    showToast(e.message || 'No se pudo crear la lista', true);
   }
 }
 
@@ -11205,6 +11316,27 @@ function handleFolderBtnClick() {
     updateFolderBtn();
     renderFolderList();
   }
+}
+
+// Entrada directa a Listas desde el sidebar/drawer (a diferencia de
+// handleFolderBtnClick, que togglea entrar/salir desde el boton de la
+// toolbar, esto siempre ENTRA a la vista de listas, sin importar desde
+// donde se llame — cierra el detalle de juego u otros overlays primero.
+function openListsPanel() {
+  document.querySelectorAll('.modal-overlay.open').forEach(o => o.classList.remove('open'));
+  if (typeof closeGameDetailView === 'function' && document.getElementById('game-detail-view')?.style.display !== 'none') {
+    closeGameDetailView();
+  }
+  if (currentView !== 'library' && currentView !== 'wishlist') {
+    setView('library');
+  }
+  activeFolderId = -1;
+  const fb = document.getElementById('filter-bar');
+  if (fb) fb.style.display = 'none';
+  document.getElementById('folder-dropdown')?.classList.remove('open');
+  showFolderLabel();
+  updateFolderBtn();
+  renderFolderList();
 }
 
 // Update folder-add-game modal footer
