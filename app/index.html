@@ -817,6 +817,7 @@
   <button onclick="openGomPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-stars" data-cp-icon="juego_del_mes"></i> <span data-i18n="gameOfMonth">Juego del mes</span></button>
   <button onclick="openMyReviewsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-message-star" data-cp-icon="mis_resenas"></i> <span data-i18n="myReviews">Reseñas</span></button>
   <button onclick="openListsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-folder" data-cp-icon="carpetas"></i> <span data-i18n="folders">Listas</span></button>
+  <button onclick="setView('rankings');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-medal" data-cp-icon="rankings"></i> <span data-i18n="rankings">Rankings</span></button>
   <button onclick="openFriendsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-users" data-cp-icon="amigos"></i> <span data-i18n="friends">Amigos</span></button>
   <button onclick="openAchievementsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-trophy" data-cp-icon="logros"></i> <span data-i18n="achievements">Logros</span></button>
   <button onclick="openConfigPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-settings" data-cp-icon="configuracion"></i> <span data-i18n="config">Configuración</span></button>
@@ -896,6 +897,12 @@
       <button id="lists-icon-btn" onclick="openListsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="folders" title="Listas">
         <i class="ti ti-folder" style="font-size:14px"></i>
         <span class="sidebar-only-label" data-i18n="folders">Listas</span>
+      </button>
+
+      <!-- Rankings button -->
+      <button id="rankings-icon-btn" onclick="setView('rankings')" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="rankings" title="Rankings">
+        <i class="ti ti-medal" style="font-size:14px"></i>
+        <span class="sidebar-only-label" data-i18n="rankings">Rankings</span>
       </button>
 
       <div class="nav-divider"></div>
@@ -1103,23 +1110,6 @@
         style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);display:inline-flex;align-items:center;gap:5px;flex-shrink:0">
         <i class="ti ti-chart-bar" style="font-size:14px"></i> <span data-i18n="stats">Estadísticas</span>
       </button>
-      <button id="view-rankings" class="nav-pill" onclick="setView('rankings')"
-        style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);display:inline-flex;align-items:center;gap:5px">
-        <i class="ti ti-medal" style="font-size:14px"></i> <span data-i18n="rankings">Rankings</span>
-      </button>
-
-      <!-- Folder filter — vive en la misma fila swipeable que Biblioteca/Deseados -->
-      <div style="position:relative;flex-shrink:0" id="folder-filter-wrap">
-        <div id="folder-filter-btn" style="display:none;align-items:center;border:0.5px solid var(--border);border-radius:20px;overflow:hidden;background:var(--bg2)">
-          <button onclick="handleFolderBtnClick()"
-            style="padding:6px 10px;font-size:12px;border:none;background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap">
-            <i class="ti ti-folder" style="font-size:12px"></i><span id="folder-btn-label">Listas</span>
-          </button>
-          <button onclick="toggleFolderDropdown()"
-            style="padding:6px 8px;font-size:11px;border:none;border-left:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer">▾</button>
-        </div>
-      </div>
-
       <span style="margin-left:auto;font-size:12px;color:var(--text2)">
         <span data-i18n="selected">Seleccionados</span>: <strong id="s-total">—</strong><br>
         <span data-i18n="hours">Horas</span>: <strong id="s-hours">—</strong>
@@ -1843,6 +1833,19 @@
     <div class="modal-actions" style="justify-content:center;margin-top:18px">
       <button class="btn-cancel" onclick="closeConnectProfileModal()" data-i18n="cancel">Cancelar</button>
       <button class="btn-save" id="connect-profile-confirm-btn" data-i18n="confirm">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Listas Modal (modal propio, mismo criterio que Reseñas) -->
+<div class="modal-overlay" id="lists-overlay">
+  <div class="modal" style="max-width:640px;width:92vw;max-height:85vh;display:flex;flex-direction:column">
+    <div class="modal-title" style="display:flex;align-items:center;justify-content:space-between">
+      <span><i class="ti ti-folder"></i> <span data-i18n="folders">Listas</span></span>
+    </div>
+    <div id="lists-modal-body" style="overflow-y:auto;flex:1;min-height:0"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeListsPanel()" data-i18n="close">Cerrar</button>
     </div>
   </div>
 </div>
@@ -3570,7 +3573,8 @@ async function _myReviewsRefresh() {
           <div style="font-size:13px;margin-top:4px">${esc(r.text)}</div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
             <span style="font-size:11px;color:var(--text2)">${_formatReviewDate(r.updated_at)}</span>
-            <div style="display:flex;gap:10px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:12px;color:var(--text2);display:flex;align-items:center;gap:4px"><i class="ti ti-thumb-up"></i> ${r.vote_count || 0}</span>
               <button onclick="_toggleMyReviewVisibility('${r.game_id}', '${r.visibility}')" title="${esc(isPublic ? t('reviewVisibilityPublic') : t('reviewVisibilityPrivate'))}" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:15px"><i class="ti ${isPublic ? 'ti-world' : 'ti-lock'}"></i></button>
               <button onclick="openReviewEditor('${r.game_id}')" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:15px"><i class="ti ti-pencil"></i></button>
               <button onclick="_deleteMyReview('${r.game_id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:15px"><i class="ti ti-trash"></i></button>
@@ -10511,8 +10515,8 @@ const FEATURE_TOUR_STEPS = [
   { selector: '#steam-menu-btn',    titleKey: 'tourTitleSteam',       bodyKey: 'tourBodySteam',       icon: 'ti-brand-steam' },
   { selector: '#add-game-btn',      titleKey: 'tourTitleAdd',         bodyKey: 'tourBodyAdd',         icon: 'ti-plus' },
   { selector: '#filter-bar',        titleKey: 'tourTitleFilters',     bodyKey: 'tourBodyFilters',     icon: 'ti-filter' },
-  { selector: '#folder-filter-btn', titleKey: 'tourTitleFolders',     bodyKey: 'tourBodyFolders',     icon: 'ti-folder' },
-  { selector: '#view-rankings',     titleKey: 'tourTitleRankings',    bodyKey: 'tourBodyRankings',    icon: 'ti-medal' },
+  { selector: '#lists-icon-btn',    titleKey: 'tourTitleFolders',     bodyKey: 'tourBodyFolders',     icon: 'ti-folder' },
+  { selector: '#rankings-icon-btn', titleKey: 'tourTitleRankings',    bodyKey: 'tourBodyRankings',    icon: 'ti-medal' },
   { selector: '#friends-btn',       titleKey: 'tourTitleFriends',     bodyKey: 'tourBodyFriends',     icon: 'ti-users' },
   { selector: '#achievements-btn',  titleKey: 'tourTitleAchievements', bodyKey: 'tourBodyAchievements', icon: 'ti-trophy' },
   { selector: '#avatar-thumb-box',  titleKey: 'tourTitleAvatar',      bodyKey: 'tourBodyAvatar',      icon: 'ti-user-circle' },
@@ -10997,9 +11001,27 @@ function switchFolderSection(section) {
 }
 
 function enterFolder(folderId) {
+  closeListsPanel();
+  // No usar setView() aca — resetea activeFolderId a null (linea ~5484,
+  // pensada para el caso "entrar a Biblioteca/Deseados normal"), lo cual
+  // pisaria el folderId que se acaba de elegir. Solo hace falta asegurar
+  // que la pantalla principal (biblioteca/deseados) este visible, sin
+  // tocar el resto del estado de esa vista.
+  const gameList = document.getElementById('game-list');
+  const filterBar = document.getElementById('filter-bar');
+  const footer = document.querySelector('.footer');
+  const statsView = document.getElementById('stats-view');
+  const rankingsView = document.getElementById('rankings-view');
+  const novedadesView = document.getElementById('novedades-view');
+  const planView = document.getElementById('plan-view');
+  if (gameList) gameList.style.display = '';
+  if (filterBar) filterBar.style.display = '';
+  if (footer) footer.style.display = '';
+  if (statsView) statsView.style.display = 'none';
+  if (rankingsView) rankingsView.style.display = 'none';
+  if (novedadesView) novedadesView.style.display = 'none';
+  if (planView) planView.style.display = 'none';
   activeFolderId = folderId;
-  document.getElementById('folder-dropdown').classList.remove('open');
-  updateFolderBtn();
   showFolderLabel();
   syncAll(1);
 }
@@ -11049,12 +11071,8 @@ function _folderTabsHtml() {
 }
 
 async function renderPublicFolderList() {
-  const gameList = document.getElementById('game-list');
+  const gameList = document.getElementById('lists-modal-body');
   if (!gameList) return;
-  const _pgbar = document.getElementById('pagination-bar');
-  if (_pgbar) _pgbar.remove();
-  const _fb = document.getElementById('filter-bar');
-  if (_fb) _fb.style.display = 'none';
   const section = currentView === 'wishlist' ? 'wishlist' : 'library';
   gameList.innerHTML = _folderTabsHtml() + `
     <div style="padding:12px 16px 0;display:flex;gap:8px">
@@ -11133,10 +11151,7 @@ function closePublicFolderViewer() {
 
 function renderFolderList() {
   if (activeFolderId !== -1) return;
-  // Remove pagination immediately
-  const _pgbar = document.getElementById('pagination-bar');
-  if (_pgbar) _pgbar.remove();
-  const gameList = document.getElementById('game-list');
+  const gameList = document.getElementById('lists-modal-body');
   if (!gameList) return;
   let folders = [...currentSectionFolders()];
   if (folderSort === 'game_count') {
@@ -11147,12 +11162,7 @@ function renderFolderList() {
     folders.reverse();
   }
 
-  // Hide filter bar in folder list view
-  const _fb = document.getElementById('filter-bar');
-  if (_fb) _fb.style.display = 'none';
   setTimeout(_syncFolderSortSelect, 0);
-  const label = document.getElementById('active-folder-label');
-  if (label) label.style.display = 'none';
 
   const section = currentView === 'wishlist' ? 'wishlist' : 'library';
 
@@ -11204,6 +11214,7 @@ function renderFolderList() {
               </div>
               <div style="font-size:14px;font-weight:600;margin-bottom:4px">${esc(f.name)}</div>
               <div style="font-size:11px;color:var(--text2)">${f.game_count} juegos · ${new Date(f.created_at).toLocaleDateString('es-AR')}</div>
+              <div style="font-size:11px;color:var(--text2);display:flex;align-items:center;gap:4px;margin-top:4px"><i class="ti ti-thumb-up"></i> ${f.vote_count || 0}</div>
             </div>
           `).join('')}
         </div>`
@@ -11520,26 +11531,25 @@ function handleFolderBtnClick() {
   }
 }
 
-// Entrada directa a Listas desde el sidebar/drawer (a diferencia de
-// handleFolderBtnClick, que togglea entrar/salir desde el boton de la
-// toolbar, esto siempre ENTRA a la vista de listas, sin importar desde
-// donde se llame — cierra el detalle de juego u otros overlays primero.
+// Entrada a Listas desde el sidebar/drawer — modal propio (mismo patron
+// que Reseñas), no la vista de biblioteca. "Mis listas" arranca siempre en
+// modo browse (activeFolderId=-1); elegir una lista cierra el modal y
+// muestra sus juegos en la pantalla principal (ver enterFolder).
 function openListsPanel() {
   document.querySelectorAll('.modal-overlay.open').forEach(o => o.classList.remove('open'));
   if (typeof closeGameDetailView === 'function' && document.getElementById('game-detail-view')?.style.display !== 'none') {
     closeGameDetailView();
   }
   if (currentView !== 'library' && currentView !== 'wishlist') {
-    setView('library');
+    currentView = 'library';
   }
   _folderTab = 'mine';
   activeFolderId = -1;
-  const fb = document.getElementById('filter-bar');
-  if (fb) fb.style.display = 'none';
-  document.getElementById('folder-dropdown')?.classList.remove('open');
-  showFolderLabel();
-  updateFolderBtn();
-  renderFolderList();
+  document.getElementById('lists-overlay').classList.add('open');
+  loadFolders().then(renderFolderList);
+}
+function closeListsPanel() {
+  document.getElementById('lists-overlay').classList.remove('open');
 }
 
 // Update folder-add-game modal footer
@@ -11656,6 +11666,7 @@ function renderRankingsList() {
         <strong style="font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.name)}</strong>
       </div>
       <div style="font-size:12px;color:var(--text2)">${r.game_count}/${MAX_RANKING_GAMES} ${t('gamesLower')}</div>
+      <div style="font-size:11px;color:var(--text2);display:flex;align-items:center;gap:4px"><i class="ti ti-thumb-up"></i> ${r.vote_count || 0}</div>
     </div>
   `).join('');
 }
