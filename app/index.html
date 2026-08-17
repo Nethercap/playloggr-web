@@ -3850,7 +3850,7 @@ function renderGameDetailContent(d) {
     const parts = [['main_story', best.main_story, t('mainStory') || 'Historia'], ['main_extra', best.main_extra, t('mainExtra') || 'Historia + Extras'], ['completionist', best.completionist, t('completionist') || 'Completista']]
       .filter(([, h]) => h != null)
       .map(([, h, label]) => `${label} ${h}hs`);
-    return parts.length ? parts.join(' · ') : null;
+    return parts.length ? parts.join('<br>') : null;
   })();
 
   const foldersHtml = d.folders.map(f => `<span style="font-size:11px;padding:3px 8px;border-radius:12px;background:var(--bg2);border:0.5px solid var(--border);margin-right:4px">${esc(f.name)}</span>`).join('');
@@ -4518,7 +4518,7 @@ function gameCardHtml(g, opts) {
         </div>
       </div>
       <div style="display:flex;justify-content:flex-end;margin-top:4px">
-        <button onclick="toggleGameActionsMenu('${g.id}', ${g.hidden}, event, ${hideLupa ? 'true' : 'false'})" title="Más opciones" style="font-size:12px;padding:2px 10px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-weight:700">•••</button>
+        <button onclick="openGameDetailView('${g.id}')" title="Ver detalle" style="font-size:12px;padding:2px 10px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-weight:700">•••</button>
       </div>
     </div>
   </div>`;
