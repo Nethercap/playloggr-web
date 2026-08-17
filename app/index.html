@@ -1300,6 +1300,19 @@
   </div>
 </div>
 
+<!-- Pantalla de detalle de juego — pantalla completa (no modal), mismo
+     patron de setView() que stats/rankings/novedades/plan: oculta la
+     biblioteca normal y muestra este contenedor hermano. Se abre con
+     openGameDetailView(gameId), se cierra con closeGameDetailView(). -->
+<div id="game-detail-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
+  <div style="padding:16px;max-width:820px;width:100%;margin:0 auto;box-sizing:border-box">
+    <button onclick="closeGameDetailView()" style="padding:6px 14px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;margin-bottom:14px;display:flex;align-items:center;gap:6px">
+      <i class="ti ti-arrow-left"></i> <span data-i18n="close">Cerrar</span>
+    </button>
+    <div id="game-detail-content"></div>
+  </div>
+</div>
+
 <!-- Modal -->
 <!-- Wishlist Modal -->
 <div class="modal-overlay" id="wishlist-modal-overlay">
@@ -3016,7 +3029,7 @@ function toggleGameActionsMenu(gameId, hidden, event, hideLupa) {
     const editItem = document.createElement('button');
     editItem.className = 'steam-menu-item';
     editItem.innerHTML = `<i class="ti ti-zoom-in" style="font-size:14px"></i> ${t('accessibleEdit') || 'Editar'}`;
-    editItem.onclick = () => { openAccessibleEditModal(gameId); popup.remove(); };
+    editItem.onclick = () => { openGameDetailView(gameId); popup.remove(); };
     popup.appendChild(editItem);
   }
 
@@ -3561,6 +3574,246 @@ function ratingDetailModalBody(gameId) {
     <div id="rating-detail-avg-${gameId}" style="font-size:11px;color:var(--text2);margin-top:4px">…</div>`;
 }
 
+// ── Pantalla de detalle de juego (pantalla completa) ────────────────────
+// _detailGameId no-null significa "la pantalla de detalle esta abierta
+// para este juego" — varias funciones compartidas con la card (setRating,
+// saveDetailRating, saveHoursModal, saveLastPlayedModal) chequean esto al
+// final para refrescar la seccion correspondiente sin recargar todo.
+let _detailGameId = null;
+let _detailData = null;
+let _rankingPickerForGameId = null;
+
+async function openGameDetailView(gameId) {
+  _detailGameId = gameId;
+  _detailData = null;
+  currentView = currentView; // no tocar currentView — al cerrar volvemos a la misma vista/filtros de antes
+  const gameList = document.getElementById('game-list');
+  const filterBar = document.getElementById('filter-bar');
+  const footer = document.querySelector('.footer');
+  const pagBar = document.getElementById('pagination-bar');
+  const fab = document.getElementById('fab-add-btn');
+  if (gameList) gameList.style.display = 'none';
+  if (filterBar) filterBar.style.display = 'none';
+  if (footer) footer.style.display = 'none';
+  if (pagBar) pagBar.style.display = 'none';
+  if (fab) fab.style.setProperty('display', 'none', 'important');
+  document.getElementById('game-detail-view').style.display = 'flex';
+  document.getElementById('game-detail-content').innerHTML = `<div class="empty"><i class="ti ti-loader"></i>${t('loading')}</div>`;
+  await refreshGameDetail();
+}
+
+function closeGameDetailView() {
+  _detailGameId = null;
+  _detailData = null;
+  document.getElementById('game-detail-view').style.display = 'none';
+  const fab = document.getElementById('fab-add-btn');
+  if (fab) fab.style.removeProperty('display');
+  // Restaura la biblioteca/deseados/filtros tal como estaban — mismo
+  // mecanismo que setView(currentView), sin resetear filtros activos.
+  const gameList = document.getElementById('game-list');
+  const filterBar = document.getElementById('filter-bar');
+  const footer = document.querySelector('.footer');
+  const pagBar = document.getElementById('pagination-bar');
+  if (gameList) gameList.style.display = '';
+  if (filterBar) filterBar.style.display = '';
+  if (footer) footer.style.display = '';
+  if (pagBar) pagBar.style.display = '';
+}
+
+async function refreshGameDetail() {
+  if (!_detailGameId) return;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/game/${encodeURIComponent(_detailGameId)}/detail`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    if (!res.ok) throw new Error('detail fetch failed');
+    _detailData = await res.json();
+  } catch(e) {
+    document.getElementById('game-detail-content').innerHTML = `<div class="empty"><i class="ti ti-alert-triangle"></i>${t('errorLoading') || 'Error al cargar'}</div>`;
+    return;
+  }
+  renderGameDetailContent(_detailData);
+  loadRatingDetailCommunityStats(_detailData.game_id);
+  if (_detailData.platform === 'Steam' && _detailData.app_id) {
+    loadGameDetailAchievements(_detailData.game_id, _detailData.app_id);
+  }
+}
+
+function renderGameDetailContent(d) {
+  const gameId = d.game_id;
+  const statusOpts = ['Jugando','Completado','Backlog','Abandonado','Intermitente','Deseados']
+    .map(s => `<option value="${s}" ${d.status === s ? 'selected' : ''}>${statusLabel(s)}</option>`).join('');
+
+  const scoreHtml = d.score.steam
+    ? `<span class="steam-score" style="background:rgba(29,158,117,0.15);color:var(--green)">${d.score.steam.total_reviews > 0 ? Math.round(100 * d.score.steam.total_positive / d.score.steam.total_reviews) : '—'}% · ${esc(d.score.steam.review_score_desc)}</span>`
+    : (d.score.igdb != null ? `<span class="steam-score" style="background:rgba(29,158,117,0.15);color:var(--green)">${d.score.igdb}% IGDB</span>` : '');
+
+  const hoursHtml = d.hours_synced
+    ? `<span>${(d.hours_played || 0).toFixed(1)} hs</span>`
+    : `<span style="cursor:pointer;text-decoration:underline dotted" onclick="editHours('${gameId}', ${d.hours_played || 0})">${(d.hours_played || 0).toFixed(1)} hs <i class="ti ti-pencil" style="font-size:11px"></i></span>`;
+
+  const lastPlayedHtml = d.can_edit_last_played
+    ? `<span style="cursor:pointer;text-decoration:underline dotted" onclick="editLastPlayed('${gameId}', '${d.last_played_date || ''}')">${d.last_played_date || t('never') || 'Nunca'} <i class="ti ti-pencil" style="font-size:11px"></i></span>`
+    : `<span>${d.last_played_date || '—'}</span>`;
+
+  const hltbHtml = (() => {
+    if (d.hltb.source === 'plan' && d.hltb.hours != null) {
+      const modeLabel = { main_story: t('mainStory'), main_extra: t('mainExtra'), completionist: t('completionist') }[d.hltb.mode] || d.hltb.mode;
+      return `<div style="font-size:13px">${modeLabel}: <strong>${d.hltb.hours} hs</strong> <span style="color:var(--text2);font-size:11px">(${t('fromGamePlan') || 'de tu Plan de juego'})</span></div>`;
+    }
+    const r = d.hltb.results;
+    if (!r || !r.length) return `<div style="font-size:12px;color:var(--text2)">${t('hltbNotFound') || 'No se encontró en HowLongToBeat'}</div>`;
+    const best = r[0];
+    const rows = [['main_story', best.main_story, t('mainStory') || 'Historia'], ['main_extra', best.main_extra, t('mainExtra') || 'Historia + Extras'], ['completionist', best.completionist, t('completionist') || 'Completista']]
+      .filter(([, h]) => h != null)
+      .map(([, h, label]) => `<div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0"><span>${label}</span><strong>${h} hs</strong></div>`).join('');
+    return rows || `<div style="font-size:12px;color:var(--text2)">${t('hltbNotFound') || 'No se encontró en HowLongToBeat'}</div>`;
+  })();
+
+  const foldersHtml = d.folders.length
+    ? d.folders.map(f => `<span style="font-size:11px;padding:3px 8px;border-radius:12px;background:var(--bg2);border:0.5px solid var(--border);margin-right:4px">${esc(f.name)}</span>`).join('')
+    : `<span style="font-size:12px;color:var(--text2)">${t('noFoldersYet') || 'No está en ninguna lista'}</span>`;
+
+  document.getElementById('game-detail-content').innerHTML = `
+    <div style="display:flex;gap:16px;margin-bottom:20px">
+      ${d.cover_url ? `<img src="${d.cover_url}" style="width:120px;height:160px;object-fit:cover;border-radius:8px;flex-shrink:0" onerror="this.style.display='none'">` : ''}
+      <div style="flex:1;min-width:0">
+        <div style="font-size:20px;font-weight:700;margin-bottom:6px">${esc(d.name)}</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+          ${platIconOnly(d.platform)}
+          ${scoreHtml}
+        </div>
+        <select onchange="changeStatus('${gameId}', this.value)" style="font-size:13px;padding:6px 10px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text);margin-bottom:8px">
+          ${statusOpts}
+        </select>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--text2);margin-top:6px">
+          <div>${t('hours') || 'Horas'}: ${hoursHtml}</div>
+          <div>${t('lastPlayed') || 'Última vez jugado'}: ${lastPlayedHtml}</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px">
+      ${ratingDetailModalBody(gameId)}
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div style="background:var(--bg2);border-radius:10px;padding:14px">
+        <div style="font-weight:700;font-size:13px;margin-bottom:8px">HowLongToBeat</div>
+        ${hltbHtml}
+      </div>
+      <div style="background:var(--bg2);border-radius:10px;padding:14px">
+        <div style="font-weight:700;font-size:13px;margin-bottom:8px">${t('achievements') || 'Logros'}</div>
+        <div id="game-detail-achievements">${d.platform === 'Steam' && d.app_id ? `<div style="font-size:12px;color:var(--text2)">${t('loading')}</div>` : `<div style="font-size:12px;color:var(--text2)">${t('onlySteam') || 'Solo disponible para juegos de Steam'}</div>`}</div>
+      </div>
+    </div>
+
+    <div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px">
+      <div style="font-weight:700;font-size:13px;margin-bottom:8px">${t('globalRanking') || 'Ranking global'}</div>
+      <div style="display:flex;gap:20px;flex-wrap:wrap;font-size:13px">
+        <div>${t('inLibraryOf') || 'En biblioteca de'} <strong>${d.ranking.library_count}</strong> ${t('usersLower') || 'usuarios'} ${d.ranking.library_rank ? `— #${d.ranking.library_rank}` : ''}</div>
+        <div>${t('inWishlistOf') || 'En deseados de'} <strong>${d.ranking.wishlist_count}</strong> ${t('usersLower') || 'usuarios'} ${d.ranking.wishlist_rank ? `— #${d.ranking.wishlist_rank}` : ''}</div>
+      </div>
+    </div>
+
+    <div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px">
+      <div style="font-weight:700;font-size:13px;margin-bottom:8px">${t('folders') || 'Listas'}</div>
+      ${foldersHtml}
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="openCardFolderPicker('${gameId}')" class="btn-cancel" style="font-size:12px"><i class="ti ti-folder-plus"></i> ${t('addToFolder') || 'Agregar a lista'}</button>
+      <button onclick="openRankingPickerForGame('${gameId}')" class="btn-cancel" style="font-size:12px"><i class="ti ti-list-numbers"></i> ${t('addToRanking') || 'Agregar a ranking'}</button>
+      <button onclick="openReviewsList('${gameId}')" class="btn-cancel" style="font-size:12px"><i class="ti ti-message-2"></i> ${t('viewReviews') || 'Ver reseñas'}</button>
+      <button onclick="openReviewEditor('${gameId}')" class="btn-cancel" style="font-size:12px"><i class="ti ti-edit"></i> ${t('writeReview') || 'Escribir reseña'}</button>
+      <button onclick="toggleHideGame('${gameId}', ${d.hidden}).then(refreshGameDetail)" class="btn-cancel" style="font-size:12px"><i class="ti ti-eye-off"></i> ${d.hidden ? (t('unhide') || 'Mostrar') : (t('hidden') || 'Ocultar')}</button>
+      <button onclick="deleteGame('${gameId}').then(() => closeGameDetailView())" class="btn-cancel" style="font-size:12px;color:var(--red);border-color:var(--red)"><i class="ti ti-trash"></i> ${t('delete') || 'Eliminar'}</button>
+    </div>
+  `;
+}
+
+async function loadGameDetailAchievements(gameId, appId) {
+  const el = document.getElementById('game-detail-achievements');
+  if (!el) return;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/steam/achievements/${appId}`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    if (_detailGameId !== gameId) return; // el usuario ya se fue a otro juego
+    if (!data.total) {
+      el.innerHTML = `<div style="font-size:12px;color:var(--text2)">${t('noAchievements') || 'Este juego no tiene logros, o el perfil de Steam es privado'}</div>`;
+      return;
+    }
+    const unlockedFirst = [...data.achievements].sort((a, b) => (b.achieved - a.achieved));
+    el.innerHTML = `
+      <div style="font-size:13px;margin-bottom:8px"><strong>${data.unlocked} / ${data.total}</strong> (${data.pct}%)</div>
+      <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:10px">
+        <div style="height:100%;width:${data.pct}%;background:var(--green)"></div>
+      </div>
+      <div style="max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:6px">
+        ${unlockedFirst.slice(0, 20).map(a => `
+          <div style="display:flex;align-items:center;gap:8px;opacity:${a.achieved ? 1 : 0.45}">
+            ${a.icon_url ? `<img src="${a.icon_url}" style="width:28px;height:28px;border-radius:4px;flex-shrink:0">` : ''}
+            <div style="min-width:0">
+              <div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(a.name)}</div>
+              <div style="font-size:10px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(a.description || '')}</div>
+            </div>
+          </div>`).join('')}
+      </div>`;
+  } catch(e) {
+    el.innerHTML = `<div style="font-size:12px;color:var(--text2)">${t('errorLoading') || 'Error al cargar'}</div>`;
+  }
+}
+
+// Agregar-a-ranking desde el detalle: a diferencia de openRankingAddGame
+// (que agrega VARIOS juegos a UN ranking ya abierto), esto elige a que
+// ranking mandar ESTE juego puntual — flujo inverso, picker propio.
+async function openRankingPickerForGame(gameId) {
+  _rankingPickerForGameId = gameId;
+  let rankings = [];
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/rankings?sort=name`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    rankings = (await res.json()).rankings || [];
+  } catch(e) {}
+  if (!rankings.length) {
+    showToast(t('noRankingsYet') || 'Todavía no tenés rankings creados', true);
+    return;
+  }
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay open';
+  overlay.id = 'ranking-picker-for-game-overlay';
+  overlay.style.zIndex = '1000';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:380px">
+      <div class="modal-title"><i class="ti ti-list-numbers"></i> ${t('addToRanking') || 'Agregar a ranking'}</div>
+      <div style="max-height:300px;overflow-y:auto;margin-bottom:12px">
+        ${rankings.map(r => `
+          <button onclick="addGameToRankingFromDetail(${r.id})" style="width:100%;text-align:left;padding:10px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;margin-bottom:6px;font-size:13px">
+            ${esc(r.name)} <span style="color:var(--text2);font-size:11px">(${r.game_count})</span>
+          </button>`).join('')}
+      </div>
+      <div class="modal-actions"><button class="btn-cancel" onclick="this.closest('.modal-overlay').remove()">${t('cancel') || 'Cancelar'}</button></div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+async function addGameToRankingFromDetail(rankingId) {
+  const gameId = _rankingPickerForGameId;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/rankings/${rankingId}/games`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ game_id: gameId }),
+    });
+    if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.detail || 'Error'); }
+    showToast(t('addedToRanking') || 'Agregado al ranking');
+  } catch(e) {
+    showToast(e.message, true);
+  }
+  document.getElementById('ranking-picker-for-game-overlay')?.remove();
+}
+
 // ── Modal accesible de edicion rapida (lupa / doble click-tap) ─────────────
 
 function accessibleEditModalBody(gameId) {
@@ -3693,7 +3946,7 @@ function handleCardDoubleTap(gameId, event) {
   // No abrir si el doble click/toque fue sobre un control interactivo
   // (boton, select, input, link) dentro de la card.
   if (event.target.closest('button, select, a, input, textarea')) return;
-  openAccessibleEditModal(gameId);
+  openGameDetailView(gameId);
 }
 
 function openAccessibleEditModal(gameId) {
@@ -4314,7 +4567,7 @@ function gridTileHtml(g, opts) {
           ${platIconOnly(g.platform, true)}
           ${scoreBadgeHtml(g)}
         </div>
-        <button onclick="openAccessibleEditModal('${g.id}')" title="${t('seeAllOptions')}"
+        <button onclick="openGameDetailView('${g.id}')" title="${t('seeAllOptions')}"
           style="position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,0.6);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ti-dots" style="font-size:14px"></i></button>
         ${bulkCheckHtml(g.id, true)}
       </div>
