@@ -536,6 +536,10 @@
     /* ── Modal ── */
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:100; align-items:center; justify-content:center; }
     .modal-overlay.open { display:flex; }
+    /* Con un modal abierto, el fondo (biblioteca/detalle/lo que sea) no
+       debe poder scrollear detras — antes el scroll se filtraba al body
+       y desalineaba todo al cerrar el modal. */
+    body:has(.modal-overlay.open) { overflow:hidden; }
     .modal { background:var(--bg); border-radius:var(--radius-lg); border:0.5px solid var(--border2); padding:22px; width:480px; max-width:95vw; max-height:90vh; overflow-y:auto; }
     .modal-title { font-size:15px; font-weight:500; margin-bottom:14px; display:flex; align-items:center; gap:7px; }
     .modal-grid { display:grid; grid-template-columns:1fr 1fr; gap:11px; }
@@ -3899,7 +3903,7 @@ async function loadGameDetailAchievements(gameId, appId, source) {
       ${unlockedFirst.length ? `<div style="height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:8px">
         ${unlockedFirst.map(a => `
           <div style="display:flex;align-items:center;gap:10px;opacity:${a.achieved ? 1 : 0.45}">
-            ${a.icon_url ? `<img src="${a.icon_url}" style="width:36px;height:36px;border-radius:4px;flex-shrink:0">` : ''}
+            ${a.icon_url ? `<img src="${a.icon_url}" style="width:36px;height:36px;border-radius:4px;flex-shrink:0" onerror="this.style.display='none'">` : ''}
             <div style="min-width:0">
               <div style="font-size:13px;font-weight:600">${esc(a.name)}</div>
               <div style="font-size:11px;color:var(--text2)">${esc(a.description || '')}</div>
