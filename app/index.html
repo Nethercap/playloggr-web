@@ -3698,9 +3698,7 @@ function renderGameDetailContent(d) {
     return parts.length ? parts.join(' · ') : null;
   })();
 
-  const foldersHtml = d.folders.length
-    ? d.folders.map(f => `<span style="font-size:11px;padding:3px 8px;border-radius:12px;background:var(--bg2);border:0.5px solid var(--border);margin-right:4px">${esc(f.name)}</span>`).join('')
-    : `<span style="font-size:12px;color:var(--text2)">${t('noFoldersYet') || 'No está en ninguna lista'}</span>`;
+  const foldersHtml = d.folders.map(f => `<span style="font-size:11px;padding:3px 8px;border-radius:12px;background:var(--bg2);border:0.5px solid var(--border);margin-right:4px">${esc(f.name)}</span>`).join('');
 
   document.getElementById('game-detail-content').innerHTML = `
     <div style="display:flex;gap:16px;margin-bottom:20px">
@@ -3740,10 +3738,11 @@ function renderGameDetailContent(d) {
       </div>
     </div>
 
+    ${d.folders.length ? `
     <div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px">
       <div style="font-weight:700;font-size:13px;margin-bottom:8px">${t('folders') || 'Listas'}</div>
       ${foldersHtml}
-    </div>
+    </div>` : ''}
 
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button onclick="openCardFolderPicker('${gameId}')" class="btn-cancel" style="font-size:12px"><i class="ti ti-folder-plus"></i> ${t('addToFolder') || 'Agregar a lista'}</button>
