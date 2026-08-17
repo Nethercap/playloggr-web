@@ -5528,10 +5528,22 @@ function _renderActivityGrid(start, end) {
   const showMonthLabels = _activityRange === 'year';
   const monthNames = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   let lastMonth = -1;
-  const monthLabels = weeks.map(week => {
+  let lastLabelWeekIndex = -99;
+  // Minimo de columnas entre dos etiquetas para que no se superpongan (una
+  // etiqueta de 3 letras a font-size 10 necesita mas de 1 columna de 15px
+  // — sin este piso, cuando el 1ro de enero cae a mitad de semana, "Dic"
+  // (ultimo dia del año anterior) y "Ene" quedaban a una sola columna de
+  // distancia y se renderizaban superpuestas como "DicEne").
+  const MIN_LABEL_GAP = 3;
+  const monthLabels = weeks.map((week, wi) => {
     if (!showMonthLabels) return '';
     const m = week[0].getMonth();
-    if (m !== lastMonth) { lastMonth = m; return monthNames[m]; }
+    if (m !== lastMonth) {
+      lastMonth = m;
+      if (wi - lastLabelWeekIndex < MIN_LABEL_GAP) return '';
+      lastLabelWeekIndex = wi;
+      return monthNames[m];
+    }
     return '';
   });
   const cell = 12, gap = 3;
