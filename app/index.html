@@ -11464,21 +11464,13 @@ async function searchFolderExternalCatalog(q) {
 async function addExternalGameToFolder(key) {
   const r = (window._folderExtResults || {})[key];
   if (!r) return;
-  const appid = r.appid || null;
-  const gameId = appid ? `steam_${appid}` : 'manual_' + Date.now();
-  const status = _folderPickerSection === 'wishlist' ? 'Deseados' : 'Backlog';
   try {
-    await fetch(`${apiBase()}/api/v1/game`, {
+    await fetch(`${apiBase()}/api/v1/folders/${_folderPickerId}/games/external`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: gameId, name: r.name, platform: 'Steam', status, hours_played: 0, cover_url: r.cover_url || null, user_rating: 0, app_id: appid }),
+      body: JSON.stringify({ name: r.name, cover_url: r.cover_url || null, platform: 'Steam' }),
     });
-    await fetch(`${apiBase()}/api/v1/folders/${_folderPickerId}/games`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ game_id: gameId }),
-    });
-    showToast(`${r.name} agregado`);
+    showToast(`${r.name} agregado (solo en esta lista)`);
     document.getElementById('folder-ext-search').value = '';
     document.getElementById('folder-ext-results').innerHTML = '';
     await loadFolders();
@@ -11955,20 +11947,13 @@ async function addExternalGameToRanking(key) {
   const r = (window._rankingExtResults || {})[key];
   if (!r) return;
   if (activeRankingGames.length >= MAX_RANKING_GAMES) { showToast(t('rankingLimitReached'), true); return; }
-  const appid = r.appid || null;
-  const gameId = appid ? `steam_${appid}` : 'manual_' + Date.now();
   try {
-    await fetch(`${apiBase()}/api/v1/game`, {
+    await fetch(`${apiBase()}/api/v1/rankings/${activeRankingId}/games/external`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: gameId, name: r.name, platform: 'Steam', status: 'Backlog', hours_played: 0, cover_url: r.cover_url || null, user_rating: 0, app_id: appid }),
+      body: JSON.stringify({ name: r.name, cover_url: r.cover_url || null, platform: 'Steam' }),
     });
-    await fetch(`${apiBase()}/api/v1/rankings/${activeRankingId}/games`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ game_id: gameId }),
-    });
-    showToast(`${r.name} agregado`);
+    showToast(`${r.name} agregado (solo en este ranking)`);
     document.getElementById('ranking-ext-search').value = '';
     document.getElementById('ranking-ext-results').innerHTML = '';
     closeRankingAddGame();
