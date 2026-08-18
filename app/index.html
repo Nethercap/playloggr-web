@@ -3803,6 +3803,10 @@ let _detailData = null;
 let _rankingPickerForGameId = null;
 
 async function openGameDetailView(gameId) {
+  // Juegos "externos" (agregados solo a una Lista/Ranking, no a la
+  // biblioteca real) no tienen game_states — el detalle completo no
+  // aplica, asi que el doble-click/"..." simplemente no hace nada.
+  if (gameId && gameId.startsWith('ext_')) return;
   _detailGameId = gameId;
   _detailData = null;
   currentView = currentView; // no tocar currentView — al cerrar volvemos a la misma vista/filtros de antes
@@ -11044,11 +11048,28 @@ function showFolderLabel() {
       document.getElementById('filter-bar').insertAdjacentElement('afterend', label);
     }
     label.innerHTML = `<i class="ti ti-folder" style="font-size:13px"></i> <strong>${f ? esc(f.name) : 'Lista'}</strong>
-      <button onclick="exitFolder()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:11px;margin-left:4px">✕ Salir de lista</button>`;
+      <button onclick="exitFolder()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:11px;margin-left:4px">✕ Salir de lista</button>
+      <span id="folder-hltb-total" style="margin-left:8px;color:var(--text2)"></span>`;
     label.style.display = 'flex';
+    _loadFolderHltbTotal(activeFolderId);
   } else if (label) {
     label.style.display = 'none';
   }
+}
+
+async function _loadFolderHltbTotal(folderId) {
+  const el = document.getElementById('folder-hltb-total');
+  if (!el) return;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/folders/${folderId}/hltb-total`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const d = await res.json();
+    if (activeFolderId !== folderId) return; // el usuario ya se fue de esta lista
+    const liveEl = document.getElementById('folder-hltb-total');
+    if (!liveEl) return;
+    if (!d.known_count) { liveEl.textContent = ''; return; }
+    const partial = d.known_count < d.total_count ? ` (${d.known_count}/${d.total_count} juegos con dato)` : '';
+    liveEl.textContent = `· ≈${d.total_hours} hs para completar según HowLongToBeat${partial}`;
+  } catch (e) {}
 }
 
 function exitFolder() {
