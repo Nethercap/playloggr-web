@@ -5430,6 +5430,10 @@ function setView(view) {
     _showPlanPremiumGate();
     return;
   }
+  // Si venia con el detalle de un juego abierto (openGameDetailView) y
+  // cambia de vista sin pasar por "Cerrar", el detalle quedaba montado
+  // por debajo — cerrarlo explicitamente antes de cambiar de vista.
+  if (_detailGameId) closeGameDetailView();
   currentView = view;
 
   const isStats     = view === 'stats';
