@@ -1650,10 +1650,10 @@
 </div>
 
 <!-- Reseñas Modal -->
-<div class="modal-overlay" id="myreviews-overlay">
-  <div class="modal" style="max-width:480px;max-height:85vh;display:flex;flex-direction:column">
-    <div class="modal-title" style="display:flex;align-items:center;justify-content:space-between">
-      <span><i class="ti ti-message-star"></i> <span data-i18n="myReviews">Reseñas</span></span>
+<div id="myreviews-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
+  <div style="padding:16px;max-width:640px;width:100%;margin:0 auto;box-sizing:border-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <strong style="font-size:16px;display:flex;align-items:center;gap:6px"><i class="ti ti-message-star"></i> <span data-i18n="myReviews">Reseñas</span></strong>
       <div style="display:flex;gap:4px">
         <select id="myreviews-sort" onchange="_myReviewsSortChange()" style="font-size:12px;padding:4px 6px;border-radius:6px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text)">
           <option value="date" data-i18n="reviewsSortDate">Fecha</option>
@@ -1663,7 +1663,7 @@
         <button id="myreviews-sort-dir-btn" onclick="_myReviewsSortDirToggle()" style="padding:4px 8px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:6px;cursor:pointer;font-size:13px;color:var(--text)">↓</button>
       </div>
     </div>
-    <div style="display:flex;gap:6px;padding:0 2px 8px">
+    <div style="display:flex;gap:6px;padding:0 2px 8px;max-width:340px">
       <button id="reviews-tab-all" onclick="switchReviewsTab('all')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:var(--green);color:#fff">
         <span data-i18n="allReviewsTab">Todas</span>
       </button>
@@ -1676,11 +1676,8 @@
         <i class="ti ti-plus"></i> <span data-i18n="addReview">Agregar reseña</span>
       </button>
     </div>
-    <div id="myreviews-content" style="overflow-y:auto;flex:1;min-height:0">
+    <div id="myreviews-content" style="min-height:0">
       <div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeMyReviewsPanel()" data-i18n="close">Cerrar</button>
     </div>
   </div>
 </div>
@@ -1842,16 +1839,10 @@
   </div>
 </div>
 
-<!-- Listas Modal (modal propio, mismo criterio que Reseñas) -->
-<div class="modal-overlay" id="lists-overlay">
-  <div class="modal" style="max-width:640px;width:92vw;max-height:85vh;display:flex;flex-direction:column">
-    <div class="modal-title" style="display:flex;align-items:center;justify-content:space-between">
-      <span><i class="ti ti-folder"></i> <span data-i18n="folders">Listas</span></span>
-    </div>
-    <div id="lists-modal-body" style="overflow-y:auto;flex:1;min-height:0"></div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeListsPanel()" data-i18n="close">Cerrar</button>
-    </div>
+<!-- Listas — vista propia (mismo criterio que Rankings), no modal. -->
+<div id="lists-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
+  <div style="padding:16px;max-width:960px;width:100%;margin:0 auto;box-sizing:border-box">
+    <div id="lists-modal-body"></div>
   </div>
 </div>
 
@@ -3305,7 +3296,7 @@ async function _saveReview(gameId) {
     const d = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(d.detail || t('reviewSaveError'));
     document.getElementById('review-editor-overlay').remove();
-    if (typeof _myReviewsRefresh === 'function' && document.getElementById('myreviews-overlay')?.classList.contains('open')) _myReviewsRefresh();
+    if (typeof _myReviewsRefresh === 'function' && document.getElementById('myreviews-view')?.style.display !== 'none') _myReviewsRefresh();
   } catch (e) {
     errEl.textContent = e.message || t('reviewSaveError');
     errEl.style.display = 'block';
@@ -3319,7 +3310,7 @@ async function _deleteReviewFromEditor(gameId) {
       method: 'DELETE', headers: { 'Authorization': `Bearer ${authToken}` },
     });
     document.getElementById('review-editor-overlay').remove();
-    if (typeof _myReviewsRefresh === 'function' && document.getElementById('myreviews-overlay')?.classList.contains('open')) _myReviewsRefresh();
+    if (typeof _myReviewsRefresh === 'function' && document.getElementById('myreviews-view')?.style.display !== 'none') _myReviewsRefresh();
   } catch (e) {
     alert(t('reviewDeleteError'));
   }
@@ -3415,14 +3406,20 @@ let _reviewsTab = 'all';
 let _allReviewsOffset = 0;
 const _ALL_REVIEWS_PAGE = 20;
 
+// Vista propia (no modal), mismo criterio que Rankings — setView('myreviews')
+// hace el show/hide y llama a openMyReviewsPanel._init() para cargar el
+// contenido. openMyReviewsPanel() se deja como entry point (usado desde el
+// sidebar y otros lugares) para no tener que tocar cada caller.
 function openMyReviewsPanel() {
-  document.getElementById('myreviews-overlay').classList.add('open');
+  setView('myreviews');
+}
+openMyReviewsPanel._init = function() {
   switchReviewsTab('all');
   _initReviewsSwipe();
-}
+};
 
 function closeMyReviewsPanel() {
-  document.getElementById('myreviews-overlay').classList.remove('open');
+  setView('library');
 }
 
 function switchReviewsTab(tab) {
@@ -5442,12 +5439,16 @@ function setView(view) {
   const isRankings  = view === 'rankings';
   const isNovedades = view === 'novedades';
   const isPlan      = view === 'plan';
-  const hideNormal = isStats || isRankings || isNovedades || isPlan;
+  const isLists      = view === 'lists';
+  const isMyReviews  = view === 'myreviews';
+  const hideNormal = isStats || isRankings || isNovedades || isPlan || isLists || isMyReviews;
   const gameList     = document.getElementById('game-list');
   const statsView    = document.getElementById('stats-view');
   const rankingsView = document.getElementById('rankings-view');
   const novedadesView = document.getElementById('novedades-view');
   const planView      = document.getElementById('plan-view');
+  const listsView      = document.getElementById('lists-view');
+  const myReviewsView  = document.getElementById('myreviews-view');
   const filterBar  = document.getElementById('filter-bar');
   const footer     = document.querySelector('.footer');
   const pagBar     = document.getElementById('pagination-bar');
@@ -5456,6 +5457,8 @@ function setView(view) {
   if (rankingsView)  rankingsView.style.display  = isRankings ? 'flex' : 'none';
   if (novedadesView) novedadesView.style.display = isNovedades ? 'flex' : 'none';
   if (planView)      planView.style.display      = isPlan ? 'flex' : 'none';
+  if (listsView)      listsView.style.display     = isLists ? 'flex' : 'none';
+  if (myReviewsView)  myReviewsView.style.display = isMyReviews ? 'flex' : 'none';
   if (filterBar)    filterBar.style.display    = hideNormal ? 'none' : '';
   if (footer)       footer.style.display       = hideNormal ? 'none' : '';
   if (pagBar)       pagBar.style.display       = hideNormal ? 'none' : '';
@@ -5491,6 +5494,14 @@ function setView(view) {
   }
   if (isPlan) {
     loadPlanListView();
+    return;
+  }
+  if (isLists) {
+    loadFolders().then(renderFolderList);
+    return;
+  }
+  if (isMyReviews) {
+    openMyReviewsPanel._init();
     return;
   }
 
@@ -11666,10 +11677,11 @@ function handleFolderBtnClick() {
   }
 }
 
-// Entrada a Listas desde el sidebar/drawer — modal propio (mismo patron
-// que Reseñas), no la vista de biblioteca. "Mis listas" arranca siempre en
-// modo browse (activeFolderId=-1); elegir una lista cierra el modal y
-// muestra sus juegos en la pantalla principal (ver enterFolder).
+// Entrada a Listas desde el sidebar/drawer — vista propia (mismo patron
+// que Rankings), no un modal ni la vista de biblioteca. "Mis listas"
+// arranca siempre en modo browse (activeFolderId=-1); elegir una lista
+// sale de esta vista y muestra sus juegos en la pantalla principal (ver
+// enterFolder).
 function openListsPanel() {
   document.querySelectorAll('.modal-overlay.open').forEach(o => o.classList.remove('open'));
   if (typeof closeGameDetailView === 'function' && document.getElementById('game-detail-view')?.style.display !== 'none') {
@@ -11682,11 +11694,17 @@ function openListsPanel() {
   _publicFolderPage = 1;
   _folderPage = 1;
   activeFolderId = -1;
-  document.getElementById('lists-overlay').classList.add('open');
-  loadFolders().then(renderFolderList);
+  setView('lists');
 }
+// Ojo: closeListsPanel() se llama tambien desde enterFolder() para pasar de
+// "estoy navegando Listas" a "estoy viendo los juegos de ESTA lista en la
+// pantalla principal" — a proposito NO delega en setView('library') aca
+// (pisaria el activeFolderId que enterFolder esta por asignar, mismo
+// problema que ya se evito en showFolderLabel/enterFolder). Solo oculta
+// la vista.
 function closeListsPanel() {
-  document.getElementById('lists-overlay').classList.remove('open');
+  const lv = document.getElementById('lists-view');
+  if (lv) lv.style.display = 'none';
 }
 
 // Update folder-add-game modal footer
