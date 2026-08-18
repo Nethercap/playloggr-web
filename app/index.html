@@ -568,7 +568,10 @@
     .profile-panel-sub { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
     .profile-panel-sub .logout-btn { font-size:11px; color:var(--text2); background:none; border:none; cursor:pointer; padding:0; }
 
-    #header-more-btn { display:none; }
+    /* Listas y Rankings viven en el sidebar completo (el "..."), igual que
+       en mobile web/app — no como botones sueltos en el header, ni en
+       desktop ni en mobile (ver #mobile-sidebar, que ya los tiene). */
+    #lists-icon-btn, #rankings-icon-btn { display:none !important; }
 
     /* ── Mobile web: emular el orden mas prolijo de la app (distinto del
        escritorio, donde el header ancho permite todo en una sola fila) ── */
@@ -580,7 +583,6 @@
          resto vive en el sidebar completo que abre el "..." (mismas
          opciones que el drawer de la app, ver #mobile-sidebar). */
       #lang-toggle-btn, #novedades-icon-btn, #achievements-btn, #gom-icon-btn, #myreviews-icon-btn,
-      #lists-icon-btn, #rankings-icon-btn,
       .header-right > button[onclick="openConfigPanel()"],
       #friends-btn, #support-link, #logout-btn-header { display:none !important; }
       #header-more-btn { display:inline-flex !important; }
@@ -11041,24 +11043,12 @@ function enterFolder(folderId) {
 }
 
 function showFolderLabel() {
-  let label = document.getElementById('active-folder-label');
-  if (activeFolderId && activeFolderId !== -1) {
-    const folders = currentSectionFolders();
-    const f = folders.find(x => x.id === activeFolderId);
-    if (!label) {
-      label = document.createElement('div');
-      label.id = 'active-folder-label';
-      label.style.cssText = 'padding:4px 16px;font-size:12px;color:var(--green);display:flex;align-items:center;gap:6px;border-bottom:0.5px solid var(--border)';
-      document.getElementById('filter-bar').insertAdjacentElement('afterend', label);
-    }
-    label.innerHTML = `<i class="ti ti-folder" style="font-size:13px"></i> <strong>${f ? esc(f.name) : 'Lista'}</strong>
-      <button onclick="exitFolder()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:11px;margin-left:4px">✕ Salir de lista</button>
-      <span id="folder-hltb-total" style="margin-left:8px;color:var(--text2)"></span>`;
-    label.style.display = 'flex';
-    _loadFolderHltbTotal(activeFolderId);
-  } else if (label) {
-    label.style.display = 'none';
-  }
+  // El detalle de "en que lista estoy" ya no se muestra en el panel de
+  // filtros (quedaba redundante ahora que Listas vive en su propio modal
+  // desde el sidebar, ver openListsPanel) — salir de la lista se hace
+  // navegando a Biblioteca/Deseados (setView ya resetea activeFolderId).
+  const label = document.getElementById('active-folder-label');
+  if (label) label.style.display = 'none';
 }
 
 async function _loadFolderHltbTotal(folderId) {
