@@ -11478,10 +11478,9 @@ function switchFolderPickerTab(tab) {
   renderFolderGamePicker();
 }
 
-// "Otro (externo)" — buscar en el catalogo de Steam/IGDB y crear un juego
-// manual nuevo (que el usuario no tiene en su cuenta todavia), agregandolo
-// directo a esta lista. Mismo endpoint que usa el modal de "Agregar juego"
-// principal (steam/search) y el mismo POST /game para crearlo.
+// "Otro (externo)" — buscar en el catalogo de Steam y agregar el juego solo
+// a esta lista (esquema ext_ en folder_games), sin tocar Biblioteca/Deseados
+// ni las stats del usuario. Mismo buscador que el modal de "Agregar juego".
 let _folderExtSearchTimer = null;
 async function searchFolderExternalCatalog(q) {
   const results = document.getElementById('folder-ext-results');
@@ -11536,9 +11535,9 @@ function renderFolderGamePicker() {
   if (_folderPickerTab === 'external') {
     list.innerHTML = tabsHtml + `
       <div style="padding:10px 12px">
-        <input type="text" id="folder-ext-search" placeholder="Buscar juego en Steam..." oninput="searchFolderExternalCatalog(this.value)"
+        <input type="text" id="folder-ext-search" placeholder="Buscá tu juego" oninput="searchFolderExternalCatalog(this.value)"
           style="width:100%;box-sizing:border-box;padding:6px 10px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text)" />
-        <div style="font-size:11px;color:var(--text2);margin-top:6px">Se agrega como juego nuevo a tu cuenta y a esta lista.</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:6px">Queda solo en esta lista, no se agrega a tu Biblioteca/Deseados.</div>
       </div>
       <div id="folder-ext-results" style="max-height:360px;overflow-y:auto"></div>`;
     return;
@@ -11958,7 +11957,7 @@ async function openRankingAddGame() {
   _rankingPickerSelected = new Set();
   _rankingPickerTab = 'library';
   const searchEl = document.getElementById('ranking-picker-search');
-  if (searchEl) searchEl.value = '';
+  if (searchEl) { searchEl.value = ''; searchEl.style.display = ''; }
   await _loadRankingPickerSection('library');
   document.getElementById('ranking-add-game-overlay').classList.add('open');
 }
@@ -11976,6 +11975,8 @@ async function _loadRankingPickerSection(section) {
 
 async function switchRankingPickerTab(tab) {
   _rankingPickerTab = tab;
+  const searchEl = document.getElementById('ranking-picker-search');
+  if (searchEl) searchEl.style.display = tab === 'external' ? 'none' : '';
   if (tab === 'external') { renderRankingGamePicker(); return; }
   await _loadRankingPickerSection(tab);
 }
@@ -12037,9 +12038,9 @@ function renderRankingGamePicker() {
   const list  = document.getElementById('ranking-picker-list');
   if (_rankingPickerTab === 'external') {
     list.innerHTML = _rankingPickerTabsHtml() + `
-      <input type="text" id="ranking-ext-search" placeholder="Buscar juego en Steam..." oninput="searchRankingExternalCatalog(this.value)"
+      <input type="text" id="ranking-ext-search" placeholder="Buscá tu juego" oninput="searchRankingExternalCatalog(this.value)"
         style="width:100%;box-sizing:border-box;padding:6px 10px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);margin-bottom:6px" />
-      <div style="font-size:11px;color:var(--text2);margin-bottom:6px">Se agrega como juego nuevo a tu cuenta y a este ranking.</div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:6px">Queda solo en este ranking, no se agrega a tu Biblioteca/Deseados.</div>
       <div id="ranking-ext-results" style="max-height:320px;overflow-y:auto"></div>`;
     return;
   }
