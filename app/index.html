@@ -10877,6 +10877,7 @@ function _syncFolderSortSelect() {
 
 function setFolderSort(val) {
   folderSort = val;
+  _folderPage = 1;
   if (folderSort === 'game_count') {
     // Client-side sort only — no server call needed
     if (activeFolderId === -1) renderFolderList();
@@ -10892,6 +10893,7 @@ function setFolderSort(val) {
 
 function toggleFolderSortDir() {
   folderSortDir = folderSortDir === 'asc' ? 'desc' : 'asc';
+  _folderPage = 1;
   if (activeFolderId === -1) renderFolderList();
   else renderFolderDropdownItems();
 }
@@ -11000,6 +11002,7 @@ function renderFolderDropdownItems() {
 function switchFolderSection(section) {
   currentView = section;
   activeFolderId = -1;
+  _folderPage = 1;
   renderFolderList();
 }
 
@@ -11063,11 +11066,13 @@ let _publicFolderSort = 'votes', _publicFolderOrder = 'desc';
 
 function _publicFolderSortChange() {
   _publicFolderSort = document.getElementById('public-folder-sort-sel').value;
+  _publicFolderPage = 1;
   renderPublicFolderList();
 }
 function _publicFolderSortDirToggle() {
   _publicFolderOrder = _publicFolderOrder === 'desc' ? 'asc' : 'desc';
   document.getElementById('public-folder-sort-dir-btn').textContent = _publicFolderOrder === 'asc' ? '↑' : '↓';
+  _publicFolderPage = 1;
   renderPublicFolderList();
 }
 
@@ -11084,17 +11089,30 @@ function _folderTabsHtml() {
   </div>`;
 }
 
-async function renderPublicFolderList() {
+let _publicFolderPage = 1;
+const _PAGE_SIZE_20 = 20;
+
+function _pagerHtml(page, hasMore, onclickPrefix) {
+  if (page === 1 && !hasMore) return '';
+  return `<div style="display:flex;justify-content:center;align-items:center;gap:12px;padding:12px 0 4px">
+    <button onclick="${onclickPrefix}(${page - 1})" ${page <= 1 ? 'disabled style="opacity:0.4"' : ''} class="btn-cancel" style="font-size:12px;padding:4px 10px">← Anterior</button>
+    <span style="font-size:12px;color:var(--text2)">Página ${page}</span>
+    <button onclick="${onclickPrefix}(${page + 1})" ${!hasMore ? 'disabled style="opacity:0.4"' : ''} class="btn-cancel" style="font-size:12px;padding:4px 10px">Siguiente →</button>
+  </div>`;
+}
+
+async function renderPublicFolderList(page) {
+  if (page) _publicFolderPage = page;
   const gameList = document.getElementById('lists-modal-body');
   if (!gameList) return;
   const section = currentView === 'wishlist' ? 'wishlist' : 'library';
   gameList.innerHTML = _folderTabsHtml() + `
     <div style="padding:12px 16px 0;display:flex;gap:8px">
-      <button onclick="currentView='library';switchFolderTab('global')"
+      <button onclick="currentView='library';_publicFolderPage=1;switchFolderTab('global')"
         style="padding:6px 14px;border-radius:20px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${section==='library'?'var(--green)':'var(--bg2)'};color:${section==='library'?'#fff':'var(--text2)'}">
         <i class="ti ti-books" style="font-size:13px"></i> Biblioteca
       </button>
-      <button onclick="currentView='wishlist';switchFolderTab('global')"
+      <button onclick="currentView='wishlist';_publicFolderPage=1;switchFolderTab('global')"
         style="padding:6px 14px;border-radius:20px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${section==='wishlist'?'#EF9F27':'var(--bg2)'};color:${section==='wishlist'?'#fff':'var(--text2)'}">
         <i class="ti ti-bookmark" style="font-size:13px"></i> Deseados
       </button>
@@ -11110,9 +11128,12 @@ async function renderPublicFolderList() {
     </div>
     <div id="public-folders-content" style="padding:16px;text-align:center;color:var(--text2)"><div class="spinner" style="margin:0 auto"></div></div>`;
   try {
-    const res = await fetch(`${apiBase()}/api/v1/folders/public?section=${section}&sort=${_publicFolderSort}&order=${_publicFolderOrder}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const offset = (_publicFolderPage - 1) * _PAGE_SIZE_20;
+    const res = await fetch(`${apiBase()}/api/v1/folders/public?section=${section}&sort=${_publicFolderSort}&order=${_publicFolderOrder}&limit=${_PAGE_SIZE_20 + 1}&offset=${offset}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
     const d = await res.json();
-    const folders = d.folders || [];
+    let folders = d.folders || [];
+    const hasMore = folders.length > _PAGE_SIZE_20;
+    folders = folders.slice(0, _PAGE_SIZE_20);
     const el = document.getElementById('public-folders-content');
     if (!el) return;
     if (!folders.length) {
@@ -11133,7 +11154,7 @@ async function renderPublicFolderList() {
           <div style="font-size:11px;color:var(--text2);margin-top:4px">${f.game_count} juegos</div>
         </div>
       `).join('')}
-    </div>`;
+    </div>${_pagerHtml(_publicFolderPage, hasMore, 'renderPublicFolderList')}`;
   } catch (e) {
     const el = document.getElementById('public-folders-content');
     if (el) el.innerHTML = `<div style="color:var(--red)">${e.message || 'Error'}</div>`;
@@ -11172,7 +11193,10 @@ function closePublicFolderViewer() {
   document.getElementById('public-folder-viewer-overlay').classList.remove('open');
 }
 
-function renderFolderList() {
+let _folderPage = 1;
+
+function renderFolderList(page) {
+  if (page) _folderPage = page;
   if (activeFolderId !== -1) return;
   const gameList = document.getElementById('lists-modal-body');
   if (!gameList) return;
@@ -11184,6 +11208,8 @@ function renderFolderList() {
   } else if (folderSortDir === 'desc') {
     folders.reverse();
   }
+  const _totalFolders = folders.length;
+  folders = folders.slice((_folderPage - 1) * _PAGE_SIZE_20, _folderPage * _PAGE_SIZE_20);
 
   setTimeout(_syncFolderSortSelect, 0);
 
@@ -11240,7 +11266,7 @@ function renderFolderList() {
               <div style="font-size:11px;color:var(--text2);display:flex;align-items:center;gap:4px;margin-top:4px"><i class="ti ti-thumb-up"></i> ${f.vote_count || 0}</div>
             </div>
           `).join('')}
-        </div>`
+        </div>${_pagerHtml(_folderPage, _folderPage * _PAGE_SIZE_20 < _totalFolders, 'renderFolderList')}`
     }`;
 }
 
@@ -11639,6 +11665,8 @@ function openListsPanel() {
     currentView = 'library';
   }
   _folderTab = 'mine';
+  _publicFolderPage = 1;
+  _folderPage = 1;
   activeFolderId = -1;
   document.getElementById('lists-overlay').classList.add('open');
   loadFolders().then(renderFolderList);
@@ -11669,12 +11697,14 @@ let _rankingsSort = 'name', _rankingsOrder = 'asc';
 
 function _rankingsSortChange() {
   _rankingsSort = document.getElementById('rankings-sort-sel').value;
+  _publicRankingPage = 1; _rankingsPage = 1;
   if (_rankingTab === 'global') renderPublicRankingsList();
   else loadRankings();
 }
 function _rankingsSortDirToggle() {
   _rankingsOrder = _rankingsOrder === 'desc' ? 'asc' : 'desc';
   document.getElementById('rankings-sort-dir-btn').textContent = _rankingsOrder === 'asc' ? '↑' : '↓';
+  _publicRankingPage = 1; _rankingsPage = 1;
   if (_rankingTab === 'global') renderPublicRankingsList();
   else loadRankings();
 }
@@ -11708,19 +11738,26 @@ function switchRankingTab(tab) {
   if (sel) sel.value = _rankingsSort;
   const dirBtn = document.getElementById('rankings-sort-dir-btn');
   if (dirBtn) dirBtn.textContent = _rankingsOrder === 'asc' ? '↑' : '↓';
+  _publicRankingPage = 1; _rankingsPage = 1;
   if (tab === 'global') renderPublicRankingsList();
   else loadRankings();
 }
 
-async function renderPublicRankingsList() {
+let _publicRankingPage = 1;
+
+async function renderPublicRankingsList(page) {
+  if (page) _publicRankingPage = page;
   const grid = document.getElementById('rankings-grid');
   document.getElementById('rankings-list-panel').style.display = '';
   document.getElementById('ranking-detail-panel').style.display = 'none';
   grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px"><div class="spinner" style="margin:0 auto"></div></div>`;
   try {
-    const res = await fetch(`${apiBase()}/api/v1/rankings/public?sort=${_rankingsSort}&order=${_rankingsOrder}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const offset = (_publicRankingPage - 1) * _PAGE_SIZE_20;
+    const res = await fetch(`${apiBase()}/api/v1/rankings/public?sort=${_rankingsSort}&order=${_rankingsOrder}&limit=${_PAGE_SIZE_20 + 1}&offset=${offset}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
     const d = await res.json();
-    const rankings = d.rankings || [];
+    let rankings = d.rankings || [];
+    const hasMore = rankings.length > _PAGE_SIZE_20;
+    rankings = rankings.slice(0, _PAGE_SIZE_20);
     if (!rankings.length) {
       grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">Todavía no hay rankings públicos.</div>`;
       return;
@@ -11737,7 +11774,7 @@ async function renderPublicRankingsList() {
         <div style="font-size:11px;color:var(--text2)">por ${esc(r.username)}</div>
         <div style="font-size:12px;color:var(--text2)">${r.game_count} ${t('gamesLower')}</div>
       </div>
-    `).join('');
+    `).join('') + `<div style="grid-column:1/-1">${_pagerHtml(_publicRankingPage, hasMore, 'renderPublicRankingsList')}</div>`;
   } catch (e) {
     grid.innerHTML = `<div style="grid-column:1/-1;color:var(--red)">${e.message || 'Error'}</div>`;
   }
@@ -11775,7 +11812,10 @@ function closePublicRankingViewer() {
   document.getElementById('public-ranking-viewer-overlay').classList.remove('open');
 }
 
-function renderRankingsList() {
+let _rankingsPage = 1;
+
+function renderRankingsList(page) {
+  if (page) _rankingsPage = page;
   document.getElementById('rankings-list-panel').style.display = '';
   document.getElementById('ranking-detail-panel').style.display = 'none';
   const grid = document.getElementById('rankings-grid');
@@ -11787,6 +11827,8 @@ function renderRankingsList() {
   if (document.getElementById('rankings-sort-sel')?.value === 'game_count') {
     list = [...list].sort((a, b) => b.game_count - a.game_count);
   }
+  const total = list.length;
+  list = list.slice((_rankingsPage - 1) * _PAGE_SIZE_20, _rankingsPage * _PAGE_SIZE_20);
   grid.innerHTML = list.map(r => `
     <div onclick="openRanking(${r.id})" style="cursor:pointer;background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:6px">
       <div style="display:flex;align-items:center;gap:8px">
@@ -11796,7 +11838,7 @@ function renderRankingsList() {
       <div style="font-size:12px;color:var(--text2)">${r.game_count}/${MAX_RANKING_GAMES} ${t('gamesLower')}</div>
       <div style="font-size:11px;color:var(--text2);display:flex;align-items:center;gap:4px"><i class="ti ti-thumb-up"></i> ${r.vote_count || 0}</div>
     </div>
-  `).join('');
+  `).join('') + `<div style="grid-column:1/-1">${_pagerHtml(_rankingsPage, _rankingsPage * _PAGE_SIZE_20 < total, 'renderRankingsList')}</div>`;
 }
 
 function openRankingCreate() {
