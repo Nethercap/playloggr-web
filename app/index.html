@@ -578,6 +578,15 @@
     @media (max-width:640px) {
       body { padding:10px; }
 
+      /* Grid de un ranking (detalle) — 5 columnas fijas apretaba demasiado
+         en mobile (nombre/estrellas/plataforma cortados). 4 por fila con
+         mas aire y texto un toque mas chico entra legible. */
+      #ranking-detail-grid { grid-template-columns:repeat(4,1fr) !important; gap:8px !important; }
+      .ranking-tile div[style*="padding:8px"] { padding:5px !important; }
+      .ranking-tile div[style*="font-size:12px"] { font-size:10.5px !important; }
+      .ranking-tile span[style*="font-size:11px"] { font-size:9px !important; }
+      .ranking-tile div[style*="font-size:11px"] { font-size:9.5px !important; }
+
       .header { padding:10px 14px; }
       /* Header mobile: solo queda Playloggr, notificaciones y "..." — el
          resto vive en el sidebar completo que abre el "..." (mismas
