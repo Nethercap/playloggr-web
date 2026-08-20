@@ -557,7 +557,11 @@ const PUSH_LABELS = {
 
 function _fmtPushDate(iso) {
   if (!iso) return 'Nunca';
-  return new Date(iso).toLocaleString('es-AR');
+  // Forzar America/Argentina/Buenos_Aires explicito — antes usaba la zona
+  // horaria del navegador de quien mira el panel, que no necesariamente
+  // es ART (el resto de la app ya usa ART como referencia, ej. los
+  // horarios de los cron en GitHub Actions).
+  return new Date(iso).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' });
 }
 
 async function loadPushStatus() {
