@@ -16,6 +16,12 @@
       --green: #1D9E75; --green-dark: #0F6E56;
       --blue: #378ADD; --red: #E24B4A; --gray: #888780; --amber: #EF9F27;
       --radius-md: 8px; --radius-lg: 12px;
+      /* Color de texto/icono sobre fondo --green — casi siempre blanco, pero
+         --green es amarillo brillante en Guaca-Guaca y Determination
+         (Undertale), donde blanco da mal contraste (WCAG fail). Todo botón
+         con background:var(--green) debe usar color:var(--on-accent) en vez
+         de un color:#fff hardcodeado para heredar el ajuste por tema. */
+      --on-accent: #ffffff;
     }
     @media (prefers-color-scheme: dark) {
       :root { --bg:#1a1a1a; --bg2:#242424; --bg3:#2e2e2e; --text:#f0f0f0; --text2:#999; --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2); }
@@ -81,7 +87,7 @@
          pisar nada aparte. */
       --bg:#000000; --bg2:#0D0D2B; --bg3:#000000; --text:#FFFFFF; --text2:#46BFEE;
       --border:rgba(33,33,222,0.7); --border2:rgba(33,33,222,0.95);
-      --green:#FFFF00; --green-dark:#C9C900;
+      --green:#FFFF00; --green-dark:#C9C900; --on-accent:#0D0D2B;
       --accent-sidebar:#FFFF00; --accent-play:#FFFF00; --accent-meta:#46BFEE; --accent-unselected:#EA82E5;
     }
     /* Determination (Undertale) — negro absoluto (page = card, igual que
@@ -93,7 +99,7 @@
     :root[data-game-theme="undertale"] {
       --bg:#000000; --bg2:#0D0D0D; --bg3:#000000; --text:#FFFFFF; --text2:#00FFFF;
       --border:rgba(255,255,255,0.5); --border2:rgba(255,255,255,0.85);
-      --green:#FFFF00; --green-dark:#C9C900;
+      --green:#FFFF00; --green-dark:#C9C900; --on-accent:#000000;
       --accent-sidebar:#FFFFFF; --accent-play:#FFFF00; --accent-meta:#00FFFF; --accent-unselected:#888888;
     }
     /* Aperture (Portal) — gris concreto de camara de pruebas, azul primario/
@@ -765,7 +771,7 @@
 
     .fab-add-btn {
       display:none; position:fixed; bottom:20px; right:20px; width:56px; height:56px; border-radius:50%;
-      background:var(--green); color:#fff; border:none; align-items:center; justify-content:center;
+      background:var(--green); color:var(--on-accent); border:none; align-items:center; justify-content:center;
       font-size:26px; box-shadow:0 4px 14px rgba(0,0,0,0.35); cursor:pointer; z-index:150;
     }
     .fab-add-btn:active { transform:scale(0.94); }
@@ -1110,7 +1116,7 @@
               <input id="steam-id-input" type="text" placeholder="Steam ID o URL..." data-i18n-placeholder="steamId"
                 style="flex:1;padding:5px 8px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);min-width:0"
                 onkeydown="if(event.key==='Enter') searchSteamProfile()" />
-              <button id="steam-id-search-btn" onclick="searchSteamProfile()" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;white-space:nowrap" data-i18n="searchAction">Buscar</button>
+              <button id="steam-id-search-btn" onclick="searchSteamProfile()" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;white-space:nowrap" data-i18n="searchAction">Buscar</button>
             </div>
             <div style="font-size:10px;color:var(--text2);margin-top:4px">Lo encontrás en la URL de tu perfil de Steam o en "Detalles de la cuenta".</div>
             <div id="steam-id-current" style="font-size:10px;color:var(--text2);margin-top:4px"></div>
@@ -1148,7 +1154,7 @@
               <input id="psn-id-input" type="text" placeholder="Tu Online ID de PSN..."
                 style="flex:1;padding:5px 8px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);min-width:0"
                 onkeydown="if(event.key==='Enter') searchPsnProfile()" />
-              <button id="psn-id-search-btn" onclick="searchPsnProfile()" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;white-space:nowrap" data-i18n="searchAction">Buscar</button>
+              <button id="psn-id-search-btn" onclick="searchPsnProfile()" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;white-space:nowrap" data-i18n="searchAction">Buscar</button>
             </div>
             <div id="psn-id-current" style="font-size:10px;color:var(--text2);margin-top:4px"></div>
           </div>
@@ -1376,7 +1382,7 @@
     <div id="plan-list-panel" style="padding:16px;max-width:820px;width:100%;margin:0 auto;box-sizing:border-box">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
         <strong style="font-size:16px" data-i18n="gamePlan">Plan de juego</strong>
-        <button onclick="openGameStepWizard({mode:'new_plan'})" style="margin-left:auto;padding:6px 14px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">
+        <button onclick="openGameStepWizard({mode:'new_plan'})" style="margin-left:auto;padding:6px 14px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer">
           <i class="ti ti-plus"></i> <span data-i18n="newPlan">Nuevo plan</span>
         </button>
       </div>
@@ -1395,7 +1401,7 @@
     <!-- Rankings list -->
     <div id="rankings-list-panel" style="padding:16px;max-width:960px;width:100%;margin:0 auto;box-sizing:border-box">
       <div style="display:flex;gap:6px;margin-bottom:12px;max-width:340px">
-        <button id="rankings-tab-mine" onclick="switchRankingTab('mine')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:var(--green);color:#fff">Mis rankings</button>
+        <button id="rankings-tab-mine" onclick="switchRankingTab('mine')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:var(--green);color:var(--on-accent)">Mis rankings</button>
         <button id="rankings-tab-global" onclick="switchRankingTab('global')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:var(--bg2);color:var(--text2)">Globales</button>
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
@@ -1406,7 +1412,7 @@
           <option value="game_count" data-i18n="quantity">Cantidad</option>
         </select>
         <button id="rankings-sort-dir-btn" onclick="_rankingsSortDirToggle()" style="padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px;color:var(--text)">↓</button>
-        <button id="rankings-new-btn" onclick="openRankingCreate()" style="margin-left:auto;padding:6px 14px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">
+        <button id="rankings-new-btn" onclick="openRankingCreate()" style="margin-left:auto;padding:6px 14px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer">
           <i class="ti ti-plus"></i> <span data-i18n="newRanking">Nuevo ranking</span>
         </button>
       </div>
@@ -1426,7 +1432,7 @@
           <button onclick="confirmDeleteRanking()" style="padding:6px 12px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:#E24B4A;cursor:pointer">
             <i class="ti ti-trash"></i>
           </button>
-          <button id="ranking-add-game-btn" onclick="openRankingAddGame()" style="padding:6px 14px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">
+          <button id="ranking-add-game-btn" onclick="openRankingAddGame()" style="padding:6px 14px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer">
             <i class="ti ti-plus"></i> <span data-i18n="addGame">Agregar juego</span>
           </button>
         </div>
@@ -1649,7 +1655,7 @@
             <span id="cfg-premium-badge" style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px"></span>
           </div>
         </div>
-        <button id="cfg-upgrade-btn" onclick="startPaddleCheckout()" style="display:none;padding:12px;border-radius:8px;border:none;background:var(--green);color:#fff;cursor:pointer;font-size:13px;font-weight:600;text-align:left">
+        <button id="cfg-upgrade-btn" onclick="startPaddleCheckout()" style="display:none;padding:12px;border-radius:8px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;font-size:13px;font-weight:600;text-align:left">
           <i class="ti ti-crown"></i> Actualizar a Premium — USD $6.99 (pago único, impuestos según checkout)
           <div style="font-size:11px;color:rgba(255,255,255,0.85);margin-top:2px;font-weight:400">Desbloqueá logros, XP y nivel, personalización completa de avatar, más listas/rankings/amigos, votar Juego del mes y más.</div>
         </button>
@@ -1797,7 +1803,7 @@
       </div>
     </div>
     <div style="display:flex;gap:6px;padding:0 2px 8px;max-width:340px">
-      <button id="reviews-tab-all" onclick="switchReviewsTab('all')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:var(--green);color:#fff">
+      <button id="reviews-tab-all" onclick="switchReviewsTab('all')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:var(--green);color:var(--on-accent)">
         <span data-i18n="allReviewsTab">Todas</span>
       </button>
       <button id="reviews-tab-mine" onclick="switchReviewsTab('mine')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:var(--bg2);color:var(--text2)">
@@ -3316,12 +3322,35 @@ function starsHtml(rating) {
   return s;
 }
 
+// Corazon pixel-art (mismo asset/path que la app Flutter — ver
+// assets/icons/undertale/heart_full.svg) para el tema Determination
+// (Undertale): reemplaza la estrella ambar por un corazon rojo, con la misma
+// logica de "corazon tenue de base + corazon brillante recortado a la mitad
+// por encima" que usa themedRatingIconWidget en Flutter para el estado
+// "medio corazon" — asi lo no seleccionado (incluso mitades) siempre se ve
+// del mismo bordo tenue, nunca negro/transparente.
+const HEART_PATH = 'M2 0h2v1h2v1h1v2h2v-2h1v-1h2v-1h2v1h1v1h1v8h-2v2h-2v2h-2v2h-4v-2h-2v-2h-2v-2h-2v-8h1v-1h1v-1z';
+function _heartIconSvg(fill) {
+  const bright = '#FF0000';
+  const dim = 'rgba(255,0,0,0.35)';
+  if (fill === 'full') return `<path fill="${bright}" d="${HEART_PATH}"/>`;
+  if (fill === 'none') return `<path fill="${dim}" d="${HEART_PATH}"/>`;
+  const clipId = 'heart-half-clip-' + Math.random().toString(36).slice(2);
+  return `<path fill="${dim}" d="${HEART_PATH}"/>
+          <defs><clipPath id="${clipId}"><rect x="0" y="0" width="8" height="16"/></clipPath></defs>
+          <path fill="${bright}" d="${HEART_PATH}" clip-path="url(#${clipId})"/>`;
+}
 function starPickerHtml(gameId, currentRating) {
+  const isUndertale = document.documentElement.dataset.gameTheme === 'undertale';
   const stars = [];
   for (let i = 1; i <= 5; i++) {
     let fill = 'none';
     if (currentRating >= i)            fill = 'full';
     else if (currentRating >= i - 0.5) fill = 'half';
+    if (isUndertale) {
+      stars.push(`<svg width="18" height="18" viewBox="0 0 16 16" style="cursor:pointer;flex-shrink:0" onclick="starClick('${gameId}',${i},event)">${_heartIconSvg(fill)}</svg>`);
+      continue;
+    }
     const amber = 'var(--amber)';
     const gray  = '#d4d4d4';
     let poly;
@@ -3874,11 +3903,16 @@ function detailRatingStep(gameId, criterion, delta) {
 }
 
 function bigStarPickerHtml(gameId, criterion, currentRating) {
+  const isUndertale = document.documentElement.dataset.gameTheme === 'undertale';
   const stars = [];
   for (let i = 1; i <= 5; i++) {
     let fill = 'none';
     if (currentRating >= i)            fill = 'full';
     else if (currentRating >= i - 0.5) fill = 'half';
+    if (isUndertale) {
+      stars.push(`<svg width="30" height="30" viewBox="0 0 16 16" style="cursor:pointer;flex-shrink:0" onclick="detailStarClick('${gameId}','${criterion}',${i},event)">${_heartIconSvg(fill)}</svg>`);
+      continue;
+    }
     const amber = 'var(--amber)';
     const gray  = '#d4d4d4';
     let poly;
@@ -4268,7 +4302,7 @@ function accessibleEditModalBody(gameId) {
         ${t('cancel') || 'Cancelar'}
       </button>
       <button onclick="aeSaveAll('${gameId}')"
-        style="flex:1;padding:11px;font-size:15px;border-radius:8px;border:none;background:var(--green);color:#fff;cursor:pointer;font-weight:600">
+        style="flex:1;padding:11px;font-size:15px;border-radius:8px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;font-weight:600">
         ${t('save') || 'Guardar'}
       </button>
     </div>`;
@@ -5404,7 +5438,7 @@ function renderFilterDropdowns() {
     const hasActive = active.size > 0;
     const btn = document.createElement('button');
     btn.id = `filter-btn-${key}`;
-    btn.innerHTML = `${label}${hasActive ? ` <span style="background:var(--green);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px">${active.size}</span>` : ' ▾'}`;
+    btn.innerHTML = `${label}${hasActive ? ` <span style="background:var(--green);color:var(--on-accent);border-radius:10px;padding:1px 6px;font-size:10px">${active.size}</span>` : ' ▾'}`;
     btn.style.cssText = `padding:4px 10px;font-size:12px;border-radius:6px;border:0.5px solid ${hasActive ? 'var(--green)' : 'var(--border)'};background:var(--bg2);color:${hasActive ? 'var(--green)' : 'var(--text2)'};cursor:pointer`;
     btn.onclick = (e) => { e.stopPropagation(); toggleFilterDropdown(key, options, wrap, btn); };
 
@@ -5507,7 +5541,7 @@ function toggleFilterDropdown(key, options, wrap, btn) {
         const count = activeFilters[key].size;
         const filterLabel = key === 'statuses' ? t('status') : key === 'platforms' ? t('platform') : key === 'hours' ? t('hours') : t('rating');
         filterBtn.innerHTML = count > 0
-          ? `${filterLabel} <span style="background:var(--green);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px">${count}</span>`
+          ? `${filterLabel} <span style="background:var(--green);color:var(--on-accent);border-radius:10px;padding:1px 6px;font-size:10px">${count}</span>`
           : `${filterLabel} ▾`;
       }
     };
@@ -5539,7 +5573,7 @@ function toggleFilterDropdown(key, options, wrap, btn) {
   };
   const okBtn = document.createElement('button');
   okBtn.textContent = 'OK';
-  okBtn.style.cssText = 'font-size:12px;padding:3px 14px;border-radius:5px;border:none;background:var(--green);color:#fff;cursor:pointer';
+  okBtn.style.cssText = 'font-size:12px;padding:3px 14px;border-radius:5px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer';
   okBtn.onmousedown = (e) => {
     e.preventDefault();
     if (hasChanged()) applyFilters();
@@ -7284,7 +7318,7 @@ function renderAchievementsPanel() {
   el.innerHTML = `
     <div style="padding:14px;background:var(--bg3);border-radius:10px;margin-bottom:16px">
       <div style="display:flex;align-items:center;gap:12px">
-        <div style="width:40px;height:40px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0">${d.level}</div>
+        <div style="width:40px;height:40px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;color:var(--on-accent);font-weight:700;flex-shrink:0">${d.level}</div>
         <div style="flex:1;min-width:0">
           <div style="font-weight:700;font-size:14px">${t('levelLabel')} ${d.level}</div>
           <div style="height:8px;border-radius:4px;background:rgba(136,135,128,0.25);margin-top:6px;overflow:hidden">
@@ -7295,7 +7329,7 @@ function renderAchievementsPanel() {
         ${d.all_completed ? '<i class="ti ti-trophy" style="font-size:26px;color:#EF9F27"></i>' : ''}
       </div>
       <div style="font-size:11px;color:var(--text2);margin-top:10px">${d.unlocked_count} ${t('of')} ${d.total_count} ${t('achievementsUnlocked')}</div>
-      ${!isPremium ? `<button onclick="startPaddleCheckout()" style="width:100%;margin-top:10px;padding:8px;border-radius:8px;border:none;background:var(--green);color:#fff;font-size:12px;font-weight:600;cursor:pointer">✨ ${t('buyPremium')} — ${t('premiumLevelHint')}</button>` : ''}
+      ${!isPremium ? `<button onclick="startPaddleCheckout()" style="width:100%;margin-top:10px;padding:8px;border-radius:8px;border:none;background:var(--green);color:var(--on-accent);font-size:12px;font-weight:600;cursor:pointer">✨ ${t('buyPremium')} — ${t('premiumLevelHint')}</button>` : ''}
     </div>
     ${categoriesHtml || (_achievementsOnlyLocked ? `<div style="text-align:center;padding:24px;color:var(--text2)">¡Desbloqueaste todos los logros disponibles!</div>` : '')}
   `;
@@ -8319,7 +8353,7 @@ function _renderPlanResumeChoiceDialog(currentHours) {
   document.getElementById('plan-wizard-title').textContent = t('resumeOrRestart');
   document.getElementById('plan-wizard-body').innerHTML = `
     <div style="font-size:13px;color:var(--text2);margin-bottom:14px">${t('resumeOrRestartHint').replace('{hours}', currentHours)}</div>
-    <button onclick="_submitPlanStep('resume')" style="width:100%;padding:12px;border-radius:8px;border:none;background:var(--green);color:#fff;font-size:13px;cursor:pointer;margin-bottom:8px">${t('resumeChoiceResume')}</button>
+    <button onclick="_submitPlanStep('resume')" style="width:100%;padding:12px;border-radius:8px;border:none;background:var(--green);color:var(--on-accent);font-size:13px;cursor:pointer;margin-bottom:8px">${t('resumeChoiceResume')}</button>
     <button onclick="_submitPlanStep('restart')" style="width:100%;padding:12px;border-radius:8px;border:0.5px solid var(--border2);background:transparent;color:var(--text);font-size:13px;cursor:pointer">${t('resumeChoiceRestart')}</button>`;
   document.getElementById('plan-wizard-actions').innerHTML = `<button class="btn-cancel" onclick="_closePlanWizard()">${t('cancel')}</button>`;
 }
@@ -9522,7 +9556,7 @@ function renderConnectorMenus() {
               style="flex:1;padding:5px 8px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);min-width:0"
               onkeydown="if(event.key==='Enter') connectConnectorCode('${p}')"
               onpaste="_onConnectorCodePaste(event, '${p}')" />
-            <button onclick="connectConnectorCode('${p}')" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer;white-space:nowrap">Conectar</button>
+            <button onclick="connectConnectorCode('${p}')" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;white-space:nowrap">Conectar</button>
           </div>
           <div id="${p}-status" style="font-size:10px;color:var(--text2);margin-top:4px"></div>
         </div>`}
@@ -10601,7 +10635,7 @@ function renderPremiumView() {
     </div>
     ${rows}
     ${isPremium ? '' : `
-    <button onclick="startPaddleCheckout()" style="width:100%;margin-top:8px;padding:14px;border-radius:8px;border:none;background:var(--green);color:#fff;cursor:pointer;font-size:15px;font-weight:600">
+    <button onclick="startPaddleCheckout()" style="width:100%;margin-top:8px;padding:14px;border-radius:8px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;font-size:15px;font-weight:600">
       <i class="ti ti-crown"></i> Actualizar a Premium — USD $6.99 (pago único, impuestos según checkout)
     </button>`}
   `;
@@ -10896,7 +10930,7 @@ function renderCosmeticPickers() {
   if (!isPremium) {
     const lockedMsg = `<div style="display:flex;flex-direction:column;gap:8px;padding:10px;background:var(--bg3);border-radius:8px">
       <div style="display:flex;align-items:center;gap:8px;color:var(--text2);font-size:12px"><i class="ti ti-lock"></i>Requiere la versión premium</div>
-      <button onclick="startPaddleCheckout()" style="padding:8px;border-radius:8px;border:none;background:var(--green);color:#fff;font-size:12px;font-weight:600;cursor:pointer">✨ ${t('buyPremium')}</button>
+      <button onclick="startPaddleCheckout()" style="padding:8px;border-radius:8px;border:none;background:var(--green);color:var(--on-accent);font-size:12px;font-weight:600;cursor:pointer">✨ ${t('buyPremium')}</button>
     </div>`;
     frameEl.innerHTML = lockedMsg;
     fontEl.innerHTML  = lockedMsg;
@@ -11451,7 +11485,7 @@ function renderFolderList(page) {
         <button id="folder-sort-list-btn" onclick="toggleFolderSortDir()"
           style="padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">${folderSortDir==="asc"?"↑":"↓"}</button>
         <button onclick="openCreateFolder()"
-          style="padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">
+          style="padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer">
           <i class="ti ti-plus"></i> Nueva lista
         </button>
       </div>
@@ -12563,7 +12597,7 @@ async function onLoginSuccess() {
       </div>
       <div class="profile-panel-sub">
         <span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px"></span>
-        <button id="header-upgrade-btn" onclick="startPaddleCheckout()" style="display:none;font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;border:none;background:var(--green);color:#fff;cursor:pointer">✨ Hacerse Premium</button>
+        <button id="header-upgrade-btn" onclick="startPaddleCheckout()" style="display:none;font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer">✨ Hacerse Premium</button>
       </div>
     </div>
     <div id="plat-status-row" style="display:flex;gap:6px;margin-left:auto"></div>
@@ -12646,7 +12680,7 @@ async function loadWidgetFriends() {
           <div class="sidebar-widget-row-sub">${t('friendRequestReceived')}</div>
         </div>
         <div style="display:flex;gap:4px;flex-shrink:0">
-          <button onclick="acceptFriendRequest('${jsAttrEsc(r.username)}')" title="${t('accept') || 'Aceptar'}" style="width:22px;height:22px;border-radius:50%;border:none;background:var(--green);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;padding:0"><i class="ti ti-check"></i></button>
+          <button onclick="acceptFriendRequest('${jsAttrEsc(r.username)}')" title="${t('accept') || 'Aceptar'}" style="width:22px;height:22px;border-radius:50%;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;padding:0"><i class="ti ti-check"></i></button>
           <button onclick="removeFriendByUsername('${jsAttrEsc(r.username)}')" title="${t('reject') || 'Rechazar'}" style="width:22px;height:22px;border-radius:50%;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;padding:0"><i class="ti ti-x"></i></button>
         </div>
       </div>
@@ -12906,7 +12940,7 @@ if (document.readyState === 'loading') {
   <p style="font-size:12.5px;color:var(--text2);margin-bottom:12px;line-height:1.5">Usamos cookies para entender cómo se usa Playloggr (Google Analytics). Podés aceptar o rechazar el análisis — la app funciona igual en ambos casos. Más info en nuestra <a href="/privacy.html" style="color:var(--green)">Política de Privacidad</a>.</p>
   <div style="display:flex;gap:8px;justify-content:flex-end">
     <button onclick="setCookieConsent(false)" style="background:transparent;color:var(--text2);border:0.5px solid var(--border2);padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">Rechazar</button>
-    <button onclick="setCookieConsent(true)" style="background:var(--green);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">Aceptar</button>
+    <button onclick="setCookieConsent(true)" style="background:var(--green);color:var(--on-accent);border:none;padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">Aceptar</button>
   </div>
 </div>
 </body>
