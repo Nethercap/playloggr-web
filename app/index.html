@@ -824,6 +824,8 @@
   <div class="mobile-sidebar-header"><i class="ti ti-device-gamepad-2" style="color:#1D9E75"></i> Playloggr</div>
   <a href="https://play.google.com/store/apps/details?id=com.playloggr.app" target="_blank" rel="noopener" class="mobile-sidebar-item" style="text-decoration:none"><img src="https://cdn.simpleicons.org/googleplay/888887" style="width:16px;height:16px"> <span data-i18n="downloadApp">Descargar la app</span></a>
   <div class="mobile-sidebar-divider"></div>
+  <button id="mobile-premium-menu-btn" onclick="setView('premium');toggleHeaderMoreMenu()" class="mobile-sidebar-item" style="display:none"><i class="ti ti-sparkles" style="color:#1D9E75"></i> <span>Evolucioná a Premium</span></button>
+  <div class="mobile-sidebar-divider"></div>
   <button onclick="setView('novedades');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-sparkles" data-cp-icon="novedades"></i> <span data-i18n="novedades">Novedades</span></button>
   <button onclick="setView('plan');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-route" data-cp-icon="plan_de_juego"></i> <span data-i18n="gamePlan" style="flex:1">Plan de juego</span><i class="ti ti-lock" id="plan-nav-lock-icon" style="display:none;font-size:13px;color:var(--text2)"></i></button>
   <button onclick="openGomPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-stars" data-cp-icon="juego_del_mes"></i> <span data-i18n="gameOfMonth">Juego del mes</span></button>
@@ -1852,6 +1854,13 @@
 <div id="lists-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
   <div style="padding:16px;max-width:960px;width:100%;margin:0 auto;box-sizing:border-box">
     <div id="lists-modal-body"></div>
+  </div>
+</div>
+
+<!-- Evolucioná a Premium — vista propia (mismo criterio que Rankings/Listas). -->
+<div id="premium-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
+  <div style="padding:16px;max-width:640px;width:100%;margin:0 auto;box-sizing:border-box">
+    <div id="premium-view-body"></div>
   </div>
 </div>
 
@@ -5450,7 +5459,8 @@ function setView(view) {
   const isPlan      = view === 'plan';
   const isLists      = view === 'lists';
   const isMyReviews  = view === 'myreviews';
-  const hideNormal = isStats || isRankings || isNovedades || isPlan || isLists || isMyReviews;
+  const isPremiumView = view === 'premium';
+  const hideNormal = isStats || isRankings || isNovedades || isPlan || isLists || isMyReviews || isPremiumView;
   const gameList     = document.getElementById('game-list');
   const statsView    = document.getElementById('stats-view');
   const rankingsView = document.getElementById('rankings-view');
@@ -5458,6 +5468,7 @@ function setView(view) {
   const planView      = document.getElementById('plan-view');
   const listsView      = document.getElementById('lists-view');
   const myReviewsView  = document.getElementById('myreviews-view');
+  const premiumView    = document.getElementById('premium-view');
   const filterBar  = document.getElementById('filter-bar');
   const footer     = document.querySelector('.footer');
   const pagBar     = document.getElementById('pagination-bar');
@@ -5468,6 +5479,7 @@ function setView(view) {
   if (planView)      planView.style.display      = isPlan ? 'flex' : 'none';
   if (listsView)      listsView.style.display     = isLists ? 'flex' : 'none';
   if (myReviewsView)  myReviewsView.style.display = isMyReviews ? 'flex' : 'none';
+  if (premiumView)    premiumView.style.display   = isPremiumView ? 'flex' : 'none';
   if (filterBar)    filterBar.style.display    = hideNormal ? 'none' : '';
   if (footer)       footer.style.display       = hideNormal ? 'none' : '';
   if (pagBar)       pagBar.style.display       = hideNormal ? 'none' : '';
@@ -5511,6 +5523,10 @@ function setView(view) {
   }
   if (isMyReviews) {
     openMyReviewsPanel._init();
+    return;
+  }
+  if (isPremiumView) {
+    renderPremiumView();
     return;
   }
 
@@ -10430,6 +10446,41 @@ function _ensurePaddleReady() {
   _paddleReady = true;
 }
 
+const PREMIUM_BENEFITS = [
+  { icon: 'ti-trophy',          title: 'Logros, XP y nivel', detail: 'La versión gratis no desbloquea logros ni suma XP: no hay subida de nivel. Premium sube hasta nivel 150.' },
+  { icon: 'ti-palette',         title: 'Temas de videojuego', detail: 'Cyberpunk 2077, Portal, Undertale, Fallout, Elden Ring, Counter-Strike, StarCraft II, Doom y más, con detalles propios de cada uno.' },
+  { icon: 'ti-user-square',     title: 'Personalización de avatar', detail: 'Todas las prendas y estilos del editor de avatar, sin restricciones.' },
+  { icon: 'ti-route',           title: 'Plan de juego', detail: 'Organizá tu backlog en pasos concretos, con horas estimadas por HowLongToBeat.' },
+  { icon: 'ti-chart-line',      title: 'Estadísticas de actividad reciente', detail: 'Seguimiento detallado de lo que jugaste, calificaste y avanzaste en las últimas semanas.' },
+  { icon: 'ti-folders',         title: 'Carpetas y rankings ilimitados', detail: 'La versión gratis limita a 10 carpetas y 3 rankings. Premium no tiene límite.' },
+  { icon: 'ti-users',           title: 'Más amigos', detail: 'La versión gratis limita a 3 amigos. Premium no tiene límite.' },
+];
+
+function renderPremiumView() {
+  const body = document.getElementById('premium-view-body');
+  if (!body) return;
+  const rows = PREMIUM_BENEFITS.map(b => `
+    <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px">
+      <div style="background:rgba(29,158,117,0.12);border-radius:10px;padding:8px;flex-shrink:0"><i class="ti ${b.icon}" style="color:var(--green);font-size:20px"></i></div>
+      <div>
+        <div style="font-weight:600;font-size:14px">${b.title}</div>
+        <div style="font-size:12.5px;color:var(--text2);line-height:1.4;margin-top:2px">${b.detail}</div>
+      </div>
+    </div>`).join('');
+  body.innerHTML = `
+    <div style="background:rgba(29,158,117,0.12);border:1px solid rgba(29,158,117,0.4);border-radius:16px;padding:20px;text-align:center;margin-bottom:20px">
+      <i class="ti ti-sparkles" style="color:var(--green);font-size:32px"></i>
+      <div style="font-size:19px;font-weight:700;margin-top:6px">${isPremium ? '¡Ya sos Premium!' : 'Playloggr Premium'}</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:4px">${isPremium ? 'Gracias por apoyar el proyecto. Tenés acceso a todo lo de abajo.' : 'Pago único, para siempre. Sin suscripción.'}</div>
+    </div>
+    ${rows}
+    ${isPremium ? '' : `
+    <button onclick="startPaddleCheckout()" style="width:100%;margin-top:8px;padding:14px;border-radius:8px;border:none;background:var(--green);color:#fff;cursor:pointer;font-size:15px;font-weight:600">
+      <i class="ti ti-crown"></i> Actualizar a Premium — USD $6.99 (pago único, impuestos según checkout)
+    </button>`}
+  `;
+}
+
 function startPaddleCheckout() {
   _ensurePaddleReady();
   if (typeof Paddle === 'undefined') {
@@ -10681,6 +10732,8 @@ function applyPremiumUI() {
   if (upgradeBtn) upgradeBtn.style.display = isPremium ? 'none' : 'block';
   const headerUpgradeBtn = document.getElementById('header-upgrade-btn');
   if (headerUpgradeBtn) headerUpgradeBtn.style.display = isPremium ? 'none' : 'inline-block';
+  const premiumMenuBtn = document.getElementById('mobile-premium-menu-btn');
+  if (premiumMenuBtn) premiumMenuBtn.style.display = isPremium ? 'none' : 'flex';
   const homeBadge = document.getElementById('user-level-badge');
   if (homeBadge) homeBadge.innerHTML = levelBadgeHtml({ level: userLevel, badge_tier: userBadgeTier, trophy: userTrophy }, 13);
   const cfgBadge = document.getElementById('cfg-level-badge');
