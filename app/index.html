@@ -84,12 +84,55 @@
       --green:#FFFF00; --green-dark:#C9C900;
       --accent-sidebar:#FFFF00; --accent-play:#FFFF00; --accent-meta:#46BFEE; --accent-unselected:#EA82E5;
     }
+    /* Determination (Undertale) — negro absoluto (page = card, igual que
+       Guaca-Guaca), se distingue por el borde blanco solido en vez de glow.
+       --green usa el amarillo de Justicia (mismo rol que "selected"/tab
+       activa en Flutter) en vez del blanco de los botones reales, porque acá
+       --green tambien hace de color de texto/acento generico del sitio y el
+       blanco ya es el color de texto por defecto del tema. */
+    :root[data-game-theme="undertale"] {
+      --bg:#000000; --bg2:#0D0D0D; --bg3:#000000; --text:#FFFFFF; --text2:#00FFFF;
+      --border:rgba(255,255,255,0.5); --border2:rgba(255,255,255,0.85);
+      --green:#FFFF00; --green-dark:#C9C900;
+      --accent-sidebar:#FFFFFF; --accent-play:#FFFF00; --accent-meta:#00FFFF; --accent-unselected:#888888;
+    }
+    /* Aperture (Portal) — gris concreto de camara de pruebas, azul primario/
+       naranja secundario como los dos colores de portal. Unico tema con
+       cards redondeadas (18px, pisa el radius:0 generico de mas abajo). */
+    :root[data-game-theme="portal"] {
+      --bg:#202020; --bg2:#2A2D31; --bg3:#16181C; --text:#FFFFFF; --text2:rgba(255,255,255,0.65);
+      --border:rgba(0,162,255,0.5); --border2:rgba(255,93,0,0.4);
+      --green:#00A2FF; --green-dark:#0077B8;
+      --accent-sidebar:#00A2FF; --accent-play:#FF5D00; --accent-meta:rgba(255,255,255,0.7); --accent-unselected:#888888;
+    }
+    /* Koprulu (StarCraft II) — negro espacio profundo, paneles azul marino
+       con brillo celeste (mismo glow neon que Guaca-Guaca, otra paleta),
+       ambar para lo activo. */
+    :root[data-game-theme="starcraft2"] {
+      --bg:#0E1A2B; --bg2:#16263D; --bg3:#05050A; --text:#DCE6EE; --text2:#4FC3F7;
+      --border:rgba(79,195,247,0.6); --border2:rgba(79,195,247,0.9);
+      --green:#FCB017; --green-dark:#C98A0A;
+      --accent-sidebar:#FCB017; --accent-play:#FCB017; --accent-meta:#4FC3F7; --accent-unselected:#888888;
+    }
+    /* Knee-Deep (Doom clasico) — paredes metal/madera oscura, paneles HUD
+       grises con relieve 3D (mismo bisel que Old Shooter, otra paleta), rojo
+       sangre y dorado de la paleta PLAYPAL. */
+    :root[data-game-theme="doom"] {
+      --bg:#4A4A4A; --bg2:#5F5F5F; --bg3:#14100C; --text:#D8D0C8; --text2:#D4A017;
+      --border:#7A7A7A; --border2:#262626;
+      --green:#CC1E1E; --green-dark:#8F1414;
+      --accent-sidebar:#D4A017; --accent-play:#CC1E1E; --accent-meta:#D4A017; --accent-unselected:#888888;
+    }
     :root[data-game-theme="cyberpunk"] body       { font-family:'Play', -apple-system, sans-serif; }
     :root[data-game-theme="atomicGreen"] body,
     :root[data-game-theme="atomicAmbar"] body      { font-family:'Share Tech Mono', monospace; }
     :root[data-game-theme="erdtree"] body          { font-family:'EB Garamond', serif; }
     :root[data-game-theme="oldShooter"] body       { font-family:'PT Sans', -apple-system, sans-serif; }
     :root[data-game-theme="pacman"] body           { font-family:'Silkscreen', monospace; }
+    :root[data-game-theme="undertale"] body        { font-family:'Pixelify Sans', monospace; }
+    :root[data-game-theme="portal"] body           { font-family:'Titillium Web', -apple-system, sans-serif; }
+    :root[data-game-theme="starcraft2"] body       { font-family:'Rajdhani', -apple-system, sans-serif; }
+    :root[data-game-theme="doom"] body             { font-family:'Metal Mania', cursive; }
 
     /* Roles que en el resto de la UI no leen --green (sidebar/drawer, boton
        de play, horas/fecha de la card) — solo se pisan cuando hay un tema de
@@ -252,6 +295,59 @@
     :root[data-game-theme="pacman"] .fbtn.active,
     :root[data-game-theme="pacman"] .btn-save {
       color: var(--bg2) !important;
+    }
+    /* --green tambien es amarillo en Determination (Undertale) — mismo
+       ajuste de contraste que Guaca-Guaca. */
+    :root[data-game-theme="undertale"] .nav-pill.active,
+    :root[data-game-theme="undertale"] .view-mode-btn.active,
+    :root[data-game-theme="undertale"] .fbtn.active,
+    :root[data-game-theme="undertale"] .btn-save {
+      color: #000000 !important;
+    }
+    /* Borde blanco solido — Determination (Undertale). */
+    :root[data-game-theme="undertale"] .game-card,
+    :root[data-game-theme="undertale"] .lib-grid-tile {
+      border: 1.5px solid var(--border2);
+    }
+
+    /* Cards redondeadas con borde en degrade azul/naranja — Aperture
+       (Portal). Unico tema que pisa el radius:0 generico de mas abajo (ver
+       regla ":root[data-game-theme] .game-card"). La version Flutter tiene
+       el anillo animado girando; en CSS puro se aproxima con un degrade
+       estatico via border-image, sin animacion. */
+    :root[data-game-theme="portal"] .game-card,
+    :root[data-game-theme="portal"] .lib-grid-tile {
+      border-radius: 18px !important;
+      border-width: 2px; border-style: solid; border-color: transparent;
+      border-image: linear-gradient(135deg, #00A2FF, #FF5D00, #00A2FF) 1;
+    }
+    :root[data-game-theme="portal"] .mobile-sidebar {
+      border-left: 2px solid var(--green);
+    }
+
+    /* Glow neon celeste — Koprulu (StarCraft II), mismo mecanismo que
+       Guaca-Guaca con la paleta de SC2. */
+    :root[data-game-theme="starcraft2"] .game-card,
+    :root[data-game-theme="starcraft2"] .lib-grid-tile {
+      border: 1.4px solid var(--border2);
+      box-shadow: 0 0 6px var(--border2), inset 0 0 3px var(--border2);
+    }
+    :root[data-game-theme="starcraft2"] .mobile-sidebar {
+      border-left: 1.4px solid var(--border2);
+      box-shadow: -6px 0 12px var(--border2);
+    }
+
+    /* Relieve 3D estilo HUD — Knee-Deep (Doom), mismo mecanismo que Old
+       Shooter con la paleta gris/PLAYPAL. */
+    :root[data-game-theme="doom"] .game-card,
+    :root[data-game-theme="doom"] .lib-grid-tile {
+      border-width: 2px; border-style: solid;
+      border-color: #7A7A7A #262626 #262626 #7A7A7A;
+    }
+    :root[data-game-theme="doom"] .play-btn {
+      border-width: 2px !important; border-style: solid !important;
+      border-color: #7A7A7A #262626 #262626 #7A7A7A !important;
+      border-radius: 3px !important;
     }
 
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; padding: 20px; }
@@ -824,7 +920,7 @@
   <div class="mobile-sidebar-header"><i class="ti ti-device-gamepad-2" style="color:#1D9E75"></i> Playloggr</div>
   <a href="https://play.google.com/store/apps/details?id=com.playloggr.app" target="_blank" rel="noopener" class="mobile-sidebar-item" style="text-decoration:none"><img src="https://cdn.simpleicons.org/googleplay/888887" style="width:16px;height:16px"> <span data-i18n="downloadApp">Descargar la app</span></a>
   <div class="mobile-sidebar-divider"></div>
-  <button id="mobile-premium-menu-btn" onclick="setView('premium');toggleHeaderMoreMenu()" class="mobile-sidebar-item" style="display:none"><i class="ti ti-sparkles" style="color:#1D9E75"></i> <span>Evolucioná a Premium</span></button>
+  <button id="mobile-premium-menu-btn" onclick="setView('premium');toggleHeaderMoreMenu()" class="mobile-sidebar-item" style="display:none"><i class="ti ti-key" style="color:#1D9E75"></i> <span>Evolucioná a Premium</span></button>
   <div class="mobile-sidebar-divider"></div>
   <button onclick="setView('novedades');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-sparkles" data-cp-icon="novedades"></i> <span data-i18n="novedades">Novedades</span></button>
   <button onclick="setView('plan');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-route" data-cp-icon="plan_de_juego"></i> <span data-i18n="gamePlan" style="flex:1">Plan de juego</span><i class="ti ti-lock" id="plan-nav-lock-icon" style="display:none;font-size:13px;color:var(--text2)"></i></button>
@@ -2862,6 +2958,10 @@ const GAME_THEMES = [
   ['erdtree',     'Erdtree — inspirado en Elden Ring'],
   ['oldShooter',  'Old Shooter — inspirado en Counter-Strike 1.6'],
   ['pacman',      'Guaca-Guaca — inspirado en Pac-Man'],
+  ['undertale',   'Determination — inspirado en Undertale'],
+  ['portal',      'Aperture — inspirado en Portal'],
+  ['starcraft2',  'Koprulu — inspirado en StarCraft II'],
+  ['doom',        'Knee-Deep — inspirado en Doom'],
 ];
 
 function ensureGameThemeFontsLoaded() {
@@ -2869,7 +2969,7 @@ function ensureGameThemeFontsLoaded() {
   const link = document.createElement('link');
   link.id = 'game-theme-fonts';
   link.rel = 'stylesheet';
-  link.href = 'https://fonts.googleapis.com/css2?family=Play:wght@400;700&family=VT323&family=Share+Tech+Mono&family=Cinzel:wght@600;700&family=EB+Garamond&family=Mulish:wght@600;700&family=PT+Sans&family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap';
+  link.href = 'https://fonts.googleapis.com/css2?family=Play:wght@400;700&family=VT323&family=Share+Tech+Mono&family=Cinzel:wght@600;700&family=EB+Garamond&family=Mulish:wght@600;700&family=PT+Sans&family=Press+Start+2P&family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;600;700&family=Titillium+Web:wght@400;600;700&family=Rajdhani:wght@500;600;700&family=Metal+Mania&display=swap';
   document.head.appendChild(link);
 }
 
@@ -10469,7 +10569,7 @@ function renderPremiumView() {
     </div>`).join('');
   body.innerHTML = `
     <div style="background:rgba(29,158,117,0.12);border:1px solid rgba(29,158,117,0.4);border-radius:16px;padding:20px;text-align:center;margin-bottom:20px">
-      <i class="ti ti-sparkles" style="color:var(--green);font-size:32px"></i>
+      <i class="ti ti-key" style="color:var(--green);font-size:32px"></i>
       <div style="font-size:19px;font-weight:700;margin-top:6px">${isPremium ? '¡Ya sos Premium!' : 'Playloggr Premium'}</div>
       <div style="font-size:13px;color:var(--text2);margin-top:4px">${isPremium ? 'Gracias por apoyar el proyecto. Tenés acceso a todo lo de abajo.' : 'Pago único, para siempre. Sin suscripción.'}</div>
     </div>
