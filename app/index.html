@@ -310,16 +310,42 @@
       border: 1.5px solid var(--border2);
     }
 
-    /* Cards redondeadas con borde en degrade azul/naranja — Aperture
-       (Portal). Unico tema que pisa el radius:0 generico de mas abajo (ver
-       regla ":root[data-game-theme] .game-card"). La version Flutter tiene
-       el anillo animado girando; en CSS puro se aproxima con un degrade
-       estatico via border-image, sin animacion. */
+    /* Cards redondeadas con anillo animado azul/naranja girando en sentido
+       antihorario — Aperture (Portal), equivalente real (no aproximado) del
+       PortalCardFrame/_PortalRingPainter de Flutter. Unico tema que pisa el
+       radius:0 generico de mas abajo (ver ":root[data-game-theme] .game-card").
+       border-image no soporta bordes redondeados ni rotar un angulo — en su
+       lugar se usa un pseudo-elemento con conic-gradient + mask de "anillo"
+       (content-box recortado via mask-composite), que si respeta
+       border-radius: inherit y se puede animar rotando @property --portal-angle
+       (un <angle> registrado interpola el conic-gradient de forma continua). */
+    @property --portal-angle {
+      syntax: '<angle>';
+      inherits: false;
+      initial-value: 0deg;
+    }
     :root[data-game-theme="portal"] .game-card,
     :root[data-game-theme="portal"] .lib-grid-tile {
+      position: relative;
       border-radius: 18px !important;
-      border-width: 2px; border-style: solid; border-color: transparent;
-      border-image: linear-gradient(135deg, #00A2FF, #FF5D00, #00A2FF) 1;
+      border: none !important;
+    }
+    :root[data-game-theme="portal"] .game-card::after,
+    :root[data-game-theme="portal"] .lib-grid-tile::after {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: inherit;
+      padding: 2px;
+      background: conic-gradient(from var(--portal-angle), #00A2FF, #FF5D00, #00A2FF, #FF5D00, #00A2FF);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      mask-composite: exclude;
+      animation: portal-ring-spin 14s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes portal-ring-spin {
+      to { --portal-angle: -360deg; }
     }
     :root[data-game-theme="portal"] .mobile-sidebar {
       border-left: 2px solid var(--green);
