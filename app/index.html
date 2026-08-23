@@ -1208,8 +1208,10 @@
     </div>
   </div>
 
-  <!-- Totales globales -->
-  <div style="display:flex;gap:10px;margin-bottom:14px;align-items:flex-start">
+  <!-- Totales globales — solo tiene sentido en Biblioteca/Deseados, setView()
+       lo oculta en cualquier otra vista (antes quedaba visible siempre, por
+       arriba de Estadisticas/Rankings/etc, sin relacion con esa vista). -->
+  <div id="global-stats-panel" style="display:flex;gap:10px;margin-bottom:14px;align-items:flex-start">
     <div class="stats-row" style="flex:1;margin-bottom:0">
       <div class="stat-card"><div class="stat-label" data-i18n="total">Total</div><div class="stat-value" id="g-total">—</div></div>
       <div class="stat-card" style="border-color:rgba(55,138,221,0.3)"><div class="stat-label" data-i18n="playing" style="color:var(--blue)">Jugando</div><div class="stat-value" id="g-playing" style="color:var(--blue)">—</div></div>
@@ -1539,10 +1541,10 @@
 </div>
 
 
-<!-- Config Panel -->
-<div class="modal-overlay" id="config-overlay">
-  <div class="modal" style="max-width:480px">
-    <div class="modal-title"><i class="ti ti-settings"></i> <span data-i18n="settings">Configuración</span></div>
+<!-- Configuración — vista propia (mismo criterio que Rankings/Listas/Reseñas/Juego del mes), no modal. -->
+<div id="config-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
+  <div style="padding:16px;max-width:640px;width:100%;margin:0 auto;box-sizing:border-box">
+    <div class="modal-title" style="margin-bottom:12px"><i class="ti ti-settings"></i> <span data-i18n="settings">Configuración</span></div>
 
     <!-- Tabs -->
     <div style="display:flex;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:0.5px solid var(--border)">
@@ -1769,21 +1771,16 @@
   </div>
 </div>
 
-<!-- Juego del mes Modal -->
-<div class="modal-overlay" id="gom-overlay">
-  <div class="modal" style="max-width:520px;max-height:85vh;display:flex;flex-direction:column">
-    <div class="modal-title" style="display:flex;align-items:center;justify-content:space-between">
-      <span><i class="ti ti-stars"></i> <span data-i18n="gameOfMonth">Juego del mes</span></span>
-    </div>
+<!-- Juego del mes — vista propia (mismo criterio que Rankings/Listas/Reseñas), no modal. -->
+<div id="gom-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
+  <div style="padding:16px;max-width:520px;width:100%;margin:0 auto;box-sizing:border-box">
+    <strong style="font-size:16px;display:flex;align-items:center;gap:6px;margin-bottom:12px"><i class="ti ti-stars"></i> <span data-i18n="gameOfMonth">Juego del mes</span></strong>
     <div style="display:flex;gap:6px;padding:0 2px 10px">
       <button id="gom-tab-vote" onclick="setGomTab('vote')" class="add-btn" style="flex:1;justify-content:center"></button>
       <button id="gom-tab-history" onclick="setGomTab('history')" class="add-btn" style="flex:1;justify-content:center"></button>
     </div>
-    <div id="gom-content" style="overflow-y:auto;flex:1">
+    <div id="gom-content">
       <div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeGomPanel()" data-i18n="close">Cerrar</button>
     </div>
   </div>
 </div>
@@ -5611,6 +5608,20 @@ function setView(view) {
   // cambia de vista sin pasar por "Cerrar", el detalle quedaba montado
   // por debajo — cerrarlo explicitamente antes de cambiar de vista.
   if (_detailGameId) closeGameDetailView();
+  // Configuración pasó de modal a vista propia — antes closeConfigPanel()
+  // revertia los cambios de Apariencia sin guardar (Cancelar/click afuera),
+  // pero ahora se "cierra" navegando a otra vista via setView(), sin pasar
+  // por esa función — hay que revertir aca, en cualquier salida de 'config'.
+  if (currentView === 'config' && view !== 'config' && _appearanceSnapshot) {
+    const s = _appearanceSnapshot;
+    setLibraryViewMode(s.view);
+    applyThemeMode(s.theme);
+    cardColorMode = s.cardColor;
+    renderGames();
+    applyGameTheme(s.gameTheme);
+    _appearanceSnapshot = null;
+    _appearancePendingBody = {};
+  }
   currentView = view;
 
   const isStats     = view === 'stats';
@@ -5620,7 +5631,9 @@ function setView(view) {
   const isLists      = view === 'lists';
   const isMyReviews  = view === 'myreviews';
   const isPremiumView = view === 'premium';
-  const hideNormal = isStats || isRankings || isNovedades || isPlan || isLists || isMyReviews || isPremiumView;
+  const isGom       = view === 'gameOfMonth';
+  const isConfig    = view === 'config';
+  const hideNormal = isStats || isRankings || isNovedades || isPlan || isLists || isMyReviews || isPremiumView || isGom || isConfig;
   const gameList     = document.getElementById('game-list');
   const statsView    = document.getElementById('stats-view');
   const rankingsView = document.getElementById('rankings-view');
@@ -5629,9 +5642,13 @@ function setView(view) {
   const listsView      = document.getElementById('lists-view');
   const myReviewsView  = document.getElementById('myreviews-view');
   const premiumView    = document.getElementById('premium-view');
+  const gomView        = document.getElementById('gom-view');
+  const configView     = document.getElementById('config-view');
   const filterBar  = document.getElementById('filter-bar');
   const footer     = document.querySelector('.footer');
   const pagBar     = document.getElementById('pagination-bar');
+  const globalStatsPanel = document.getElementById('global-stats-panel');
+  if (globalStatsPanel) globalStatsPanel.style.display = hideNormal ? 'none' : 'flex';
   if (gameList)      gameList.style.display      = hideNormal ? 'none' : '';
   if (statsView)     statsView.style.display     = isStats ? 'flex' : 'none';
   if (rankingsView)  rankingsView.style.display  = isRankings ? 'flex' : 'none';
@@ -5640,6 +5657,8 @@ function setView(view) {
   if (listsView)      listsView.style.display     = isLists ? 'flex' : 'none';
   if (myReviewsView)  myReviewsView.style.display = isMyReviews ? 'flex' : 'none';
   if (premiumView)    premiumView.style.display   = isPremiumView ? 'flex' : 'none';
+  if (gomView)        gomView.style.display       = isGom ? 'flex' : 'none';
+  if (configView)      configView.style.display    = isConfig ? 'flex' : 'none';
   if (filterBar)    filterBar.style.display    = hideNormal ? 'none' : '';
   if (footer)       footer.style.display       = hideNormal ? 'none' : '';
   if (pagBar)       pagBar.style.display       = hideNormal ? 'none' : '';
@@ -5687,6 +5706,14 @@ function setView(view) {
   }
   if (isPremiumView) {
     renderPremiumView();
+    return;
+  }
+  if (isGom) {
+    openGomPanel._init();
+    return;
+  }
+  if (isConfig) {
+    openConfigPanel._init();
     return;
   }
 
@@ -6479,7 +6506,10 @@ document.addEventListener('DOMContentLoaded', () => {});
 
 // ── User Configuration ───────────────────────────────────────────────────────
 
-async function openConfigPanel() {
+function openConfigPanel() {
+  setView('config');
+}
+openConfigPanel._init = async function() {
   // Load current profile
   try {
     const res  = await fetch(`${apiBase()}/api/v1/user/profile`, {
@@ -6503,26 +6533,12 @@ async function openConfigPanel() {
   applyPremiumUI();
   await loadAvatarConfig();
   switchConfigTab('profile');
-  document.getElementById('config-overlay').classList.add('open');
-}
+  const msg = document.getElementById('cfg-profile-msg');
+  if (msg) msg.style.display = 'none';
+};
 
 function closeConfigPanel() {
-  // Si habia cambios de Apariencia sin confirmar (Cancelar, click afuera del
-  // modal, o la X) se revierten a como estaban al abrir la tab — Guardar
-  // limpia _appearanceSnapshot antes de llegar aca, asi que en ese caso no
-  // pasa nada.
-  if (_appearanceSnapshot) {
-    const s = _appearanceSnapshot;
-    setLibraryViewMode(s.view);
-    applyThemeMode(s.theme);
-    cardColorMode = s.cardColor;
-    renderGames();
-    applyGameTheme(s.gameTheme);
-    _appearanceSnapshot = null;
-    _appearancePendingBody = {};
-  }
-  document.getElementById('config-overlay').classList.remove('open');
-  document.getElementById('cfg-profile-msg').style.display = 'none';
+  setView('library');
 }
 
 async function saveAppearanceConfig() {
@@ -7360,10 +7376,12 @@ let _gomCandidates = [];
 let _gomHistory = null;
 let _gomSearchTimer = null;
 
-async function openGomPanel() {
-  document.getElementById('gom-overlay').classList.add('open');
-  setGomTab('vote');
+function openGomPanel() {
+  setView('gameOfMonth');
 }
+openGomPanel._init = function() {
+  setGomTab('vote');
+};
 
 function setGomTab(tab) {
   _gomTab = tab;
@@ -7549,7 +7567,7 @@ function showGomTop3(index) {
 }
 
 function closeGomPanel() {
-  document.getElementById('gom-overlay').classList.remove('open');
+  setView('library');
 }
 
 // ── Novedades ────────────────────────────────────────────────────────
@@ -9094,11 +9112,6 @@ async function confirmDeleteAccount() {
     showToast(t('errorDeletingAccount'), true);
   }
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-  const co = document.getElementById('config-overlay');
-  if (co) co.addEventListener('click', e => { if (e.target === co) closeConfigPanel(); });
-});
 
 // ── Steam Unified Menu ───────────────────────────────────────────────────────
 
@@ -11399,7 +11412,10 @@ async function renderPublicFolderList(page) {
           </div>
           <div style="font-size:14px;font-weight:600;margin-bottom:2px">${esc(f.name)}</div>
           <div style="font-size:11px;color:var(--text2)">por ${esc(f.username)}</div>
-          <div style="font-size:11px;color:var(--text2);margin-top:4px">${f.game_count} juegos</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px;display:flex;align-items:center;justify-content:space-between;gap:4px">
+            <span>${f.game_count} juegos</span>
+            <span>${_formatReviewDate(f.created_at)}</span>
+          </div>
         </div>
       `).join('')}
     </div>${_pagerHtml(_publicFolderPage, hasMore, 'renderPublicFolderList')}`;
@@ -12026,7 +12042,10 @@ async function renderPublicRankingsList(page) {
           <span onclick="event.stopPropagation()">${_voteBtnHtml('ranking', r.id, r.vote_count, r.voted_by_me)}</span>
         </div>
         <div style="font-size:11px;color:var(--text2)">por ${esc(r.username)}</div>
-        <div style="font-size:12px;color:var(--text2)">${r.game_count} ${t('gamesLower')}</div>
+        <div style="font-size:12px;color:var(--text2);display:flex;align-items:center;justify-content:space-between;gap:4px">
+          <span>${r.game_count} ${t('gamesLower')}</span>
+          <span style="font-size:11px">${_formatReviewDate(r.created_at)}</span>
+        </div>
       </div>
     `).join('') + `<div style="grid-column:1/-1">${_pagerHtml(_publicRankingPage, hasMore, 'renderPublicRankingsList')}</div>`;
   } catch (e) {
@@ -12090,7 +12109,10 @@ function renderRankingsList(page) {
         <strong style="font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.name)}</strong>
       </div>
       <div style="font-size:12px;color:var(--text2)">${r.game_count}/${MAX_RANKING_GAMES} ${t('gamesLower')}</div>
-      <div style="font-size:11px;color:var(--text2);display:flex;align-items:center;gap:4px"><i class="ti ti-thumb-up"></i> ${r.vote_count || 0}</div>
+      <div style="font-size:11px;color:var(--text2);display:flex;align-items:center;justify-content:space-between;gap:4px">
+        <span style="display:flex;align-items:center;gap:4px"><i class="ti ti-thumb-up"></i> ${r.vote_count || 0}</span>
+        <span>${_formatReviewDate(r.created_at)}</span>
+      </div>
     </div>
   `).join('') + `<div style="grid-column:1/-1">${_pagerHtml(_rankingsPage, _rankingsPage * _PAGE_SIZE_20 < total, 'renderRankingsList')}</div>`;
 }
