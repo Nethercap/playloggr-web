@@ -5760,8 +5760,8 @@ function setView(view) {
   resetActiveFilters();
   const sortSel = document.getElementById('sort-sel');
   if (sortSel) {
-    const wishlistOpts = ['<option value="name">Nombre</option>','<option value="platform">Plataforma</option>'];
-    const libraryOpts  = ['<option value="name">Nombre</option>','<option value="hours">Horas</option>','<option value="rating">Calificación</option>','<option value="platform">Plataforma</option>','<option value="status">Estado</option>'];
+    const wishlistOpts = [`<option value="name">${t('name')}</option>`,`<option value="platform">${t('platform')}</option>`];
+    const libraryOpts  = [`<option value="name">${t('name')}</option>`,`<option value="hours">${t('hours')}</option>`,`<option value="rating">${t('rating')}</option>`,`<option value="platform">${t('platform')}</option>`,`<option value="status">${t('status')}</option>`];
     sortSel.innerHTML  = (view === 'wishlist' ? wishlistOpts : libraryOpts).join('');
   }
 
