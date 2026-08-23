@@ -1555,7 +1555,7 @@
       <button id="tab-account" onclick="switchConfigTab('account')"
         style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px" data-i18n="accountTab">Cuenta</button>
       <button id="tab-appearance" onclick="switchConfigTab('appearance')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px">Apariencia</button>
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px" data-i18n="appearanceTab">Apariencia</button>
     </div>
 
     <!-- Profile tab -->
@@ -1658,8 +1658,8 @@
           </div>
         </div>
         <button id="cfg-upgrade-btn" onclick="startPaddleCheckout()" style="display:none;padding:12px;border-radius:8px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;font-size:13px;font-weight:600;text-align:left">
-          <i class="ti ti-crown"></i> Actualizar a Premium — USD $6.99 (pago único, impuestos según checkout)
-          <div style="font-size:11px;color:rgba(255,255,255,0.85);margin-top:2px;font-weight:400">Desbloqueá logros, XP y nivel, personalización completa de avatar, más listas/rankings/amigos, votar Juego del mes y más.</div>
+          <i class="ti ti-crown"></i> <span data-i18n="upgradeToPremiumBtn">Actualizar a Premium — USD $6.99 (pago único, impuestos según checkout)</span>
+          <div style="font-size:11px;color:rgba(255,255,255,0.85);margin-top:2px;font-weight:400" data-i18n="premiumBenefitsShort">Desbloqueá logros, XP y nivel, personalización completa de avatar, más listas/rankings/amigos, votar Juego del mes y más.</div>
         </button>
         <button onclick="confirmDeleteLibrary()"
           style="padding:10px;border-radius:8px;border:0.5px solid var(--red);background:transparent;color:var(--red);cursor:pointer;font-size:13px;text-align:left">
@@ -1678,36 +1678,36 @@
     <div id="config-appearance" style="display:none">
       <div style="display:flex;flex-direction:column;gap:16px">
         <div class="modal-group full">
-          <label>Vista por defecto</label>
+          <label data-i18n="defaultView">Vista por defecto</label>
           <div style="display:flex;gap:8px;margin-top:6px">
-            <button class="cfg-choice-btn" data-group="view" data-value="list" onclick="setCfgChoice('view','list')"><i class="ti ti-list"></i> Lista</button>
-            <button class="cfg-choice-btn" data-group="view" data-value="grid" onclick="setCfgChoice('view','grid')"><i class="ti ti-layout-grid"></i> Cuadrícula</button>
+            <button class="cfg-choice-btn" data-group="view" data-value="list" onclick="setCfgChoice('view','list')"><i class="ti ti-list"></i> <span data-i18n="listViewOpt">Lista</span></button>
+            <button class="cfg-choice-btn" data-group="view" data-value="grid" onclick="setCfgChoice('view','grid')"><i class="ti ti-layout-grid"></i> <span data-i18n="gridViewOpt">Cuadrícula</span></button>
           </div>
         </div>
         <div class="modal-group full">
-          <label>Densidad</label>
-          <div style="font-size:11px;color:var(--text2);margin-top:2px">Modo compacto: una línea por juego (o 2 en cuadrícula), tocá para expandirlo.</div>
+          <label data-i18n="density">Densidad</label>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px" data-i18n="densityHint">Modo compacto: una línea por juego (o 2 en cuadrícula), tocá para expandirlo.</div>
           <div style="display:flex;gap:8px;margin-top:6px">
-            <button class="cfg-choice-btn" data-group="density" data-value="normal" onclick="setCompactMode(false)"><i class="ti ti-list-details"></i> Normal</button>
-            <button class="cfg-choice-btn" data-group="density" data-value="compact" onclick="setCompactMode(true)"><i class="ti ti-baseline-density-medium"></i> Compacta</button>
+            <button class="cfg-choice-btn" data-group="density" data-value="normal" onclick="setCompactMode(false)"><i class="ti ti-list-details"></i> <span data-i18n="densityNormal">Normal</span></button>
+            <button class="cfg-choice-btn" data-group="density" data-value="compact" onclick="setCompactMode(true)"><i class="ti ti-baseline-density-medium"></i> <span data-i18n="densityCompact">Compacta</span></button>
           </div>
         </div>
         <div class="modal-group full">
-          <label>Tema</label>
+          <label data-i18n="themeLabel">Tema</label>
           <div style="display:flex;gap:8px;margin-top:6px">
-            <button class="cfg-choice-btn" data-group="theme" data-value="light" onclick="setCfgChoice('theme','light')"><i class="ti ti-sun"></i> Claro</button>
-            <button class="cfg-choice-btn" data-group="theme" data-value="dark" onclick="setCfgChoice('theme','dark')"><i class="ti ti-moon"></i> Oscuro</button>
+            <button class="cfg-choice-btn" data-group="theme" data-value="light" onclick="setCfgChoice('theme','light')"><i class="ti ti-sun"></i> <span data-i18n="lightTheme">Claro</span></button>
+            <button class="cfg-choice-btn" data-group="theme" data-value="dark" onclick="setCfgChoice('theme','dark')"><i class="ti ti-moon"></i> <span data-i18n="darkTheme">Oscuro</span></button>
           </div>
         </div>
         <div class="modal-group full">
-          <label>Color de card</label>
+          <label data-i18n="cardColorLabel">Color de card</label>
           <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px" id="cfg-cardcolor-options"></div>
         </div>
         <div class="modal-group full" id="cfg-gametheme-group" style="display:none">
-          <label>Tema de videojuego
-            <span style="font-size:10px;color:var(--amber);background:rgba(239,159,39,0.15);padding:2px 6px;border-radius:6px;margin-left:6px">Experimental</span>
+          <label><span data-i18n="gameThemeLabel">Tema de videojuego</span>
+            <span style="font-size:10px;color:var(--amber);background:rgba(239,159,39,0.15);padding:2px 6px;border-radius:6px;margin-left:6px" data-i18n="experimentalTag">Experimental</span>
           </label>
-          <div style="font-size:12px;color:var(--text2);margin-top:4px">Cambia toda la estética de la app: colores y tipografía. Solo visible en tu cuenta.</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:4px" data-i18n="gameThemeHint">Cambia toda la estética de la app: colores y tipografía. Solo visible en tu cuenta.</div>
           <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px" id="cfg-gametheme-options"></div>
         </div>
         <div class="modal-group full">
@@ -2354,6 +2354,17 @@ const I18N = {
     shirt: 'Camisa', pants: 'Pantalón', boots: 'Botas', gloves: 'Guantes', shoulders: 'Hombreras', waist: 'Cinturón',
     deleteLibrary: 'Eliminar biblioteca', deleteLibrarySubtitle: 'Borra todos los juegos de tu biblioteca y deseados.',
     deleteAccount: 'Eliminar cuenta', deleteAccountSubtitle: 'Elimina permanentemente tu cuenta y todos tus datos.',
+    appearanceTab: 'Apariencia', defaultView: 'Vista por defecto', listViewOpt: 'Lista', gridViewOpt: 'Cuadrícula',
+    density: 'Densidad', densityHint: 'Modo compacto: una línea por juego (o 2 en cuadrícula), tocá para expandirlo.',
+    densityNormal: 'Normal', densityCompact: 'Compacta',
+    themeLabel: 'Tema', lightTheme: 'Claro', darkTheme: 'Oscuro', cardColorLabel: 'Color de card',
+    cardColorTheme: 'Según tema', cardColorStatus: 'Según estado del juego', cardColorFixed: 'Color fijo',
+    cardColorWhite: 'Blanco', cardColorBlack: 'Negro',
+    gameThemeLabel: 'Tema de videojuego', experimentalTag: 'Experimental',
+    gameThemeHint: 'Cambia toda la estética de la app: colores y tipografía. Solo visible en tu cuenta.',
+    gameThemeInspiredBy: 'inspirado en',
+    upgradeToPremiumBtn: 'Actualizar a Premium — USD $6.99 (pago único, impuestos según checkout)',
+    premiumBenefitsShort: 'Desbloqueá logros, XP y nivel, personalización completa de avatar, más listas/rankings/amigos, votar Juego del mes y más.',
     close: 'Cerrar', search: 'Buscar...',
     chooseUsername: 'Elegí tu nombre de usuario',
     usernameHint: 'Solo letras y números, sin espacios ni tildes. Lo van a ver tus amigos.',
@@ -2549,6 +2560,17 @@ const I18N = {
     shirt: 'Shirt', pants: 'Pants', boots: 'Boots', gloves: 'Gloves', shoulders: 'Shoulders', waist: 'Belt',
     deleteLibrary: 'Delete library', deleteLibrarySubtitle: 'Deletes all games in your library and wishlist.',
     deleteAccount: 'Delete account', deleteAccountSubtitle: 'Permanently deletes your account and all your data.',
+    appearanceTab: 'Appearance', defaultView: 'Default view', listViewOpt: 'List', gridViewOpt: 'Grid',
+    density: 'Density', densityHint: 'Compact mode: one line per game (or 2 in grid view), tap to expand it.',
+    densityNormal: 'Normal', densityCompact: 'Compact',
+    themeLabel: 'Theme', lightTheme: 'Light', darkTheme: 'Dark', cardColorLabel: 'Card color',
+    cardColorTheme: 'By theme', cardColorStatus: 'By game status', cardColorFixed: 'Fixed color',
+    cardColorWhite: 'White', cardColorBlack: 'Black',
+    gameThemeLabel: 'Video game theme', experimentalTag: 'Experimental',
+    gameThemeHint: 'Changes the whole look of the app: colors and typography. Only visible on your account.',
+    gameThemeInspiredBy: 'inspired by',
+    upgradeToPremiumBtn: 'Upgrade to Premium — USD $6.99 (one-time payment, taxes may apply at checkout)',
+    premiumBenefitsShort: 'Unlock achievements, XP and levels, full avatar customization, more lists/rankings/friends, vote for Game of the Month, and more.',
     close: 'Close', search: 'Search...',
     chooseUsername: 'Choose your username',
     usernameHint: 'Letters and numbers only, no spaces or accents. Your friends will see it.',
@@ -2744,6 +2766,17 @@ const I18N = {
     shirt: 'Camisa', pants: 'Calça', boots: 'Botas', gloves: 'Luvas', shoulders: 'Ombreiras', waist: 'Cinto',
     deleteLibrary: 'Excluir biblioteca', deleteLibrarySubtitle: 'Apaga todos os jogos da sua biblioteca e desejados.',
     deleteAccount: 'Excluir conta', deleteAccountSubtitle: 'Exclui permanentemente sua conta e todos os seus dados.',
+    appearanceTab: 'Aparência', defaultView: 'Visualização padrão', listViewOpt: 'Lista', gridViewOpt: 'Grade',
+    density: 'Densidade', densityHint: 'Modo compacto: uma linha por jogo (ou 2 na grade), toque para expandir.',
+    densityNormal: 'Normal', densityCompact: 'Compacta',
+    themeLabel: 'Tema', lightTheme: 'Claro', darkTheme: 'Escuro', cardColorLabel: 'Cor do card',
+    cardColorTheme: 'Conforme o tema', cardColorStatus: 'Conforme o status do jogo', cardColorFixed: 'Cor fixa',
+    cardColorWhite: 'Branco', cardColorBlack: 'Preto',
+    gameThemeLabel: 'Tema de videogame', experimentalTag: 'Experimental',
+    gameThemeHint: 'Muda toda a estética do app: cores e tipografia. Visível só na sua conta.',
+    gameThemeInspiredBy: 'inspirado em',
+    upgradeToPremiumBtn: 'Atualizar para Premium — USD $6.99 (pagamento único, impostos podem ser cobrados no checkout)',
+    premiumBenefitsShort: 'Desbloqueie conquistas, XP e níveis, personalização completa de avatar, mais listas/rankings/amigos, vote no Jogo do mês e mais.',
     close: 'Fechar', search: 'Buscar...',
     chooseUsername: 'Escolha seu nome de usuário',
     usernameHint: 'Somente letras e números, sem espaços ou acentos. Seus amigos vão ver.',
@@ -2979,19 +3012,26 @@ async function loadAppearanceSettings() {
 // ── Temas de videojuego (experimental, Premium) — solo local (no via
 // /settings, mismo criterio que la app Flutter: se guarda en localStorage,
 // no se sincroniza al backend).
-const GAME_THEMES = [
-  ['none',        'Playloggr (por defecto)'],
-  ['cyberpunk',   'Cyberpunk'],
-  ['atomicGreen', 'Atomic Green — inspirado en Fallout 3'],
-  ['atomicAmbar', 'Atomic Ambar — inspirado en Fallout: New Vegas'],
-  ['erdtree',     'Erdtree — inspirado en Elden Ring'],
-  ['oldShooter',  'Old Shooter — inspirado en Counter-Strike 1.6'],
-  ['pacman',      'Guaca-Guaca — inspirado en Pac-Man'],
-  ['undertale',   'Determination — inspirado en Undertale'],
-  ['portal',      'Aperture — inspirado en Portal'],
-  ['starcraft2',  'Koprulu — inspirado en StarCraft II'],
-  ['doom',        'Knee-Deep — inspirado en Doom'],
+// Nombre del tema fijo (marca propia, no se traduce) + juego de referencia —
+// el conector ("inspirado en"/"inspired by"/"inspirado em") sale de t(),
+// asi que GAME_THEMES es una funcion (no un array estatico) para poder
+// recalcularse cada vez que cambia el idioma.
+const GAME_THEME_DEFS = [
+  ['none',        'Playloggr (por defecto)', null],
+  ['cyberpunk',   'Cyberpunk', null],
+  ['atomicGreen', 'Atomic Green', 'Fallout 3'],
+  ['atomicAmbar', 'Atomic Ambar', 'Fallout: New Vegas'],
+  ['erdtree',     'Erdtree', 'Elden Ring'],
+  ['oldShooter',  'Old Shooter', 'Counter-Strike 1.6'],
+  ['pacman',      'Guaca-Guaca', 'Pac-Man'],
+  ['undertale',   'Determination', 'Undertale'],
+  ['portal',      'Aperture', 'Portal'],
+  ['starcraft2',  'Koprulu', 'StarCraft II'],
+  ['doom',        'Knee-Deep', 'Doom'],
 ];
+function GAME_THEMES() {
+  return GAME_THEME_DEFS.map(([key, name, game]) => [key, game ? `${name} — ${t('gameThemeInspiredBy')} ${game}` : name]);
+}
 
 function ensureGameThemeFontsLoaded() {
   if (document.getElementById('game-theme-fonts')) return;
@@ -6611,11 +6651,11 @@ function renderAppearanceTab() {
   const isFixed = STATUS_DOT_COLORS.hasOwnProperty(cardColorMode);
   const selectedKey = isFixed ? '__fixed__' : (cardColorMode || 'theme');
   const options = [
-    ['theme', 'ti-brightness-6', 'Según tema'],
-    ['status', 'ti-palette', 'Según estado del juego'],
-    ['__fixed__', 'ti-pin', 'Color fijo'],
-    ['white', 'ti-square', 'Blanco'],
-    ['black', 'ti-square-filled', 'Negro'],
+    ['theme', 'ti-brightness-6', t('cardColorTheme')],
+    ['status', 'ti-palette', t('cardColorStatus')],
+    ['__fixed__', 'ti-pin', t('cardColorFixed')],
+    ['white', 'ti-square', t('cardColorWhite')],
+    ['black', 'ti-square-filled', t('cardColorBlack')],
   ];
   const host = document.getElementById('cfg-cardcolor-options');
   host.innerHTML = `
@@ -6639,7 +6679,7 @@ function renderAppearanceTab() {
   if (gtGroup) {
     gtGroup.style.display = '';
     const current = document.documentElement.dataset.gameTheme || 'none';
-    document.getElementById('cfg-gametheme-options').innerHTML = GAME_THEMES.map(([key, label]) => {
+    document.getElementById('cfg-gametheme-options').innerHTML = GAME_THEMES().map(([key, label]) => {
       const locked = !isPremium && key !== 'none';
       return `
         <button type="button" class="cfg-choice-btn ${current === key ? 'active' : ''}" style="justify-content:flex-start;text-align:left;opacity:${locked ? 0.5 : 1}"
