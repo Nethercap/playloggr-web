@@ -952,7 +952,7 @@
   <div class="mobile-sidebar-header"><i class="ti ti-device-gamepad-2" style="color:#1D9E75"></i> Playloggr</div>
   <a href="https://play.google.com/store/apps/details?id=com.playloggr.app" target="_blank" rel="noopener" class="mobile-sidebar-item" style="text-decoration:none"><img src="https://cdn.simpleicons.org/googleplay/888887" style="width:16px;height:16px"> <span data-i18n="downloadApp">Descargar la app</span></a>
   <div class="mobile-sidebar-divider"></div>
-  <button id="mobile-premium-menu-btn" onclick="setView('premium');toggleHeaderMoreMenu()" class="mobile-sidebar-item" style="display:none"><i class="ti ti-key" style="color:#1D9E75"></i> <span>Evolucioná a Premium</span></button>
+  <button id="mobile-premium-menu-btn" onclick="setView('premium');toggleHeaderMoreMenu()" class="mobile-sidebar-item" style="display:none"><i class="ti ti-key" style="color:#1D9E75"></i> <span data-i18n="evolveToPremium">Evolucioná a Premium</span></button>
   <div class="mobile-sidebar-divider"></div>
   <button onclick="setView('novedades');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-sparkles" data-cp-icon="novedades"></i> <span data-i18n="novedades">Novedades</span></button>
   <button onclick="setView('plan');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-route" data-cp-icon="plan_de_juego"></i> <span data-i18n="gamePlan" style="flex:1">Plan de juego</span><i class="ti ti-lock" id="plan-nav-lock-icon" style="display:none;font-size:13px;color:var(--text2)"></i></button>
@@ -1118,7 +1118,7 @@
                 onkeydown="if(event.key==='Enter') searchSteamProfile()" />
               <button id="steam-id-search-btn" onclick="searchSteamProfile()" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;white-space:nowrap" data-i18n="searchAction">Buscar</button>
             </div>
-            <div style="font-size:10px;color:var(--text2);margin-top:4px">Lo encontrás en la URL de tu perfil de Steam o en "Detalles de la cuenta".</div>
+            <div style="font-size:10px;color:var(--text2);margin-top:4px" data-i18n="steamIdFindHint">Lo encontrás en la URL de tu perfil de Steam o en "Detalles de la cuenta".</div>
             <div id="steam-id-current" style="font-size:10px;color:var(--text2);margin-top:4px"></div>
           </div>
           <!-- Actions -->
@@ -2365,6 +2365,25 @@ const I18N = {
     gameThemeInspiredBy: 'inspirado en',
     upgradeToPremiumBtn: 'Actualizar a Premium — USD $6.99 (pago único, impuestos según checkout)',
     premiumBenefitsShort: 'Desbloqueá logros, XP y nivel, personalización completa de avatar, más listas/rankings/amigos, votar Juego del mes y más.',
+    evolveToPremium: 'Evolucioná a Premium',
+    premiumActiveTitle: '¡Ya sos Premium!', premiumTitle: 'Playloggr Premium',
+    premiumActiveSubtitle: 'Gracias por apoyar el proyecto. Tenés acceso a todo lo de abajo.',
+    premiumSubtitle: 'Pago único, para siempre. Sin suscripción.',
+    checkoutLoadError: 'No se pudo cargar el checkout de pago. Recargá la página e intentá de nuevo.',
+    pbAchievementsTitle: 'Logros, XP y nivel',
+    pbAchievementsDetail: 'La versión gratis no desbloquea logros ni suma XP: no hay subida de nivel. Premium sube hasta nivel 150.',
+    pbThemesTitle: 'Temas de videojuego',
+    pbThemesDetail: 'Cyberpunk 2077, Portal, Undertale, Fallout, Elden Ring, Counter-Strike, StarCraft II, Doom y más, con detalles propios de cada uno.',
+    pbAvatarTitle: 'Personalización de avatar',
+    pbAvatarDetail: 'Todas las prendas y estilos del editor de avatar, sin restricciones.',
+    pbGamePlanTitle: 'Plan de juego',
+    pbGamePlanDetail: 'Organizá tu backlog en pasos concretos, con horas estimadas por HowLongToBeat.',
+    pbStatsTitle: 'Estadísticas de actividad reciente',
+    pbStatsDetail: 'Seguimiento detallado de lo que jugaste, calificaste y avanzaste en las últimas semanas.',
+    pbFoldersTitle: 'Carpetas y rankings ilimitados',
+    pbFoldersDetail: 'La versión gratis limita a 10 carpetas y 3 rankings. Premium no tiene límite.',
+    pbFriendsTitle: 'Más amigos',
+    pbFriendsDetail: 'La versión gratis limita a 3 amigos. Premium no tiene límite.',
     close: 'Cerrar', search: 'Buscar...',
     chooseUsername: 'Elegí tu nombre de usuario',
     usernameHint: 'Solo letras y números, sin espacios ni tildes. Lo van a ver tus amigos.',
@@ -2488,6 +2507,32 @@ const I18N = {
     errorLoadingFriends: 'Error al cargar amigos',
     usernameFormatError: 'El nombre de usuario debe tener 3-20 caracteres, solo letras y números',
     captchaRequired: 'Completá la verificación antes de continuar',
+    fillEmailPassword: 'Completá email y contraseña', fillUsername: 'Completá el nombre de usuario',
+    usernameAlreadyInUse: 'Nombre de usuario ya en uso', checkYourData: 'Verificá los datos ingresados',
+    authError: 'Error de autenticación',
+    allAchievementsUnlocked: '¡Desbloqueaste todos los logros disponibles!',
+    levelUpToast: '🎉 ¡Felicidades! Subiste al nivel {level}',
+    communityAvgSingular: 'Promedio de {avg} sobre un total de {count} valoración',
+    communityAvgPlural: 'Promedio de {avg} sobre un total de {count} valoraciones',
+    noCommunityRatingsYet: 'Todavía sin valoraciones de la comunidad',
+    addGameOrSyncHint: 'Agregá un juego o sincronizá Steam / PSN',
+    codeIncorrect: 'Código incorrecto', passwordUpdated: '✓ Contraseña actualizada. Iniciá sesión con tu nueva contraseña.',
+    savedSyncingSteam: '✓ Guardado. Sincronizando Steam...', savedCorrectly: '✓ Guardado correctamente',
+    avatarSaved: '✓ Avatar guardado', connectedLabel: 'Conectado',
+    profileNotFound: 'No se encontró el perfil', libraryAndWishlistSynced: '✓ Biblioteca y deseados sincronizados',
+    requiresPremiumHint: 'Requiere la versión premium',
+    pageLabel: 'Página {page}', noPublicListsSection: 'Todavía no hay listas públicas en esta sección.',
+    listHasNoGamesYet: 'Esta lista todavía no tiene juegos.',
+    noPublicRankingsYet: 'Todavía no hay rankings públicos.', rankingHasNoGamesYet: 'Este ranking todavía no tiene juegos.',
+    cookieBannerText: 'Usamos cookies para entender cómo se usa Playloggr (Google Analytics). Podés aceptar o rechazar el análisis — la app funciona igual en ambos casos. Más info en nuestra',
+    privacyPolicyLink: 'Política de Privacidad',
+    steamIdFindHint: 'Lo encontrás en la URL de tu perfil de Steam o en "Detalles de la cuenta".',
+    gogConnectInstructions: '1) Iniciá sesión con usuario y contraseña de GOG (no funciona "Continuar con Google") — el login pasa por la página oficial de GOG, nunca por nosotros. 2) Al terminar, esa pestaña va a quedar en blanco o dar error — es normal, es una limitación de GOG, no nuestra: copiá la URL COMPLETA de la barra de direcciones (tiene que contener "code=...", no es información sensible) y pegala abajo.',
+    xboxConnectInstructions: 'Se abre una ventana para iniciar sesión con tu cuenta de Microsoft/Xbox — al terminar se conecta solo, no hace falta copiar nada. Si tu navegador bloqueó la ventana emergente, permitila e intentá de nuevo.',
+    initialConnectOnlyFromApp: 'La conexión inicial con {label} solo se puede hacer desde la app (no desde el navegador). Ya conectada, podés sincronizar desde acá.',
+    openLoginInOtherTab: 'Abrir login de {label} en otra pestaña',
+    pasteCodePlaceholder: 'Pegá el code (o la URL/JSON final)...',
+    loginWithLabel: 'Login {label}', savedLabel: '✓ Guardado: {value}', connectedDefault: 'Conectado',
     sendCode: 'Enviar código', enterEmailFirst: 'Ingresá tu email primero',
     codeSentIfExists: 'Si el email existe, te enviamos un código de recuperación.',
     genericNetworkError: 'Error de conexión. Intentá de nuevo.',
@@ -2571,6 +2616,25 @@ const I18N = {
     gameThemeInspiredBy: 'inspired by',
     upgradeToPremiumBtn: 'Upgrade to Premium — USD $6.99 (one-time payment, taxes may apply at checkout)',
     premiumBenefitsShort: 'Unlock achievements, XP and levels, full avatar customization, more lists/rankings/friends, vote for Game of the Month, and more.',
+    evolveToPremium: 'Level up to Premium',
+    premiumActiveTitle: 'You\'re already Premium!', premiumTitle: 'Playloggr Premium',
+    premiumActiveSubtitle: 'Thanks for supporting the project. You have access to everything below.',
+    premiumSubtitle: 'One-time payment, forever. No subscription.',
+    checkoutLoadError: 'Could not load the payment checkout. Reload the page and try again.',
+    pbAchievementsTitle: 'Achievements, XP and level',
+    pbAchievementsDetail: 'The free tier doesn\'t unlock achievements or earn XP: no leveling up. Premium levels up to 150.',
+    pbThemesTitle: 'Video game themes',
+    pbThemesDetail: 'Cyberpunk 2077, Portal, Undertale, Fallout, Elden Ring, Counter-Strike, StarCraft II, Doom, and more, each with its own details.',
+    pbAvatarTitle: 'Avatar customization',
+    pbAvatarDetail: 'All outfits and styles in the avatar editor, no restrictions.',
+    pbGamePlanTitle: 'Game plan',
+    pbGamePlanDetail: 'Organize your backlog into concrete steps, with estimated hours from HowLongToBeat.',
+    pbStatsTitle: 'Recent activity statistics',
+    pbStatsDetail: 'Detailed tracking of what you played, rated, and made progress on in recent weeks.',
+    pbFoldersTitle: 'Unlimited lists and rankings',
+    pbFoldersDetail: 'The free tier limits you to 10 lists and 3 rankings. Premium has no limit.',
+    pbFriendsTitle: 'More friends',
+    pbFriendsDetail: 'The free tier limits you to 3 friends. Premium has no limit.',
     close: 'Close', search: 'Search...',
     chooseUsername: 'Choose your username',
     usernameHint: 'Letters and numbers only, no spaces or accents. Your friends will see it.',
@@ -2694,6 +2758,32 @@ const I18N = {
     errorLoadingFriends: 'Error loading friends',
     usernameFormatError: 'Username must be 3-20 characters, letters and numbers only',
     captchaRequired: 'Please complete the verification before continuing',
+    fillEmailPassword: 'Fill in email and password', fillUsername: 'Fill in your username',
+    usernameAlreadyInUse: 'Username already in use', checkYourData: 'Check your details',
+    authError: 'Authentication error',
+    allAchievementsUnlocked: "You've unlocked all available achievements!",
+    levelUpToast: '🎉 Congrats! You leveled up to {level}',
+    communityAvgSingular: 'Average of {avg} out of {count} rating',
+    communityAvgPlural: 'Average of {avg} out of {count} ratings',
+    noCommunityRatingsYet: 'No community ratings yet',
+    addGameOrSyncHint: 'Add a game or sync Steam / PSN',
+    codeIncorrect: 'Incorrect code', passwordUpdated: '✓ Password updated. Log in with your new password.',
+    savedSyncingSteam: '✓ Saved. Syncing Steam...', savedCorrectly: '✓ Saved successfully',
+    avatarSaved: '✓ Avatar saved', connectedLabel: 'Connected',
+    profileNotFound: 'Profile not found', libraryAndWishlistSynced: '✓ Library and wishlist synced',
+    requiresPremiumHint: 'Requires the premium version',
+    pageLabel: 'Page {page}', noPublicListsSection: "There aren't any public lists in this section yet.",
+    listHasNoGamesYet: "This list doesn't have any games yet.",
+    noPublicRankingsYet: "There aren't any public rankings yet.", rankingHasNoGamesYet: "This ranking doesn't have any games yet.",
+    cookieBannerText: 'We use cookies to understand how Playloggr is used (Google Analytics). You can accept or decline analytics — the app works the same either way. More info in our',
+    privacyPolicyLink: 'Privacy Policy',
+    steamIdFindHint: 'You can find it in your Steam profile URL or in "Account Details".',
+    gogConnectInstructions: '1) Log in with your GOG username and password ("Continue with Google" doesn\'t work) — login happens on GOG\'s own official page, never through us. 2) When it finishes, that tab will go blank or show an error — that\'s normal, a GOG limitation, not ours: copy the FULL URL from the address bar (it must contain "code=...", not sensitive info) and paste it below.',
+    xboxConnectInstructions: 'A window opens to log in with your Microsoft/Xbox account — once done it connects automatically, no need to copy anything. If your browser blocked the popup, allow it and try again.',
+    initialConnectOnlyFromApp: 'The initial connection with {label} can only be done from the app (not from the browser). Once connected, you can sync from here.',
+    openLoginInOtherTab: 'Open {label} login in another tab',
+    pasteCodePlaceholder: 'Paste the code (or the final URL/JSON)...',
+    loginWithLabel: '{label} login', savedLabel: '✓ Saved: {value}', connectedDefault: 'Connected',
     sendCode: 'Send code', enterEmailFirst: 'Enter your email first',
     codeSentIfExists: 'If the email exists, we sent a recovery code.',
     genericNetworkError: 'Connection error. Please try again.',
@@ -2777,6 +2867,25 @@ const I18N = {
     gameThemeInspiredBy: 'inspirado em',
     upgradeToPremiumBtn: 'Atualizar para Premium — USD $6.99 (pagamento único, impostos podem ser cobrados no checkout)',
     premiumBenefitsShort: 'Desbloqueie conquistas, XP e níveis, personalização completa de avatar, mais listas/rankings/amigos, vote no Jogo do mês e mais.',
+    evolveToPremium: 'Evolua para Premium',
+    premiumActiveTitle: 'Você já é Premium!', premiumTitle: 'Playloggr Premium',
+    premiumActiveSubtitle: 'Obrigado por apoiar o projeto. Você tem acesso a tudo abaixo.',
+    premiumSubtitle: 'Pagamento único, para sempre. Sem assinatura.',
+    checkoutLoadError: 'Não foi possível carregar o checkout de pagamento. Recarregue a página e tente novamente.',
+    pbAchievementsTitle: 'Conquistas, XP e nível',
+    pbAchievementsDetail: 'A versão gratuita não desbloqueia conquistas nem soma XP: não há subida de nível. Premium sobe até o nível 150.',
+    pbThemesTitle: 'Temas de videogame',
+    pbThemesDetail: 'Cyberpunk 2077, Portal, Undertale, Fallout, Elden Ring, Counter-Strike, StarCraft II, Doom e mais, com detalhes próprios de cada um.',
+    pbAvatarTitle: 'Personalização de avatar',
+    pbAvatarDetail: 'Todas as roupas e estilos do editor de avatar, sem restrições.',
+    pbGamePlanTitle: 'Plano de jogo',
+    pbGamePlanDetail: 'Organize seu backlog em etapas concretas, com horas estimadas pelo HowLongToBeat.',
+    pbStatsTitle: 'Estatísticas de atividade recente',
+    pbStatsDetail: 'Acompanhamento detalhado do que você jogou, avaliou e avançou nas últimas semanas.',
+    pbFoldersTitle: 'Listas e rankings ilimitados',
+    pbFoldersDetail: 'A versão gratuita limita a 10 listas e 3 rankings. Premium não tem limite.',
+    pbFriendsTitle: 'Mais amigos',
+    pbFriendsDetail: 'A versão gratuita limita a 3 amigos. Premium não tem limite.',
     close: 'Fechar', search: 'Buscar...',
     chooseUsername: 'Escolha seu nome de usuário',
     usernameHint: 'Somente letras e números, sem espaços ou acentos. Seus amigos vão ver.',
@@ -2900,6 +3009,32 @@ const I18N = {
     errorLoadingFriends: 'Erro ao carregar amigos',
     usernameFormatError: 'O nome de usuário deve ter 3-20 caracteres, somente letras e números',
     captchaRequired: 'Complete a verificação antes de continuar',
+    fillEmailPassword: 'Preencha email e senha', fillUsername: 'Preencha o nome de usuário',
+    usernameAlreadyInUse: 'Nome de usuário já em uso', checkYourData: 'Verifique os dados informados',
+    authError: 'Erro de autenticação',
+    allAchievementsUnlocked: 'Você desbloqueou todas as conquistas disponíveis!',
+    levelUpToast: '🎉 Parabéns! Você subiu para o nível {level}',
+    communityAvgSingular: 'Média de {avg} de um total de {count} avaliação',
+    communityAvgPlural: 'Média de {avg} de um total de {count} avaliações',
+    noCommunityRatingsYet: 'Ainda sem avaliações da comunidade',
+    addGameOrSyncHint: 'Adicione um jogo ou sincronize Steam / PSN',
+    codeIncorrect: 'Código incorreto', passwordUpdated: '✓ Senha atualizada. Faça login com sua nova senha.',
+    savedSyncingSteam: '✓ Salvo. Sincronizando Steam...', savedCorrectly: '✓ Salvo com sucesso',
+    avatarSaved: '✓ Avatar salvo', connectedLabel: 'Conectado',
+    profileNotFound: 'Perfil não encontrado', libraryAndWishlistSynced: '✓ Biblioteca e desejados sincronizados',
+    requiresPremiumHint: 'Requer a versão premium',
+    pageLabel: 'Página {page}', noPublicListsSection: 'Ainda não há listas públicas nesta seção.',
+    listHasNoGamesYet: 'Esta lista ainda não tem jogos.',
+    noPublicRankingsYet: 'Ainda não há rankings públicos.', rankingHasNoGamesYet: 'Este ranking ainda não tem jogos.',
+    cookieBannerText: 'Usamos cookies para entender como o Playloggr é usado (Google Analytics). Você pode aceitar ou recusar a análise — o app funciona do mesmo jeito em ambos os casos. Mais informações na nossa',
+    privacyPolicyLink: 'Política de Privacidade',
+    steamIdFindHint: 'Você encontra na URL do seu perfil da Steam ou em "Detalhes da conta".',
+    gogConnectInstructions: '1) Faça login com usuário e senha da GOG (não funciona "Continuar com Google") — o login acontece na página oficial da GOG, nunca conosco. 2) Ao terminar, essa aba vai ficar em branco ou dar erro — isso é normal, uma limitação da GOG, não nossa: copie a URL COMPLETA da barra de endereços (precisa conter "code=...", não é informação sensível) e cole abaixo.',
+    xboxConnectInstructions: 'Uma janela abre para fazer login com sua conta Microsoft/Xbox — ao terminar, conecta sozinho, não precisa copiar nada. Se seu navegador bloqueou a janela pop-up, permita e tente de novo.',
+    initialConnectOnlyFromApp: 'A conexão inicial com {label} só pode ser feita pelo app (não pelo navegador). Já conectado, você pode sincronizar por aqui.',
+    openLoginInOtherTab: 'Abrir login do {label} em outra aba',
+    pasteCodePlaceholder: 'Cole o code (ou a URL/JSON final)...',
+    loginWithLabel: 'Login {label}', savedLabel: '✓ Salvo: {value}', connectedDefault: 'Conectado',
     sendCode: 'Enviar código', enterEmailFirst: 'Digite seu email primeiro',
     codeSentIfExists: 'Se o email existir, enviamos um código de recuperação.',
     genericNetworkError: 'Erro de conexão. Tente novamente.',
@@ -4454,8 +4589,8 @@ async function loadRatingDetailCommunityStats(gameId) {
     const avgEl = document.getElementById(`rating-detail-avg-${gameId}`);
     if (avgEl) {
       avgEl.textContent = d.rating_count > 0
-        ? `Promedio de ${d.avg_rating} sobre un total de ${d.rating_count} ${d.rating_count === 1 ? 'valoración' : 'valoraciones'}`
-        : 'Todavía sin valoraciones de la comunidad';
+        ? t(d.rating_count === 1 ? 'communityAvgSingular' : 'communityAvgPlural').replace('{avg}', d.avg_rating).replace('{count}', d.rating_count)
+        : t('noCommunityRatingsYet');
     }
   } catch (e) {}
 }
@@ -4819,7 +4954,7 @@ async function renderGames() {
       list.innerHTML = `
         <div class="empty">
           <i class="ti ti-mood-sad" style="font-size:32px;display:block;margin-bottom:10px"></i>
-          <div style="margin-bottom:14px">Agregá un juego o sincronizá Steam / PSN</div>
+          <div style="margin-bottom:14px">${t('addGameOrSyncHint')}</div>
           <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
             <button onclick="${addFn}" class="add-btn"><i class="ti ti-plus"></i> Agregar juego</button>${syncBtns}
           </div>
@@ -5897,7 +6032,7 @@ async function submitVerifyEmail() {
       body: JSON.stringify({ email: _pendingVerifyEmail, code }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Código incorrecto');
+    if (!res.ok) throw new Error(data.detail || t('codeIncorrect'));
     authToken = data.access_token;
     authUser  = data.username;
     localStorage.setItem('gb_token', authToken);
@@ -5905,7 +6040,7 @@ async function submitVerifyEmail() {
     closeVerifyEmail();
     onLoginSuccess();
   } catch(e) {
-    msgEl.textContent = (e instanceof Error ? e.message : String(e)) || 'Código incorrecto';
+    msgEl.textContent = (e instanceof Error ? e.message : String(e)) || t('codeIncorrect');
     msgEl.style.color = '#E24B4A';
     msgEl.style.display = 'block';
   }
@@ -5983,7 +6118,7 @@ async function submitReset() {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail);
-    msg.textContent = '✓ Contraseña actualizada. Iniciá sesión con tu nueva contraseña.';
+    msg.textContent = t('passwordUpdated');
     msg.style.color = 'var(--green)';
     msg.style.display = 'block';
     setTimeout(() => { closeReset(); logout(); }, 2000);
@@ -6027,7 +6162,7 @@ async function saveSettings() {
       body: JSON.stringify(body),
     });
     if (!res.ok) throw new Error('Error al guardar');
-    msg.textContent = '✓ Guardado. Sincronizando Steam...';
+    msg.textContent = t('savedSyncingSteam');
     msg.style.color = 'var(--green)';
     msg.style.display = 'block';
     setTimeout(() => { closeSettings(); syncAll(); }, 1200);
@@ -6745,7 +6880,7 @@ async function saveConfig() {
       const msg = document.getElementById('cfg-profile-msg');
       msg.style.display = 'block';
       msg.style.color   = 'var(--red)';
-      msg.textContent   = 'Ese nombre de usuario ya está en uso';
+      msg.textContent   = t('usernameAlreadyInUse');
       return;
     }
   }
@@ -6769,7 +6904,7 @@ async function saveConfig() {
     });
     if (!res.ok) throw new Error();
     msg.style.color = 'var(--green)';
-    msg.textContent = '✓ Guardado correctamente';
+    msg.textContent = t('savedCorrectly');
     if (body.language === 'en' || body.language === 'es' || body.language === 'pt') {
       currentLang = body.language;
       localStorage.setItem('gb_lang', currentLang);
@@ -6993,7 +7128,7 @@ async function saveAvatarConfig() {
     });
     if (!res.ok) throw new Error();
     msg.style.color = 'var(--green)';
-    msg.textContent = '✓ Avatar guardado';
+    msg.textContent = t('avatarSaved');
     renderAvatarPreview();
     setTimeout(closeConfigPanel, 1200);
   } catch (e) {
@@ -7387,7 +7522,7 @@ function renderAchievementsPanel() {
       <div style="font-size:11px;color:var(--text2);margin-top:10px">${d.unlocked_count} ${t('of')} ${d.total_count} ${t('achievementsUnlocked')}</div>
       ${!isPremium ? `<button onclick="startPaddleCheckout()" style="width:100%;margin-top:10px;padding:8px;border-radius:8px;border:none;background:var(--green);color:var(--on-accent);font-size:12px;font-weight:600;cursor:pointer">✨ ${t('buyPremium')} — ${t('premiumLevelHint')}</button>` : ''}
     </div>
-    ${categoriesHtml || (_achievementsOnlyLocked ? `<div style="text-align:center;padding:24px;color:var(--text2)">¡Desbloqueaste todos los logros disponibles!</div>` : '')}
+    ${categoriesHtml || (_achievementsOnlyLocked ? `<div style="text-align:center;padding:24px;color:var(--text2)">${t('allAchievementsUnlocked')}</div>` : '')}
   `;
 }
 
@@ -8624,7 +8759,7 @@ async function checkAchievements() {
       // del perfil real y comparar contra el userLevel=1 por defecto,
       // disparando el aviso en cada visita aunque no hubo suba real.
       if (_hasCheckedLevelOnce && userLevel > oldLevel) {
-        queueToast(`🎉 ¡Felicidades! Subiste al nivel ${userLevel}`);
+        queueToast(t('levelUpToast').replace('{level}', userLevel));
       }
       _hasCheckedLevelOnce = true;
     }
@@ -9222,7 +9357,7 @@ async function _saveSteamIdToServer(steamId) {
   });
   if (!res.ok) throw new Error();
   const cur = document.getElementById('steam-id-current');
-  cur.textContent = `✓ Guardado: ${steamId}`;
+  cur.textContent = t('savedLabel').replace('{value}', steamId);
   cur.style.color = 'var(--green)';
 }
 
@@ -9250,7 +9385,7 @@ async function searchSteamProfile() {
       headers: { 'Authorization': `Bearer ${authToken}` },
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'No se encontró el perfil');
+    if (!res.ok) throw new Error(data.detail || t('profileNotFound'));
     cur.textContent = '';
     document.getElementById('connect-profile-avatar').src = data.avatar_url || '';
     document.getElementById('connect-profile-username').textContent = data.username || steamId;
@@ -9267,7 +9402,7 @@ async function searchSteamProfile() {
     _steamMenuOpen = false;
     document.getElementById('connect-profile-overlay').classList.add('open');
   } catch(e) {
-    cur.textContent = e.message || 'No se encontró el perfil';
+    cur.textContent = e.message || t('profileNotFound');
     cur.style.color = 'var(--red)';
   } finally {
     btn.disabled = false;
@@ -9343,7 +9478,7 @@ async function syncBoth() {
     }
     await syncAll(1);
     await loadGlobalStats();
-    showToast('✓ Biblioteca y deseados sincronizados');
+    showToast(t('libraryAndWishlistSynced'));
     checkAchievements();
   } catch(e) {
     showToast(e.message || 'Error al sincronizar', true);
@@ -9436,7 +9571,7 @@ async function _savePsnIdToServer(id) {
   });
   if (!res.ok) throw new Error();
   const cur = document.getElementById('psn-id-current');
-  cur.textContent = `✓ Guardado: ${id}`;
+  cur.textContent = t('savedLabel').replace('{value}', id);
   cur.style.color = 'var(--green)';
 }
 
@@ -9454,7 +9589,7 @@ async function searchPsnProfile() {
       headers: { 'Authorization': `Bearer ${authToken}` },
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'No se encontró el perfil');
+    if (!res.ok) throw new Error(data.detail || t('profileNotFound'));
     cur.textContent = '';
     document.getElementById('connect-profile-avatar').src = data.avatar_url || '';
     document.getElementById('connect-profile-username').textContent = data.online_id || id;
@@ -9467,7 +9602,7 @@ async function searchPsnProfile() {
     _psnMenuOpen = false;
     document.getElementById('connect-profile-overlay').classList.add('open');
   } catch(e) {
-    cur.textContent = e.message || 'No se encontró el perfil';
+    cur.textContent = e.message || t('profileNotFound');
     cur.style.color = 'var(--red)';
   } finally {
     btn.disabled = false;
@@ -9540,11 +9675,11 @@ async function restoreDeletedPsn() {
 const CONNECTORS = {
   gog: {
     slug: 'gogdotcom', label: 'GOG',
-    instructions: '1) Iniciá sesión con usuario y contraseña de GOG (no funciona "Continuar con Google") — el login pasa por la página oficial de GOG, nunca por nosotros. 2) Al terminar, esa pestaña va a quedar en blanco o dar error — es normal, es una limitación de GOG, no nuestra: copiá la URL COMPLETA de la barra de direcciones (tiene que contener "code=...", no es información sensible) y pegala abajo.',
+    get instructions() { return t('gogConnectInstructions'); },
   },
   xbox: {
     tablerIcon: 'brand-xbox', label: 'Xbox', popupCapture: true,
-    instructions: 'Se abre una ventana para iniciar sesión con tu cuenta de Microsoft/Xbox — al terminar se conecta solo, no hace falta copiar nada. Si tu navegador bloqueó la ventana emergente, permitila e intentá de nuevo.',
+    get instructions() { return t('xboxConnectInstructions'); },
   },
   // Epic: el paso de "Conectar" (login + pegar code) se saca de la web —
   // el authorizationCode que devuelve Epic dura muy poco (pensado para que
@@ -9595,17 +9730,17 @@ function renderConnectorMenus() {
         <div style="padding:10px 14px;border-bottom:0.5px solid var(--border)">
           <div style="font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">${c.label}</div>
           <div style="font-size:10px;color:var(--text2);line-height:1.5;background:var(--bg3);border-radius:6px;padding:8px">
-            <i class="ti ti-device-mobile"></i> La conexión inicial con ${c.label} solo se puede hacer desde la app (no desde el navegador). Ya conectada, podés sincronizar desde acá.
+            <i class="ti ti-device-mobile"></i> ${t('initialConnectOnlyFromApp').replace('{label}', c.label)}
           </div>
         </div>` : `
         <div style="padding:10px 14px;border-bottom:0.5px solid var(--border)">
-          <div style="font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Login ${c.label}</div>
+          <div style="font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">${t('loginWithLabel').replace('{label}', c.label)}</div>
           <div style="font-size:10px;color:var(--text2);line-height:1.5;margin-bottom:8px;background:var(--bg3);border-radius:6px;padding:8px">${c.instructions}</div>
           <button onclick="openConnectorLogin('${p}')" style="width:100%;padding:6px 10px;font-size:12px;border-radius:6px;border:none;background:var(--bg3);color:var(--text);cursor:pointer;text-align:left;margin-bottom:6px">
-            <i class="ti ti-external-link"></i> Abrir login de ${c.label} en otra pestaña
+            <i class="ti ti-external-link"></i> ${t('openLoginInOtherTab').replace('{label}', c.label)}
           </button>
           <div style="display:flex;gap:6px">
-            <input id="${p}-code-input" type="text" placeholder="Pegá el code (o la URL/JSON final)..."
+            <input id="${p}-code-input" type="text" placeholder="${t('pasteCodePlaceholder')}"
               style="flex:1;padding:5px 8px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);min-width:0"
               onkeydown="if(event.key==='Enter') connectConnectorCode('${p}')"
               onpaste="_onConnectorCodePaste(event, '${p}')" />
@@ -9737,7 +9872,7 @@ async function connectConnectorCode(platform) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Error');
-    status.textContent = `✓ ${data.message || 'Conectado'}`;
+    status.textContent = `✓ ${data.message || t('connectedDefault')}`;
     status.style.color = 'var(--green)';
     input.value = '';
     await syncAll(1);
@@ -10659,20 +10794,22 @@ function _ensurePaddleReady() {
   _paddleReady = true;
 }
 
-const PREMIUM_BENEFITS = [
-  { icon: 'ti-trophy',          title: 'Logros, XP y nivel', detail: 'La versión gratis no desbloquea logros ni suma XP: no hay subida de nivel. Premium sube hasta nivel 150.' },
-  { icon: 'ti-palette',         title: 'Temas de videojuego', detail: 'Cyberpunk 2077, Portal, Undertale, Fallout, Elden Ring, Counter-Strike, StarCraft II, Doom y más, con detalles propios de cada uno.' },
-  { icon: 'ti-user-square',     title: 'Personalización de avatar', detail: 'Todas las prendas y estilos del editor de avatar, sin restricciones.' },
-  { icon: 'ti-route',           title: 'Plan de juego', detail: 'Organizá tu backlog en pasos concretos, con horas estimadas por HowLongToBeat.' },
-  { icon: 'ti-chart-line',      title: 'Estadísticas de actividad reciente', detail: 'Seguimiento detallado de lo que jugaste, calificaste y avanzaste en las últimas semanas.' },
-  { icon: 'ti-folders',         title: 'Carpetas y rankings ilimitados', detail: 'La versión gratis limita a 10 carpetas y 3 rankings. Premium no tiene límite.' },
-  { icon: 'ti-users',           title: 'Más amigos', detail: 'La versión gratis limita a 3 amigos. Premium no tiene límite.' },
-];
+function PREMIUM_BENEFITS() {
+  return [
+    { icon: 'ti-trophy',          title: t('pbAchievementsTitle'), detail: t('pbAchievementsDetail') },
+    { icon: 'ti-palette',         title: t('pbThemesTitle'), detail: t('pbThemesDetail') },
+    { icon: 'ti-user-square',     title: t('pbAvatarTitle'), detail: t('pbAvatarDetail') },
+    { icon: 'ti-route',           title: t('pbGamePlanTitle'), detail: t('pbGamePlanDetail') },
+    { icon: 'ti-chart-line',      title: t('pbStatsTitle'), detail: t('pbStatsDetail') },
+    { icon: 'ti-folders',         title: t('pbFoldersTitle'), detail: t('pbFoldersDetail') },
+    { icon: 'ti-users',           title: t('pbFriendsTitle'), detail: t('pbFriendsDetail') },
+  ];
+}
 
 function renderPremiumView() {
   const body = document.getElementById('premium-view-body');
   if (!body) return;
-  const rows = PREMIUM_BENEFITS.map(b => `
+  const rows = PREMIUM_BENEFITS().map(b => `
     <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px">
       <div style="background:rgba(29,158,117,0.12);border-radius:10px;padding:8px;flex-shrink:0"><i class="ti ${b.icon}" style="color:var(--green);font-size:20px"></i></div>
       <div>
@@ -10683,13 +10820,13 @@ function renderPremiumView() {
   body.innerHTML = `
     <div style="background:rgba(29,158,117,0.12);border:1px solid rgba(29,158,117,0.4);border-radius:16px;padding:20px;text-align:center;margin-bottom:20px">
       <i class="ti ti-key" style="color:var(--green);font-size:32px"></i>
-      <div style="font-size:19px;font-weight:700;margin-top:6px">${isPremium ? '¡Ya sos Premium!' : 'Playloggr Premium'}</div>
-      <div style="font-size:13px;color:var(--text2);margin-top:4px">${isPremium ? 'Gracias por apoyar el proyecto. Tenés acceso a todo lo de abajo.' : 'Pago único, para siempre. Sin suscripción.'}</div>
+      <div style="font-size:19px;font-weight:700;margin-top:6px">${isPremium ? t('premiumActiveTitle') : t('premiumTitle')}</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:4px">${isPremium ? t('premiumActiveSubtitle') : t('premiumSubtitle')}</div>
     </div>
     ${rows}
     ${isPremium ? '' : `
     <button onclick="startPaddleCheckout()" style="width:100%;margin-top:8px;padding:14px;border-radius:8px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;font-size:15px;font-weight:600">
-      <i class="ti ti-crown"></i> Actualizar a Premium — USD $6.99 (pago único, impuestos según checkout)
+      <i class="ti ti-crown"></i> ${t('upgradeToPremiumBtn')}
     </button>`}
   `;
 }
@@ -10697,7 +10834,7 @@ function renderPremiumView() {
 function startPaddleCheckout() {
   _ensurePaddleReady();
   if (typeof Paddle === 'undefined') {
-    showToast('No se pudo cargar el checkout de pago. Recargá la página e intentá de nuevo.', true);
+    showToast(t('checkoutLoadError'), true);
     return;
   }
   Paddle.Checkout.open({
@@ -10982,7 +11119,7 @@ function renderCosmeticPickers() {
 
   if (!isPremium) {
     const lockedMsg = `<div style="display:flex;flex-direction:column;gap:8px;padding:10px;background:var(--bg3);border-radius:8px">
-      <div style="display:flex;align-items:center;gap:8px;color:var(--text2);font-size:12px"><i class="ti ti-lock"></i>Requiere la versión premium</div>
+      <div style="display:flex;align-items:center;gap:8px;color:var(--text2);font-size:12px"><i class="ti ti-lock"></i>${t('requiresPremiumHint')}</div>
       <button onclick="startPaddleCheckout()" style="padding:8px;border-radius:8px;border:none;background:var(--green);color:var(--on-accent);font-size:12px;font-weight:600;cursor:pointer">✨ ${t('buyPremium')}</button>
     </div>`;
     frameEl.innerHTML = lockedMsg;
@@ -11079,8 +11216,8 @@ async function submitAuth() {
   const username = document.getElementById('l-username').value.trim();
   const errEl    = document.getElementById('login-err');
 
-  if (!email || !password) { errEl.textContent='Completá email y contraseña'; errEl.style.display='block'; return; }
-  if (isRegister && !username) { errEl.textContent='Completá el nombre de usuario'; errEl.style.display='block'; return; }
+  if (!email || !password) { errEl.textContent=t('fillEmailPassword'); errEl.style.display='block'; return; }
+  if (isRegister && !username) { errEl.textContent=t('fillUsername'); errEl.style.display='block'; return; }
   if (isRegister && !/^[A-Za-z0-9]{3,20}$/.test(username)) {
     errEl.textContent = t('usernameFormatError');
     errEl.style.display = 'block';
@@ -11114,9 +11251,9 @@ async function submitAuth() {
         openVerifyEmail(data.detail.email || email);
         return;
       }
-      if (res.status === 409) throw new Error(data.detail || 'Nombre de usuario ya en uso');
-      if (res.status === 401) throw new Error('Verificá los datos ingresados');
-      throw new Error((typeof data.detail === 'string' && data.detail) || 'Error de autenticación');
+      if (res.status === 409) throw new Error(data.detail || t('usernameAlreadyInUse'));
+      if (res.status === 401) throw new Error(t('checkYourData'));
+      throw new Error((typeof data.detail === 'string' && data.detail) || t('authError'));
     }
 
     // Evento real de registro para Google Analytics / Google Ads — se dispara
@@ -11141,7 +11278,7 @@ async function submitAuth() {
     localStorage.setItem('gb_user',  authUser);
     onLoginSuccess();
   } catch(e) {
-    errEl.textContent = (e instanceof Error ? e.message : String(e)) || 'Error de autenticación';
+    errEl.textContent = (e instanceof Error ? e.message : String(e)) || t('authError');
     errEl.style.display = 'block';
     // Los tokens de Turnstile son de un solo uso — resetear para reintentar.
     if (isRegister && typeof turnstile !== 'undefined' && _turnstileWidgetId !== null) {
@@ -11265,7 +11402,7 @@ function renderFolderDropdownItems() {
       </select>
       <button id="folder-sort-list-btn" onclick="toggleFolderSortDir()" style="padding:3px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">${folderSortDir==="asc"?"↑":"↓"}</button>
     </div>
-    ${!folders.length ? '<div style="padding:8px 14px;font-size:12px;color:var(--text2)">Sin listas en esta sección</div>' :
+    ${!folders.length ? `<div style="padding:8px 14px;font-size:12px;color:var(--text2)">${t('noFoldersInSection')}</div>` :
       folders.map(f => `
         <div style="display:flex;align-items:center;gap:6px;padding:7px 14px;cursor:pointer;font-size:13px;border-top:0.5px solid var(--border)"
           onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
@@ -11397,7 +11534,7 @@ function _pagerHtml(page, hasMore, onclickPrefix) {
   if (page === 1 && !hasMore) return '';
   return `<div style="display:flex;justify-content:center;align-items:center;gap:12px;padding:12px 0 4px">
     <button onclick="${onclickPrefix}(${page - 1})" ${page <= 1 ? 'disabled style="opacity:0.4"' : ''} class="btn-cancel" style="font-size:12px;padding:4px 10px">← Anterior</button>
-    <span style="font-size:12px;color:var(--text2)">Página ${page}</span>
+    <span style="font-size:12px;color:var(--text2)">${t('pageLabel').replace('{page}', page)}</span>
     <button onclick="${onclickPrefix}(${page + 1})" ${!hasMore ? 'disabled style="opacity:0.4"' : ''} class="btn-cancel" style="font-size:12px;padding:4px 10px">Siguiente →</button>
   </div>`;
 }
@@ -11438,7 +11575,7 @@ async function renderPublicFolderList(page) {
     const el = document.getElementById('public-folders-content');
     if (!el) return;
     if (!folders.length) {
-      el.innerHTML = '<div class="empty"><i class="ti ti-folder-off" style="font-size:32px;display:block;margin-bottom:8px"></i>Todavía no hay listas públicas en esta sección.</div>';
+      el.innerHTML = `<div class="empty"><i class="ti ti-folder-off" style="font-size:32px;display:block;margin-bottom:8px"></i>${t('noPublicListsSection')}</div>`;
       el.style.textAlign = '';
       return;
     }
@@ -11476,7 +11613,7 @@ async function openPublicFolderViewer(folderId) {
     if (!res.ok) throw new Error(d.detail || 'Error');
     document.getElementById('public-folder-viewer-title').textContent = `${d.folder_name} — por ${d.username}`;
     if (!d.games.length) {
-      body.innerHTML = '<div class="empty">Esta lista todavía no tiene juegos.</div>';
+      body.innerHTML = `<div class="empty">${t('listHasNoGamesYet')}</div>`;
       return;
     }
     body.innerHTML = d.games.map(g => `
@@ -11547,7 +11684,7 @@ function renderFolderList(page) {
       </div>
     </div>
     ${!folders.length
-      ? '<div class="empty"><i class="ti ti-folder-off" style="font-size:32px;display:block;margin-bottom:8px"></i>Sin listas. Creá una.</div>'
+      ? `<div class="empty"><i class="ti ti-folder-off" style="font-size:32px;display:block;margin-bottom:8px"></i>${t('noFoldersInSection')}</div>`
       : `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;padding:16px">
           ${folders.map(f => `
             <div onclick="enterFolder(${f.id})" style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius-md);padding:14px 16px;cursor:pointer;transition:border-color 0.15s"
@@ -12069,7 +12206,7 @@ async function renderPublicRankingsList(page) {
     const hasMore = rankings.length > _PAGE_SIZE_20;
     rankings = rankings.slice(0, _PAGE_SIZE_20);
     if (!rankings.length) {
-      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">Todavía no hay rankings públicos.</div>`;
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">${t('noPublicRankingsYet')}</div>`;
       return;
     }
     grid.innerHTML = rankings.map(r => `
@@ -12104,7 +12241,7 @@ async function openPublicRankingViewer(rankingId) {
     if (!res.ok) throw new Error(d.detail || 'Error');
     document.getElementById('public-ranking-viewer-title').textContent = `${d.ranking_name} — por ${d.username}`;
     if (!d.games.length) {
-      body.innerHTML = '<div class="empty">Este ranking todavía no tiene juegos.</div>';
+      body.innerHTML = `<div class="empty">${t('rankingHasNoGamesYet')}</div>`;
       return;
     }
     body.innerHTML = d.games.map((g, i) => `
@@ -12999,10 +13136,10 @@ if (document.readyState === 'loading') {
 
 <!-- ═══════════════ COOKIE BANNER ═══════════════ -->
 <div id="cookie-banner" style="display:none;position:fixed;bottom:16px;left:16px;right:16px;max-width:480px;margin:0 auto;background:var(--bg2);border:0.5px solid var(--border2);border-radius:14px;padding:18px 20px;box-shadow:0 12px 40px rgba(0,0,0,0.5);z-index:999">
-  <p style="font-size:12.5px;color:var(--text2);margin-bottom:12px;line-height:1.5">Usamos cookies para entender cómo se usa Playloggr (Google Analytics). Podés aceptar o rechazar el análisis — la app funciona igual en ambos casos. Más info en nuestra <a href="/privacy.html" style="color:var(--green)">Política de Privacidad</a>.</p>
+  <p style="font-size:12.5px;color:var(--text2);margin-bottom:12px;line-height:1.5"><span id="cookie-banner-text" data-i18n="cookieBannerText">Usamos cookies para entender cómo se usa Playloggr (Google Analytics). Podés aceptar o rechazar el análisis — la app funciona igual en ambos casos. Más info en nuestra</span> <a href="/privacy.html" style="color:var(--green)" data-i18n="privacyPolicyLink">Política de Privacidad</a>.</p>
   <div style="display:flex;gap:8px;justify-content:flex-end">
-    <button onclick="setCookieConsent(false)" style="background:transparent;color:var(--text2);border:0.5px solid var(--border2);padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">Rechazar</button>
-    <button onclick="setCookieConsent(true)" style="background:var(--green);color:var(--on-accent);border:none;padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">Aceptar</button>
+    <button onclick="setCookieConsent(false)" style="background:transparent;color:var(--text2);border:0.5px solid var(--border2);padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer" data-i18n="reject">Rechazar</button>
+    <button onclick="setCookieConsent(true)" style="background:var(--green);color:var(--on-accent);border:none;padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer" data-i18n="accept">Aceptar</button>
   </div>
 </div>
 </body>
