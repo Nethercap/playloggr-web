@@ -6927,7 +6927,7 @@ async function saveConfig() {
 // ── Avatar ───────────────────────────────────────────────────────────────
 
 const AVATAR_LAYER_ORDER = ['body','pants','boots','shirt','waist','gloves','shoulders','hair','headwear'];
-const AVATAR_BODY_OPTIONS = ['base','avian','orc','panda','undead'];
+const AVATAR_BODY_OPTIONS = ['base','avian','avian2','orc','panda','undead'];
 
 const AVATAR_COLOR_SWATCH = {
   black: '#2c2c2a', blue: '#378add', brown: '#8b5a2b', green: '#4c9a4c',
@@ -6947,10 +6947,10 @@ const AVATAR_HAIR_MAP = {
 const AVATAR_HEADWEAR_MAP = {
   bandana1: AVATAR_BANDANA_COLORS, hat1: AVATAR_COLORS9, helmet1: AVATAR_COLORS9, hood1: AVATAR_COLORS9,
 };
-const AVATAR_SHIRT_MAP = { armor1: AVATAR_SHIRT_COLORS, shirt1: AVATAR_SHIRT_COLORS };
+const AVATAR_SHIRT_MAP = { armor1: AVATAR_SHIRT_COLORS, shirt1: AVATAR_SHIRT_COLORS, armor2: AVATAR_SHIRT_COLORS, shirt2: AVATAR_SHIRT_COLORS };
 const AVATAR_GLOVES_MAP = { gloves1: AVATAR_COLORS9 };
-const AVATAR_SHOULDERS_MAP = { shoulders1: AVATAR_SHOULDER_COLORS, shoulders2: AVATAR_SHOULDER_COLORS };
-const AVATAR_WAIST_MAP = { belt1: AVATAR_WAIST_COLORS };
+const AVATAR_SHOULDERS_MAP = { shoulders1: AVATAR_SHOULDER_COLORS, shoulders2: AVATAR_SHOULDER_COLORS, shoulders3: AVATAR_SHOULDER_COLORS, shoulders5: AVATAR_COLORS9 };
+const AVATAR_WAIST_MAP = { belt1: AVATAR_WAIST_COLORS, belt2: AVATAR_COLORS9, belt2b: AVATAR_COLORS9, belt3: AVATAR_COLORS9 };
 
 let currentAvatarConfig = {
   body: 'base', hair: 'mhair1_black', headwear: null, shirt: 'shirt1_blue',
