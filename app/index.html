@@ -310,6 +310,24 @@
     :root[data-game-theme="undertale"] .btn-save {
       color: #000000 !important;
     }
+    /* Subtabs (Mis rankings/Global, Todas/Mis reseñas, Mis listas/Globales)
+       sin caja de fondo — mismo criterio que el TabBar de la app (Portal,
+       Guaca-Guaca, Determination, Koprulu, Knee-Deep): subrayado + color de
+       texto en vez de un pill relleno que tapaba el titulo. */
+    :root[data-game-theme="pacman"] .subtab-pill.active,
+    :root[data-game-theme="undertale"] .subtab-pill.active,
+    :root[data-game-theme="portal"] .subtab-pill.active,
+    :root[data-game-theme="starcraft2"] .subtab-pill.active,
+    :root[data-game-theme="doom"] .subtab-pill.active {
+      background: transparent !important;
+      border-radius: 0 !important;
+      border-bottom: 3px solid;
+    }
+    :root[data-game-theme="pacman"] .subtab-pill.active     { color: var(--green) !important; border-bottom-color: var(--border2); }
+    :root[data-game-theme="undertale"] .subtab-pill.active  { color: var(--green) !important; border-bottom-color: var(--text2); }
+    :root[data-game-theme="portal"] .subtab-pill.active     { color: var(--accent-play) !important; border-bottom-color: var(--green); }
+    :root[data-game-theme="starcraft2"] .subtab-pill.active { color: var(--green) !important; border-bottom-color: var(--text2); }
+    :root[data-game-theme="doom"] .subtab-pill.active       { color: var(--text2) !important; border-bottom-color: var(--green); }
     /* Borde blanco solido — Determination (Undertale). */
     :root[data-game-theme="undertale"] .game-card,
     :root[data-game-theme="undertale"] .lib-grid-tile {
@@ -562,6 +580,13 @@
     .view-mode-btn.active { background:var(--green); color:#fff; }
     .nav-pill.active { color:#fff; }
     .nav-pill:not(.active) { color:var(--text2); }
+
+    /* Sub-tabs tipo "Mis rankings/Global", "Todas/Mis reseñas",
+       "Mis listas/Globales" — pill rellena por defecto, mismo criterio que
+       .fbtn/.view-mode-btn de arriba. Los temas sin caja (ver mas abajo,
+       misma lista que el TabBar de la app) la pisan con subrayado. */
+    .subtab-pill { flex:1; padding:6px; border-radius:8px; border:none; cursor:pointer; font-size:12px; font-weight:600; background:var(--bg2); color:var(--text2); }
+    .subtab-pill.active { background:var(--green); color:var(--on-accent); }
     @media (max-width: 900px) {
       .game-list.grid-view { grid-template-columns:repeat(3,1fr); }
       .stats-row { grid-template-columns:repeat(3,1fr); }
@@ -1403,8 +1428,8 @@
     <!-- Rankings list -->
     <div id="rankings-list-panel" style="padding:16px;max-width:960px;width:100%;margin:0 auto;box-sizing:border-box">
       <div style="display:flex;gap:6px;margin-bottom:12px;max-width:340px">
-        <button id="rankings-tab-mine" onclick="switchRankingTab('mine')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:var(--green);color:var(--on-accent)">Mis rankings</button>
-        <button id="rankings-tab-global" onclick="switchRankingTab('global')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:var(--bg2);color:var(--text2)">Globales</button>
+        <button id="rankings-tab-mine" class="subtab-pill active" onclick="switchRankingTab('mine')">Mis rankings</button>
+        <button id="rankings-tab-global" class="subtab-pill" onclick="switchRankingTab('global')">Globales</button>
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
         <select id="rankings-sort-sel" onchange="_rankingsSortChange()" style="font-size:12px;padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text)">
@@ -1776,8 +1801,8 @@
   <div style="padding:16px;max-width:520px;width:100%;margin:0 auto;box-sizing:border-box">
     <strong style="font-size:16px;display:flex;align-items:center;gap:6px;margin-bottom:12px"><i class="ti ti-stars"></i> <span data-i18n="gameOfMonth">Juego del mes</span></strong>
     <div style="display:flex;gap:6px;padding:0 2px 10px">
-      <button id="gom-tab-vote" onclick="setGomTab('vote')" class="add-btn" style="flex:1;justify-content:center"></button>
-      <button id="gom-tab-history" onclick="setGomTab('history')" class="add-btn" style="flex:1;justify-content:center"></button>
+      <button id="gom-tab-vote" onclick="setGomTab('vote')" class="subtab-pill"></button>
+      <button id="gom-tab-history" onclick="setGomTab('history')" class="subtab-pill"></button>
     </div>
     <div id="gom-content">
       <div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div>
@@ -1800,10 +1825,10 @@
       </div>
     </div>
     <div style="display:flex;gap:6px;padding:0 2px 8px;max-width:340px">
-      <button id="reviews-tab-all" onclick="switchReviewsTab('all')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:var(--green);color:var(--on-accent)">
+      <button id="reviews-tab-all" class="subtab-pill active" onclick="switchReviewsTab('all')">
         <span data-i18n="allReviewsTab">Todas</span>
       </button>
-      <button id="reviews-tab-mine" onclick="switchReviewsTab('mine')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:var(--bg2);color:var(--text2)">
+      <button id="reviews-tab-mine" class="subtab-pill" onclick="switchReviewsTab('mine')">
         <span data-i18n="myReviewsTab">Mis reseñas</span>
       </button>
     </div>
@@ -3771,8 +3796,8 @@ function switchReviewsTab(tab) {
   _reviewsTab = tab;
   const btnAll  = document.getElementById('reviews-tab-all');
   const btnMine = document.getElementById('reviews-tab-mine');
-  if (btnAll)  { btnAll.style.background  = tab === 'all'  ? 'var(--green)' : 'var(--bg2)'; btnAll.style.color  = tab === 'all'  ? '#fff' : 'var(--text2)'; }
-  if (btnMine) { btnMine.style.background = tab === 'mine' ? 'var(--green)' : 'var(--bg2)'; btnMine.style.color = tab === 'mine' ? '#fff' : 'var(--text2)'; }
+  if (btnAll)  btnAll.classList.toggle('active', tab === 'all');
+  if (btnMine) btnMine.classList.toggle('active', tab === 'mine');
   const addWrap = document.getElementById('myreviews-addbtn-wrap');
   if (addWrap) addWrap.style.display = tab === 'mine' ? '' : 'none';
   if (tab === 'mine') _myReviewsRefresh();
@@ -7564,10 +7589,8 @@ function setGomTab(tab) {
   const histBtn = document.getElementById('gom-tab-history');
   voteBtn.textContent = t('gomVote');
   histBtn.textContent = t('gomHistory');
-  voteBtn.style.background = tab === 'vote' ? 'var(--green)' : 'transparent';
-  voteBtn.style.color = tab === 'vote' ? '#fff' : 'var(--text)';
-  histBtn.style.background = tab === 'history' ? 'var(--green)' : 'transparent';
-  histBtn.style.color = tab === 'history' ? '#fff' : 'var(--text)';
+  voteBtn.classList.toggle('active', tab === 'vote');
+  histBtn.classList.toggle('active', tab === 'history');
   if (tab === 'vote') loadGomVoteTab(); else loadGomHistoryTab();
 }
 
@@ -11522,8 +11545,8 @@ function switchFolderTab(tab) {
 
 function _folderTabsHtml() {
   return `<div style="padding:12px 16px 0;display:flex;gap:6px">
-    <button onclick="switchFolderTab('mine')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${_folderTab==='mine'?'var(--green)':'var(--bg2)'};color:${_folderTab==='mine'?'#fff':'var(--text2)'}">Mis listas</button>
-    <button onclick="switchFolderTab('global')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${_folderTab==='global'?'var(--green)':'var(--bg2)'};color:${_folderTab==='global'?'#fff':'var(--text2)'}">Globales</button>
+    <button onclick="switchFolderTab('mine')" class="subtab-pill${_folderTab==='mine'?' active':''}">Mis listas</button>
+    <button onclick="switchFolderTab('global')" class="subtab-pill${_folderTab==='global'?' active':''}">Globales</button>
   </div>`;
 }
 
@@ -12173,8 +12196,8 @@ function switchRankingTab(tab) {
   _rankingTab = tab;
   const btnMine = document.getElementById('rankings-tab-mine');
   const btnGlobal = document.getElementById('rankings-tab-global');
-  if (btnMine)   { btnMine.style.background   = tab === 'mine'   ? 'var(--green)' : 'var(--bg2)'; btnMine.style.color   = tab === 'mine'   ? '#fff' : 'var(--text2)'; }
-  if (btnGlobal) { btnGlobal.style.background = tab === 'global' ? 'var(--green)' : 'var(--bg2)'; btnGlobal.style.color = tab === 'global' ? '#fff' : 'var(--text2)'; }
+  if (btnMine)   btnMine.classList.toggle('active', tab === 'mine');
+  if (btnGlobal) btnGlobal.classList.toggle('active', tab === 'global');
   const newBtn = document.getElementById('rankings-new-btn');
   if (newBtn) newBtn.style.display = tab === 'mine' ? '' : 'none';
   const votesOpt = document.getElementById('rankings-sort-opt-votes');
