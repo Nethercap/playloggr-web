@@ -7272,11 +7272,11 @@ const _statusColorsFriend = {
 
 const CATEGORY_LABELS_EN = {
   actividad: 'Activity', biblioteca: 'Library', calificaciones: 'Ratings', social: 'Social',
-  steam: 'Steam', comunidad: 'Community', avatar: 'Avatar', cuenta: 'Account', resenas: 'Reviews',
+  steam: 'Steam', comunidad: 'Community', avatar: 'Avatar', cuenta: 'Account', resenas: 'Reviews', racha: 'Streak',
 };
 const CATEGORY_LABELS_PT = {
   actividad: 'Atividade', biblioteca: 'Biblioteca', calificaciones: 'Avaliações', social: 'Social',
-  steam: 'Steam', comunidad: 'Comunidade', avatar: 'Avatar', cuenta: 'Conta', resenas: 'Resenhas',
+  steam: 'Steam', comunidad: 'Comunidade', avatar: 'Avatar', cuenta: 'Conta', resenas: 'Resenhas', racha: 'Sequência',
 };
 function categoryLabel(c) {
   if (currentLang === 'en') return CATEGORY_LABELS_EN[c] || c;
@@ -7417,6 +7417,12 @@ const ACHIEVEMENT_LABELS_EN = {
   review_20: { name: 'Active Reviewer', description: 'Write 20 reviews' },
   review_50: { name: 'Expert Reviewer', description: 'Write 50 reviews' },
   review_100: { name: 'Legendary Reviewer', description: 'Write 100 reviews' },
+  streak_7:   { name: 'One Week Streak', description: 'Log in 7 days in a row' },
+  streak_14:  { name: 'Two Week Streak', description: 'Log in 14 days in a row' },
+  streak_30:  { name: 'One Month Streak', description: 'Log in 30 days in a row' },
+  streak_90:  { name: 'Three Month Streak', description: 'Log in 90 days in a row' },
+  streak_180: { name: 'Six Month Streak', description: 'Log in 180 days in a row' },
+  streak_365: { name: 'One Year Streak', description: 'Log in 365 days in a row' },
 };
 
 const ACHIEVEMENT_LABELS_PT = {
@@ -7552,6 +7558,12 @@ const ACHIEVEMENT_LABELS_PT = {
   review_20: { name: 'Resenhista Ativo', description: 'Escreva 20 resenhas' },
   review_50: { name: 'Resenhista Especialista', description: 'Escreva 50 resenhas' },
   review_100: { name: 'Resenhista Lendário', description: 'Escreva 100 resenhas' },
+  streak_7:   { name: 'Uma Semana Seguida', description: 'Entre 7 dias seguidos' },
+  streak_14:  { name: 'Duas Semanas Seguidas', description: 'Entre 14 dias seguidos' },
+  streak_30:  { name: 'Um Mês Seguido', description: 'Entre 30 dias seguidos' },
+  streak_90:  { name: 'Três Meses Seguidos', description: 'Entre 90 dias seguidos' },
+  streak_180: { name: 'Seis Meses Seguidos', description: 'Entre 180 dias seguidos' },
+  streak_365: { name: 'Um Ano Seguido', description: 'Entre 365 dias seguidos' },
 };
 
 function achievementInfo(a) {
@@ -7671,6 +7683,14 @@ async function checkStreakIn() {
     const d = await res.json();
     if (!res.ok) return;
     streakState = d;
+    // El picker de avatares de racha y el de fuentes (dentro del panel de
+    // Configuracion) se renderizan una sola vez al loguear, ANTES de que
+    // este fetch resuelva (loadAvatarConfig corre primero) — sin este
+    // refresh quedaban mostrando todo bloqueado hasta que otra accion
+    // disparara un re-render por otro motivo, aunque streakState ya
+    // tuviera el estado real correcto.
+    renderStreakAvatarPicker();
+    renderCosmeticPickers();
     if (!d.already_checked_in) {
       streakClaimedAvatarId = null;
       renderStreakModal();
@@ -11409,6 +11429,13 @@ function renderCosmeticPickers() {
   const frameEl = document.getElementById('cfg-frame-picker');
   const fontEl  = document.getElementById('cfg-font-picker');
   if (!frameEl || !fontEl) return;
+
+  // El aviso de "las fuentes tambien se desbloquean por racha" solo aplica
+  // a gratis — premium ya las desbloquea por nivel, mencionar racha ahi es
+  // confuso/irrelevante (ademas, premium nunca escribe en
+  // streak_font_unlocks, ver _streak_checkin_core en el backend).
+  const unlockInfo = document.getElementById('cfg-font-unlock-info');
+  if (unlockInfo) unlockInfo.style.display = isPremium ? 'none' : '';
 
   if (!isPremium) {
     const lockedMsg = `<div style="display:flex;flex-direction:column;gap:8px;padding:10px;background:var(--bg3);border-radius:8px">
