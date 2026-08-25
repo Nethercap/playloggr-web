@@ -1593,6 +1593,7 @@
 
         <div class="modal-group full">
           <label data-i18n="usernameFont">Fuente de nombre de usuario</label>
+          <div id="cfg-font-unlock-info" style="font-size:11px;color:var(--text2);margin:4px 0 6px" data-i18n="usernameFontsUnlockInfo"></div>
           <div id="cfg-font-picker" style="margin-top:6px"></div>
         </div>
 
@@ -1632,6 +1633,12 @@
       </div>
 
       <div id="avatar-pickers-scroll" style="max-height:42vh;overflow-y:auto;padding-right:4px">
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:2px" data-i18n="streakAvatarSectionTitle">Avatares de racha</label>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:6px" data-i18n="streakAvatarLockedHint">Desbloqueá uno cada 10 días de racha</div>
+        <div id="avatar-streak-picker"></div>
+        <div id="avatar-streak-active-notice" style="display:none;font-size:11px;color:#EF9F27;background:rgba(239,159,39,0.12);border-radius:8px;padding:8px;margin-top:8px" data-i18n="streakAvatarActiveNotice"></div>
+      </div>
       <div style="margin-bottom:14px">
         <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px" data-i18n="race">Raza</label>
         <div id="avatar-race-picker"></div>
@@ -1793,6 +1800,12 @@
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeAchievementsPanel()" data-i18n="close">Cerrar</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="streak-overlay">
+  <div class="modal" style="max-width:380px;text-align:center">
+    <div id="streak-content"></div>
   </div>
 </div>
 
@@ -2590,6 +2603,16 @@ const I18N = {
     rankingLimitReached: 'Máximo 25 juegos por ranking', rankingFreeLimitReached: 'Límite de la versión gratis (3 rankings). Actualizá a premium para crear más.',
     removeFromRanking: 'Quitar del ranking', date: 'Fecha', quantity: 'Cantidad',
     premiumThanksTitle: '¡Gracias por ser premium!', premiumThanksBody: 'Disfrutá de todas las funcionalidades de Playloggr.', premiumThanksBtn: 'Genial',
+    streakDaysLabel: 'días seguidos', streakXpGained: 'XP por tu racha', streakNextRewardIn: 'Próxima recompensa en',
+    streakDay: 'día', streakDays: 'días',
+    streakRewardPreviewXp: 'XP extra', streakRewardPreviewAvatar: 'elegí un avatar exclusivo', streakRewardPreviewFont: 'nueva fuente de nombre', streakRewardPreviewAchievement: 'logro de racha',
+    streakAvatarCreditTitle: '¡Desbloqueaste un avatar de racha!', streakAvatarCreditBody: 'Elegí cuál querés agregar a tu colección.',
+    streakUnlockBtn: 'Desbloquear', streakEquipNowBtn: 'Equipar ahora',
+    streakUnlockedFontTitle: '¡Nueva fuente desbloqueada!', streakUnlockedFontBody: 'Ya podés usar esta fuente en tu nombre de usuario, desde Configuración.',
+    streakFreeUpsellTitle: 'Con Premium, además desbloquearías:', streakClose: 'Cerrar',
+    streakAvatarSectionTitle: 'Avatares de racha', streakAvatarLockedHint: 'Desbloqueá uno cada 10 días de racha',
+    streakAvatarActiveNotice: 'Tenés un avatar de racha equipado — el resto de las opciones de abajo no se aplican mientras esté activo.',
+    usernameFontsUnlockInfo: 'Desbloqueás una fuente nueva cada 10 días de racha. Con Premium, además las desbloqueás subiendo de nivel — mucho más rápido.',
     novedades: 'Novedades', novedadesError: 'No se pudo cargar Novedades', novedadesEmpty: 'Todavía no hay novedades para mostrar',
     novedadesFriendsPlaying: 'Amigos jugando esto (últimos 5 días)', novedadesPopularWishlist: 'Popular en Deseados (últimos 7 días)',
     novedadesMostHours: 'Más jugado (últimos 3 días)', novedadesPlayers: 'jugadores',
@@ -2841,6 +2864,16 @@ const I18N = {
     rankingLimitReached: 'Maximum 25 games per ranking', rankingFreeLimitReached: 'Free version limit (3 rankings). Upgrade to premium to create more.',
     removeFromRanking: 'Remove from ranking', date: 'Date', quantity: 'Quantity',
     premiumThanksTitle: 'Thanks for going premium!', premiumThanksBody: 'Enjoy all of Playloggr\'s features.', premiumThanksBtn: 'Great',
+    streakDaysLabel: 'day streak', streakXpGained: 'XP for your streak', streakNextRewardIn: 'Next reward in',
+    streakDay: 'day', streakDays: 'days',
+    streakRewardPreviewXp: 'bonus XP', streakRewardPreviewAvatar: 'pick an exclusive avatar', streakRewardPreviewFont: 'new username font', streakRewardPreviewAchievement: 'streak achievement',
+    streakAvatarCreditTitle: 'You unlocked a streak avatar!', streakAvatarCreditBody: 'Pick which one to add to your collection.',
+    streakUnlockBtn: 'Unlock', streakEquipNowBtn: 'Equip now',
+    streakUnlockedFontTitle: 'New font unlocked!', streakUnlockedFontBody: 'You can now use this font for your username, from Settings.',
+    streakFreeUpsellTitle: 'With Premium you\'d also unlock:', streakClose: 'Close',
+    streakAvatarSectionTitle: 'Streak avatars', streakAvatarLockedHint: 'Unlock one every 10 days of streak',
+    streakAvatarActiveNotice: 'You have a streak avatar equipped — the options below don\'t apply while it\'s active.',
+    usernameFontsUnlockInfo: 'You unlock a new font every 10 days of streak. With Premium, you also unlock them by leveling up — much faster.',
     novedades: 'News', novedadesError: 'Could not load News', novedadesEmpty: 'No news to show yet',
     novedadesFriendsPlaying: 'Friends playing this (last 5 days)', novedadesPopularWishlist: 'Popular in Wishlist (last 7 days)',
     novedadesMostHours: 'Most played (last 3 days)', novedadesPlayers: 'players',
@@ -3092,6 +3125,16 @@ const I18N = {
     rankingLimitReached: 'Máximo de 25 jogos por ranking', rankingFreeLimitReached: 'Limite da versão gratuita (3 rankings). Atualize para premium para criar mais.',
     removeFromRanking: 'Remover do ranking', date: 'Data', quantity: 'Quantidade',
     premiumThanksTitle: 'Obrigado por ser premium!', premiumThanksBody: 'Aproveite todos os recursos do Playloggr.', premiumThanksBtn: 'Ótimo',
+    streakDaysLabel: 'dias seguidos', streakXpGained: 'XP pela sua sequência', streakNextRewardIn: 'Próxima recompensa em',
+    streakDay: 'dia', streakDays: 'dias',
+    streakRewardPreviewXp: 'XP extra', streakRewardPreviewAvatar: 'escolha um avatar exclusivo', streakRewardPreviewFont: 'nova fonte de nome', streakRewardPreviewAchievement: 'conquista de sequência',
+    streakAvatarCreditTitle: 'Você desbloqueou um avatar de sequência!', streakAvatarCreditBody: 'Escolha qual adicionar à sua coleção.',
+    streakUnlockBtn: 'Desbloquear', streakEquipNowBtn: 'Equipar agora',
+    streakUnlockedFontTitle: 'Nova fonte desbloqueada!', streakUnlockedFontBody: 'Agora você pode usar essa fonte no seu nome de usuário, em Configurações.',
+    streakFreeUpsellTitle: 'Com Premium, você também desbloquearia:', streakClose: 'Fechar',
+    streakAvatarSectionTitle: 'Avatares de sequência', streakAvatarLockedHint: 'Desbloqueie um a cada 10 dias de sequência',
+    streakAvatarActiveNotice: 'Você tem um avatar de sequência equipado — as opções abaixo não se aplicam enquanto ele estiver ativo.',
+    usernameFontsUnlockInfo: 'Você desbloqueia uma fonte nova a cada 10 dias de sequência. Com Premium, também as desbloqueia subindo de nível — muito mais rápido.',
     novedades: 'Novidades', novedadesError: 'Não foi possível carregar Novidades', novedadesEmpty: 'Ainda não há novidades para mostrar',
     novedadesFriendsPlaying: 'Amigos jogando isso (últimos 5 dias)', novedadesPopularWishlist: 'Popular nos Desejados (últimos 7 dias)',
     novedadesMostHours: 'Mais jogado (últimos 3 dias)', novedadesPlayers: 'jogadores',
@@ -6980,9 +7023,21 @@ const AVATAR_WAIST_MAP = { belt1: AVATAR_WAIST_COLORS, belt2: AVATAR_COLORS9, be
 let currentAvatarConfig = {
   body: 'base', hair: 'mhair1_black', headwear: null, shirt: 'shirt1_blue',
   pants: 'pants1_blue', boots: 'boots1_black', gloves: null, shoulders: null, waist: null,
+  streakAvatarId: null,
 };
 
+// Mismo orden/ids que STREAK_AVATAR_IDS en el backend y kStreakAvatarIds en
+// la app — imagenes completas en streak_avatars/{id}.png, reemplazan el
+// doll entero al equiparse (ver pixelAvatarHtml).
+const STREAK_AVATAR_IDS = [
+  'cazadora', 'doomguy', 'dragonborn', 'halo', 'hechicero', 'kunoichi',
+  'laracroft', 'lee', 'orco', 'samurai', 'soldier', 'vikinga', 'zombie',
+];
+
 function pixelAvatarHtml(config, size) {
+  if (config.streakAvatarId) {
+    return `<img src="streak_avatars/${config.streakAvatarId}.png" style="position:absolute;top:0;left:0;width:${size}px;height:${size}px;object-fit:contain" onerror="this.style.display='none'" />`;
+  }
   return AVATAR_LAYER_ORDER.map(cat => {
     const val = config[cat];
     if (!val) return '';
@@ -6995,6 +7050,27 @@ function renderAvatarPreview() {
   if (box) box.innerHTML = pixelAvatarHtml(currentAvatarConfig, 150);
   const thumb = document.getElementById('avatar-thumb-box');
   if (thumb) thumb.innerHTML = pixelAvatarHtml(currentAvatarConfig, 48);
+}
+
+function renderStreakAvatarPicker() {
+  const wrap = document.getElementById('avatar-streak-picker');
+  if (!wrap) return;
+  const unlocked = (streakState && streakState.unlocked_avatar_ids) || [];
+  wrap.innerHTML = `<div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:2px">${
+    STREAK_AVATAR_IDS.map(id => {
+      const isUnlocked = unlocked.includes(id);
+      const active = currentAvatarConfig.streakAvatarId === id;
+      return `<div onclick="${isUnlocked ? `setStreakAvatar('${id}')` : ''}" title="${isUnlocked ? id : t('streakAvatarLockedHint')}"
+          style="width:56px;height:56px;flex-shrink:0;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;cursor:${isUnlocked ? 'pointer' : 'default'};border:2px solid ${active ? '#8E7CE8' : 'transparent'};overflow:hidden;position:relative;opacity:${isUnlocked ? 1 : 0.35}">
+        <img src="streak_avatars/${id}.png" style="width:52px;height:52px;object-fit:contain" />
+        ${!isUnlocked ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35)"><i class="ti ti-lock" style="font-size:16px;color:#fff"></i></div>` : ''}
+      </div>`;
+    }).join('')
+  }</div>`;
+}
+function setStreakAvatar(id) {
+  currentAvatarConfig.streakAvatarId = currentAvatarConfig.streakAvatarId === id ? null : id;
+  refreshAvatarControls();
 }
 
 function renderRacePicker() {
@@ -7101,6 +7177,9 @@ function setAvatarLayerColor(category, color) {
 }
 
 function refreshAvatarControls() {
+  renderStreakAvatarPicker();
+  const notice = document.getElementById('avatar-streak-active-notice');
+  if (notice) notice.style.display = currentAvatarConfig.streakAvatarId ? 'block' : 'none';
   renderRacePicker();
   renderLayerPicker('avatar-hair-picker', 'hair', AVATAR_HAIR_MAP, true);
   renderLayerPicker('avatar-headwear-picker', 'headwear', AVATAR_HEADWEAR_MAP, true);
@@ -7133,11 +7212,26 @@ async function loadAvatarConfig() {
           gloves: parsed.gloves || null,
           shoulders: parsed.shoulders || null,
           waist: parsed.waist || null,
+          streakAvatarId: parsed.streakAvatarId || null,
         };
       }
     }
   } catch (e) {}
   refreshAvatarControls();
+}
+
+// Version sin feedback de UI (mensaje "Guardando.../Guardado", cierre del
+// panel) — usada al equipar desde el modal de racha, que no esta dentro del
+// panel de configuracion.
+async function saveAvatarConfigSilent() {
+  try {
+    await fetch(`${apiBase()}/api/v1/user/avatar`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ avatar_config: JSON.stringify(currentAvatarConfig) }),
+    });
+  } catch (e) {}
+  renderAvatarPreview();
 }
 
 async function saveAvatarConfig() {
@@ -7553,6 +7647,163 @@ function renderAchievementsPanel() {
 
 function closeAchievementsPanel() {
   document.getElementById('achievements-overlay').classList.remove('open');
+}
+
+// ── Racha de ingreso ─────────────────────────────────────────────────────
+let streakState = null;       // ultimo resultado de check-in/status, ver AppState.pendingStreakResult en la app
+let streakClaimedAvatarId = null; // avatar recien elegido en el modal (fijo, sin swipe)
+
+function _streakRewardPreview(kind) {
+  switch (kind) {
+    case 'xp_bonus':    return t('streakRewardPreviewXp');
+    case 'avatar':      return t('streakRewardPreviewAvatar');
+    case 'font':        return t('streakRewardPreviewFont');
+    case 'achievement': return t('streakRewardPreviewAchievement');
+    default: return '';
+  }
+}
+
+async function checkStreakIn() {
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/streak/check-in`, {
+      method: 'POST', headers: { 'Authorization': `Bearer ${authToken}` },
+    });
+    const d = await res.json();
+    if (!res.ok) return;
+    streakState = d;
+    if (!d.already_checked_in) {
+      streakClaimedAvatarId = null;
+      renderStreakModal();
+      document.getElementById('streak-overlay').classList.add('open');
+    }
+  } catch (e) {}
+}
+
+async function refreshStreakStatus() {
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/streak/status`, {
+      headers: { 'Authorization': `Bearer ${authToken}` },
+    });
+    const d = await res.json();
+    if (res.ok) streakState = d;
+  } catch (e) {}
+}
+
+function renderStreakModal() {
+  const d = streakState;
+  if (!d) return;
+  ensureGameThemeFontsLoaded();
+  const retro = "font-family:'Press Start 2P',monospace";
+  const rewards = d.rewards_this_checkin || [];
+  const avatarReward = rewards.some(r => r.kind === 'avatar_credit');
+  const fontReward = rewards.find(r => r.kind === 'font_unlock');
+  const unlockedAvatars = d.unlocked_avatar_ids || [];
+  const lockedAvatars = STREAK_AVATAR_IDS.filter(id => !unlockedAvatars.includes(id) && id !== streakClaimedAvatarId);
+
+  let html = `
+    <img src="streak_avatars/bonfire.png" style="height:48px;filter:invert(66%) sepia(56%) saturate(1000%) hue-rotate(1deg) brightness(103%) contrast(96%)" onerror="this.style.display='none'" />
+    <div style="${retro};font-size:36px;margin-top:10px">${d.streak_days}</div>
+    <div style="${retro};font-size:10px;color:var(--text2);margin-top:8px;line-height:1.5">${d.streak_days === 1 ? t('streakDay') : t('streakDaysLabel')}</div>`;
+
+  if (d.xp_gained > 0) {
+    html += `<div style="display:inline-block;margin-top:14px;padding:8px 14px;border-radius:20px;background:rgba(29,158,117,0.15)">
+      <span style="${retro};font-size:11px;color:var(--green)">+${d.xp_gained} ${t('streakXpGained')}</span>
+    </div>`;
+  }
+
+  if (!d.is_premium && fontReward) {
+    html += `<div style="margin-top:16px">
+      <div style="${retro};font-size:12px">${t('streakUnlockedFontTitle')}</div>
+      <div style="${retro};font-size:9px;color:var(--text2);margin-top:6px;line-height:1.6">${t('streakUnlockedFontBody')}</div>
+    </div>`;
+  }
+
+  if (d.next_reward_in_days != null) {
+    html += `<div style="margin-top:18px">
+      <div style="${retro};font-size:11px">${t('streakNextRewardIn')} ${d.next_reward_in_days} ${d.next_reward_in_days === 1 ? t('streakDay') : t('streakDays')}</div>
+      <div style="${retro};font-size:9px;color:var(--text2);margin-top:4px">${_streakRewardPreview(d.next_reward_kind)}</div>
+    </div>`;
+  }
+
+  const showAvatarPicker = d.is_premium && (avatarReward || d.avatar_credits_available > 0) && (lockedAvatars.length > 0 || streakClaimedAvatarId);
+  if (showAvatarPicker) {
+    html += `<hr style="margin:24px 0;border:none;border-top:1px solid var(--border)" />
+      <div style="${retro};font-size:12px">${t('streakAvatarCreditTitle')}</div>
+      <div style="${retro};font-size:9px;color:var(--text2);margin-top:6px;line-height:1.6">${t('streakAvatarCreditBody')}</div>`;
+    if (streakClaimedAvatarId) {
+      html += `<div style="margin-top:12px;padding:8px;border-radius:16px;border:3px solid #8E7CE8">
+        <img src="streak_avatars/${streakClaimedAvatarId}.png" style="width:100%;max-height:210px;object-fit:contain;border-radius:10px" />
+      </div>`;
+    } else {
+      html += `<div style="margin-top:12px;display:flex;gap:8px;overflow-x:auto;padding-bottom:4px" id="streak-avatar-carousel">
+        ${lockedAvatars.map((id, i) => `<img src="streak_avatars/${id}.png" data-avatar-id="${id}"
+              onclick="_selectStreakCarouselAvatar('${id}', this)"
+              style="height:210px;flex-shrink:0;border-radius:16px;cursor:pointer;border:3px solid ${i === 0 ? '#8E7CE8' : 'transparent'}" />`).join('')}
+      </div>`;
+    }
+    if (streakClaimedAvatarId) {
+      html += `<button onclick="equipStreakAvatar()" style="${retro};font-size:11px;width:100%;margin-top:10px;padding:10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer">${t('streakEquipNowBtn')}</button>`;
+    } else {
+      html += `<button id="streak-unlock-btn" onclick="claimSelectedStreakAvatar()" style="${retro};font-size:11px;width:100%;margin-top:10px;padding:10px;border-radius:8px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer" ${d.avatar_credits_available <= 0 ? 'disabled' : ''}>${t('streakUnlockBtn')}</button>`;
+    }
+  }
+
+  if (!d.is_premium) {
+    html += `<hr style="margin:24px 0;border:none;border-top:1px solid var(--border)" />
+      <div style="${retro};font-size:11px">${t('streakFreeUpsellTitle')}</div>
+      <div style="margin-top:8px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
+        <span style="${retro};font-size:8px;color:#EF9F27;border:1px solid #EF9F27;border-radius:14px;padding:6px 10px">${t('streakRewardPreviewAvatar')}</span>
+        <span style="${retro};font-size:8px;color:#EF9F27;border:1px solid #EF9F27;border-radius:14px;padding:6px 10px">${t('streakRewardPreviewXp')}</span>
+      </div>`;
+  }
+
+  html += `<button onclick="closeStreakModal()" style="${retro};font-size:10px;margin-top:16px;background:none;border:none;color:var(--text2);cursor:pointer;padding:8px">${t('streakClose')}</button>`;
+
+  document.getElementById('streak-content').innerHTML = html;
+}
+
+let _streakSelectedCarouselId = null;
+function _selectStreakCarouselAvatar(id, el) {
+  _streakSelectedCarouselId = id;
+  document.querySelectorAll('#streak-avatar-carousel img').forEach(img => {
+    img.style.borderColor = img === el ? '#8E7CE8' : 'transparent';
+  });
+}
+
+async function claimSelectedStreakAvatar() {
+  const d = streakState;
+  const unlockedAvatars = d.unlocked_avatar_ids || [];
+  const lockedAvatars = STREAK_AVATAR_IDS.filter(id => !unlockedAvatars.includes(id));
+  const avatarId = _streakSelectedCarouselId || lockedAvatars[0];
+  if (!avatarId) return;
+  const btn = document.getElementById('streak-unlock-btn');
+  if (btn) btn.disabled = true;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/streak/claim-avatar`, {
+      method: 'POST', headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ avatar_id: avatarId }),
+    });
+    const r = await res.json();
+    if (res.ok && r.unlocked) {
+      streakState.unlocked_avatar_ids = [...unlockedAvatars, avatarId];
+      streakState.avatar_credits_available = r.avatar_credits_available;
+      streakClaimedAvatarId = avatarId;
+      renderStreakModal();
+    }
+  } catch (e) {
+    if (btn) btn.disabled = false;
+  }
+}
+
+function equipStreakAvatar() {
+  if (!streakClaimedAvatarId) return;
+  currentAvatarConfig.streakAvatarId = streakClaimedAvatarId;
+  saveAvatarConfigSilent();
+  closeStreakModal();
+}
+
+function closeStreakModal() {
+  document.getElementById('streak-overlay').classList.remove('open');
 }
 
 // ── Juego del mes ────────────────────────────────────────────────────────
@@ -11190,7 +11441,11 @@ function renderCosmeticPickers() {
   }).join('');
 
   fontEl.innerHTML = kFontTiers.map(([id, level, name]) => {
-    const unlocked = userUnlockedFonts.includes(id);
+    // Gratis: las fuentes tambien se pueden desbloquear via racha (no solo
+    // por nivel, que las cuentas gratis nunca alcanzan porque no generan
+    // XP) — ver streak_font_unlocks / AppState.unlockedStreakFonts.
+    const streakUnlocked = streakState && streakState.unlocked_font_ids && streakState.unlocked_font_ids.includes(id);
+    const unlocked = userUnlockedFonts.includes(id) || streakUnlocked;
     const selected = userFont === id;
     return `<div onclick="${unlocked ? `selectCosmetic('font','${id}')` : ''}"
         style="display:inline-flex;align-items:center;gap:4px;cursor:${unlocked ? 'pointer' : 'default'};opacity:${unlocked ? 1 : 0.4};margin:0 8px 8px 0;padding:6px 10px;background:var(--bg3);border-radius:8px;${selected ? 'outline:2px solid var(--green)' : ''}">
@@ -12869,6 +13124,7 @@ async function onLoginSuccess() {
   checkActiveSession();
   loadAvatarConfig();
   checkAchievements();
+  checkStreakIn();
   loadSidebarWidgets();
 }
 
