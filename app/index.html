@@ -8802,26 +8802,20 @@ function closeFriendsPanel() {
 
 const _badgeTierColors = { bronce: '#CD7F32', plata: '#B0B0B8', oro: '#E0B84C', prisma: '#8E7CE8' };
 
-// Umbrales de tier — deben coincidir con _badge_tier() en el backend
-// (routes/api_cloud.py): bronce 1-50, plata 51-100, oro 101-149, prisma 150+.
-const _BADGE_BRONCE_MAX = 50, _BADGE_PLATA_MAX = 100, _BADGE_ORO_MAX = 149;
-
-// El sprite de medallas trae 5 escudos por tier para bronce/plata y 3 para
-// oro (progresivamente mas decorados) — se elige el sub-escudo segun que
-// tan avanzado esta el nivel dentro de su banda, mismo criterio que
-// widgets/level_badge.dart en la app.
-function _badgeAssetPath(level, tier) {
-  if (tier === 'plata') {
-    const idx = Math.min(4, Math.floor((level - _BADGE_BRONCE_MAX - 1) * 5 / (_BADGE_PLATA_MAX - _BADGE_BRONCE_MAX)));
-    return `badges/plata_${Math.max(0, idx)}.png`;
-  }
-  if (tier === 'oro') {
-    const idx = Math.min(2, Math.floor((level - _BADGE_PLATA_MAX - 1) * 3 / (_BADGE_ORO_MAX - _BADGE_PLATA_MAX)));
-    return `badges/oro_${Math.max(0, idx)}.png`;
-  }
-  if (tier === 'prisma') return 'badges/prisma.png';
-  const idx = Math.min(4, Math.floor((level - 1) * 5 / _BADGE_BRONCE_MAX));
-  return `badges/bronce_${Math.max(0, idx)}.png`;
+// 15 medallas en total, 10 niveles cada una — 5 bronce (1-50), 5 plata
+// (51-100), 3 oro (101-130), y 2 de diamante: la primera cubre 131-149 (19
+// niveles, la unica banda mas larga que 10) y la segunda es exclusiva del
+// nivel 150 (tope de cuenta premium). El tier que devuelve el backend
+// (_badge_tier en routes/api_cloud.py) solo pasa a "prisma" en el nivel
+// 150 — para que el numero y la medalla coincidan visualmente, el color se
+// deriva de la misma banda que la medalla en vez del tier del backend.
+// Mismo criterio que widgets/level_badge.dart en la app.
+function _badgeAssetAndColor(level) {
+  if (level <= 50)  return [`badges/bronce_${Math.min(4, Math.floor((level - 1) / 10))}.png`, _badgeTierColors.bronce];
+  if (level <= 100) return [`badges/plata_${Math.min(4, Math.floor((level - 51) / 10))}.png`, _badgeTierColors.plata];
+  if (level <= 130) return [`badges/oro_${Math.min(2, Math.floor((level - 101) / 10))}.png`, _badgeTierColors.oro];
+  if (level <= 149) return ['badges/prisma_0.png', _badgeTierColors.prisma];
+  return ['badges/prisma_1.png', _badgeTierColors.prisma];
 }
 
 // Antes esto dibujaba una insignia con forma (circulo/hexagono/estrella/
@@ -8832,10 +8826,9 @@ function _badgeAssetPath(level, tier) {
 function levelBadgeHtml(levelInfo, size = 18) {
   if (!levelInfo) return '';
   if (typeof ensureGameThemeFontsLoaded === 'function') ensureGameThemeFontsLoaded();
-  const tier = levelInfo.badge_tier;
-  const color = _badgeTierColors[tier] || _badgeTierColors.bronce;
+  const [asset, color] = _badgeAssetAndColor(levelInfo.level);
   const iconSize = Math.round(size * 2.1);
-  const icon = `<img src="${_badgeAssetPath(levelInfo.level, tier)}" style="width:${iconSize}px;height:${iconSize}px;flex-shrink:0;display:block" onerror="this.style.display='none'" />`;
+  const icon = `<img src="${asset}" style="width:${iconSize}px;height:${iconSize}px;flex-shrink:0;display:block" onerror="this.style.display='none'" />`;
   // El trofeo se muestra al lado del numero (y por lo tanto, al lado del
   // nombre de usuario donde se renderizan juntos), no superpuesto encima.
   const trophy = levelInfo.trophy
