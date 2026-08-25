@@ -8802,20 +8802,46 @@ function closeFriendsPanel() {
 
 const _badgeTierColors = { bronce: '#CD7F32', plata: '#B0B0B8', oro: '#E0B84C', prisma: '#8E7CE8' };
 
+// Umbrales de tier — deben coincidir con _badge_tier() en el backend
+// (routes/api_cloud.py): bronce 1-50, plata 51-100, oro 101-149, prisma 150+.
+const _BADGE_BRONCE_MAX = 50, _BADGE_PLATA_MAX = 100, _BADGE_ORO_MAX = 149;
+
+// El sprite de medallas trae 5 escudos por tier para bronce/plata y 3 para
+// oro (progresivamente mas decorados) — se elige el sub-escudo segun que
+// tan avanzado esta el nivel dentro de su banda, mismo criterio que
+// widgets/level_badge.dart en la app.
+function _badgeAssetPath(level, tier) {
+  if (tier === 'plata') {
+    const idx = Math.min(4, Math.floor((level - _BADGE_BRONCE_MAX - 1) * 5 / (_BADGE_PLATA_MAX - _BADGE_BRONCE_MAX)));
+    return `badges/plata_${Math.max(0, idx)}.png`;
+  }
+  if (tier === 'oro') {
+    const idx = Math.min(2, Math.floor((level - _BADGE_PLATA_MAX - 1) * 3 / (_BADGE_ORO_MAX - _BADGE_PLATA_MAX)));
+    return `badges/oro_${Math.max(0, idx)}.png`;
+  }
+  if (tier === 'prisma') return 'badges/prisma.png';
+  const idx = Math.min(4, Math.floor((level - 1) * 5 / _BADGE_BRONCE_MAX));
+  return `badges/bronce_${Math.max(0, idx)}.png`;
+}
+
 // Antes esto dibujaba una insignia con forma (circulo/hexagono/estrella/
-// diamante segun el tier) y el numero en blanco adentro — a pedido se saco
-// la forma y se dejo solo el numero, coloreado segun el tier (bronce/
-// plata/oro/prisma), sin fondo ni recorte.
+// diamante segun el tier) y el numero en blanco adentro, luego solo el
+// numero sin forma — ahora se usa la medalla real del sprite (ver
+// _badgeAssetPath) mas el numero en fuente retro (Press Start 2P, misma que
+// GoogleFonts.pressStart2p en la app) al lado, coloreado segun el tier.
 function levelBadgeHtml(levelInfo, size = 18) {
   if (!levelInfo) return '';
+  if (typeof ensureGameThemeFontsLoaded === 'function') ensureGameThemeFontsLoaded();
   const tier = levelInfo.badge_tier;
   const color = _badgeTierColors[tier] || _badgeTierColors.bronce;
+  const iconSize = Math.round(size * 1.3);
+  const icon = `<img src="${_badgeAssetPath(levelInfo.level, tier)}" style="width:${iconSize}px;height:${iconSize}px;flex-shrink:0" onerror="this.style.display='none'" />`;
   // El trofeo se muestra al lado del numero (y por lo tanto, al lado del
   // nombre de usuario donde se renderizan juntos), no superpuesto encima.
   const trophy = levelInfo.trophy
     ? `<i class="ti ti-trophy" style="font-size:${Math.round(size*0.85)}px;color:#EF9F27;margin-right:4px"></i>`
     : '';
-  return `<span style="color:${color};font-weight:700;font-size:${size}px;flex-shrink:0">${levelInfo.level}</span>${trophy}<span style="display:inline-block;width:6px"></span>`;
+  return `<span style="display:inline-flex;align-items:center;gap:4px">${icon}<span style="font-family:'Press Start 2P',monospace;color:${color};font-size:${Math.round(size*0.72)}px;flex-shrink:0">${levelInfo.level}</span></span>${trophy}<span style="display:inline-block;width:6px"></span>`;
 }
 
 const kFrameTiers = [
