@@ -715,7 +715,7 @@
     }
 
     /* ── Panel de perfil (avatar + nombre + nivel) — mobile y web ── */
-    .profile-panel { display:flex; align-items:center; gap:12px; background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:10px 16px; margin-bottom:14px; }
+    .profile-panel { display:flex; align-items:center; gap:12px; background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:7px 16px; margin-bottom:14px; }
     .profile-panel-info { display:flex; flex-direction:column; gap:3px; min-width:0; }
     .profile-panel-name { font-size:14px; font-weight:600; display:flex; align-items:center; gap:6px; }
     .profile-panel-sub { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
@@ -7049,7 +7049,7 @@ function renderAvatarPreview() {
   const box = document.getElementById('avatar-preview-box2');
   if (box) box.innerHTML = pixelAvatarHtml(currentAvatarConfig, 150);
   const thumb = document.getElementById('avatar-thumb-box');
-  if (thumb) thumb.innerHTML = pixelAvatarHtml(currentAvatarConfig, 48);
+  if (thumb) thumb.innerHTML = pixelAvatarHtml(currentAvatarConfig, 68);
 }
 
 function renderStreakAvatarPicker() {
@@ -11400,7 +11400,7 @@ function applyAvatarFrameUI() {
   const thumbWrap = document.getElementById('avatar-thumb-box')?.parentElement;
   if (thumbWrap) {
     thumbWrap.setAttribute('style',
-      `cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 66px;height:66px;box-sizing:border-box;overflow:hidden;${frameWrapStyle(userFrame)}`);
+      `cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 76px;height:76px;box-sizing:border-box;overflow:hidden;${frameWrapStyle(userFrame)}`);
     thumbWrap.className = frameAnimClass(userFrame);
   }
 }
@@ -13082,7 +13082,7 @@ async function onLoginSuccess() {
   const profilePanel = document.getElementById('profile-panel');
   profilePanel.innerHTML = `
     <div style="cursor:pointer;flex-shrink:0" onclick="openConfigPanel().then(()=>switchConfigTab('avatar'))" data-i18n-title="customizeAvatar" title="Personalizar avatar">
-      <div id="avatar-thumb-box" style="width:48px;height:48px;position:relative"></div>
+      <div id="avatar-thumb-box" style="width:68px;height:68px;position:relative"></div>
     </div>
     <div class="profile-panel-info">
       <div class="profile-panel-name">
@@ -13167,10 +13167,13 @@ async function loadWidgetFriends() {
 
     // Solicitudes pendientes primero, con accion rapida de aceptar/rechazar
     // sin tener que abrir el panel completo de Amigos.
-    const requestsHtml = requests.map(r => `
+    const requestsHtml = requests.map(r => { const rFrame = r.level_info && r.level_info.frame; return `
       <div class="sidebar-widget-row">
-        <div style="width:30px;height:30px;border-radius:50%;overflow:hidden;background:var(--bg3);flex-shrink:0;position:relative;cursor:pointer" onclick="openFriendProfile('${jsAttrEsc(r.username)}')">
-          <div style="width:30px;height:30px;position:relative;transform:translateY(-11.7%)">${_friendAvatarHtml(r, 30)}</div>
+        <div class="${frameAnimClass(rFrame)}" style="width:30px;height:30px;flex-shrink:0;position:relative;cursor:pointer;${frameWrapStyle(rFrame)}" onclick="openFriendProfile('${jsAttrEsc(r.username)}')">
+          <div style="width:100%;height:100%;border-radius:50%;overflow:hidden;background:var(--bg3);position:relative">
+            <div style="width:30px;height:30px;position:relative;transform:translateY(-11.7%)">${_friendAvatarHtml(r, 30)}</div>
+          </div>
+          ${frameBadgeHtml(rFrame)}
         </div>
         <div class="sidebar-widget-row-text" style="cursor:pointer" onclick="openFriendProfile('${jsAttrEsc(r.username)}')">
           <div class="sidebar-widget-row-name">${esc(r.username)}</div>
@@ -13181,20 +13184,23 @@ async function loadWidgetFriends() {
           <button onclick="removeFriendByUsername('${jsAttrEsc(r.username)}')" title="${t('reject') || 'Rechazar'}" style="width:22px;height:22px;border-radius:50%;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;padding:0"><i class="ti ti-x"></i></button>
         </div>
       </div>
-    `).join('');
+    `; }).join('');
 
-    const friendsHtml = friends.map(f => `
+    const friendsHtml = friends.map(f => { const fFrame = f.level_info && f.level_info.frame; return `
       <div class="sidebar-widget-row" style="cursor:pointer" onclick="openFriendProfile('${jsAttrEsc(f.username)}')">
-        <div style="width:30px;height:30px;border-radius:50%;overflow:hidden;background:var(--bg3);flex-shrink:0;position:relative">
-          <div style="width:30px;height:30px;position:relative;transform:translateY(-11.7%)">${_friendAvatarHtml(f, 30)}</div>
+        <div class="${frameAnimClass(fFrame)}" style="width:30px;height:30px;flex-shrink:0;position:relative;${frameWrapStyle(fFrame)}">
+          <div style="width:100%;height:100%;border-radius:50%;overflow:hidden;background:var(--bg3);position:relative">
+            <div style="width:30px;height:30px;position:relative;transform:translateY(-11.7%)">${_friendAvatarHtml(f, 30)}</div>
+          </div>
           ${f.in_session ? `<div style="position:absolute;bottom:-1px;right:-1px;width:13px;height:13px;border-radius:50%;background:#1D9E75;border:1.5px solid var(--bg);display:flex;align-items:center;justify-content:center" title="${t('inSession')}"><i class="ti ti-player-play-filled" style="font-size:7px;color:#fff"></i></div>` : ''}
+          ${frameBadgeHtml(fFrame)}
         </div>
         <div class="sidebar-widget-row-text">
           <div class="sidebar-widget-row-name">${esc(f.username)}</div>
           <div class="sidebar-widget-row-sub">${f.in_session ? t('inSession') : `${f.library_count} ${t('gamesLower') || ''}`}</div>
         </div>
       </div>
-    `).join('');
+    `; }).join('');
 
     el.innerHTML = requestsHtml + friendsHtml;
   } catch (e) {
