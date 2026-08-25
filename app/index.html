@@ -9133,6 +9133,21 @@ function frameWrapStyle(frameId) {
   return `border:${thick}px solid ${color};border-radius:10px;padding:2px;`;
 }
 
+/** Igual que frameWrapStyle pero circular (border-radius:50%), para
+ * avatares redondos como el widget de amigos del sidebar — frameWrapStyle
+ * usa esquinas cuadradas (10px) pensado para los chips cuadrados del
+ * selector de avatar/panel de solicitudes, y se veia desalineado/con las
+ * puntas del marco asomando sobre un avatar circular. Sin marco, no agrega
+ * nada (ni borde ni el circulo "prohibido" de frameBadgeHtml, que es para
+ * el contexto de "todavia no lo desbloqueaste" del selector, no para ver
+ * el avatar de otro usuario que simplemente no tiene marco puesto). */
+function friendFrameStyle(frameId) {
+  const color = _frameColors[frameId];
+  if (!color) return '';
+  const thick = (frameId === 'neon' || frameId === 'fuego' || frameId === 'prisma') ? 3 : 2;
+  return `border:${thick}px solid ${color};border-radius:50%;padding:1px;`;
+}
+
 // Clase de animacion para el marco: los 3 tiers anteriores al ultimo
 // (fuego/amatista/dorado) laten con un fade a un color mas tenue; el
 // ultimo tier (prisma) tiene un degrade RGB que se desplaza.
@@ -13196,11 +13211,10 @@ async function loadWidgetFriends() {
     // sin tener que abrir el panel completo de Amigos.
     const requestsHtml = requests.map(r => { const rFrame = r.level_info && r.level_info.frame; return `
       <div class="sidebar-widget-row">
-        <div class="${frameAnimClass(rFrame)}" style="width:30px;height:30px;flex-shrink:0;position:relative;cursor:pointer;${frameWrapStyle(rFrame)}" onclick="openFriendProfile('${jsAttrEsc(r.username)}')">
-          <div style="width:100%;height:100%;border-radius:50%;overflow:hidden;background:var(--bg3);position:relative">
+        <div class="${frameAnimClass(rFrame)}" style="box-sizing:content-box;width:30px;height:30px;flex-shrink:0;position:relative;cursor:pointer;${friendFrameStyle(rFrame)}" onclick="openFriendProfile('${jsAttrEsc(r.username)}')">
+          <div style="width:30px;height:30px;border-radius:50%;overflow:hidden;background:var(--bg3);position:relative">
             <div style="width:30px;height:30px;position:relative;transform:translateY(-11.7%)">${_friendAvatarHtml(r, 30)}</div>
           </div>
-          ${frameBadgeHtml(rFrame)}
         </div>
         <div class="sidebar-widget-row-text" style="cursor:pointer" onclick="openFriendProfile('${jsAttrEsc(r.username)}')">
           <div class="sidebar-widget-row-name">${esc(r.username)}</div>
@@ -13215,12 +13229,11 @@ async function loadWidgetFriends() {
 
     const friendsHtml = friends.map(f => { const fFrame = f.level_info && f.level_info.frame; return `
       <div class="sidebar-widget-row" style="cursor:pointer" onclick="openFriendProfile('${jsAttrEsc(f.username)}')">
-        <div class="${frameAnimClass(fFrame)}" style="width:30px;height:30px;flex-shrink:0;position:relative;${frameWrapStyle(fFrame)}">
-          <div style="width:100%;height:100%;border-radius:50%;overflow:hidden;background:var(--bg3);position:relative">
+        <div class="${frameAnimClass(fFrame)}" style="box-sizing:content-box;width:30px;height:30px;flex-shrink:0;position:relative;${friendFrameStyle(fFrame)}">
+          <div style="width:30px;height:30px;border-radius:50%;overflow:hidden;background:var(--bg3);position:relative">
             <div style="width:30px;height:30px;position:relative;transform:translateY(-11.7%)">${_friendAvatarHtml(f, 30)}</div>
           </div>
           ${f.in_session ? `<div style="position:absolute;bottom:-1px;right:-1px;width:13px;height:13px;border-radius:50%;background:#1D9E75;border:1.5px solid var(--bg);display:flex;align-items:center;justify-content:center" title="${t('inSession')}"><i class="ti ti-player-play-filled" style="font-size:7px;color:#fff"></i></div>` : ''}
-          ${frameBadgeHtml(fFrame)}
         </div>
         <div class="sidebar-widget-row-text">
           <div class="sidebar-widget-row-name">${esc(f.username)}</div>
