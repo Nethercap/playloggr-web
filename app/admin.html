@@ -74,6 +74,7 @@
     <div class="card-header" onclick="toggleCard('card-metrics')">
       <span class="card-header-title"><span class="card-chevron">▸</span><strong>Métricas generales</strong></span>
       <button class="btn-secondary" style="padding:4px 10px; font-size:11px" onclick="event.stopPropagation(); loadMetrics()">↻ Actualizar</button>
+      <button class="btn-secondary" title="Fuerza el recalculo de rankings globales, novedades y otros datos cacheados (normalmente se renuevan solos a medianoche ART)" style="padding:4px 10px; font-size:11px" onclick="event.stopPropagation(); adminClearCache()">🗑️ Limpiar cache</button>
     </div>
     <div class="card-body">
       <div class="metrics-grid" id="metrics-grid">
@@ -860,6 +861,18 @@ function formatWebAppUsage(webIso, appIso) {
   if (appIso) parts.push(badge('App', '#1D9E75'));
   if (!parts.length) return '<span style="color:var(--text2)">—</span>';
   return parts.join('');
+}
+
+async function adminClearCache() {
+  if (!confirm('¿Limpiar el cache del servidor? Los rankings globales, novedades y otros datos cacheados se van a recalcular en la próxima consulta (puede tardar un poco más esa primera vez).')) return;
+  try {
+    const res = await fetch(`${API}/cache/clear`, { method: 'POST', headers: headers() });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    alert('Cache limpiado.');
+  } catch (e) {
+    alert(e.message || 'Error al limpiar el cache');
+  }
 }
 
 async function adminResetPassword(email) {
