@@ -9375,8 +9375,16 @@ async function openFriendProfile(username) {
   currentFriendUsername = username;
   const cached = (window._friendsCache || []).find(f => f.username === username);
   const li = cached && cached.level_info;
+  const frameId = li && li.frame;
+  const avatarHtml = cached
+    ? `<div class="${frameAnimClass(frameId)}" style="box-sizing:content-box;width:26px;height:26px;flex-shrink:0;position:relative;${friendFrameStyle(frameId)}">
+         <div style="width:26px;height:26px;border-radius:50%;overflow:hidden;background:var(--bg3);position:relative">
+           <div style="width:26px;height:26px;position:relative;transform:translateY(-11.7%)">${_friendAvatarHtml(cached, 26)}</div>
+         </div>
+       </div>`
+    : '<i class="ti ti-user"></i>';
   document.getElementById('friend-profile-title').innerHTML =
-    `<i class="ti ti-user"></i> ${levelBadgeHtml(li)}<span style="${usernameFontStyle(li && li.font)}">${esc(username)}</span>`;
+    `${avatarHtml} ${levelBadgeHtml(li)}<span style="${usernameFontStyle(li && li.font)}">${esc(username)}</span>`;
   document.getElementById('friend-profile-overlay').classList.add('open');
   switchFriendTab('library');
 }
@@ -13205,6 +13213,11 @@ async function loadWidgetFriends() {
     const d = await friendsRes.json();
     const requests = requestsRes.ok ? ((await requestsRes.json()).requests || []) : [];
     const friends = d.friends || [];
+    // Mismo cache que usa el panel completo de Amigos (loadFriendsList) —
+    // openFriendProfile lo usa para mostrar el avatar+marco en el titulo, y
+    // se puede entrar a un perfil desde este widget sin haber abierto antes
+    // el panel completo (que es el que lo llenaba hasta ahora).
+    window._friendsCache = friends;
     if (!friends.length && !requests.length) { el.innerHTML = `<div class="sidebar-widget-empty">${t('noFriendsYet')}</div>`; return; }
 
     // Solicitudes pendientes primero, con accion rapida de aceptar/rechazar
