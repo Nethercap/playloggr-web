@@ -8834,8 +8834,8 @@ function levelBadgeHtml(levelInfo, size = 18) {
   if (typeof ensureGameThemeFontsLoaded === 'function') ensureGameThemeFontsLoaded();
   const tier = levelInfo.badge_tier;
   const color = _badgeTierColors[tier] || _badgeTierColors.bronce;
-  const iconSize = Math.round(size * 1.3);
-  const icon = `<img src="${_badgeAssetPath(levelInfo.level, tier)}" style="width:${iconSize}px;height:${iconSize}px;flex-shrink:0" onerror="this.style.display='none'" />`;
+  const iconSize = Math.round(size * 2.1);
+  const icon = `<img src="${_badgeAssetPath(levelInfo.level, tier)}" style="width:${iconSize}px;height:${iconSize}px;flex-shrink:0;display:block" onerror="this.style.display='none'" />`;
   // El trofeo se muestra al lado del numero (y por lo tanto, al lado del
   // nombre de usuario donde se renderizan juntos), no superpuesto encima.
   const trophy = levelInfo.trophy
