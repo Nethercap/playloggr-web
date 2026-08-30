@@ -264,6 +264,13 @@
     h1 { font-size: 18px; }
     .feature-grid { grid-template-columns: 1fr; }
     .section { padding: 52px 0; }
+    /* En pantallas angostas "cover" termina zoomeando demasiado la imagen
+       (el contenedor queda mucho mas angosto que alto en proporcion a la
+       foto, que es panoramica) y el auto -el sujeto de la imagen- quedaba
+       cortado fuera de foco. Se re-centra sobre el auto y se le da un poco
+       mas de aire con background-size explicito en vez de dejar que cover
+       lo lleve al maximo posible. */
+    .hero::before { background-position: 44% 46%; background-size: 220% auto; }
   }
 </style>
 </head>
