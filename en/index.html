@@ -264,13 +264,17 @@
     h1 { font-size: 18px; }
     .feature-grid { grid-template-columns: 1fr; }
     .section { padding: 52px 0; }
-    /* En pantallas angostas "cover" termina zoomeando demasiado la imagen
-       (el contenedor queda mucho mas angosto que alto en proporcion a la
-       foto, que es panoramica) y el auto -el sujeto de la imagen- quedaba
-       cortado fuera de foco. Se re-centra sobre el auto y se le da un poco
-       mas de aire con background-size explicito en vez de dejar que cover
-       lo lleve al maximo posible. */
-    .hero::before { background-position: 44% 46%; background-size: 220% auto; }
+    /* La foto de fondo del desktop es panoramica (16:9) -- en un
+       contenedor angosto "cover" termina zoomeando demasiado y el sujeto
+       de la imagen queda cortado fuera de foco. En vez de forzar un recorte
+       raro de esa misma imagen, en mobile se usa una foto vertical aparte
+       (compuesta para ese aspecto) que ya encuadra bien sin ajustes. */
+    .hero::before {
+      background-image:
+        linear-gradient(180deg, rgba(10,8,14,0.55) 0%, rgba(10,8,14,0.82) 55%, var(--bg) 100%),
+        url('/assets/hero-bg-mobile.jpg');
+      background-position: center top; background-size: cover;
+    }
   }
 </style>
 </head>
