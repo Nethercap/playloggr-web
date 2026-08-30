@@ -87,7 +87,18 @@
   .nav-toggle { display: none; background: none; border: none; color: var(--text); font-size: 22px; cursor: pointer; align-items: center; justify-content: center; }
 
   /* ── Hero ── */
-  .hero { padding: 80px 0 40px; text-align: center; }
+  .hero {
+    padding: 96px 0 64px; text-align: center; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(180deg, rgba(10,8,14,0.55) 0%, rgba(10,8,14,0.82) 55%, var(--bg) 100%),
+      url('/assets/hero-bg.jpg');
+    background-size: cover; background-position: center 30%;
+    z-index: 0;
+  }
+  .hero > .wrap { position: relative; z-index: 1; }
   .eyebrow {
     display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600;
     color: var(--green); background: var(--green-dim); padding: 6px 14px; border-radius: 20px;
@@ -116,32 +127,34 @@
     background: var(--bg2); border: 1px solid var(--border); padding: 8px 14px; border-radius: 20px;
   }
 
-  /* ── Gallery (carousel, one screenshot at a time) ── */
-  .gallery-section { padding: 56px 0 24px; }
-  .gallery-carousel { display: flex; align-items: center; justify-content: center; gap: 14px; }
-  .gallery-viewport { width: 380px; max-width: calc(100vw - 100px); height: 340px; overflow: hidden; border-radius: 20px; }
-  .gallery-track { display: flex; height: 100%; transition: transform 0.35s ease; }
-  .shot {
-    flex: 0 0 100%; width: 380px; height: 340px;
-    background: var(--bg2); border: 1px solid var(--border); border-radius: 20px;
-    overflow: hidden; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+
+
+  /* ── Preview de biblioteca (cards estaticas, sin swipe) ── */
+  .preview-panel { margin: 44px auto 0; max-width: 420px; }
+  .preview-cards {
+    display: flex; flex-direction: column; gap: 1px;
+    background: var(--border); border: 1px solid var(--border); border-radius: 16px;
+    overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+    backdrop-filter: blur(6px);
   }
-  .shot img { width: 100%; height: 100%; object-fit: contain; object-position: top center; background: var(--bg3); }
-  .shot .shot-caption {
-    position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 14px;
-    background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
-    font-size: 12.5px; color: #fff; font-weight: 600;
+  .preview-card {
+    display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+    background: rgba(26,26,26,0.92); text-align: left;
   }
-  .gallery-arrow {
-    flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%;
-    border: 1px solid var(--border); background: var(--bg2); color: var(--text);
-    font-size: 20px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  .preview-cover {
+    width: 40px; height: 40px; border-radius: 9px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; color: #fff; font-size: 17px;
   }
-  .gallery-arrow:hover { background: var(--bg3); }
-  @media (max-width: 520px) { .gallery-arrow { display: none; } }
-  .gallery-dots { display: flex; justify-content: center; gap: 8px; margin-top: 14px; }
-  .gallery-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); cursor: pointer; border: none; padding: 0; }
-  .gallery-dot.active { background: var(--green); }
+  .preview-info { flex: 1; min-width: 0; }
+  .preview-name { font-size: 13.5px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .preview-meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .preview-status {
+    flex-shrink: 0; font-size: 10.5px; font-weight: 700; padding: 4px 9px; border-radius: 20px;
+    text-transform: uppercase; letter-spacing: 0.02em;
+  }
+  .status-playing { color: #3B82F6; background: rgba(59,130,246,0.15); }
+  .status-done    { color: var(--green); background: var(--green-dim); }
+  .status-backlog { color: var(--text2); background: rgba(255,255,255,0.06); }
 
   /* ── Section headers ── */
   .section { padding: 72px 0; }
@@ -307,11 +320,9 @@
 <header class="hero" id="que-es">
   <div class="wrap">
     <div class="eyebrow"><i class="ti ti-device-gamepad-2"></i> Your game backlog, finally under control</div>
-    <h1>Stop forgetting what you were playing.<br>Organize your <span class="accent">game backlog</span> in one place.</h1>
+    <h1>Your gaming space, <span class="accent">all in one place</span>.</h1>
     <p class="hero-sub">
-      Playloggr is the platform for gamers who want to keep a real record of their library: what they're playing,
-      what they've finished, what they've dropped, and what's still pending. Sync your Steam, PlayStation, GOG, Xbox, or Epic Games account, unlock achievements,
-      level up, and compare your stats with friends — all free to start.
+      Sync your library, level up, and share with your friends.
     </p>
     <div class="hero-ctas">
       <a href="/app/" class="btn-primary">Create a free account</a>
@@ -324,38 +335,37 @@
       <span class="pill"><i class="ti ti-trophy"></i> 139 unlockable achievements</span>
       <span class="pill"><i class="ti ti-chart-bar"></i> Real-time statistics</span>
       <span class="pill"><i class="ti ti-users"></i> Social backlog with friends</span>
+    <div class="preview-panel">
+      <div class="preview-cards">
+        <div class="preview-card">
+          <div class="preview-cover" style="background:linear-gradient(135deg,#1D9E75,#0c4a35)"><i class="ti ti-sword"></i></div>
+          <div class="preview-info">
+            <div class="preview-name">Aegis Fall</div>
+            <div class="preview-meta">PC · 62 hrs</div>
+          </div>
+          <span class="preview-status status-playing">Playing</span>
+        </div>
+        <div class="preview-card">
+          <div class="preview-cover" style="background:linear-gradient(135deg,#3B82F6,#173a75)"><i class="ti ti-ghost-2"></i></div>
+          <div class="preview-info">
+            <div class="preview-name">Nightbound Chronicles</div>
+            <div class="preview-meta">PS5 · 118 hrs</div>
+          </div>
+          <span class="preview-status status-done">Completed</span>
+        </div>
+        <div class="preview-card">
+          <div class="preview-cover" style="background:linear-gradient(135deg,#6b6b6b,#2b2b2b)"><i class="ti ti-shield-half"></i></div>
+          <div class="preview-info">
+            <div class="preview-name">Ironvale Tactics</div>
+            <div class="preview-meta">Xbox · 8 hrs</div>
+          </div>
+          <span class="preview-status status-backlog">Backlog</span>
+        </div>
+      </div>
     </div>
   </div>
 </header>
 
-<!-- ═══════════════ GALLERY ═══════════════ -->
-<section class="gallery-section">
-  <div class="gallery-carousel">
-    <button class="gallery-arrow gallery-prev" aria-label="Previous" onclick="galleryNav(-1)">‹</button>
-    <div class="gallery-viewport">
-      <div class="gallery-track" id="gallery-scroll">
-        <div class="shot">
-          <img src="/assets/screenshots/biblioteca.png" alt="Game library in Playloggr, with filters by status and platform" loading="lazy" />
-          <div class="shot-caption"><i class="ti ti-books"></i> Your whole library, with filters</div>
-        </div>
-        <div class="shot">
-          <img src="/assets/screenshots/logros.png" alt="Achievements and level panel in Playloggr" loading="lazy" />
-          <div class="shot-caption"><i class="ti ti-trophy"></i> 139 achievements to unlock</div>
-        </div>
-        <div class="shot">
-          <img src="/assets/screenshots/estadisticas.png" alt="Library statistics, hours played, and ratings in Playloggr" loading="lazy" />
-          <div class="shot-caption"><i class="ti ti-chart-bar"></i> Real stats on your backlog</div>
-        </div>
-        <div class="shot">
-          <img src="/assets/screenshots/avatar.png" alt="Avatar customization and unlockable frames in Playloggr" loading="lazy" />
-          <div class="shot-caption"><i class="ti ti-palette"></i> Avatar and exclusive frames by level</div>
-        </div>
-      </div>
-    </div>
-    <button class="gallery-arrow gallery-next" aria-label="Next" onclick="galleryNav(1)">›</button>
-  </div>
-  <div class="gallery-dots" id="gallery-dots"></div>
-</section>
 
 <!-- ═══════════════ FEATURES AND PLANS ═══════════════ -->
 <section class="section section-alt" id="funcionalidades">
@@ -514,37 +524,6 @@
 
 <script>
   document.getElementById('year').textContent = new Date().getFullYear();
-
-  // ── Screenshot carousel (one at a time, arrows + swipe) ──
-  (function initGalleryCarousel() {
-    const track = document.getElementById('gallery-scroll');
-    const dotsWrap = document.getElementById('gallery-dots');
-    if (!track) return;
-    const slides = Array.from(track.children);
-    let idx = 0;
-    slides.forEach((_, i) => {
-      const dot = document.createElement('button');
-      dot.className = 'gallery-dot' + (i === 0 ? ' active' : '');
-      dot.setAttribute('aria-label', `Screenshot ${i + 1}`);
-      dot.addEventListener('click', () => goTo(i));
-      dotsWrap.appendChild(dot);
-    });
-    function update() {
-      track.style.transform = `translateX(-${idx * 100}%)`;
-      Array.from(dotsWrap.children).forEach((d, i) => d.classList.toggle('active', i === idx));
-    }
-    function goTo(i) { idx = (i + slides.length) % slides.length; update(); }
-    window.galleryNav = (dir) => goTo(idx + dir);
-    let startX = null;
-    track.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
-    track.addEventListener('touchend', e => {
-      if (startX === null) return;
-      const dx = e.changedTouches[0].clientX - startX;
-      if (Math.abs(dx) > 40) goTo(idx + (dx < 0 ? 1 : -1));
-      startX = null;
-    }, { passive: true });
-    update();
-  })();
 
   // ── Language picker (first visit) ──
   (function initLangPicker() {
