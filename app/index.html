@@ -980,6 +980,7 @@
 <div class="mobile-sidebar" id="mobile-sidebar">
   <div class="mobile-sidebar-header"><i class="ti ti-device-gamepad-2" style="color:#1D9E75"></i> Playloggr</div>
   <a href="https://play.google.com/store/apps/details?id=com.playloggr.app" target="_blank" rel="noopener" class="mobile-sidebar-item" style="text-decoration:none"><img src="https://cdn.simpleicons.org/googleplay/888887" style="width:16px;height:16px"> <span data-i18n="downloadApp">Descargar la app</span></a>
+  <a href="https://discord.gg/ksF4AaMt4j" target="_blank" rel="noopener" class="mobile-sidebar-item" style="text-decoration:none"><i class="ti ti-brand-discord" style="color:#5865F2"></i> <span data-i18n="joinDiscord">Unite a Discord</span></a>
   <div class="mobile-sidebar-divider"></div>
   <button id="mobile-premium-menu-btn" onclick="setView('premium');toggleHeaderMoreMenu()" class="mobile-sidebar-item" style="display:none"><i class="ti ti-key" style="color:#1D9E75"></i> <span data-i18n="evolveToPremium">Evolucioná a Premium</span></button>
   <div class="mobile-sidebar-divider"></div>
@@ -2464,7 +2465,7 @@ const I18N = {
     activityTab: 'Actividad', activityDetailHint: 'Hacé click en un día para ver el detalle.',
     activityLess: 'Menos', activityMore: 'Más', activityNoData: 'sin actividad',
     mon: 'Lun', tue: 'Mar', wed: 'Mié', thu: 'Jue', fri: 'Vie', sat: 'Sáb', sun: 'Dom',
-    downloadApp: 'Descargar la app',
+    downloadApp: 'Descargar la app', joinDiscord: 'Unite a Discord',
     gamePlan: 'Plan de juego', newPlan: 'Nuevo plan', backToPlans: '← Volver a Plan de juego',
     noPlans: 'No tenés planes todavía. Creá uno para estimar cuándo vas a terminar tus juegos.',
     planStatusActive: 'Activo', planStatusCompleted: 'Completado', planStatusAbandoned: 'Abandonado',
@@ -2725,7 +2726,7 @@ const I18N = {
     activityTab: 'Activity', activityDetailHint: 'Click a day to see the detail.',
     activityLess: 'Less', activityMore: 'More', activityNoData: 'no activity',
     mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat', sun: 'Sun',
-    downloadApp: 'Download the app',
+    downloadApp: 'Download the app', joinDiscord: 'Join Discord',
     gamePlan: 'Game plan', newPlan: 'New plan', backToPlans: '← Back to Game plan',
     noPlans: "You don't have any plans yet. Create one to estimate when you'll finish your games.",
     planStatusActive: 'Active', planStatusCompleted: 'Completed', planStatusAbandoned: 'Abandoned',
@@ -2986,7 +2987,7 @@ const I18N = {
     activityTab: 'Atividade', activityDetailHint: 'Clique em um dia para ver o detalhe.',
     activityLess: 'Menos', activityMore: 'Mais', activityNoData: 'sem atividade',
     mon: 'Seg', tue: 'Ter', wed: 'Qua', thu: 'Qui', fri: 'Sex', sat: 'Sáb', sun: 'Dom',
-    downloadApp: 'Baixar o aplicativo',
+    downloadApp: 'Baixar o aplicativo', joinDiscord: 'Entrar no Discord',
     gamePlan: 'Plano de jogo', newPlan: 'Novo plano', backToPlans: '← Voltar ao Plano de jogo',
     noPlans: 'Você ainda não tem planos. Crie um para estimar quando vai terminar seus jogos.',
     planStatusActive: 'Ativo', planStatusCompleted: 'Concluído', planStatusAbandoned: 'Abandonado',
@@ -11180,40 +11181,53 @@ function _notifTimeAgo(iso) {
   return `${days}d`;
 }
 
-function openNotifModal() {
+function _renderNotifModalList() {
   const list = document.getElementById('notif-modal-list');
   const items = notifState.recent || [];
   list.innerHTML = items.length ? items.map(n => {
     const meta = NOTIF_TYPE_META[n.push_type] || NOTIF_TYPE_META.custom;
-    return `<button onclick="openNotifItem('${n.push_type}')" class="steam-menu-item" style="width:100%;text-align:left;display:flex;align-items:center;gap:10px;padding:10px 6px">
+    return `<button onclick="openNotifItem(${n.id}, '${n.push_type}')" data-notif-id="${n.id}" class="steam-menu-item" style="width:100%;text-align:left;display:flex;align-items:center;gap:10px;padding:10px 6px;transition:opacity .15s,transform .15s">
       <i class="ti ${meta.icon}" style="font-size:16px;color:${meta.color};flex-shrink:0"></i>
       <span style="flex:1;font-size:13px;line-height:1.4">${esc(n.title || '')}</span>
       <span style="font-size:11px;color:var(--text2);flex-shrink:0">${_notifTimeAgo(n.sent_at)}</span>
     </button>`;
   }).join('') : `<div style="padding:24px;text-align:center;font-size:12px;color:var(--text2)">${t('noNotifications')}</div>`;
+}
 
+async function openNotifModal() {
+  _renderNotifModalList();
   document.getElementById('notif-modal-overlay').classList.add('open');
 
   // Se marcan todas como leidas al abrir el modal (no por item clickeado) --
   // mismo criterio que "abrir para ver" en las notificaciones push del celular.
-  if (notifState.unseen_recent) {
-    notifState.unseen_recent = false;
-    notifState.has_any = notifState.friend_requests > 0 || notifState.unseen_period_summary || notifState.has_new_novedades;
-    renderNotifBell();
-    fetch(`${apiBase()}/api/v1/notifications/recent/seen`, {
+  // Incondicional (no atado a unseen_recent) para no depender de que ese
+  // flag este bien sincronizado con lo que se ve en pantalla.
+  notifState.unseen_recent = false;
+  notifState.has_any = notifState.friend_requests > 0 || notifState.unseen_period_summary || notifState.has_new_novedades;
+  renderNotifBell();
+  try {
+    await fetch(`${apiBase()}/api/v1/notifications/recent/seen`, {
       method: 'POST', headers: { 'Authorization': `Bearer ${authToken}` },
-    }).catch(() => {});
-  }
+    });
+  } catch (e) {}
 }
 
 function closeNotifModal() {
   document.getElementById('notif-modal-overlay').classList.remove('open');
 }
 
-function openNotifItem(pushType) {
-  closeNotifModal();
+function openNotifItem(id, pushType) {
+  // Desaparece de la lista al clickear (mismo criterio que "descartar" una
+  // notificacion push ya abierta) antes de navegar a la pantalla equivalente.
+  const el = document.querySelector(`#notif-modal-list [data-notif-id="${id}"]`);
+  if (el) {
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(8px)';
+    setTimeout(() => el.remove(), 150);
+  }
+  notifState.recent = (notifState.recent || []).filter(n => n.id !== id);
   const meta = NOTIF_TYPE_META[pushType] || NOTIF_TYPE_META.custom;
-  meta.go();
+  setTimeout(() => { closeNotifModal(); meta.go(); }, 160);
 }
 
 async function markNotificationsRead() {
