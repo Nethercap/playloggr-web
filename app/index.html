@@ -1597,6 +1597,7 @@
   <div class="modal" style="max-width:380px;padding:0;overflow:hidden">
     <div id="welcome-stats-card" style="padding:26px 22px;background:linear-gradient(160deg,#16231d,#111111);text-align:center">
       <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--green);font-weight:700;margin-bottom:14px" data-i18n="wowEyebrow">Tu biblioteca</div>
+      <div id="welcome-stats-avatar" style="width:72px;height:72px;margin:0 auto 10px;border-radius:50%;overflow:hidden;background:var(--bg3);position:relative"></div>
       <div id="welcome-stats-user" style="font-size:15px;font-weight:700;margin-bottom:18px"></div>
       <div style="display:flex;justify-content:center;gap:26px;margin-bottom:16px">
         <div>
@@ -11628,21 +11629,34 @@ function maybeShowWelcomeStats(data) {
 
   const hours = Math.round(data.total_hours || 0);
   const days  = Math.round(hours / 24);
+  // Avatar del usuario: el mismo render que el resto de la app. El transform
+  // recorta la cabeza/torso del pixel-doll, que es lo que se ve bien en
+  // redondo (mismo criterio que la miniatura del panel de perfil).
+  const avBox = document.getElementById('welcome-stats-avatar');
+  if (avBox) {
+    avBox.innerHTML = `<div style="width:72px;height:72px;position:relative;transform:translateY(-11.7%)">
+      ${pixelAvatarHtml(currentAvatarConfig, 72)}</div>`;
+  }
   document.getElementById('welcome-stats-user').textContent = authUser || '';
   document.getElementById('welcome-stats-games').textContent = total.toLocaleString();
   document.getElementById('welcome-stats-hours').textContent = hours.toLocaleString();
   document.getElementById('welcome-stats-life').textContent =
     days > 0 ? t('wowLife').replace('{days}', days.toLocaleString()) : '';
 
-  const by = data.by_status || {};
-  const chips = [
-    ['Completado', '#1D9E75'],
-    ['Jugando',    '#3B82F6'],
-    ['Backlog',    '#9E9E9E'],
-  ].filter(([st]) => (by[st] || 0) > 0).map(([st, color]) => `
-    <span style="font-size:11px;padding:4px 10px;border-radius:20px;background:${color}22;color:${color};font-weight:600">
-      ${by[st]} ${esc(statusLabel(st))}
-    </span>`).join('');
+  // Todos los estados que el usuario realmente tenga, en orden fijo y con los
+  // mismos colores que el resto de la app (STATUS_DOT_COLORS). "Deseados" sale
+  // aparte porque /backlog lo excluye del conteo por estado.
+  const by = { ...(data.by_status || {}) };
+  const wish = (window._globalStats || {}).wishlist_count || 0;
+  if (wish > 0) by['Deseados'] = wish;
+  const chips = ['Jugando', 'Completado', 'Intermitente', 'Abandonado', 'Backlog', 'Deseados']
+    .filter(st => (by[st] || 0) > 0)
+    .map(st => {
+      const color = STATUS_DOT_COLORS[st] || 'var(--text2)';
+      return `<span style="font-size:11px;padding:4px 10px;border-radius:20px;background:${color}22;color:${color};font-weight:600">
+        ${by[st]} ${esc(statusLabel(st))}
+      </span>`;
+    }).join('');
   document.getElementById('welcome-stats-breakdown').innerHTML = chips;
 
   setTimeout(() => document.getElementById('welcome-stats-overlay').classList.add('open'), 600);
