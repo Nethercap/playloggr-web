@@ -1357,6 +1357,10 @@
         style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px" data-i18n="periodTab">Semana/Mes</button>
       <button id="stab-activity" onclick="switchStatsTab('activity')"
         style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px" data-i18n="activityTab">Actividad</button>
+      <button onclick="openShareCard()" data-i18n-title="shareLibrary" title="Compartir mi biblioteca"
+        style="margin-left:auto;padding:6px 14px;font-size:12px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;border-radius:20px;font-weight:600">
+        <i class="ti ti-share"></i> <span data-i18n="shareLibraryShort">Compartir</span>
+      </button>
     </div>
     <div id="stats-user-tab" style="padding:16px;max-width:720px;width:100%;margin:0 auto;box-sizing:border-box">
       <div id="stats-user-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
@@ -1609,7 +1613,8 @@
           <div style="font-size:10.5px;color:var(--text2);margin-top:3px" data-i18n="wowHours">horas</div>
         </div>
       </div>
-      <div id="welcome-stats-life" style="font-size:12.5px;color:var(--text2);margin-bottom:16px"></div>
+      <div id="welcome-stats-life" style="font-size:12.5px;color:var(--text2);margin-bottom:12px"></div>
+      <div id="welcome-stats-streak" style="margin-bottom:14px"></div>
       <div id="welcome-stats-breakdown" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap"></div>
       <div style="margin-top:20px;font-size:10.5px;color:#666;letter-spacing:.04em">playloggr.com</div>
     </div>
@@ -2692,6 +2697,7 @@ const I18N = {
     activateManual: 'A mano', activateLater: 'Lo hago más tarde',
     wowEyebrow: 'Tu biblioteca', wowGames: 'juegos', wowHours: 'horas', wowShare: 'Compartir',
     wowLife: 'Son {days} días de tu vida jugando',
+    streakDaysShort: 'días de racha', shareLibrary: 'Compartir mi biblioteca', shareLibraryShort: 'Compartir',
     tourTitleSteam: 'Sincronizá tus plataformas', tourBodySteam: 'Tocá acá para conectar Steam, PlayStation, GOG, Xbox o Epic Games y traer tu biblioteca automáticamente.',
     tourTitleAdd: 'Agregá juegos', tourBodyAdd: 'Tocá acá para agregar un juego manualmente a tu biblioteca.',
     tourTitleFolders: 'Organizá con listas', tourBodyFolders: 'Creá listas para agrupar tus juegos como quieras.',
@@ -2960,6 +2966,7 @@ const I18N = {
     activateManual: 'Manually', activateLater: "I'll do it later",
     wowEyebrow: 'Your library', wowGames: 'games', wowHours: 'hours', wowShare: 'Share',
     wowLife: "That's {days} days of your life playing",
+    streakDaysShort: 'day streak', shareLibrary: 'Share my library', shareLibraryShort: 'Share',
     tourTitleSteam: 'Sync your platforms', tourBodySteam: 'Tap here to connect Steam, PlayStation, GOG, Xbox or Epic Games and bring in your library automatically.',
     tourTitleAdd: 'Add games', tourBodyAdd: 'Tap here to manually add a game to your library.',
     tourTitleFolders: 'Organize with lists', tourBodyFolders: 'Create lists to group your games however you like.',
@@ -3228,6 +3235,7 @@ const I18N = {
     activateManual: 'Manualmente', activateLater: 'Faço isso depois',
     wowEyebrow: 'Sua biblioteca', wowGames: 'jogos', wowHours: 'horas', wowShare: 'Compartilhar',
     wowLife: 'São {days} dias da sua vida jogando',
+    streakDaysShort: 'dias de sequência', shareLibrary: 'Compartilhar minha biblioteca', shareLibraryShort: 'Compartilhar',
     tourTitleSteam: 'Sincronize suas plataformas', tourBodySteam: 'Toque aqui para conectar Steam, PlayStation, GOG, Xbox ou Epic Games e trazer sua biblioteca automaticamente.',
     tourTitleAdd: 'Adicione jogos', tourBodyAdd: 'Toque aqui para adicionar um jogo manualmente à sua biblioteca.',
     tourTitleFolders: 'Organize com listas', tourBodyFolders: 'Crie listas para agrupar seus jogos como quiser.',
@@ -11626,8 +11634,24 @@ function maybeShowWelcomeStats(data) {
     if (localStorage.getItem(key)) return;
     localStorage.setItem(key, '1');
   } catch (e) { return; }
+  _fillAndOpenShareCard(data, 600);
+}
 
+// Misma tarjeta, pero a pedido (boton "compartir" del perfil y de
+// Estadisticas). Usa las stats GLOBALES, no las de la pagina actual: pedirla
+// con un filtro puesto tenia que mostrar la biblioteca entera igual.
+function openShareCard() {
+  const g = window._globalStats || {};
+  _fillAndOpenShareCard({
+    total: g.total || 0,
+    total_hours: g.total_hours || 0,
+    by_status: g.by_status || {},
+  }, 0);
+}
+
+function _fillAndOpenShareCard(data, delay) {
   const hours = Math.round(data.total_hours || 0);
+  const total = data.total || 0;
   const days  = Math.round(hours / 24);
   // Avatar del usuario: el mismo render que el resto de la app. El transform
   // recorta la cabeza/torso del pixel-doll, que es lo que se ve bien en
@@ -11659,7 +11683,20 @@ function maybeShowWelcomeStats(data) {
     }).join('');
   document.getElementById('welcome-stats-breakdown').innerHTML = chips;
 
-  setTimeout(() => document.getElementById('welcome-stats-overlay').classList.add('open'), 600);
+  // Racha: es el numero del que la gente se enorgullece, va arriba de todo.
+  const streakDays = (streakState && streakState.streak_days) || 0;
+  const streakEl = document.getElementById('welcome-stats-streak');
+  if (streakEl) {
+    streakEl.innerHTML = streakDays > 0
+      ? `<span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#EF9F27;background:rgba(239,159,39,.14);padding:5px 12px;border-radius:20px">
+           <img src="streak_avatars/bonfire.png" style="width:14px;height:14px;object-fit:contain" onerror="this.style.display='none'">
+           ${streakDays} ${esc(t('streakDaysShort'))}
+         </span>`
+      : '';
+  }
+
+  const open = () => document.getElementById('welcome-stats-overlay').classList.add('open');
+  if (delay) setTimeout(open, delay); else open();
 }
 
 function closeWelcomeStats() {
@@ -13659,7 +13696,11 @@ async function onLoginSuccess() {
         <button id="header-upgrade-btn" onclick="startPaddleCheckout()" style="display:none;font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer">✨ Hacerse Premium</button>
       </div>
     </div>
-    <div id="plat-status-row" style="display:flex;gap:6px;margin-left:auto"></div>
+    <button onclick="openShareCard()" data-i18n-title="shareLibrary" title="Compartir mi biblioteca"
+      style="margin-left:auto;padding:5px 9px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer">
+      <i class="ti ti-share"></i>
+    </button>
+    <div id="plat-status-row" style="display:flex;gap:6px"></div>
   `;
   applyI18n();
 
