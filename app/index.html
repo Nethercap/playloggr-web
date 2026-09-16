@@ -1549,6 +1549,46 @@
 </div>
 
 <!-- Cover Edit Modal -->
+<!-- Activacion: primer paso real despues de registrarse. El onboarding viejo
+     solo "contaba" lo que hacia la app y el 97% de los registros de ads se
+     iba sin conectar nada (ver /admin/metrics/funnel) — conectar una
+     plataforma es lo unico que correlaciona con volver, asi que ahora se
+     pide explicitamente antes que cualquier otra cosa. -->
+<div class="modal-overlay" id="activate-overlay">
+  <div class="modal" style="max-width:400px;text-align:center">
+    <div style="font-size:34px;margin-bottom:6px">🎮</div>
+    <div class="modal-title" style="justify-content:center" data-i18n="activateTitle">Conectá tu biblioteca</div>
+    <p style="font-size:13px;color:var(--text2);line-height:1.5;margin:6px 0 18px" data-i18n="activateBody">
+      Tus juegos y tus horas aparecen solos. Nunca te pedimos tu contraseña.
+    </p>
+
+    <button onclick="activateVia('steam')" style="width:100%;display:flex;align-items:center;justify-content:center;gap:9px;padding:14px;margin-bottom:10px;border:none;border-radius:10px;background:#1b2838;color:#fff;font-size:15px;font-weight:600;cursor:pointer">
+      <img src="https://cdn.simpleicons.org/steam/ffffff" style="width:19px;height:19px">
+      <span data-i18n="activateSteam">Conectar Steam</span>
+    </button>
+
+    <button onclick="activateVia('psn')" style="width:100%;display:flex;align-items:center;justify-content:center;gap:9px;padding:14px;margin-bottom:16px;border:none;border-radius:10px;background:#003791;color:#fff;font-size:15px;font-weight:600;cursor:pointer">
+      <img src="https://cdn.simpleicons.org/playstation/ffffff" style="width:19px;height:19px">
+      <span data-i18n="activatePsn">Conectar PlayStation</span>
+    </button>
+
+    <div style="font-size:11px;color:var(--text2);margin-bottom:8px" data-i18n="activateOther">Otras plataformas</div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-bottom:18px">
+      <button onclick="activateVia('gog')" style="flex:1;padding:8px;border:0.5px solid var(--border2);border-radius:8px;background:transparent;color:var(--text2);font-size:12.5px;cursor:pointer">
+        <img src="https://cdn.simpleicons.org/gogdotcom/888887" style="width:13px;height:13px;vertical-align:-2px"> GOG
+      </button>
+      <button onclick="activateVia('xbox')" style="flex:1;padding:8px;border:0.5px solid var(--border2);border-radius:8px;background:transparent;color:var(--text2);font-size:12.5px;cursor:pointer">
+        <i class="ti ti-brand-xbox"></i> Xbox
+      </button>
+      <button onclick="activateVia('manual')" style="flex:1;padding:8px;border:0.5px solid var(--border2);border-radius:8px;background:transparent;color:var(--text2);font-size:12.5px;cursor:pointer">
+        <i class="ti ti-plus"></i> <span data-i18n="activateManual">A mano</span>
+      </button>
+    </div>
+
+    <button onclick="closeActivationPrompt()" style="background:none;border:none;color:var(--text2);font-size:11px;opacity:.65;cursor:pointer;text-decoration:underline" data-i18n="activateLater">Lo hago más tarde</button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="notif-modal-overlay">
   <div class="modal" style="max-width:420px">
     <div class="modal-title"><i class="ti ti-bell"></i> <span data-i18n="notifications">Notificaciones</span></div>
@@ -2614,6 +2654,9 @@ const I18N = {
     onboardTitle4: 'Mirá tus estadísticas', onboardBody4: 'Horas jugadas, comparación con el resto de la comunidad y rankings globales.',
     onboardTitle5: 'Personalizá tu avatar', onboardBody5: 'Armá tu propio personaje pixel art con la ropa y accesorios que vayas desbloqueando.',
     onboardNext: 'Siguiente', onboardBack: 'Atrás', onboardStart: 'Empezar', onboardSkip: 'Saltar',
+    activateTitle: 'Conectá tu biblioteca', activateBody: 'Tus juegos y tus horas aparecen solos. Nunca te pedimos tu contraseña.',
+    activateSteam: 'Conectar Steam', activatePsn: 'Conectar PlayStation', activateOther: 'Otras plataformas',
+    activateManual: 'A mano', activateLater: 'Lo hago más tarde',
     tourTitleSteam: 'Sincronizá tus plataformas', tourBodySteam: 'Tocá acá para conectar Steam, PlayStation, GOG, Xbox o Epic Games y traer tu biblioteca automáticamente.',
     tourTitleAdd: 'Agregá juegos', tourBodyAdd: 'Tocá acá para agregar un juego manualmente a tu biblioteca.',
     tourTitleFolders: 'Organizá con listas', tourBodyFolders: 'Creá listas para agrupar tus juegos como quieras.',
@@ -2875,6 +2918,9 @@ const I18N = {
     onboardTitle4: 'Check your stats', onboardBody4: 'Hours played, comparisons with the rest of the community and global rankings.',
     onboardTitle5: 'Customize your avatar', onboardBody5: 'Build your own pixel-art character with the clothes and accessories you unlock.',
     onboardNext: 'Next', onboardBack: 'Back', onboardStart: 'Get started', onboardSkip: 'Skip',
+    activateTitle: 'Connect your library', activateBody: 'Your games and playtime show up on their own. We never ask for your password.',
+    activateSteam: 'Connect Steam', activatePsn: 'Connect PlayStation', activateOther: 'Other platforms',
+    activateManual: 'Manually', activateLater: "I'll do it later",
     tourTitleSteam: 'Sync your platforms', tourBodySteam: 'Tap here to connect Steam, PlayStation, GOG, Xbox or Epic Games and bring in your library automatically.',
     tourTitleAdd: 'Add games', tourBodyAdd: 'Tap here to manually add a game to your library.',
     tourTitleFolders: 'Organize with lists', tourBodyFolders: 'Create lists to group your games however you like.',
@@ -3136,6 +3182,9 @@ const I18N = {
     onboardTitle4: 'Veja suas estatísticas', onboardBody4: 'Horas jogadas, comparação com o resto da comunidade e rankings globais.',
     onboardTitle5: 'Personalize seu avatar', onboardBody5: 'Monte seu próprio personagem em pixel art com as roupas e acessórios que for desbloqueando.',
     onboardNext: 'Próximo', onboardBack: 'Voltar', onboardStart: 'Começar', onboardSkip: 'Pular',
+    activateTitle: 'Conecte sua biblioteca', activateBody: 'Seus jogos e suas horas aparecem sozinhos. Nunca pedimos sua senha.',
+    activateSteam: 'Conectar Steam', activatePsn: 'Conectar PlayStation', activateOther: 'Outras plataformas',
+    activateManual: 'Manualmente', activateLater: 'Faço isso depois',
     tourTitleSteam: 'Sincronize suas plataformas', tourBodySteam: 'Toque aqui para conectar Steam, PlayStation, GOG, Xbox ou Epic Games e trazer sua biblioteca automaticamente.',
     tourTitleAdd: 'Adicione jogos', tourBodyAdd: 'Toque aqui para adicionar um jogo manualmente à sua biblioteca.',
     tourTitleFolders: 'Organize com listas', tourBodyFolders: 'Crie listas para agrupar seus jogos como quiser.',
@@ -11473,7 +11522,65 @@ function onboardingStep(delta) {
 
 function finishOnboardingIntro() {
   document.getElementById('onboarding-overlay').classList.remove('open');
-  setTimeout(startFeatureTour, 350);
+  // El tour de coachmarks queda para despues de pedir la conexion: primero
+  // que active, despues le explicamos la interfaz.
+  setTimeout(() => showActivationPrompt(true), 350);
+}
+
+// ── Activacion (conectar una plataforma) ──────────────────────────────────
+// Es EL paso que decide si el usuario vuelve o no: los que conectan una
+// plataforma vuelven 65% de las veces y duran ~21 dias; los que no, 8% y
+// menos de un dia (medido sobre los primeros 195 registros).
+let _activationFromOnboarding = false;
+
+function showActivationPrompt(fromOnboarding) {
+  _activationFromOnboarding = !!fromOnboarding;
+  document.getElementById('activate-overlay').classList.add('open');
+  try { localStorage.setItem('pl_activate_prompt', new Date().toISOString().slice(0, 10)); } catch (e) {}
+}
+
+// Se muestra tambien a los que ya estaban registrados y nunca cargaron nada
+// (no solo a los recien registrados), como maximo una vez por dia para no
+// convertirlo en un nag.
+function maybeShowActivationPrompt() {
+  if (allGames.length > 0) return;
+  const onboarding = document.getElementById('onboarding-overlay');
+  if (onboarding && onboarding.classList.contains('open')) return;
+  if (document.querySelector('.modal-overlay.open')) return;
+  try {
+    if (localStorage.getItem('pl_activate_prompt') === new Date().toISOString().slice(0, 10)) return;
+  } catch (e) {}
+  showActivationPrompt(false);
+}
+
+function closeActivationPrompt() {
+  document.getElementById('activate-overlay').classList.remove('open');
+  if (_activationFromOnboarding) {
+    _activationFromOnboarding = false;
+    setTimeout(startFeatureTour, 300);
+  }
+}
+
+// Cada opcion cierra el modal y abre el flujo real que ya existe, en vez de
+// duplicar formularios de conexion.
+function activateVia(platform) {
+  document.getElementById('activate-overlay').classList.remove('open');
+  _activationFromOnboarding = false;
+  setTimeout(() => {
+    if (platform === 'steam') {
+      toggleSteamMenu();
+      const i = document.getElementById('steam-id-input');
+      if (i) i.focus();
+    } else if (platform === 'psn') {
+      togglePsnMenu();
+      const i = document.getElementById('psn-id-input');
+      if (i) i.focus();
+    } else if (platform === 'manual') {
+      openModal();
+    } else {
+      toggleConnectorMenu(platform);
+    }
+  }, 220);
 }
 
 async function dismissOnboarding() {
@@ -13429,6 +13536,7 @@ async function onLoginSuccess() {
   checkAchievements();
   checkStreakIn();
   loadSidebarWidgets();
+  maybeShowActivationPrompt();
 }
 
 // ── Widgets del sidebar derecho (desktop): amigos + proximos lanzamientos +
