@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://playloggr.com/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://playloggr.com/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://playloggr.com/en/" />
+    <xhtml:link rel="alternate" hreflang="pt" href="https://playloggr.com/pt/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://playloggr.com/" />
+  </url>
+  <url>
+    <loc>https://playloggr.com/en/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://playloggr.com/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://playloggr.com/en/" />
+    <xhtml:link rel="alternate" hreflang="pt" href="https://playloggr.com/pt/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://playloggr.com/" />
+  </url>
+  <url>
+    <loc>https://playloggr.com/pt/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://playloggr.com/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://playloggr.com/en/" />
+    <xhtml:link rel="alternate" hreflang="pt" href="https://playloggr.com/pt/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://playloggr.com/" />
+  </url>
+  <url>
+    <loc>https://playloggr.com/privacy.html</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://playloggr.com/privacy.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://playloggr.com/en/privacy.html" />
+    <xhtml:link rel="alternate" hreflang="pt" href="https://playloggr.com/pt/privacy.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://playloggr.com/privacy.html" />
+  </url>
+  <url>
+    <loc>https://playloggr.com/en/privacy.html</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://playloggr.com/privacy.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://playloggr.com/en/privacy.html" />
+    <xhtml:link rel="alternate" hreflang="pt" href="https://playloggr.com/pt/privacy.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://playloggr.com/privacy.html" />
+  </url>
+  <url>
+    <loc>https://playloggr.com/pt/privacy.html</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://playloggr.com/privacy.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://playloggr.com/en/privacy.html" />
+    <xhtml:link rel="alternate" hreflang="pt" href="https://playloggr.com/pt/privacy.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://playloggr.com/privacy.html" />
+  </url>
+  <url>
+    <loc>https://playloggr.com/terms.html</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://playloggr.com/terms.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://playloggr.com/en/terms.html" />
+    <xhtml:link rel="alternate" hreflang="pt" href="https://playloggr.com/pt/terms.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://playloggr.com/terms.html" />
+  </url>
+  <url>
+    <loc>https://playloggr.com/en/terms.html</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://playloggr.com/terms.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://playloggr.com/en/terms.html" />
+    <xhtml:link rel="alternate" hreflang="pt" href="https://playloggr.com/pt/terms.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://playloggr.com/terms.html" />
+  </url>
+  <url>
+    <loc>https://playloggr.com/pt/terms.html</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://playloggr.com/terms.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://playloggr.com/en/terms.html" />
+    <xhtml:link rel="alternate" hreflang="pt" href="https://playloggr.com/pt/terms.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://playloggr.com/terms.html" />
+  </url>
+  <url>
+    <loc>https://playloggr.com/refunds.html</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://playloggr.com/refunds.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://playloggr.com/en/refunds.html" />
+    <xhtml:link rel="alternate" hreflang="pt" href="https://playloggr.com/pt/refunds.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://playloggr.com/refunds.html" />
+  </url>
+  <url>
+    <loc>https://playloggr.com/en/refunds.html</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://playloggr.com/refunds.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://playloggr.com/en/refunds.html" />
+    <xhtml:link rel="alternate" hreflang="pt" href="https://playloggr.com/pt/refunds.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://playloggr.com/refunds.html" />
+  </url>
+  <url>
+    <loc>https://playloggr.com/pt/refunds.html</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://playloggr.com/refunds.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://playloggr.com/en/refunds.html" />
+    <xhtml:link rel="alternate" hreflang="pt" href="https://playloggr.com/pt/refunds.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://playloggr.com/refunds.html" />
+  </url>
+</urlset>

@@ -7565,6 +7565,17 @@ function refreshAvatarControls() {
   applyAvatarFrameUI();
 }
 
+// Promesa compartida de la carga del avatar. La tarjeta para compartir se
+// arma desde syncAll(), que corre ANTES de que loadAvatarConfig() arranque en
+// el arranque de la app: sin esto la tarjeta dibujaba el muñeco por defecto
+// aunque el usuario tuviera equipado un avatar de racha.
+let _avatarConfigReady = null;
+
+function avatarConfigReady() {
+  if (!_avatarConfigReady) _avatarConfigReady = loadAvatarConfig();
+  return _avatarConfigReady;
+}
+
 async function loadAvatarConfig() {
   try {
     const res = await fetch(`${apiBase()}/api/v1/user/avatar`, {
@@ -11748,18 +11759,27 @@ function openShareCard() {
   }, 0);
 }
 
+// El transform recorta la cabeza/torso del pixel-doll, que es lo que se ve
+// bien en redondo (mismo criterio que la miniatura del panel de perfil). Los
+// avatares de racha son imagenes enteras ya encuadradas, no se recortan.
+function _renderShareCardAvatar() {
+  const avBox = document.getElementById('welcome-stats-avatar');
+  if (!avBox) return;
+  const shift = currentAvatarConfig.streakAvatarId ? '0' : '-11.7%';
+  avBox.innerHTML = `<div style="width:72px;height:72px;position:relative;transform:translateY(${shift})">
+    ${pixelAvatarHtml(currentAvatarConfig, 72)}</div>`;
+}
+
 function _fillAndOpenShareCard(data, delay) {
   const hours = Math.round(data.total_hours || 0);
   const total = data.total || 0;
   const days  = Math.round(hours / 24);
-  // Avatar del usuario: el mismo render que el resto de la app. El transform
-  // recorta la cabeza/torso del pixel-doll, que es lo que se ve bien en
-  // redondo (mismo criterio que la miniatura del panel de perfil).
-  const avBox = document.getElementById('welcome-stats-avatar');
-  if (avBox) {
-    avBox.innerHTML = `<div style="width:72px;height:72px;position:relative;transform:translateY(-11.7%)">
-      ${pixelAvatarHtml(currentAvatarConfig, 72)}</div>`;
-  }
+  // Avatar del usuario: el mismo render que el resto de la app.
+  _renderShareCardAvatar();
+  // Y de nuevo cuando llega la config real: la tarjeta puede abrirse antes de
+  // que termine loadAvatarConfig(), y ahi currentAvatarConfig todavia es el
+  // muñeco por defecto en vez del avatar equipado.
+  avatarConfigReady().then(_renderShareCardAvatar);
   document.getElementById('welcome-stats-user').textContent = authUser || '';
   // La URL del perfil, no solo el dominio: asi cada imagen compartida es un
   // link directo a este perfil publico en vez de a la home.
@@ -13829,7 +13849,7 @@ async function onLoginSuccess() {
   loadAvailableFilters();
   loadFolders();
   checkActiveSession();
-  loadAvatarConfig();
+  avatarConfigReady();
   checkAchievements();
   checkStreakIn();
   loadSidebarWidgets();
