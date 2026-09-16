@@ -1616,7 +1616,7 @@
       <div id="welcome-stats-life" style="font-size:12.5px;color:var(--text2);margin-bottom:12px"></div>
       <div id="welcome-stats-streak" style="margin-bottom:14px"></div>
       <div id="welcome-stats-breakdown" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap"></div>
-      <div style="margin-top:20px;font-size:10.5px;color:#666;letter-spacing:.04em">playloggr.com</div>
+      <div id="welcome-stats-url" style="margin-top:20px;font-size:10.5px;color:#777;letter-spacing:.04em">playloggr.com</div>
     </div>
     <div style="display:flex;gap:8px;padding:14px 18px 18px">
       <button class="btn-cancel" style="flex:1" onclick="closeWelcomeStats()" data-i18n="close">Cerrar</button>
@@ -11662,6 +11662,10 @@ function _fillAndOpenShareCard(data, delay) {
       ${pixelAvatarHtml(currentAvatarConfig, 72)}</div>`;
   }
   document.getElementById('welcome-stats-user').textContent = authUser || '';
+  // La URL del perfil, no solo el dominio: asi cada imagen compartida es un
+  // link directo a este perfil publico en vez de a la home.
+  const urlEl = document.getElementById('welcome-stats-url');
+  if (urlEl) urlEl.textContent = authUser ? `playloggr.com/u/${authUser}` : 'playloggr.com';
   document.getElementById('welcome-stats-games').textContent = total.toLocaleString();
   document.getElementById('welcome-stats-hours').textContent = hours.toLocaleString();
   document.getElementById('welcome-stats-life').textContent =
