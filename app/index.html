@@ -2464,7 +2464,7 @@ let currentLang = localStorage.getItem('gb_lang') || 'es';
 
 const I18N = {
   es: {
-    sync: 'Sincronizar', stats: 'Estadísticas', config: 'Configuración', friends: 'Amigos',
+    sync: 'Sincronizar', stats: 'Estadísticas', config: 'Configuración', friends: 'Seguidores',
     commonGames: 'En común', noCommonGames: 'No tienen juegos en común', you: 'Vos',
     achievements: 'Logros', steamMenu: 'Steam', steamId: 'Steam ID', save: 'Guardar',
     syncLibrary: 'Sincronizar biblioteca', syncWishlist: 'Sincronizar deseados', syncAll: 'Sincronizar todo',
@@ -2605,7 +2605,9 @@ const I18N = {
     reviewReportConfirm: '¿Reportar esta reseña por contenido inapropiado?', recentReviews: 'Últimas reseñas',
     recentReviewsEmpty: 'Todavía no hay reseñas recientes.', myReviewsEmpty: 'Todavía no escribiste ninguna reseña.',
     addReview: 'Agregar reseña', reviewPickGame: 'Elegí un juego', reviewPickGameHint: 'Buscá el juego para reseñar',
-    noFriendsYet: 'Todavía no agregaste amigos', incomingRequests: 'Solicitudes recibidas',
+    noFriendsYet: 'Todavía no seguís a nadie', incomingRequests: 'Solicitudes recibidas',
+    follow: 'Seguir', unfollow: 'Siguiendo', followBack: 'Seguir', publicProfile: 'Ver perfil público',
+    followersLabel: 'Te siguen', followingLabel: 'Siguiendo', noFollowingYet: 'Todavía no seguís a nadie',
     sentRequests: 'Solicitudes enviadas', accept: 'Aceptar', reject: 'Rechazar',
     waitingConfirmation: 'Esperando confirmación', inSession: 'En sesión',
     gamesLower: 'juegos', wishlistLower: 'deseados', removeFriend: 'Quitar amigo', block: 'Bloquear',
@@ -2730,7 +2732,7 @@ const I18N = {
     choosePlatform: 'Elegí la plataforma',
   },
   en: {
-    sync: 'Sync', stats: 'Stats', config: 'Settings', friends: 'Friends',
+    sync: 'Sync', stats: 'Stats', config: 'Settings', friends: 'Followers',
     commonGames: 'In common', noCommonGames: 'No games in common', you: 'You',
     achievements: 'Achievements', steamMenu: 'Steam', steamId: 'Steam ID', save: 'Save',
     syncLibrary: 'Sync library', syncWishlist: 'Sync wishlist', syncAll: 'Sync all',
@@ -2871,7 +2873,9 @@ const I18N = {
     reviewReportConfirm: 'Report this review for inappropriate content?', recentReviews: 'Recent reviews',
     recentReviewsEmpty: 'No recent reviews yet.', myReviewsEmpty: "You haven't written any reviews yet.",
     addReview: 'Add review', reviewPickGame: 'Pick a game', reviewPickGameHint: 'Search for the game to review',
-    noFriendsYet: "You haven't added any friends yet", incomingRequests: 'Incoming requests',
+    noFriendsYet: "You're not following anyone yet", incomingRequests: 'Incoming requests',
+    follow: 'Follow', unfollow: 'Following', followBack: 'Follow back', publicProfile: 'View public profile',
+    followersLabel: 'Followers', followingLabel: 'Following', noFollowingYet: "You're not following anyone yet",
     sentRequests: 'Sent requests', accept: 'Accept', reject: 'Reject',
     waitingConfirmation: 'Waiting for confirmation', inSession: 'In session',
     gamesLower: 'games', wishlistLower: 'wishlist', removeFriend: 'Remove friend', block: 'Block',
@@ -2996,7 +3000,7 @@ const I18N = {
     choosePlatform: 'Choose the platform',
   },
   pt: {
-    sync: 'Sincronizar', stats: 'Estatísticas', config: 'Configurações', friends: 'Amigos',
+    sync: 'Sincronizar', stats: 'Estatísticas', config: 'Configurações', friends: 'Seguidores',
     commonGames: 'Em comum', noCommonGames: 'Vocês não têm jogos em comum', you: 'Você',
     achievements: 'Conquistas', steamMenu: 'Steam', steamId: 'Steam ID', save: 'Salvar',
     syncLibrary: 'Sincronizar biblioteca', syncWishlist: 'Sincronizar desejados', syncAll: 'Sincronizar tudo',
@@ -3137,7 +3141,9 @@ const I18N = {
     reviewReportConfirm: 'Denunciar esta resenha por conteúdo inadequado?', recentReviews: 'Últimas resenhas',
     recentReviewsEmpty: 'Ainda não há resenhas recentes.', myReviewsEmpty: 'Você ainda não escreveu nenhuma resenha.',
     addReview: 'Adicionar resenha', reviewPickGame: 'Escolha um jogo', reviewPickGameHint: 'Busque o jogo para resenhar',
-    noFriendsYet: 'Você ainda não adicionou amigos', incomingRequests: 'Solicitações recebidas',
+    noFriendsYet: 'Você ainda não segue ninguém', incomingRequests: 'Solicitações recebidas',
+    follow: 'Seguir', unfollow: 'Seguindo', followBack: 'Seguir de volta', publicProfile: 'Ver perfil público',
+    followersLabel: 'Seguidores', followingLabel: 'Seguindo', noFollowingYet: 'Você ainda não segue ninguém',
     sentRequests: 'Solicitações enviadas', accept: 'Aceitar', reject: 'Rejeitar',
     waitingConfirmation: 'Aguardando confirmação', inSession: 'Em sessão',
     gamesLower: 'jogos', wishlistLower: 'desejados', removeFriend: 'Remover amigo', block: 'Bloquear',
@@ -3898,7 +3904,7 @@ async function _loadReviewsList(gameId) {
       return;
     }
     el.innerHTML = reviews.map(r => {
-      const name = r.is_anonymous ? t('reviewAnonymousLabel') : esc(r.username || '?');
+      const name = authorLinkHtml(r.username, r.is_anonymous);
       const rating = r.rating > 0 ? `<span style="color:var(--amber)">★</span> ${r.rating.toFixed(1)}` : '';
       const reportBtn = r.is_mine ? '' : `<button onclick="_reportReview(${r.id})" title="${esc(t('reviewReport'))}" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:14px"><i class="ti ti-flag"></i></button>`;
       return `
@@ -4046,7 +4052,7 @@ function _voteBtnHtml(targetType, targetId, count, votedByMe) {
 
 function _renderAllReviewsItems(reviews) {
   return reviews.map(r => {
-    const name = r.is_anonymous ? t('reviewAnonymousLabel') : esc(r.username || '?');
+    const name = authorLinkHtml(r.username, r.is_anonymous);
     const rating = r.rating > 0 ? `<span style="color:var(--amber)">★</span> ${r.rating.toFixed(1)}` : '';
     return `
       <div style="padding:10px 4px;border-bottom:0.5px solid var(--border)">
@@ -9119,7 +9125,7 @@ function _renderPlanResumeChoiceDialog(currentHours) {
 }
 
 function _novedadesReviewTileHtml(r, i) {
-  const name = r.is_anonymous ? t('reviewAnonymousLabel') : esc(r.username || '?');
+  const name = authorLinkHtml(r.username, r.is_anonymous);
   const rating = r.rating > 0 ? `<span style="color:var(--amber)">★</span> ${r.rating.toFixed(1)}` : '';
   const cover = r.cover_url
     ? `<img src="${r.cover_url}" style="width:34px;height:44px;object-fit:cover;border-radius:6px" onerror="this.style.display='none'">`
@@ -9141,7 +9147,7 @@ function _novedadesReviewTileHtml(r, i) {
 function _showNovedadesReviewDetail(i) {
   const r = (_novedadesReviews || [])[i];
   if (!r) return;
-  const name = r.is_anonymous ? t('reviewAnonymousLabel') : esc(r.username || '?');
+  const name = authorLinkHtml(r.username, r.is_anonymous);
   const rating = r.rating > 0 ? `<span style="color:var(--amber)">★</span> ${r.rating.toFixed(1)}` : '';
   const cover = r.cover_url
     ? `<img src="${r.cover_url}" style="width:54px;height:70px;object-fit:cover;border-radius:8px" onerror="this.style.display='none'">`
@@ -9487,44 +9493,33 @@ async function loadFriendsList() {
   const list = document.getElementById('friends-list');
   list.innerHTML = `<div class="empty"><i class="ti ti-loader"></i>${t('loading')}</div>`;
   try {
-    const [friendsRes, incomingRes, sentRes] = await Promise.all([
-      fetch(`${apiBase()}/api/v1/friends`, { headers: { 'Authorization': `Bearer ${authToken}` } }),
-      fetch(`${apiBase()}/api/v1/friends/requests`, { headers: { 'Authorization': `Bearer ${authToken}` } }),
-      fetch(`${apiBase()}/api/v1/friends/requests/sent`, { headers: { 'Authorization': `Bearer ${authToken}` } }),
+    // Modelo de seguidores: ya no hay solicitudes que aprobar. Se listan a
+    // quienes seguis (con su sesion en vivo, que es lo que mas se mira) y
+    // abajo quienes te siguen.
+    const [followingRes, followersRes] = await Promise.all([
+      fetch(`${apiBase()}/api/v1/me/following`, { headers: { 'Authorization': `Bearer ${authToken}` } }),
+      fetch(`${apiBase()}/api/v1/me/followers`, { headers: { 'Authorization': `Bearer ${authToken}` } }),
     ]);
-    const friends  = (await friendsRes.json()).friends || [];
-    const incoming = (await incomingRes.json()).requests || [];
-    const sent     = (await sentRes.json()).requests || [];
-    window._friendsCache = friends;
+    const friends   = (await followingRes.json()).users || [];
+    const followers = (await followersRes.json()).users || [];
+    window._friendsCache = [...friends, ...followers];
+    window._followingCache = friends.map(f => f.username);
 
-    if (!friends.length && !incoming.length && !sent.length) {
-      list.innerHTML = `<div class="empty"><i class="ti ti-users"></i>${t('noFriendsYet')}</div>`;
+    if (!friends.length && !followers.length) {
+      list.innerHTML = `<div class="empty"><i class="ti ti-users"></i>${t('noFollowingYet')}</div>`;
       return;
     }
 
     let html = '';
-    if (incoming.length) {
-      html += `<div style="font-weight:600;font-size:12px;margin-bottom:4px">${t('incomingRequests')}</div>`;
-      html += incoming.map(r => _requestRowHtml(r, `
-        <button onclick="acceptFriendRequest('${jsAttrEsc(r.username)}')" title="${t('accept')}"
-          style="padding:5px 8px;font-size:11px;border-radius:6px;border:0.5px solid var(--green);background:transparent;color:var(--green);cursor:pointer">
-          <i class="ti ti-check"></i>
-        </button>
-        <button onclick="removeFriendByUsername('${jsAttrEsc(r.username)}')" title="${t('reject')}"
-          style="padding:5px 8px;font-size:11px;border-radius:6px;border:0.5px solid var(--red);background:transparent;color:var(--red);cursor:pointer">
-          <i class="ti ti-x"></i>
-        </button>
+    if (followers.length) {
+      html += `<div style="font-weight:600;font-size:12px;margin-bottom:4px">${t('followersLabel')} (${followers.length})</div>`;
+      html += followers.map(r => _requestRowHtml(r, r.following_back ? '' : `
+        <button onclick="toggleFollow('${jsAttrEsc(r.username)}')"
+          style="padding:5px 10px;font-size:11px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer">${t('followBack')}</button>
       `)).join('');
     }
-    if (sent.length) {
-      html += `<div style="font-weight:600;font-size:12px;margin:12px 0 4px">${t('sentRequests')}</div>`;
-      html += sent.map(r => _requestRowHtml(r, `
-        <button onclick="removeFriendByUsername('${jsAttrEsc(r.username)}')" title="${t('cancel')}"
-          style="padding:5px 10px;font-size:11px;border-radius:6px;border:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer">${t('cancel')}</button>
-      `, t('waitingConfirmation'))).join('');
-    }
     if (friends.length) {
-      html += `<div style="font-weight:600;font-size:12px;margin:12px 0 4px">${t('friends')}</div>`;
+      html += `<div style="font-weight:600;font-size:12px;margin:12px 0 4px">${t('followingLabel')} (${friends.length})</div>`;
       html += friends.map(f => {
         const sessionBadge = f.in_session
           ? `<span style="background:#1D9E75;color:#fff;font-size:10px;padding:2px 6px;border-radius:6px;margin-left:6px">${t('inSession')}</span>`
@@ -9644,6 +9639,15 @@ async function blockFriendByUsername(username) {
   loadWidgetFriends();
 }
 
+// Autor clickeable de una lista, ranking o reseña -> abre su perfil. Es el
+// bucle de descubrimiento: ves contenido de alguien, entras a su perfil, lo
+// seguis. Las reseñas anonimas no linkean (seria deanonimizarlas).
+function authorLinkHtml(username, isAnonymous) {
+  if (isAnonymous || !username) return esc(t('reviewAnonymousLabel') || 'Anónimo');
+  return `<span onclick="event.stopPropagation();openFriendProfile('${jsAttrEsc(username)}')"
+    style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px">${esc(username)}</span>`;
+}
+
 async function openFriendProfile(username) {
   currentFriendUsername = username;
   const cached = (window._friendsCache || []).find(f => f.username === username);
@@ -9657,9 +9661,54 @@ async function openFriendProfile(username) {
        </div>`
     : '<i class="ti ti-user"></i>';
   document.getElementById('friend-profile-title').innerHTML =
-    `${avatarHtml} ${levelBadgeHtml(li)}<span style="${usernameFontStyle(li && li.font)}">${esc(username)}</span>`;
+    `${avatarHtml} ${levelBadgeHtml(li)}<span style="${usernameFontStyle(li && li.font)}">${esc(username)}</span>`
+    + `<span id="friend-follow-slot" style="margin-left:auto;display:flex;gap:6px;align-items:center"></span>`;
   document.getElementById('friend-profile-overlay').classList.add('open');
+  renderFollowButton(username);
   switchFriendTab('library');
+}
+
+// Boton seguir / dejar de seguir + link al perfil publico compartible.
+async function renderFollowButton(username) {
+  const slot = document.getElementById('friend-follow-slot');
+  if (!slot) return;
+  let following = (window._followingCache || []).includes(username);
+  const label = following ? t('unfollow') : t('follow');
+  slot.innerHTML = `
+    <a href="https://playloggr.com/u/${encodeURIComponent(username)}" target="_blank" rel="noopener"
+       title="${esc(t('publicProfile'))}"
+       style="font-size:11px;color:var(--text2);padding:5px 8px;border-radius:6px;border:0.5px solid var(--border);text-decoration:none">
+      <i class="ti ti-external-link"></i>
+    </a>
+    <button id="friend-follow-btn" onclick="toggleFollow('${jsAttrEsc(username)}')"
+      style="font-size:12px;font-weight:600;padding:6px 14px;border-radius:6px;cursor:pointer;border:${following ? '0.5px solid var(--border)' : 'none'};
+             background:${following ? 'transparent' : 'var(--green)'};color:${following ? 'var(--text2)' : 'var(--on-accent)'}">
+      ${esc(label)}
+    </button>`;
+}
+
+async function toggleFollow(username) {
+  const btn = document.getElementById('friend-follow-btn');
+  const following = (window._followingCache || []).includes(username);
+  if (btn) btn.disabled = true;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/follow/${encodeURIComponent(username)}`, {
+      method: following ? 'DELETE' : 'POST',
+      headers: { 'Authorization': `Bearer ${authToken}` },
+    });
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}));
+      throw new Error(d.detail || 'Error');
+    }
+    window._followingCache = following
+      ? (window._followingCache || []).filter(u => u !== username)
+      : [...(window._followingCache || []), username];
+    renderFollowButton(username);
+    loadFriendsList();
+  } catch (e) {
+    showToast(e.message, true);
+    if (btn) btn.disabled = false;
+  }
 }
 
 function closeFriendProfile() {
@@ -12347,7 +12396,7 @@ async function renderPublicFolderList(page) {
             <span onclick="event.stopPropagation()">${_voteBtnHtml('list', f.id, f.vote_count, f.voted_by_me)}</span>
           </div>
           <div style="font-size:14px;font-weight:600;margin-bottom:2px">${esc(f.name)}</div>
-          <div style="font-size:11px;color:var(--text2)">por ${esc(f.username)}</div>
+          <div style="font-size:11px;color:var(--text2)">por ${authorLinkHtml(f.username)}</div>
           <div style="font-size:11px;color:var(--text2);margin-top:4px;display:flex;align-items:center;justify-content:space-between;gap:4px">
             <span>${f.game_count} juegos</span>
             <span>${_formatReviewDate(f.created_at)}</span>
@@ -12977,7 +13026,7 @@ async function renderPublicRankingsList(page) {
           </div>
           <span onclick="event.stopPropagation()">${_voteBtnHtml('ranking', r.id, r.vote_count, r.voted_by_me)}</span>
         </div>
-        <div style="font-size:11px;color:var(--text2)">por ${esc(r.username)}</div>
+        <div style="font-size:11px;color:var(--text2)">por ${authorLinkHtml(r.username)}</div>
         <div style="font-size:12px;color:var(--text2);display:flex;align-items:center;justify-content:space-between;gap:4px">
           <span>${r.game_count} ${t('gamesLower')}</span>
           <span style="font-size:11px">${_formatReviewDate(r.created_at)}</span>
