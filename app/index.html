@@ -1602,7 +1602,11 @@
     <div id="welcome-stats-card" style="padding:26px 22px;background:linear-gradient(160deg,#16231d,#111111);text-align:center">
       <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--green);font-weight:700;margin-bottom:14px" data-i18n="wowEyebrow">Tu biblioteca</div>
       <div id="welcome-stats-avatar" style="width:72px;height:72px;margin:0 auto 10px;border-radius:50%;overflow:hidden;background:var(--bg3);position:relative"></div>
-      <div id="welcome-stats-user" style="font-size:15px;font-weight:700;margin-bottom:18px"></div>
+      <div id="welcome-stats-user" style="font-size:15px;font-weight:700;margin-bottom:9px"></div>
+      <!-- Nivel + racha juntos, arriba de los numeros: son los dos datos de
+           progreso que la gente comparte, y de nada sirve que el nivel viva
+           solo en el header si la imagen que sale afuera no lo lleva. -->
+      <div id="welcome-stats-badges" style="display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:18px"></div>
       <div style="display:flex;justify-content:center;gap:26px;margin-bottom:16px">
         <div>
           <div id="welcome-stats-games" style="font-size:30px;font-weight:800;line-height:1">0</div>
@@ -1613,8 +1617,7 @@
           <div style="font-size:10.5px;color:var(--text2);margin-top:3px" data-i18n="wowHours">horas</div>
         </div>
       </div>
-      <div id="welcome-stats-life" style="font-size:12.5px;color:var(--text2);margin-bottom:12px"></div>
-      <div id="welcome-stats-streak" style="margin-bottom:14px"></div>
+      <div id="welcome-stats-life" style="font-size:12.5px;color:var(--text2);margin-bottom:14px"></div>
       <div id="welcome-stats-breakdown" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap"></div>
       <div id="welcome-stats-url" style="margin-top:20px;font-size:10.5px;color:#777;letter-spacing:.04em">playloggr.com</div>
     </div>
@@ -8058,6 +8061,16 @@ function _streakRewardPreview(kind) {
   }
 }
 
+// Misma idea que avatarConfigReady(): quien necesite la racha ya cargada
+// (la tarjeta para compartir) espera esta promesa en vez de leer streakState
+// y encontrarlo todavia en null.
+let _streakReady = null;
+
+function streakReady() {
+  if (!_streakReady) _streakReady = checkStreakIn();
+  return _streakReady;
+}
+
 async function checkStreakIn() {
   try {
     const res = await fetch(`${apiBase()}/api/v1/streak/check-in`, {
@@ -11491,6 +11504,15 @@ async function markNovedadesSeenWeb() {
   } catch (e) {}
 }
 
+// De aca salen userLevel/userBadgeTier/userTrophy, que la tarjeta para
+// compartir necesita para el badge de nivel (ver streakReady/avatarConfigReady).
+let _premiumStatusReady = null;
+
+function premiumStatusReady() {
+  if (!_premiumStatusReady) _premiumStatusReady = loadPremiumStatus();
+  return _premiumStatusReady;
+}
+
 async function loadPremiumStatus() {
   try {
     const res = await fetch(`${apiBase()}/api/v1/user/profile`, {
@@ -11770,16 +11792,54 @@ function _renderShareCardAvatar() {
     ${pixelAvatarHtml(currentAvatarConfig, 72)}</div>`;
 }
 
+function _shareChip(inner, color) {
+  return `<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;
+    color:${color};background:${color === '#EF9F27' ? 'rgba(239,159,39,.14)' : 'rgba(255,255,255,.07)'};
+    padding:4px 12px;border-radius:20px;line-height:1">${inner}</span>`;
+}
+
+// Nivel + racha. No se arma con levelBadgeHtml() a proposito: esa version es
+// para ir pegada al nombre de usuario dentro de la app, donde el contexto se
+// entiende solo. Acá la imagen sale a Twitter/Discord y la ve gente que no
+// conoce Playloggr, asi que la medalla necesita la palabra "Nivel" al lado.
+function _renderShareCardBadges() {
+  const box = document.getElementById('welcome-stats-badges');
+  if (!box) return;
+  if (typeof ensureGameThemeFontsLoaded === 'function') ensureGameThemeFontsLoaded();
+
+  const [asset, tierColor] = _badgeAssetAndColor(userLevel);
+  const trophy = userTrophy ? `<i class="ti ti-trophy" style="font-size:12px;color:#EF9F27"></i>` : '';
+  const level = _shareChip(
+    `<img src="${asset}" style="width:26px;height:26px;object-fit:contain;display:block;margin:-4px 0 -4px -5px" onerror="this.style.display='none'">
+     <span style="color:var(--text2);font-weight:600">${esc(t('levelLabel'))}</span>
+     <span style="font-family:'Press Start 2P',monospace;color:${tierColor};font-size:11px">${userLevel}</span>${trophy}`,
+    'var(--text)');
+
+  const days = (streakState && streakState.streak_days) || 0;
+  const streak = days > 0 ? _shareChip(
+    `<img src="streak_avatars/bonfire.png" style="width:14px;height:14px;object-fit:contain" onerror="this.style.display='none'">
+     ${days} ${esc(t('streakDaysShort'))}`,
+    '#EF9F27') : '';
+
+  box.innerHTML = level + streak;
+}
+
+function _renderShareCardChrome() {
+  _renderShareCardAvatar();
+  _renderShareCardBadges();
+}
+
 function _fillAndOpenShareCard(data, delay) {
   const hours = Math.round(data.total_hours || 0);
   const total = data.total || 0;
   const days  = Math.round(hours / 24);
-  // Avatar del usuario: el mismo render que el resto de la app.
-  _renderShareCardAvatar();
-  // Y de nuevo cuando llega la config real: la tarjeta puede abrirse antes de
-  // que termine loadAvatarConfig(), y ahi currentAvatarConfig todavia es el
-  // muñeco por defecto en vez del avatar equipado.
-  avatarConfigReady().then(_renderShareCardAvatar);
+  // Avatar, nivel y racha. Se dibujan con lo que haya y se redibujan cuando
+  // llegan los datos: la tarjeta se abre desde syncAll(), que corre antes de
+  // que resuelvan loadAvatarConfig/loadPremiumStatus/checkStreakIn. Sin esto
+  // salia el muñeco por defecto, nivel 1 y sin racha.
+  _renderShareCardChrome();
+  Promise.allSettled([avatarConfigReady(), premiumStatusReady(), streakReady()])
+    .then(_renderShareCardChrome);
   document.getElementById('welcome-stats-user').textContent = authUser || '';
   // La URL del perfil, no solo el dominio: asi cada imagen compartida es un
   // link directo a este perfil publico en vez de a la home.
@@ -11805,18 +11865,6 @@ function _fillAndOpenShareCard(data, delay) {
       </span>`;
     }).join('');
   document.getElementById('welcome-stats-breakdown').innerHTML = chips;
-
-  // Racha: es el numero del que la gente se enorgullece, va arriba de todo.
-  const streakDays = (streakState && streakState.streak_days) || 0;
-  const streakEl = document.getElementById('welcome-stats-streak');
-  if (streakEl) {
-    streakEl.innerHTML = streakDays > 0
-      ? `<span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#EF9F27;background:rgba(239,159,39,.14);padding:5px 12px;border-radius:20px">
-           <img src="streak_avatars/bonfire.png" style="width:14px;height:14px;object-fit:contain" onerror="this.style.display='none'">
-           ${streakDays} ${esc(t('streakDaysShort'))}
-         </span>`
-      : '';
-  }
 
   const open = () => document.getElementById('welcome-stats-overlay').classList.add('open');
   if (delay) setTimeout(open, delay); else open();
@@ -13840,7 +13888,7 @@ async function onLoginSuccess() {
   await Promise.all([
     syncAll(1),
     loadGlobalStats(),
-    loadPremiumStatus(),
+    premiumStatusReady(),
     loadNotificationsSummary(),
   ]);
   checkActiveAnnouncement();
@@ -13851,7 +13899,7 @@ async function onLoginSuccess() {
   checkActiveSession();
   avatarConfigReady();
   checkAchievements();
-  checkStreakIn();
+  streakReady();
   loadSidebarWidgets();
   maybeShowActivationPrompt();
 }
