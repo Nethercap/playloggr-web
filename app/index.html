@@ -1589,6 +1589,36 @@
   </div>
 </div>
 
+<!-- Momento "wow": primera vez que la biblioteca deja de estar vacia. Es el
+     unico instante en que el usuario ve de golpe el valor del producto, y la
+     tarjeta esta pensada para compartirse (lleva el dominio adentro), que es
+     el motor de crecimiento organico que hoy no existe. -->
+<div class="modal-overlay" id="welcome-stats-overlay">
+  <div class="modal" style="max-width:380px;padding:0;overflow:hidden">
+    <div id="welcome-stats-card" style="padding:26px 22px;background:linear-gradient(160deg,#16231d,#111111);text-align:center">
+      <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--green);font-weight:700;margin-bottom:14px" data-i18n="wowEyebrow">Tu biblioteca</div>
+      <div id="welcome-stats-user" style="font-size:15px;font-weight:700;margin-bottom:18px"></div>
+      <div style="display:flex;justify-content:center;gap:26px;margin-bottom:16px">
+        <div>
+          <div id="welcome-stats-games" style="font-size:30px;font-weight:800;line-height:1">0</div>
+          <div style="font-size:10.5px;color:var(--text2);margin-top:3px" data-i18n="wowGames">juegos</div>
+        </div>
+        <div>
+          <div id="welcome-stats-hours" style="font-size:30px;font-weight:800;line-height:1;color:var(--green)">0</div>
+          <div style="font-size:10.5px;color:var(--text2);margin-top:3px" data-i18n="wowHours">horas</div>
+        </div>
+      </div>
+      <div id="welcome-stats-life" style="font-size:12.5px;color:var(--text2);margin-bottom:16px"></div>
+      <div id="welcome-stats-breakdown" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap"></div>
+      <div style="margin-top:20px;font-size:10.5px;color:#666;letter-spacing:.04em">playloggr.com</div>
+    </div>
+    <div style="display:flex;gap:8px;padding:14px 18px 18px">
+      <button class="btn-cancel" style="flex:1" onclick="closeWelcomeStats()" data-i18n="close">Cerrar</button>
+      <button class="btn-save" style="flex:1" onclick="shareWelcomeStats()"><i class="ti ti-download"></i> <span data-i18n="wowShare">Compartir</span></button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="notif-modal-overlay">
   <div class="modal" style="max-width:420px">
     <div class="modal-title"><i class="ti ti-bell"></i> <span data-i18n="notifications">Notificaciones</span></div>
@@ -2657,6 +2687,8 @@ const I18N = {
     activateTitle: 'Conectá tu biblioteca', activateBody: 'Tus juegos y tus horas aparecen solos. Nunca te pedimos tu contraseña.',
     activateSteam: 'Conectar Steam', activatePsn: 'Conectar PlayStation', activateOther: 'Otras plataformas',
     activateManual: 'A mano', activateLater: 'Lo hago más tarde',
+    wowEyebrow: 'Tu biblioteca', wowGames: 'juegos', wowHours: 'horas', wowShare: 'Compartir',
+    wowLife: 'Son {days} días de tu vida jugando',
     tourTitleSteam: 'Sincronizá tus plataformas', tourBodySteam: 'Tocá acá para conectar Steam, PlayStation, GOG, Xbox o Epic Games y traer tu biblioteca automáticamente.',
     tourTitleAdd: 'Agregá juegos', tourBodyAdd: 'Tocá acá para agregar un juego manualmente a tu biblioteca.',
     tourTitleFolders: 'Organizá con listas', tourBodyFolders: 'Creá listas para agrupar tus juegos como quieras.',
@@ -2921,6 +2953,8 @@ const I18N = {
     activateTitle: 'Connect your library', activateBody: 'Your games and playtime show up on their own. We never ask for your password.',
     activateSteam: 'Connect Steam', activatePsn: 'Connect PlayStation', activateOther: 'Other platforms',
     activateManual: 'Manually', activateLater: "I'll do it later",
+    wowEyebrow: 'Your library', wowGames: 'games', wowHours: 'hours', wowShare: 'Share',
+    wowLife: "That's {days} days of your life playing",
     tourTitleSteam: 'Sync your platforms', tourBodySteam: 'Tap here to connect Steam, PlayStation, GOG, Xbox or Epic Games and bring in your library automatically.',
     tourTitleAdd: 'Add games', tourBodyAdd: 'Tap here to manually add a game to your library.',
     tourTitleFolders: 'Organize with lists', tourBodyFolders: 'Create lists to group your games however you like.',
@@ -3185,6 +3219,8 @@ const I18N = {
     activateTitle: 'Conecte sua biblioteca', activateBody: 'Seus jogos e suas horas aparecem sozinhos. Nunca pedimos sua senha.',
     activateSteam: 'Conectar Steam', activatePsn: 'Conectar PlayStation', activateOther: 'Outras plataformas',
     activateManual: 'Manualmente', activateLater: 'Faço isso depois',
+    wowEyebrow: 'Sua biblioteca', wowGames: 'jogos', wowHours: 'horas', wowShare: 'Compartilhar',
+    wowLife: 'São {days} dias da sua vida jogando',
     tourTitleSteam: 'Sincronize suas plataformas', tourBodySteam: 'Toque aqui para conectar Steam, PlayStation, GOG, Xbox ou Epic Games e trazer sua biblioteca automaticamente.',
     tourTitleAdd: 'Adicione jogos', tourBodyAdd: 'Toque aqui para adicionar um jogo manualmente à sua biblioteca.',
     tourTitleFolders: 'Organize com listas', tourBodyFolders: 'Crie listas para agrupar seus jogos como quiser.',
@@ -11527,6 +11563,60 @@ function finishOnboardingIntro() {
   setTimeout(() => showActivationPrompt(true), 350);
 }
 
+// ── Momento "wow" (primera biblioteca sincronizada) ───────────────────────
+// Se dispara una sola vez por cuenta, cuando la biblioteca pasa de vacia a
+// tener juegos. Es el unico momento donde el valor del producto se ve de
+// golpe, y la tarjeta se puede bajar como imagen (lleva el dominio adentro)
+// para que el usuario la comparta.
+function maybeShowWelcomeStats(data) {
+  const total = data?.total || 0;
+  if (total <= 0) return;
+  const key = `pl_wow_shown_${authUser || ''}`;
+  try {
+    if (localStorage.getItem(key)) return;
+    localStorage.setItem(key, '1');
+  } catch (e) { return; }
+
+  const hours = Math.round(data.total_hours || 0);
+  const days  = Math.round(hours / 24);
+  document.getElementById('welcome-stats-user').textContent = authUser || '';
+  document.getElementById('welcome-stats-games').textContent = total.toLocaleString();
+  document.getElementById('welcome-stats-hours').textContent = hours.toLocaleString();
+  document.getElementById('welcome-stats-life').textContent =
+    days > 0 ? t('wowLife').replace('{days}', days.toLocaleString()) : '';
+
+  const by = data.by_status || {};
+  const chips = [
+    ['Completado', '#1D9E75'],
+    ['Jugando',    '#3B82F6'],
+    ['Backlog',    '#9E9E9E'],
+  ].filter(([st]) => (by[st] || 0) > 0).map(([st, color]) => `
+    <span style="font-size:11px;padding:4px 10px;border-radius:20px;background:${color}22;color:${color};font-weight:600">
+      ${by[st]} ${esc(statusLabel(st))}
+    </span>`).join('');
+  document.getElementById('welcome-stats-breakdown').innerHTML = chips;
+
+  setTimeout(() => document.getElementById('welcome-stats-overlay').classList.add('open'), 600);
+}
+
+function closeWelcomeStats() {
+  document.getElementById('welcome-stats-overlay').classList.remove('open');
+}
+
+async function shareWelcomeStats() {
+  const card = document.getElementById('welcome-stats-card');
+  if (!card || typeof html2canvas === 'undefined') return;
+  try {
+    const canvas = await html2canvas(card, { backgroundColor: '#111111', useCORS: true, scale: 2 });
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = 'playloggr.png';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } catch (e) {}
+}
+
 // ── Activacion (conectar una plataforma) ──────────────────────────────────
 // Es EL paso que decide si el usuario vuelve o no: los que conectan una
 // plataforma vuelven 65% de las veces y duran ~21 dias; los que no, 8% y
@@ -13781,6 +13871,7 @@ async function syncAll(page = 1, silent = false) {
     renderPlatStatus();
 
     renderStats(data);
+    maybeShowWelcomeStats(data);
     if (activeFolderId === -1) {
       renderFolderList();
     } else {
