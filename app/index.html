@@ -1725,6 +1725,20 @@
             </label>
           </div>
         </div>
+        <div class="modal-group full">
+          <label data-i18n="notifPrefsLabel">Notificaciones</label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;margin-top:6px">
+            <input type="checkbox" id="cfg-push-news" onchange="savePushPrefs()">
+            <span data-i18n="notifPrefsNews">Novedades (lanzamientos, juegos gratis, lo más jugado)</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;margin-top:6px">
+            <input type="checkbox" id="cfg-push-streak" onchange="savePushPrefs()">
+            <span data-i18n="notifPrefsStreak">Recordatorio de racha</span>
+          </label>
+          <div style="font-size:11px;color:var(--text2);margin-top:6px" data-i18n="notifPrefsHint">
+            Los avisos sobre vos (te siguieron, tu resumen semanal) siempre llegan.
+          </div>
+        </div>
       </div>
       <div id="cfg-profile-msg" style="font-size:12px;margin-top:8px;display:none"></div>
     </div>
@@ -2698,6 +2712,9 @@ const I18N = {
     wowEyebrow: 'Tu biblioteca', wowGames: 'juegos', wowHours: 'horas', wowShare: 'Compartir',
     wowLife: 'Son {days} días de tu vida jugando',
     streakDaysShort: 'días de racha', shareLibrary: 'Compartir mi biblioteca', shareLibraryShort: 'Compartir',
+    reviewPromptTitle: '¿Qué te pareció?', reviewPromptCta: 'Escribir reseña', reviewPromptLater: 'Ahora no',
+    notifPrefsLabel: 'Notificaciones', notifPrefsNews: 'Novedades (lanzamientos, juegos gratis, lo más jugado)',
+    notifPrefsStreak: 'Recordatorio de racha', notifPrefsHint: 'Los avisos sobre vos (te siguieron, tu resumen semanal) siempre llegan.',
     tourTitleSteam: 'Sincronizá tus plataformas', tourBodySteam: 'Tocá acá para conectar Steam, PlayStation, GOG, Xbox o Epic Games y traer tu biblioteca automáticamente.',
     tourTitleAdd: 'Agregá juegos', tourBodyAdd: 'Tocá acá para agregar un juego manualmente a tu biblioteca.',
     tourTitleFolders: 'Organizá con listas', tourBodyFolders: 'Creá listas para agrupar tus juegos como quieras.',
@@ -2967,6 +2984,9 @@ const I18N = {
     wowEyebrow: 'Your library', wowGames: 'games', wowHours: 'hours', wowShare: 'Share',
     wowLife: "That's {days} days of your life playing",
     streakDaysShort: 'day streak', shareLibrary: 'Share my library', shareLibraryShort: 'Share',
+    reviewPromptTitle: 'What did you think?', reviewPromptCta: 'Write a review', reviewPromptLater: 'Not now',
+    notifPrefsLabel: 'Notifications', notifPrefsNews: 'News (releases, free games, most played)',
+    notifPrefsStreak: 'Streak reminder', notifPrefsHint: 'Notices about you (new followers, your weekly summary) always arrive.',
     tourTitleSteam: 'Sync your platforms', tourBodySteam: 'Tap here to connect Steam, PlayStation, GOG, Xbox or Epic Games and bring in your library automatically.',
     tourTitleAdd: 'Add games', tourBodyAdd: 'Tap here to manually add a game to your library.',
     tourTitleFolders: 'Organize with lists', tourBodyFolders: 'Create lists to group your games however you like.',
@@ -3236,6 +3256,9 @@ const I18N = {
     wowEyebrow: 'Sua biblioteca', wowGames: 'jogos', wowHours: 'horas', wowShare: 'Compartilhar',
     wowLife: 'São {days} dias da sua vida jogando',
     streakDaysShort: 'dias de sequência', shareLibrary: 'Compartilhar minha biblioteca', shareLibraryShort: 'Compartilhar',
+    reviewPromptTitle: 'O que você achou?', reviewPromptCta: 'Escrever avaliação', reviewPromptLater: 'Agora não',
+    notifPrefsLabel: 'Notificações', notifPrefsNews: 'Novidades (lançamentos, jogos grátis, mais jogados)',
+    notifPrefsStreak: 'Lembrete de sequência', notifPrefsHint: 'Avisos sobre você (novos seguidores, seu resumo semanal) sempre chegam.',
     tourTitleSteam: 'Sincronize suas plataformas', tourBodySteam: 'Toque aqui para conectar Steam, PlayStation, GOG, Xbox ou Epic Games e trazer sua biblioteca automaticamente.',
     tourTitleAdd: 'Adicione jogos', tourBodyAdd: 'Toque aqui para adicionar um jogo manualmente à sua biblioteca.',
     tourTitleFolders: 'Organize com listas', tourBodyFolders: 'Crie listas para agrupar seus jogos como quiser.',
@@ -6355,7 +6378,39 @@ async function changeStatus(gameId, newStatus) {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
     loadGlobalStats();
+    if (newStatus === 'Completado') maybeAskForReview(gameId, g && g.name);
   } catch(e) {}
+}
+
+// Terminar un juego es EL momento en que alguien tiene algo para decir, y
+// hasta ahora no se le preguntaba nada: 1 sola persona escribio reseñas en
+// toda la vida de la app. Las reseñas son ademas el contenido que llena los
+// perfiles publicos, asi que este prompt alimenta el crecimiento organico.
+// Se ofrece, no se impone: un toast que se va solo, maximo uno por dia.
+function maybeAskForReview(gameId, gameName) {
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    if (localStorage.getItem('pl_review_prompt') === today) return;
+    localStorage.setItem('pl_review_prompt', today);
+  } catch (e) { return; }
+
+  const el = document.createElement('div');
+  el.style.cssText = `position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:9999;
+    background:var(--bg2);border:0.5px solid var(--green);border-radius:12px;padding:14px 16px;
+    box-shadow:0 10px 32px rgba(0,0,0,.5);display:flex;align-items:center;gap:12px;max-width:min(460px,92vw)`;
+  el.innerHTML = `
+    <div style="flex:1;min-width:0">
+      <div style="font-size:13px;font-weight:600;margin-bottom:2px">${esc(t('reviewPromptTitle'))}</div>
+      <div style="font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(gameName || '')}</div>
+    </div>
+    <button id="review-prompt-no" style="background:none;border:none;color:var(--text2);font-size:12px;cursor:pointer">${esc(t('reviewPromptLater'))}</button>
+    <button id="review-prompt-yes" style="border:none;background:var(--green);color:var(--on-accent);font-weight:600;font-size:12px;padding:8px 14px;border-radius:8px;cursor:pointer">${esc(t('reviewPromptCta'))}</button>`;
+  document.body.appendChild(el);
+
+  const close = () => el.remove();
+  el.querySelector('#review-prompt-no').onclick = close;
+  el.querySelector('#review-prompt-yes').onclick = () => { close(); openReviewEditor(gameId); };
+  setTimeout(() => { if (document.body.contains(el)) close(); }, 12000);
 }
 
 
@@ -7040,7 +7095,36 @@ document.addEventListener('DOMContentLoaded', () => {});
 function openConfigPanel() {
   setView('config');
 }
+// Preferencias de notificacion por tipo. Se guardan al toggle, sin boton.
+async function loadPushPrefs() {
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/user/push-prefs`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    if (!res.ok) return;
+    const p = await res.json();
+    const n = document.getElementById('cfg-push-news');
+    const s = document.getElementById('cfg-push-streak');
+    if (n) n.checked = p.news !== false;
+    if (s) s.checked = p.streak !== false;
+  } catch (e) {}
+}
+
+async function savePushPrefs() {
+  try {
+    await fetch(`${apiBase()}/api/v1/user/push-prefs`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        news:   document.getElementById('cfg-push-news').checked,
+        streak: document.getElementById('cfg-push-streak').checked,
+      }),
+    });
+  } catch (e) {}
+}
+
 openConfigPanel._init = async function() {
+  loadPushPrefs();
   // Load current profile
   try {
     const res  = await fetch(`${apiBase()}/api/v1/user/profile`, {
@@ -11545,7 +11629,22 @@ const ONBOARDING_SLIDES = [
 ];
 let _onboardingStep = 0;
 
+// El carrusel de 5 slides se saco: le explicaba la app a alguien que todavia
+// no habia conectado nada, y cada pantalla entre el registro y conectar Steam
+// cuesta activacion (medido: 3-12% de los registros de ads conectaban algo).
+// Ahora se va directo a pedir la conexion; el tour de coachmarks queda para
+// despues, cuando ya hay biblioteca que mirar.
 function showOnboarding() {
+  const usernameModal = document.getElementById('set-username-overlay');
+  if (usernameModal && usernameModal.classList.contains('open')) {
+    setTimeout(showOnboarding, 300);
+    return;
+  }
+  markOnboardingSeenApi();
+  showActivationPrompt(true);
+}
+
+function _showOnboardingCarouselLegacy() {
   // Si el modal de "elegi tu nombre de usuario" todavia esta abierto (primer
   // login), esperamos a que se cierre antes de arrancar el onboarding —
   // si no, quedan superpuestos.
