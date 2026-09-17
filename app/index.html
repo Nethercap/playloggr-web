@@ -428,6 +428,14 @@
     .mobile-sidebar-item:active { background:var(--bg2); }
     .mobile-sidebar-item i, .mobile-sidebar-item img { width:20px; text-align:center; font-size:18px; flex-shrink:0; }
     .mobile-sidebar-divider { height:0.5px; background:var(--border); margin:10px 0; }
+    /* Encabezado de grupo del drawer. Reemplaza a los divisores sueltos: una
+       linea separa pero no dice de que es cada bloque, que era justo el
+       problema de la lista plana de 19 items. */
+    .mobile-sidebar-group {
+      padding:14px 18px 5px; font-size:10.5px; font-weight:700; letter-spacing:.07em;
+      text-transform:uppercase; color:var(--text2);
+    }
+    .mobile-sidebar-group:first-of-type { padding-top:6px; }
     .header-title { font-size:17px; font-weight:500; display:flex; align-items:center; gap:8px; }
     .header-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
     .sidebar-only-label { display:none; }
@@ -979,27 +987,38 @@
 <div class="mobile-sidebar-backdrop" id="mobile-sidebar-backdrop" onclick="toggleHeaderMoreMenu()"></div>
 <div class="mobile-sidebar" id="mobile-sidebar">
   <div class="mobile-sidebar-header"><i class="ti ti-device-gamepad-2" style="color:#1D9E75"></i> Playloggr</div>
-  <a href="https://play.google.com/store/apps/details?id=com.playloggr.app" target="_blank" rel="noopener" class="mobile-sidebar-item" style="text-decoration:none"><img src="https://cdn.simpleicons.org/googleplay/888887" style="width:16px;height:16px"> <span data-i18n="downloadApp">Descargar la app</span></a>
-  <a href="https://discord.gg/ksF4AaMt4j" target="_blank" rel="noopener" class="mobile-sidebar-item" style="text-decoration:none"><i class="ti ti-brand-discord" style="color:#5865F2"></i> <span data-i18n="joinDiscord">Unite a Discord</span></a>
-  <div class="mobile-sidebar-divider"></div>
-  <button id="mobile-premium-menu-btn" onclick="setView('premium');toggleHeaderMoreMenu()" class="mobile-sidebar-item" style="display:none"><i class="ti ti-key" style="color:#1D9E75"></i> <span data-i18n="evolveToPremium">Evolucioná a Premium</span></button>
-  <div class="mobile-sidebar-divider"></div>
-  <button onclick="setView('novedades');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-sparkles" data-cp-icon="novedades"></i> <span data-i18n="novedades">Novedades</span></button>
-  <button onclick="setView('plan');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-route" data-cp-icon="plan_de_juego"></i> <span data-i18n="gamePlan" style="flex:1">Plan de juego</span><i class="ti ti-lock" id="plan-nav-lock-icon" style="display:none;font-size:13px;color:var(--text2)"></i></button>
-  <button onclick="openGomPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-stars" data-cp-icon="juego_del_mes"></i> <span data-i18n="gameOfMonth">Juego del mes</span></button>
-  <button onclick="openMyReviewsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-message-star" data-cp-icon="mis_resenas"></i> <span data-i18n="myReviews">Reseñas</span></button>
-  <button onclick="openListsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-folder" data-cp-icon="carpetas"></i> <span data-i18n="folders">Listas</span></button>
-  <button onclick="setView('rankings');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-medal" data-cp-icon="rankings"></i> <span data-i18n="rankings">Rankings</span></button>
-  <button onclick="openFriendsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-users" data-cp-icon="amigos"></i> <span data-i18n="friends">Amigos</span></button>
-  <button onclick="openAchievementsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-trophy" data-cp-icon="logros"></i> <span data-i18n="achievements">Logros</span></button>
-  <button onclick="openConfigPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-settings" data-cp-icon="configuracion"></i> <span data-i18n="config">Configuración</span></button>
-  <div class="mobile-sidebar-divider"></div>
+
+  <!-- Los 19 items estaban en una lista plana, todos al mismo nivel: lo que
+       usa el 60% (racha, sesion) competia visualmente con lo que no usa nadie.
+       Ahora van en 4 grupos. Sincronizar va primero y sin anidar a proposito:
+       conectar una plataforma es el paso que la mayoria de las cuentas nuevas
+       nunca da, meterlo detras de un click extra iba justo en contra. -->
+  <div class="mobile-sidebar-group" data-i18n="menuSync">Sincronizar</div>
   <button id="mobile-steam-menu-btn" onclick="toggleHeaderMoreMenu();toggleSteamMenu()" class="mobile-sidebar-item"><i class="ti ti-brand-steam"></i> Steam</button>
   <button id="mobile-psn-menu-btn" onclick="toggleHeaderMoreMenu();togglePsnMenu()" class="mobile-sidebar-item"><img src="https://cdn.simpleicons.org/playstation/888887"> PSN</button>
   <button id="mobile-gog-menu-btn" onclick="toggleHeaderMoreMenu();toggleConnectorMenu('gog')" class="mobile-sidebar-item"><img src="https://cdn.simpleicons.org/gogdotcom/888887"> GOG</button>
   <button id="mobile-xbox-menu-btn" onclick="toggleHeaderMoreMenu();toggleConnectorMenu('xbox')" class="mobile-sidebar-item"><i class="ti ti-brand-xbox"></i> Xbox</button>
   <button id="mobile-epic-menu-btn" onclick="toggleHeaderMoreMenu();toggleConnectorMenu('epic')" class="mobile-sidebar-item"><img src="https://cdn.simpleicons.org/epicgames/888887"> Epic</button>
-  <div class="mobile-sidebar-divider"></div>
+
+  <div class="mobile-sidebar-group" data-i18n="menuProgress">Mi progreso</div>
+  <button onclick="toggleHeaderMoreMenu();openStreakPanel()" class="mobile-sidebar-item"><img src="streak_avatars/bonfire.png" style="width:18px;height:18px;object-fit:contain" onerror="this.style.display='none'"> <span data-i18n="streak">Racha</span></button>
+  <button onclick="openAchievementsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-trophy" data-cp-icon="logros"></i> <span data-i18n="achievements">Logros</span></button>
+  <button onclick="toggleHeaderMoreMenu();openConfigPanel().then(()=>switchConfigTab('avatar'))" class="mobile-sidebar-item"><i class="ti ti-user-star"></i> <span data-i18n="levelAndAvatar">Nivel y avatar</span></button>
+  <button onclick="openListsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-folder" data-cp-icon="carpetas"></i> <span data-i18n="folders">Listas</span></button>
+  <button onclick="setView('rankings');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-medal" data-cp-icon="rankings"></i> <span data-i18n="rankings">Rankings</span></button>
+  <button onclick="openMyReviewsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-message-star" data-cp-icon="mis_resenas"></i> <span data-i18n="myReviews">Reseñas</span></button>
+  <button onclick="setView('plan');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-route" data-cp-icon="plan_de_juego"></i> <span data-i18n="gamePlan" style="flex:1">Plan de juego</span><i class="ti ti-lock" id="plan-nav-lock-icon" style="display:none;font-size:13px;color:var(--text2)"></i></button>
+
+  <div class="mobile-sidebar-group" data-i18n="menuCommunity">Comunidad</div>
+  <button onclick="openFriendsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-users" data-cp-icon="amigos"></i> <span data-i18n="friends">Seguidores</span></button>
+  <button onclick="openGomPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-stars" data-cp-icon="juego_del_mes"></i> <span data-i18n="gameOfMonth">Juego del mes</span></button>
+  <button onclick="setView('novedades');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-sparkles" data-cp-icon="novedades"></i> <span data-i18n="novedades">Descubrir</span></button>
+
+  <div class="mobile-sidebar-group" data-i18n="menuAccount">Cuenta</div>
+  <button id="mobile-premium-menu-btn" onclick="setView('premium');toggleHeaderMoreMenu()" class="mobile-sidebar-item" style="display:none"><i class="ti ti-key" style="color:#1D9E75"></i> <span data-i18n="evolveToPremium">Evolucioná a Premium</span></button>
+  <button onclick="openConfigPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-settings" data-cp-icon="configuracion"></i> <span data-i18n="config">Configuración</span></button>
+  <a href="https://play.google.com/store/apps/details?id=com.playloggr.app" target="_blank" rel="noopener" class="mobile-sidebar-item" style="text-decoration:none"><img src="https://cdn.simpleicons.org/googleplay/888887" style="width:16px;height:16px"> <span data-i18n="downloadApp">Descargar la app</span></a>
+  <a href="https://discord.gg/ksF4AaMt4j" target="_blank" rel="noopener" class="mobile-sidebar-item" style="text-decoration:none"><i class="ti ti-brand-discord" style="color:#5865F2"></i> <span data-i18n="joinDiscord">Unite a Discord</span></a>
   <a href="mailto:nether.appdev@gmail.com" class="mobile-sidebar-item"><i class="ti ti-lifebuoy" data-cp-icon="soporte"></i> <span data-i18n="support">Soporte</span></a>
   <button onclick="logout()" class="mobile-sidebar-item"><i class="ti ti-logout" data-cp-icon="cerrar_sesion"></i> <span data-i18n="logout">Salir</span></button>
 </div>
@@ -2750,7 +2769,7 @@ const I18N = {
     streakAvatarSectionTitle: 'Avatares de racha', streakAvatarLockedHint: 'Desbloqueá uno cada 10 días de racha',
     streakAvatarActiveNotice: 'Tenés un avatar de racha equipado — el resto de las opciones de abajo no se aplican mientras esté activo.',
     usernameFontsUnlockInfo: 'Desbloqueás una fuente nueva cada 10 días de racha. Con Premium, además las desbloqueás subiendo de nivel — mucho más rápido.',
-    novedades: 'Novedades', novedadesError: 'No se pudo cargar Novedades', novedadesEmpty: 'Todavía no hay novedades para mostrar',
+    novedades: 'Descubrir', novedadesError: 'No se pudo cargar Descubrir', novedadesEmpty: 'Todavía no hay novedades para mostrar', menuSync: 'Sincronizar', menuProgress: 'Mi progreso', menuCommunity: 'Comunidad', menuAccount: 'Cuenta', streak: 'Racha', levelAndAvatar: 'Nivel y avatar',
     novedadesFriendsPlaying: 'Amigos jugando esto (últimos 5 días)', novedadesPopularWishlist: 'Popular en Deseados (últimos 7 días)',
     novedadesMostHours: 'Más jugado (últimos 3 días)', novedadesPlayers: 'jugadores',
     novedadesRecentReleases: 'Recién salió', novedadesUpcomingReleases: 'Próximamente',
@@ -3022,7 +3041,7 @@ const I18N = {
     streakAvatarSectionTitle: 'Streak avatars', streakAvatarLockedHint: 'Unlock one every 10 days of streak',
     streakAvatarActiveNotice: 'You have a streak avatar equipped — the options below don\'t apply while it\'s active.',
     usernameFontsUnlockInfo: 'You unlock a new font every 10 days of streak. With Premium, you also unlock them by leveling up — much faster.',
-    novedades: 'News', novedadesError: 'Could not load News', novedadesEmpty: 'No news to show yet',
+    novedades: 'Discover', novedadesError: 'Could not load Discover', novedadesEmpty: 'No news to show yet', menuSync: 'Sync', menuProgress: 'My progress', menuCommunity: 'Community', menuAccount: 'Account', streak: 'Streak', levelAndAvatar: 'Level and avatar',
     novedadesFriendsPlaying: 'Friends playing this (last 5 days)', novedadesPopularWishlist: 'Popular in Wishlist (last 7 days)',
     novedadesMostHours: 'Most played (last 3 days)', novedadesPlayers: 'players',
     novedadesRecentReleases: 'Just released', novedadesUpcomingReleases: 'Coming soon',
@@ -3294,7 +3313,7 @@ const I18N = {
     streakAvatarSectionTitle: 'Avatares de sequência', streakAvatarLockedHint: 'Desbloqueie um a cada 10 dias de sequência',
     streakAvatarActiveNotice: 'Você tem um avatar de sequência equipado — as opções abaixo não se aplicam enquanto ele estiver ativo.',
     usernameFontsUnlockInfo: 'Você desbloqueia uma fonte nova a cada 10 dias de sequência. Com Premium, também as desbloqueia subindo de nível — muito mais rápido.',
-    novedades: 'Novidades', novedadesError: 'Não foi possível carregar Novidades', novedadesEmpty: 'Ainda não há novidades para mostrar',
+    novedades: 'Descobrir', novedadesError: 'Não foi possível carregar Descobrir', novedadesEmpty: 'Ainda não há novidades para mostrar', menuSync: 'Sincronizar', menuProgress: 'Meu progresso', menuCommunity: 'Comunidade', menuAccount: 'Conta', streak: 'Sequência', levelAndAvatar: 'Nível e avatar',
     novedadesFriendsPlaying: 'Amigos jogando isso (últimos 5 dias)', novedadesPopularWishlist: 'Popular nos Desejados (últimos 7 dias)',
     novedadesMostHours: 'Mais jogado (últimos 3 dias)', novedadesPlayers: 'jogadores',
     novedadesRecentReleases: 'Lançou agora', novedadesUpcomingReleases: 'Em breve',
@@ -8087,6 +8106,7 @@ async function checkStreakIn() {
     // tuviera el estado real correcto.
     renderStreakAvatarPicker();
     renderCosmeticPickers();
+    renderProfileStreakChip();
     if (!d.already_checked_in) {
       streakClaimedAvatarId = null;
       renderStreakModal();
@@ -8103,6 +8123,30 @@ async function refreshStreakStatus() {
     const d = await res.json();
     if (res.ok) streakState = d;
   } catch (e) {}
+}
+
+// La racha es la feature mas usada de la app (117 de 196 usuarios) y hasta
+// ahora solo existia como modal al hacer check-in y como push — no tenia
+// ningun lugar fijo en la interfaz. Va en el panel de perfil, al lado del
+// nivel, y abre el modal de racha al tocarla.
+function renderProfileStreakChip() {
+  const el = document.getElementById('profile-streak-chip');
+  if (!el) return;
+  const days = (streakState && streakState.streak_days) || 0;
+  if (!days) { el.innerHTML = ''; return; }
+  el.innerHTML = `<button onclick="openStreakPanel()" data-i18n-title="streak" title="Racha"
+    style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:#EF9F27;
+    background:rgba(239,159,39,.14);border:none;padding:2px 8px;border-radius:20px;cursor:pointer;line-height:1.6">
+    <img src="streak_avatars/bonfire.png" style="width:11px;height:11px;object-fit:contain" onerror="this.style.display='none'">
+    ${days}</button>`;
+}
+
+async function openStreakPanel() {
+  await refreshStreakStatus();
+  renderProfileStreakChip();
+  if (!streakState) return;
+  renderStreakModal();
+  document.getElementById('streak-overlay').classList.add('open');
 }
 
 function renderStreakModal() {
@@ -13859,8 +13903,9 @@ async function onLoginSuccess() {
       <div class="profile-panel-name">
         <span id="user-name-span">${authUser}</span>
       </div>
-      <div class="profile-panel-level" style="font-size:11px;color:var(--text2);display:flex;align-items:center;gap:3px">
+      <div class="profile-panel-level" style="font-size:11px;color:var(--text2);display:flex;align-items:center;gap:3px;flex-wrap:wrap">
         <span id="user-level-badge"></span>
+        <span id="profile-streak-chip"></span>
       </div>
       <div class="profile-panel-sub">
         <span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px"></span>
