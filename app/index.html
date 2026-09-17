@@ -528,6 +528,9 @@
       #folder-filter-btn { width:100%; }
       #folder-filter-btn > button { justify-content:flex-start; text-align:left; }
       #filter-bar { order:3; padding:0; display:flex; flex-direction:column; }
+      /* El buscador arranca la columna: con cientos de juegos es lo primero
+         que se toca, y el order de #filter-bar manda sobre el HTML. */
+      #filter-bar-row0 { order:1; margin-bottom:14px; }
       #filter-bar-row1 { order:2; flex-direction:column; align-items:stretch; }
       #filter-dropdowns { flex-direction:column; align-items:stretch; }
       #filter-dropdowns > div { width:100%; }
@@ -1282,8 +1285,8 @@
         <i class="ti ti-star"></i> <span data-i18n="addWishlistGame">Agregar juego deseado</span>
       </button>
     </div>
-    <!-- Main selector: Biblioteca / Deseados -->
-    <div id="view-selector-row" style="display:flex;padding:8px 0;gap:8px;align-items:center">
+    <!-- Main selector: Biblioteca / Deseados / Estadisticas / Listas / Rankings -->
+    <div id="view-selector-row" style="display:flex;flex-wrap:wrap;padding:8px 0;gap:8px;align-items:center">
       <button id="view-library" class="nav-pill active" onclick="setView('library')"
         style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--green);display:inline-flex;align-items:center;gap:5px">
         <i class="ti ti-books" style="font-size:14px"></i> <span data-i18n="library">Biblioteca</span>
@@ -1296,7 +1299,20 @@
         style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);display:inline-flex;align-items:center;gap:5px;flex-shrink:0">
         <i class="ti ti-chart-bar" style="font-size:14px"></i> <span data-i18n="stats">Estadísticas</span>
       </button>
-      <span style="margin-left:auto;font-size:12px;color:var(--text2)">
+      <!-- Listas y Rankings son vistas del mismo nivel que Biblioteca/Deseados/
+           Estadisticas, pero vivian sueltas en el drawer: no habia criterio que
+           explicara por que Estadisticas si y Rankings no. -->
+      <button id="view-lists" class="nav-pill" onclick="openListsPanel()" data-i18n-title="folders" title="Listas"
+        style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);display:inline-flex;align-items:center;gap:5px;flex-shrink:0">
+        <i class="ti ti-folder" style="font-size:14px"></i> <span data-i18n="folders">Listas</span>
+      </button>
+      <button id="view-rankings" class="nav-pill" onclick="setView('rankings')" data-i18n-title="rankings" title="Rankings"
+        style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);display:inline-flex;align-items:center;gap:5px;flex-shrink:0">
+        <i class="ti ti-medal" style="font-size:14px"></i> <span data-i18n="rankings">Rankings</span>
+      </button>
+      <!-- Solo cuando lo que se ve es un subconjunto: sin filtros repetia
+           exactamente el TOTAL y las HORAS de la fila de arriba. -->
+      <span id="sel-summary" style="display:none;margin-left:auto;font-size:12px;color:var(--text2)">
         <span data-i18n="selected">Seleccionados</span>: <strong id="s-total">—</strong><br>
         <span data-i18n="hours">Horas</span>: <strong id="s-hours">—</strong>
       </span>
@@ -1304,6 +1320,17 @@
 
     <!-- Filter bar -->
     <div id="filter-bar" style="display:flex;flex-direction:column;gap:8px;padding:10px 0 12px">
+      <!-- Row 0: buscar. Va primero porque en una biblioteca de cientos de
+           juegos es el control mas usado de la barra, y estaba ultimo: debajo
+           de los 4 filtros, los toggles de vista, Ocultos y el orden. -->
+      <div id="filter-bar-row0" style="display:flex;align-items:center;gap:6px">
+        <div style="position:relative;flex:1;display:flex;align-items:center">
+          <i class="ti ti-search" style="position:absolute;left:9px;font-size:13px;color:var(--text2);pointer-events:none"></i>
+          <input type="text" id="search-input" placeholder="Buscar juego..." data-i18n-placeholder="searchGame" oninput="applyFilters()"
+            style="padding:5px 10px 5px 27px;font-size:12px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text);width:100%" />
+        </div>
+      </div>
+
       <!-- Row 1: filtros (estado/plataforma/genero/etc), swipeable -->
       <div id="filter-bar-row1" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;row-gap:4px">
         <!-- Filter dropdowns injected by JS -->
@@ -1346,8 +1373,6 @@
           style="padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">
           ↑
         </button>
-        <input type="text" id="search-input" placeholder="Buscar juego..." data-i18n-placeholder="searchGame" oninput="applyFilters()"
-          style="padding:4px 10px;font-size:12px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text);width:160px" />
       </div>
     </div>
   </div>
@@ -4927,6 +4952,13 @@ async function fetchSteamScore(appId) {
   }
 }
 
+// "1 juegos" se veia en el widget de seguidores, en las listas y en el contador
+// de la biblioteca. Las claves gameSingular/gamesPlural ya existian en los 3
+// idiomas (las usaba solo el plan de juego), no habia que traducir nada nuevo.
+function gamesLabel(n) {
+  return Number(n) === 1 ? t('gameSingular') : t('gamesPlural');
+}
+
 function renderStats(data) {
   const byS   = data ? (data.by_status || {}) : {};
   // Filtered stats
@@ -4936,6 +4968,19 @@ function renderStats(data) {
     document.getElementById('s-hours').textContent = Math.round(hours).toLocaleString('es-AR') + ' hs';
   }
   // If no data, preserve existing hours value
+  updateSelectionSummary();
+}
+
+/** "Seleccionados/Horas" solo aparece cuando lo que se ve es un subconjunto
+ * de la biblioteca. Sin filtros repetia numero por numero el TOTAL y las
+ * HORAS de la fila de arriba, en la misma pantalla. Se compara contra el
+ * total global en vez de inspeccionar el estado de los filtros: eso cubre
+ * tambien la vista de Deseados y el filtro por carpeta sin enumerarlos. */
+function updateSelectionSummary() {
+  const el = document.getElementById('sel-summary');
+  if (!el) return;
+  const all = (window._globalStats || {}).total;
+  el.style.display = (all != null && (totalGames || 0) !== all) ? '' : 'none';
 }
 
 async function loadGlobalStats() {
@@ -4953,6 +4998,9 @@ async function loadGlobalStats() {
     document.getElementById('g-hours').textContent     = Math.round(data.total_hours || 0).toLocaleString('es-AR');
     const wEl = document.getElementById('g-wishlist');
     if (wEl) wEl.textContent = data.wishlist_count || 0;
+    // El total global recien existe aca, y de el depende si se muestra el
+    // resumen de seleccion (ver updateSelectionSummary).
+    updateSelectionSummary();
   } catch(e) {}
 }
 
@@ -5185,7 +5233,7 @@ function gameCardHtml(g, opts) {
 async function renderGames() {
   const list  = document.getElementById('game-list');
   const items = sortedFiltered();
-  document.getElementById('count-label').textContent = `${items.length} ${t('of')} ${allGames.length} ${t('gamesLower')}`;
+  document.getElementById('count-label').textContent = `${items.length} ${t('of')} ${allGames.length} ${gamesLabel(allGames.length)}`;
 
   if (!items.length) {
     if (!allGames.length) {
@@ -6248,10 +6296,12 @@ function setView(view) {
   const wishBtn      = document.getElementById('view-wishlist');
   const statsBtn     = document.getElementById('view-stats');
   const rankingsBtn  = document.getElementById('view-rankings');
+  const listsBtn     = document.getElementById('view-lists');
   if (libBtn)      { libBtn.style.background      = view === 'library'  ? 'var(--green)' : 'var(--bg2)';  libBtn.classList.toggle('active', view === 'library'); }
   if (wishBtn)     { wishBtn.style.background     = view === 'wishlist' ? '#EF9F27'      : 'var(--bg2)';  wishBtn.classList.toggle('active', view === 'wishlist'); }
   if (statsBtn)    { statsBtn.style.background    = isStats             ? 'var(--green)' : 'var(--bg2)';  statsBtn.classList.toggle('active', isStats); }
   if (rankingsBtn) { rankingsBtn.style.background = isRankings          ? 'var(--green)' : 'var(--bg2)';  rankingsBtn.classList.toggle('active', isRankings); }
+  if (listsBtn)    { listsBtn.style.background    = isLists             ? 'var(--green)' : 'var(--bg2)';  listsBtn.classList.toggle('active', isLists); }
 
   if (isStats) {
     switchStatsTab('user');
@@ -9690,7 +9740,7 @@ async function loadFriendsList() {
           : '';
         const subtitle = f.in_session
           ? `<span style="color:#1D9E75">${esc(f.session_game || '')} · ${esc(f.session_platform || '')}</span>`
-          : `${f.library_count} ${t('gamesLower')} · ${f.wishlist_count} ${t('wishlistLower')} · ${Math.round(f.total_hours)} hs`;
+          : `${f.library_count} ${gamesLabel(f.library_count)} · ${f.wishlist_count} ${t('wishlistLower')} · ${Math.round(f.total_hours)} hs`;
         const frameId = f.level_info && f.level_info.frame;
         const fontId  = f.level_info && f.level_info.font;
         return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px">
@@ -13298,7 +13348,7 @@ async function renderPublicRankingsList(page) {
         </div>
         <div style="font-size:11px;color:var(--text2)">por ${authorLinkHtml(r.username)}</div>
         <div style="font-size:12px;color:var(--text2);display:flex;align-items:center;justify-content:space-between;gap:4px">
-          <span>${r.game_count} ${t('gamesLower')}</span>
+          <span>${r.game_count} ${gamesLabel(r.game_count)}</span>
           <span style="font-size:11px">${_formatReviewDate(r.created_at)}</span>
         </div>
       </div>
@@ -13363,7 +13413,7 @@ function renderRankingsList(page) {
         <i class="ti ti-medal" style="color:var(--green);font-size:18px"></i>
         <strong style="font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.name)}</strong>
       </div>
-      <div style="font-size:12px;color:var(--text2)">${r.game_count}/${MAX_RANKING_GAMES} ${t('gamesLower')}</div>
+      <div style="font-size:12px;color:var(--text2)">${r.game_count}/${MAX_RANKING_GAMES} ${gamesLabel(MAX_RANKING_GAMES)}</div>
       <div style="font-size:11px;color:var(--text2);display:flex;align-items:center;justify-content:space-between;gap:4px">
         <span style="display:flex;align-items:center;gap:4px"><i class="ti ti-thumb-up"></i> ${r.vote_count || 0}</span>
         <span>${_formatReviewDate(r.created_at)}</span>
@@ -14031,7 +14081,7 @@ async function loadWidgetFriends() {
         </div>
         <div class="sidebar-widget-row-text">
           <div class="sidebar-widget-row-name">${esc(f.username)}</div>
-          <div class="sidebar-widget-row-sub">${f.in_session ? t('inSession') : `${f.library_count} ${t('gamesLower') || ''}`}</div>
+          <div class="sidebar-widget-row-sub">${f.in_session ? t('inSession') : `${f.library_count} ${gamesLabel(f.library_count)}`}</div>
         </div>
       </div>
     `; }).join('');
@@ -14223,7 +14273,7 @@ async function syncAll(page = 1, silent = false) {
     if (btn) { btn.disabled=false; btn.innerHTML = `<i class="ti ti-refresh"></i> ${t('sync')}`; }
     const now = new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
     const countLabel = document.getElementById('count-label');
-    if (countLabel) countLabel.textContent = `${totalGames} ${t('gamesLower')} — ${t('lastSync')} ${now}`;
+    if (countLabel) countLabel.textContent = `${totalGames} ${gamesLabel(totalGames)} — ${t('lastSync')} ${now}`;
   }
 }
 
