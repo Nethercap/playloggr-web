@@ -1832,6 +1832,11 @@
         <label style="font-size:12px;color:var(--text2)" data-i18n="avatarFrame">Marco de avatar</label>
         <div id="cfg-frame-picker" style="margin-top:6px"></div>
       </div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;color:var(--text2)" data-i18n="profileBanner">Banner de perfil</label>
+        <div style="font-size:11px;color:var(--text2);margin:2px 0 6px" data-i18n="profileBannerHint">Se ve en tu perfil público y cuando compartís el link.</div>
+        <div id="cfg-banner-picker"></div>
+      </div>
       <div style="display:flex;justify-content:center;margin-bottom:12px;flex-shrink:0">
         <div id="avatar-preview-box" style="width:180px;height:180px;background:var(--bg3);border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden">
           <div id="avatar-preview-box2" style="width:150px;height:150px;position:relative"></div>
@@ -2722,6 +2727,7 @@ const I18N = {
     communityActivity: 'Actividad de la comunidad',
     leaderboardTab: 'Tabla global', yourPosition: 'Tu posición',
     titleUse: 'Usar como título', titleCurrent: 'Tu título', titleClear: 'Quitar título',
+    profileBanner: 'Banner de perfil', profileBannerHint: 'Se ve en tu perfil público y cuando compartís el link.',
     titleSet: 'Título actualizado', titleCleared: 'Título quitado',
     leaderboardEmpty: 'Todavía no hay nadie con XP en la tabla.',
     leaderboardPrivacyNote: 'Los perfiles privados no se listan, pero sí cuentan para tu posición.',
@@ -3002,6 +3008,7 @@ const I18N = {
     communityActivity: 'Community activity',
     leaderboardTab: 'Leaderboard', yourPosition: 'Your position',
     titleUse: 'Use as title', titleCurrent: 'Your title', titleClear: 'Remove title',
+    profileBanner: 'Profile banner', profileBannerHint: 'Shown on your public profile and when you share the link.',
     titleSet: 'Title updated', titleCleared: 'Title removed',
     leaderboardEmpty: 'No one has XP on the board yet.',
     leaderboardPrivacyNote: 'Private profiles are not listed, but they do count toward your position.',
@@ -3282,6 +3289,7 @@ const I18N = {
     communityActivity: 'Atividade da comunidade',
     leaderboardTab: 'Tabela global', yourPosition: 'Sua posição',
     titleUse: 'Usar como título', titleCurrent: 'Seu título', titleClear: 'Remover título',
+    profileBanner: 'Banner do perfil', profileBannerHint: 'Aparece no seu perfil público e quando você compartilha o link.',
     titleSet: 'Título atualizado', titleCleared: 'Título removido',
     leaderboardEmpty: 'Ainda não há ninguém com XP na tabela.',
     leaderboardPrivacyNote: 'Perfis privados não são listados, mas contam para a sua posição.',
@@ -9707,6 +9715,7 @@ async function checkAchievements() {
       // esto solo se actualizaba releyendo el perfil (loadPremiumStatus, una
       // sola vez al cargar la pagina).
       if (d.unlocked_frames) userUnlockedFrames = d.unlocked_frames;
+      if (d.unlocked_banners) userUnlockedBanners = d.unlocked_banners;
       if (d.unlocked_fonts)  userUnlockedFonts  = d.unlocked_fonts;
       applyPremiumUI();
       // Si el panel de Configuracion (tab Avatar) esta abierto en este
@@ -9775,6 +9784,29 @@ function levelBadgeHtml(levelInfo, size = 18) {
     ? `<i class="ti ti-trophy" style="font-size:${Math.round(size*0.85)}px;color:#EF9F27;margin-right:4px"></i>`
     : '';
   return `<span style="display:inline-flex;align-items:center;gap:4px">${icon}<span style="font-family:'Press Start 2P',monospace;color:${color};font-size:${Math.round(size*0.72)}px;flex-shrink:0">${levelInfo.level}</span></span>${trophy}<span style="display:inline-block;width:6px"></span>`;
+}
+
+// Espejo de BANNER_TIERS en routes/api_cloud.py. Calca los marcos: mismo
+// nivel y misma paleta, asi banner y marco del mismo tier combinan solos.
+const kBannerTiers = [
+  ['none', 1, 'Ninguno', []],
+  ['medianoche', 10, 'Medianoche', ['#0f172a', '#1e293b', '#334155']],
+  ['bronce', 20, 'Bronce', ['#3b1d0a', '#7c3f14', '#CD7F32']],
+  ['esmeralda', 35, 'Esmeralda', ['#052e16', '#14532d', '#1D9E75']],
+  ['zafiro', 50, 'Zafiro', ['#0c1a4a', '#1e3a8a', '#3B82F6']],
+  ['neon', 70, 'Neón', ['#0b0b2b', '#3b0764', '#00E5FF']],
+  ['fuego', 90, 'Fuego', ['#450a0a', '#b91c1c', '#FF5722']],
+  ['amatista', 110, 'Amatista', ['#2e1065', '#6b21a8', '#9C27B0']],
+  ['dorado', 130, 'Dorado', ['#422006', '#a16207', '#FFC107']],
+  ['prisma', 150, 'Prisma', ['#8E7CE8', '#3B82F6', '#1D9E75', '#FFC107', '#FF5722']],
+];
+function bannerCss(id) {
+  const t = kBannerTiers.find(x => x[0] === id);
+  const stops = t ? t[3] : [];
+  if (!stops.length) return '';
+  if (stops.length === 3) return `linear-gradient(135deg, ${stops[0]} 0%, ${stops[1]} 55%, ${stops[2]} 100%)`;
+  const step = 100 / (stops.length - 1);
+  return 'linear-gradient(120deg, ' + stops.map((c, i) => `${c} ${Math.round(i * step)}%`).join(', ') + ')';
 }
 
 const kFrameTiers = [
@@ -11607,6 +11639,8 @@ let userBadgeTier = 'bronce';
 let userFrame  = 'none';
 let userFont   = 'default';
 let userUnlockedFrames = ['none'];
+let userBanner = 'none';
+let userUnlockedBanners = ['none'];
 let userUnlockedFonts  = ['default'];
 let userTrophy = false;
 let userTitle = null;   // { id, name } del logro elegido como titulo, o null
@@ -11813,6 +11847,8 @@ async function loadPremiumStatus() {
     userFrame = d.selected_frame || 'none';
     userFont  = d.selected_font || 'default';
     userUnlockedFrames = d.unlocked_frames || ['none'];
+    userBanner = d.selected_banner || 'none';
+    userUnlockedBanners = d.unlocked_banners || ['none'];
     userUnlockedFonts  = d.unlocked_fonts || ['default'];
     userTrophy = d.trophy || false;
     userTitle  = d.title || null;
@@ -12411,6 +12447,7 @@ function applyAvatarFrameUI() {
 function renderCosmeticPickers() {
   const frameEl = document.getElementById('cfg-frame-picker');
   const fontEl  = document.getElementById('cfg-font-picker');
+  const bannerEl = document.getElementById('cfg-banner-picker');
   if (!frameEl || !fontEl) return;
 
   // El aviso de "las fuentes tambien se desbloquean por racha" solo aplica
@@ -12427,8 +12464,22 @@ function renderCosmeticPickers() {
     </div>`;
     frameEl.innerHTML = lockedMsg;
     fontEl.innerHTML  = lockedMsg;
+    if (bannerEl) bannerEl.innerHTML = lockedMsg;
     return;
   }
+
+  if (bannerEl) bannerEl.innerHTML = kBannerTiers.map(([id, level, name]) => {
+    const unlocked = userUnlockedBanners.includes(id);
+    const selected = userBanner === id;
+    const css = bannerCss(id);
+    return `<div onclick="${unlocked ? `selectCosmetic('banner','${id}')` : ''}"
+        style="display:inline-flex;flex-direction:column;gap:3px;cursor:${unlocked ? 'pointer' : 'default'};opacity:${unlocked ? 1 : 0.35};margin:0 8px 8px 0;width:76px">
+      <div style="height:34px;border-radius:7px;background:${css || 'var(--bg2)'};border:${selected ? '2px solid var(--green)' : '1px solid var(--border)'};display:flex;align-items:center;justify-content:center;box-sizing:border-box">
+        ${unlocked ? (selected ? '<i class="ti ti-check" style="font-size:13px;color:#fff;text-shadow:0 0 4px #000"></i>' : '') : '<i class="ti ti-lock" style="font-size:12px;color:var(--text2)"></i>'}
+      </div>
+      <span style="font-size:9px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${name} · Nv.${level}</span>
+    </div>`;
+  }).join('');
 
   frameEl.innerHTML = kFrameTiers.map(([id, level, name]) => {
     const unlocked = userUnlockedFrames.includes(id);
@@ -12468,7 +12519,7 @@ function renderCosmeticPickers() {
 
 async function selectCosmetic(kind, id) {
   try {
-    const body = kind === 'frame' ? { frame: id } : kind === 'title' ? { title: id } : { font: id };
+    const body = kind === 'frame' ? { frame: id } : kind === 'title' ? { title: id } : kind === 'banner' ? { banner: id } : { font: id };
     const res = await fetch(`${apiBase()}/api/v1/user/cosmetics`, {
       method: 'PATCH',
       headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
@@ -12477,6 +12528,7 @@ async function selectCosmetic(kind, id) {
     const d = await res.json();
     if (!res.ok) throw new Error(d.detail || 'Error');
     if (kind === 'frame') userFrame = id;
+    else if (kind === 'banner') { userBanner = id; renderCosmeticPickers(); }
     else if (kind === 'title') {
       const a = (_achievementsData && _achievementsData.achievements || []).find(x => x.id === id);
       userTitle = id && a ? { id, name: a.name } : null;
