@@ -1448,6 +1448,9 @@
           style="padding:5px 14px;font-size:12px;border-radius:16px;border:0.5px solid var(--green);background:var(--bg2);color:var(--green);cursor:pointer;font-weight:600" data-i18n="periodWeek">Semana</button>
         <button id="ptab-month" onclick="switchPeriodType('month')"
           style="padding:5px 14px;font-size:12px;border-radius:16px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n="periodMonth">Mes</button>
+        <button id="period-share-btn" onclick="openPeriodShareCard()" style="display:none;margin-left:auto;padding:5px 14px;font-size:12px;border-radius:16px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;font-weight:600">
+          <i class="ti ti-share"></i> <span data-i18n="shareLibraryShort">Compartir</span>
+        </button>
       </div>
       <div id="stats-period-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
     </div>
@@ -1704,6 +1707,35 @@
     <div style="display:flex;gap:8px;padding:14px 18px 18px">
       <button class="btn-cancel" style="flex:1" onclick="closeWelcomeStats()" data-i18n="close">Cerrar</button>
       <button class="btn-save" style="flex:1" onclick="shareWelcomeStats()"><i class="ti ti-download"></i> <span data-i18n="wowShare">Compartir</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- Resumen de periodo compartible. Es el patron Spotify Wrapped: el numero
+     del que la gente se enorgullece ("12 hs esta semana", "completé Hades")
+     en una imagen que se comparte sola. Misma tarjeta que la de biblioteca,
+     otro contenido. -->
+<div class="modal-overlay" id="period-share-overlay">
+  <div class="modal" style="max-width:380px;padding:0;overflow:hidden">
+    <div id="period-share-card" style="padding:26px 22px;background:linear-gradient(160deg,#16231d,#111111);text-align:center">
+      <div id="period-share-eyebrow" style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--green);font-weight:700;margin-bottom:3px"></div>
+      <div id="period-share-range" style="font-size:10.5px;color:var(--text2);margin-bottom:14px"></div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px">
+        <div id="period-share-avatar" style="width:40px;height:40px;border-radius:50%;overflow:hidden;background:var(--bg3);position:relative;flex-shrink:0"></div>
+        <div style="text-align:left">
+          <div id="period-share-user" style="font-size:14px;font-weight:700;line-height:1.2"></div>
+          <div id="period-share-title" style="line-height:1.2"></div>
+        </div>
+      </div>
+      <div id="period-share-hours" style="font-size:44px;font-weight:800;line-height:1;color:var(--green)">0</div>
+      <div style="font-size:11px;color:var(--text2);margin:4px 0 16px" id="period-share-hours-lbl"></div>
+      <div id="period-share-games" style="display:flex;flex-direction:column;gap:6px;text-align:left;margin-bottom:14px"></div>
+      <div id="period-share-chips" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap"></div>
+      <div id="period-share-url" style="margin-top:18px;font-size:10.5px;color:#777;letter-spacing:.04em">playloggr.com</div>
+    </div>
+    <div style="display:flex;gap:8px;padding:14px 18px 18px">
+      <button class="btn-cancel" style="flex:1" onclick="document.getElementById('period-share-overlay').classList.remove('open')" data-i18n="close">Cerrar</button>
+      <button class="btn-save" style="flex:1" onclick="exportCardAsImage('period-share-card', 'playloggr-resumen.png')"><i class="ti ti-download"></i> <span data-i18n="wowShare">Compartir</span></button>
     </div>
   </div>
 </div>
@@ -2728,6 +2760,8 @@ const I18N = {
     leaderboardTab: 'Tabla global', yourPosition: 'Tu posición',
     titleUse: 'Usar como título', titleCurrent: 'Tu título', titleClear: 'Quitar título',
     profileBanner: 'Banner de perfil', profileBannerHint: 'Se ve en tu perfil público y cuando compartís el link.',
+    periodShareWeek: 'Tu semana', periodShareMonth: 'Tu mes', periodShareHoursWeek: 'horas jugadas esta semana', periodShareHoursMonth: 'horas jugadas este mes',
+    periodShareCompleted1: 'completado', periodShareCompletedN: 'completados', periodShareStarted1: 'empezado', periodShareStartedN: 'empezados',
     titleSet: 'Título actualizado', titleCleared: 'Título quitado',
     leaderboardEmpty: 'Todavía no hay nadie con XP en la tabla.',
     leaderboardPrivacyNote: 'Los perfiles privados no se listan, pero sí cuentan para tu posición.',
@@ -3009,6 +3043,8 @@ const I18N = {
     leaderboardTab: 'Leaderboard', yourPosition: 'Your position',
     titleUse: 'Use as title', titleCurrent: 'Your title', titleClear: 'Remove title',
     profileBanner: 'Profile banner', profileBannerHint: 'Shown on your public profile and when you share the link.',
+    periodShareWeek: 'Your week', periodShareMonth: 'Your month', periodShareHoursWeek: 'hours played this week', periodShareHoursMonth: 'hours played this month',
+    periodShareCompleted1: 'completed', periodShareCompletedN: 'completed', periodShareStarted1: 'started', periodShareStartedN: 'started',
     titleSet: 'Title updated', titleCleared: 'Title removed',
     leaderboardEmpty: 'No one has XP on the board yet.',
     leaderboardPrivacyNote: 'Private profiles are not listed, but they do count toward your position.',
@@ -3290,6 +3326,8 @@ const I18N = {
     leaderboardTab: 'Tabela global', yourPosition: 'Sua posição',
     titleUse: 'Usar como título', titleCurrent: 'Seu título', titleClear: 'Remover título',
     profileBanner: 'Banner do perfil', profileBannerHint: 'Aparece no seu perfil público e quando você compartilha o link.',
+    periodShareWeek: 'Sua semana', periodShareMonth: 'Seu mês', periodShareHoursWeek: 'horas jogadas esta semana', periodShareHoursMonth: 'horas jogadas este mês',
+    periodShareCompleted1: 'concluído', periodShareCompletedN: 'concluídos', periodShareStarted1: 'iniciado', periodShareStartedN: 'iniciados',
     titleSet: 'Título atualizado', titleCleared: 'Título removido',
     leaderboardEmpty: 'Ainda não há ninguém com XP na tabela.',
     leaderboardPrivacyNote: 'Perfis privados não são listados, mas contam para a sua posição.',
@@ -6886,6 +6924,9 @@ async function loadPeriodStats() {
 function renderPeriodStats(own, glob) {
   const el = document.getElementById('stats-period-content');
   const periodLabel = currentPeriodType === 'week' ? t('periodLastWeek') : t('periodLastMonth');
+  _lastPeriodOwn = own;
+  const shareBtn = document.getElementById('period-share-btn');
+  if (shareBtn) shareBtn.style.display = own.has_data ? 'inline-flex' : 'none';
 
   if (!own.has_data) {
     el.innerHTML = `<div class="empty"><i class="ti ti-calendar-time"></i>${t('periodNoData')}</div>`;
@@ -12186,18 +12227,71 @@ function closeWelcomeStats() {
   document.getElementById('welcome-stats-overlay').classList.remove('open');
 }
 
-async function shareWelcomeStats() {
-  const card = document.getElementById('welcome-stats-card');
+// Exporta cualquier tarjeta a PNG. La de biblioteca y la de resumen de
+// periodo comparten esto; antes estaba pegado a welcome-stats-card.
+async function exportCardAsImage(cardId, filename) {
+  const card = document.getElementById(cardId);
   if (!card || typeof html2canvas === 'undefined') return;
   try {
     const canvas = await html2canvas(card, { backgroundColor: '#111111', useCORS: true, scale: 2 });
     const a = document.createElement('a');
     a.href = canvas.toDataURL('image/png');
-    a.download = 'playloggr.png';
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     a.remove();
   } catch (e) {}
+}
+
+async function shareWelcomeStats() {
+  return exportCardAsImage('welcome-stats-card', 'playloggr.png');
+}
+
+// El ultimo resumen cargado en el tab de periodo, para armar la tarjeta sin
+// volver a pedirlo.
+let _lastPeriodOwn = null;
+
+function openPeriodShareCard() {
+  const own = _lastPeriodOwn;
+  if (!own || !own.has_data) return;
+  const isWeek = currentPeriodType === 'week';
+  document.getElementById('period-share-eyebrow').textContent = isWeek ? t('periodShareWeek') : t('periodShareMonth');
+  document.getElementById('period-share-range').textContent = `${own.period_start} → ${own.period_end}`;
+  document.getElementById('period-share-user').textContent = authUser || '';
+  document.getElementById('period-share-title').innerHTML = titleHtml(userTitle, 8.5);
+  const av = document.getElementById('period-share-avatar');
+  const shift = currentAvatarConfig.streakAvatarId ? '0' : '-11.7%';
+  av.innerHTML = `<div style="width:40px;height:40px;position:relative;transform:translateY(${shift})">${pixelAvatarHtml(currentAvatarConfig, 40)}</div>`;
+
+  const hrs = Math.round((own.total_hours || 0) * 10) / 10;
+  document.getElementById('period-share-hours').textContent = hrs.toLocaleString();
+  document.getElementById('period-share-hours-lbl').textContent = isWeek ? t('periodShareHoursWeek') : t('periodShareHoursMonth');
+
+  // Top 3 juegos por horas: es lo que la gente cuenta ("me pase la semana
+  // en Hades"), no la tabla completa.
+  const top = Object.entries(own.hours_by_game || {}).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  document.getElementById('period-share-games').innerHTML = top.map(([name, h], i) => `
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+      <span style="width:18px;height:18px;border-radius:${i === 0 ? '50%' : '4px'};border:1.5px solid ${['#E0B84C','#B0B0B8','#CD7F32'][i]};color:${['#E0B84C','#B0B0B8','#CD7F32'][i]};font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">${i + 1}</span>
+      <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600">${esc(name)}</span>
+      <span style="color:var(--text2);flex-shrink:0">${h} hs</span>
+    </div>`).join('');
+
+  // Completados y empezados en el periodo, desde los cambios de estado.
+  let completed = 0, started = 0;
+  Object.entries(own.status_changes || {}).forEach(([k, n]) => {
+    const to = k.split('->')[1];
+    if (to === 'Completado') completed += n;
+    if (to === 'Jugando') started += n;
+  });
+  const chip = (n, label, color) => n > 0
+    ? `<span style="font-size:11px;padding:4px 10px;border-radius:20px;background:${color}22;color:${color};font-weight:600">${n} ${esc(label)}</span>` : '';
+  document.getElementById('period-share-chips').innerHTML =
+    chip(completed, completed === 1 ? t('periodShareCompleted1') : t('periodShareCompletedN'), STATUS_DOT_COLORS['Completado']) +
+    chip(started, started === 1 ? t('periodShareStarted1') : t('periodShareStartedN'), STATUS_DOT_COLORS['Jugando']);
+
+  document.getElementById('period-share-url').textContent = authUser ? `playloggr.com/u/${authUser}` : 'playloggr.com';
+  document.getElementById('period-share-overlay').classList.add('open');
 }
 
 // ── Activacion (conectar una plataforma) ──────────────────────────────────
