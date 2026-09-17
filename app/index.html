@@ -46,9 +46,17 @@
        --accent-sidebar/-play/-meta/-unselected replican los roles de
        GameThemeAccents que en Flutter difieren de --green (selected) en
        algunos temas — ver abajo donde se aplican. */
+    /* --ring: el color de la FIRMA de cada tema (brackets, glow, anillo,
+       borde de card). Antes iba en --border/--border2, que usa toda la UI
+       -- stats, paneles, inputs, modales -- y el tema terminaba pintando
+       cada borde del sitio: cuando todo tiene color, nada tiene jerarquia.
+       Ahora los bordes genericos son neutros (blanco al 8/16% sobre el fondo
+       del tema) y solo la firma lleva el color. Atomic, Old Shooter y Doom no
+       cambian: atomic es monocromo CRT (todo verde/ambar ES el concepto) y
+       los otros dos ya tenian bordes neutros. */
     :root[data-game-theme="cyberpunk"] {
       --bg:#160A0A; --bg2:#1F0F0F; --bg3:#0C0707; --text:#E8828C; --text2:#A65A62;
-      --border:rgba(232,16,42,0.35); --border2:rgba(232,16,42,0.55);
+      --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.16); --ring:rgba(232,16,42,0.55);
       --green:#17F1F1; --green-dark:#0FB8B8;
       --accent-sidebar:#17F1F1; --accent-play:#17F1F1; --accent-meta:#17F1F1; --accent-unselected:#17F1F1;
     }
@@ -66,7 +74,7 @@
     }
     :root[data-game-theme="erdtree"] {
       --bg:#13251C; --bg2:#1D3327; --bg3:#0C0D0A; --text:#E1E2D6; --text2:#1F648D;
-      --border:rgba(237,138,9,0.5); --border2:rgba(237,138,9,0.7);
+      --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.16); --ring:rgba(237,138,9,0.7);
       --green:#ED8A09; --green-dark:#6B4A0F;
       --accent-sidebar:#ED8A09; --accent-play:#ED8A09; --accent-meta:#1F648D; --accent-unselected:#E1E2D6;
     }
@@ -87,7 +95,7 @@
          que los detalles secundarios ya salgan del color de fantasma sin
          pisar nada aparte. */
       --bg:#000000; --bg2:#0D0D2B; --bg3:#000000; --text:#FFFFFF; --text2:#46BFEE;
-      --border:rgba(33,33,222,0.7); --border2:rgba(33,33,222,0.95);
+      --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.16); --ring:rgba(33,33,222,0.95);
       --green:#FFFF00; --green-dark:#C9C900; --on-accent:#0D0D2B;
       --accent-sidebar:#FFFF00; --accent-play:#FFFF00; --accent-meta:#46BFEE; --accent-unselected:#EA82E5;
     }
@@ -99,7 +107,7 @@
        blanco ya es el color de texto por defecto del tema. */
     :root[data-game-theme="undertale"] {
       --bg:#000000; --bg2:#0D0D0D; --bg3:#000000; --text:#FFFFFF; --text2:#00FFFF;
-      --border:rgba(255,255,255,0.5); --border2:rgba(255,255,255,0.85);
+      --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.16); --ring:rgba(255,255,255,0.85);
       --green:#FFFF00; --green-dark:#C9C900; --on-accent:#000000;
       --accent-sidebar:#FFFFFF; --accent-play:#FFFF00; --accent-meta:#00FFFF; --accent-unselected:#888888;
     }
@@ -108,7 +116,7 @@
        cards redondeadas (18px, pisa el radius:0 generico de mas abajo). */
     :root[data-game-theme="portal"] {
       --bg:#202020; --bg2:#2A2D31; --bg3:#16181C; --text:#FFFFFF; --text2:rgba(255,255,255,0.65);
-      --border:rgba(0,162,255,0.5); --border2:rgba(255,93,0,0.4);
+      --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.16); --ring:#00A2FF;
       --green:#00A2FF; --green-dark:#0077B8;
       --accent-sidebar:#00A2FF; --accent-play:#FF5D00; --accent-meta:rgba(255,255,255,0.7); --accent-unselected:#888888;
     }
@@ -117,7 +125,7 @@
        ambar para lo activo. */
     :root[data-game-theme="starcraft2"] {
       --bg:#0E1A2B; --bg2:#16263D; --bg3:#05050A; --text:#DCE6EE; --text2:#4FC3F7;
-      --border:rgba(79,195,247,0.6); --border2:rgba(79,195,247,0.9);
+      --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.16); --ring:rgba(79,195,247,0.9);
       --green:#FCB017; --green-dark:#C98A0A;
       --accent-sidebar:#FCB017; --accent-play:#FCB017; --accent-meta:#4FC3F7; --accent-unselected:#888888;
     }
@@ -286,12 +294,12 @@
        mano en Flutter) — Guaca-Guaca. Azul laberinto en cards/sidebar. */
     :root[data-game-theme="pacman"] .game-card,
     :root[data-game-theme="pacman"] .lib-grid-tile {
-      border: 1.6px solid var(--border2);
-      box-shadow: 0 0 6px var(--border2), inset 0 0 3px var(--border2);
+      border: 1.6px solid var(--ring);
+      box-shadow: 0 0 6px var(--ring), inset 0 0 3px var(--ring);
     }
     :root[data-game-theme="pacman"] .mobile-sidebar {
-      border-left: 1.6px solid var(--border2);
-      box-shadow: -6px 0 12px var(--border2);
+      border-left: 1.6px solid var(--ring);
+      box-shadow: -6px 0 12px var(--ring);
     }
     /* --green es amarillo en este tema (ver arriba) — texto blanco sobre
        fondo amarillo da muy mal contraste (WCAG fail). Los botones
@@ -324,7 +332,7 @@
       border-radius: 0 !important;
       border-bottom: 3px solid;
     }
-    :root[data-game-theme="pacman"] .subtab-pill.active     { color: var(--green) !important; border-bottom-color: var(--border2); }
+    :root[data-game-theme="pacman"] .subtab-pill.active     { color: var(--green) !important; border-bottom-color: var(--ring); }
     :root[data-game-theme="undertale"] .subtab-pill.active  { color: var(--green) !important; border-bottom-color: var(--text2); }
     :root[data-game-theme="portal"] .subtab-pill.active     { color: var(--accent-play) !important; border-bottom-color: var(--green); }
     :root[data-game-theme="starcraft2"] .subtab-pill.active { color: var(--green) !important; border-bottom-color: var(--text2); }
@@ -332,7 +340,7 @@
     /* Borde blanco solido — Determination (Undertale). */
     :root[data-game-theme="undertale"] .game-card,
     :root[data-game-theme="undertale"] .lib-grid-tile {
-      border: 1.5px solid var(--border2);
+      border: 1.5px solid var(--ring);
     }
 
     /* Cards redondeadas con anillo animado azul/naranja girando en sentido
@@ -380,12 +388,12 @@
        Guaca-Guaca con la paleta de SC2. */
     :root[data-game-theme="starcraft2"] .game-card,
     :root[data-game-theme="starcraft2"] .lib-grid-tile {
-      border: 1.4px solid var(--border2);
-      box-shadow: 0 0 6px var(--border2), inset 0 0 3px var(--border2);
+      border: 1.4px solid var(--ring);
+      box-shadow: 0 0 6px var(--ring), inset 0 0 3px var(--ring);
     }
     :root[data-game-theme="starcraft2"] .mobile-sidebar {
-      border-left: 1.4px solid var(--border2);
-      box-shadow: -6px 0 12px var(--border2);
+      border-left: 1.4px solid var(--ring);
+      box-shadow: -6px 0 12px var(--ring);
     }
 
     /* Relieve 3D estilo HUD — Knee-Deep (Doom), mismo mecanismo que Old
