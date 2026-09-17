@@ -1016,6 +1016,7 @@
   <button onclick="openFriendsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-users" data-cp-icon="amigos"></i> <span data-i18n="friends">Seguidores</span></button>
   <button onclick="openGomPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-stars" data-cp-icon="juego_del_mes"></i> <span data-i18n="gameOfMonth">Juego del mes</span></button>
   <button onclick="setView('novedades');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-sparkles" data-cp-icon="novedades"></i> <span data-i18n="novedades">Descubrir</span></button>
+  <a href="https://playloggr.com/actividad" target="_blank" rel="noopener" class="mobile-sidebar-item" style="text-decoration:none"><i class="ti ti-activity"></i> <span data-i18n="communityActivity">Actividad de la comunidad</span></a>
 
   <div class="mobile-sidebar-group" data-i18n="menuAccount">Cuenta</div>
   <button id="mobile-premium-menu-btn" onclick="setView('premium');toggleHeaderMoreMenu()" class="mobile-sidebar-item" style="display:none"><i class="ti ti-key" style="color:#1D9E75"></i> <span data-i18n="evolveToPremium">Evolucioná a Premium</span></button>
@@ -1401,6 +1402,8 @@
         style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px" data-i18n="periodTab">Semana/Mes</button>
       <button id="stab-activity" onclick="switchStatsTab('activity')"
         style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px" data-i18n="activityTab">Actividad</button>
+      <button id="stab-leaderboard" onclick="switchStatsTab('leaderboard')"
+        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px" data-i18n="leaderboardTab">Tabla global</button>
       <button onclick="openShareCard()" data-i18n-title="shareLibrary" title="Compartir mi biblioteca"
         style="margin-left:auto;padding:6px 14px;font-size:12px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;border-radius:20px;font-weight:600">
         <i class="ti ti-share"></i> <span data-i18n="shareLibraryShort">Compartir</span>
@@ -1439,6 +1442,12 @@
       </div>
       <div id="activity-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
       <div id="activity-detail" style="margin-top:14px;padding:12px 14px;border-radius:var(--radius-lg);background:var(--bg2);font-size:12.5px;color:var(--text2)" data-i18n="activityDetailHint">Hacé click en un día para ver el detalle.</div>
+    </div>
+
+    <!-- Tabla global por XP. Hasta ahora el nivel era progresion privada: se
+         subia sin saber nunca contra quien. -->
+    <div id="stats-leaderboard-tab" style="display:none;padding:16px;max-width:720px;width:100%;margin:0 auto;box-sizing:border-box">
+      <div id="leaderboard-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
     </div>
   </div>
 
@@ -2683,6 +2692,10 @@ const I18N = {
     achievements: 'Logros', globalRanking: 'Ranking global', usersLower: 'usuarios', onlySteam: 'Solo disponible para juegos de Steam',
     noAchievements: 'Este juego no tiene logros, o el perfil de Steam es privado', addedToRanking: 'Agregado al ranking',
     fromGamePlan: 'de tu Plan de juego', noFoldersYet: 'No está en ninguna lista', never: 'Nunca', errorLoading: 'Error al cargar',
+    communityActivity: 'Actividad de la comunidad',
+    leaderboardTab: 'Tabla global', yourPosition: 'Tu posición',
+    leaderboardEmpty: 'Todavía no hay nadie con XP en la tabla.',
+    leaderboardPrivacyNote: 'Los perfiles privados no se listan, pero sí cuentan para tu posición.',
     of: 'de', achievementsUnlocked: 'logros desbloqueados', errorLoadingAchievements: 'Error al cargar logros',
     errorDeletingGame: 'Error al eliminar el juego', errorUpdatingCover: 'Error al actualizar portada',
     confirmRemoveFriend: '¿Quitar a {username} de tus amigos?',
@@ -2955,6 +2968,10 @@ const I18N = {
     achievements: 'Achievements', globalRanking: 'Global ranking', usersLower: 'users', onlySteam: 'Only available for Steam games',
     noAchievements: 'This game has no achievements, or the Steam profile is private', addedToRanking: 'Added to ranking',
     fromGamePlan: 'from your Game plan', noFoldersYet: 'Not on any list yet', never: 'Never', errorLoading: 'Error loading',
+    communityActivity: 'Community activity',
+    leaderboardTab: 'Leaderboard', yourPosition: 'Your position',
+    leaderboardEmpty: 'No one has XP on the board yet.',
+    leaderboardPrivacyNote: 'Private profiles are not listed, but they do count toward your position.',
     of: 'of', achievementsUnlocked: 'achievements unlocked', errorLoadingAchievements: 'Error loading achievements',
     errorDeletingGame: 'Error deleting game', errorUpdatingCover: 'Error updating cover',
     confirmRemoveFriend: 'Remove {username} from your friends?',
@@ -3227,6 +3244,10 @@ const I18N = {
     achievements: 'Conquistas', globalRanking: 'Ranking global', usersLower: 'usuários', onlySteam: 'Disponível apenas para jogos da Steam',
     noAchievements: 'Este jogo não tem conquistas, ou o perfil da Steam é privado', addedToRanking: 'Adicionado ao ranking',
     fromGamePlan: 'do seu Plano de jogo', noFoldersYet: 'Não está em nenhuma lista', never: 'Nunca', errorLoading: 'Erro ao carregar',
+    communityActivity: 'Atividade da comunidade',
+    leaderboardTab: 'Tabela global', yourPosition: 'Sua posição',
+    leaderboardEmpty: 'Ainda não há ninguém com XP na tabela.',
+    leaderboardPrivacyNote: 'Perfis privados não são listados, mas contam para a sua posição.',
     of: 'de', achievementsUnlocked: 'conquistas desbloqueadas', errorLoadingAchievements: 'Erro ao carregar conquistas',
     errorDeletingGame: 'Erro ao excluir o jogo', errorUpdatingCover: 'Erro ao atualizar a capa',
     confirmRemoveFriend: 'Remover {username} dos seus amigos?',
@@ -6680,22 +6701,79 @@ async function openStatsPanel() {
   setView('stats');
 }
 
+// Base del perfil publico. Estaba escrita a mano en cada lugar que la
+// necesitaba; si algun dia cambia el dominio hay un solo lugar que tocar.
+const PUBLIC_PROFILE_BASE = 'https://playloggr.com/u';
+
 function switchStatsTab(tab) {
-  document.getElementById('stats-user-tab').style.display       = tab === 'user'       ? '' : 'none';
-  document.getElementById('stats-global-tab').style.display     = tab === 'global'     ? '' : 'none';
-  document.getElementById('stats-period-tab').style.display     = tab === 'period'     ? '' : 'none';
-  document.getElementById('stats-activity-tab').style.display   = tab === 'activity'   ? '' : 'none';
-  ['user','global','period','activity'].forEach(t => {
+  ['user','global','period','activity','leaderboard'].forEach(t => {
+    const pane = document.getElementById(`stats-${t}-tab`);
+    if (pane) pane.style.display = t === tab ? '' : 'none';
     const btn = document.getElementById(`stab-${t}`);
     if (!btn) return;
     btn.style.color       = t === tab ? 'var(--green)' : 'var(--text2)';
     btn.style.borderColor = t === tab ? 'var(--green)' : 'var(--border)';
     btn.style.fontWeight  = t === tab ? '600' : 'normal';
   });
-  if (tab === 'user')       loadUserStats();
-  if (tab === 'global')     loadGlobalRankings();
-  if (tab === 'period')     loadPeriodStats();
-  if (tab === 'activity')   loadActivityHeatmap();
+  if (tab === 'user')        loadUserStats();
+  if (tab === 'global')      loadGlobalRankings();
+  if (tab === 'period')      loadPeriodStats();
+  if (tab === 'activity')    loadActivityHeatmap();
+  if (tab === 'leaderboard') loadLeaderboard();
+}
+
+async function loadLeaderboard() {
+  const box = document.getElementById('leaderboard-content');
+  if (!box) return;
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/leaderboard`, {
+      headers: { 'Authorization': `Bearer ${authToken}` },
+    });
+    if (!res.ok) throw new Error(res.status);
+    const d = await res.json();
+
+    // El puesto propio va arriba y siempre, aunque no estes en el top 20:
+    // es el unico dato de esta pantalla que es sobre vos.
+    const me = d.me || {};
+    const mine = `
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;margin-bottom:16px;
+        background:var(--bg2);border:0.5px solid var(--green);border-radius:var(--radius-lg)">
+        <div>
+          <div style="font-size:10.5px;color:var(--text2);letter-spacing:.06em;text-transform:uppercase">${esc(t('yourPosition'))}</div>
+          <div style="font-size:26px;font-weight:800;line-height:1.1">#${me.rank || '—'}
+            <span style="font-size:13px;font-weight:500;color:var(--text2)">${esc(t('of'))} ${me.total || 0}</span></div>
+        </div>
+        <div style="margin-left:auto;text-align:right">
+          <div style="font-size:12px;color:var(--text2)">${esc(t('levelLabel'))} ${me.level || 1}</div>
+          <div style="font-size:12px;color:var(--green);font-weight:600">${(me.xp || 0).toLocaleString()} XP</div>
+        </div>
+      </div>`;
+
+    const rows = (d.top || []).map((r, i) => {
+      const pos = i + 1;
+      // Oro/plata/bronce para el podio, gris para el resto — mismo criterio
+      // que los marcos de posicion de los rankings propios.
+      const medal = ['#E0B84C', '#B0B0B8', '#CD7F32'][i] || 'var(--text2)';
+      const shape = pos <= 3 ? 'border-radius:50%' : 'border-radius:5px';
+      return `<div style="display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:8px;
+        background:${r.is_me ? 'rgba(29,158,117,.12)' : 'transparent'}">
+        <span style="flex-shrink:0;width:26px;height:26px;${shape};border:1.5px solid ${medal};color:${medal};
+          font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center">${pos}</span>
+        <a href="${PUBLIC_PROFILE_BASE}/${encodeURIComponent(r.username)}" target="_blank" rel="noopener"
+          style="font-size:13.5px;font-weight:600;color:inherit;text-decoration:none;flex:1;min-width:0;
+          overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.username)}</a>
+        <span style="font-size:11.5px;color:var(--text2);flex-shrink:0">${esc(t('levelLabel'))} ${r.level}</span>
+        <span style="font-size:11.5px;color:var(--green);font-weight:600;flex-shrink:0;min-width:56px;text-align:right">${r.xp.toLocaleString()} XP</span>
+      </div>`;
+    }).join('');
+
+    box.innerHTML = mine + (rows
+      ? `<div style="display:flex;flex-direction:column;gap:2px">${rows}</div>
+         <div style="font-size:11.5px;color:var(--text2);margin-top:14px">${esc(t('leaderboardPrivacyNote'))}</div>`
+      : `<div style="text-align:center;padding:30px;color:var(--text2)">${esc(t('leaderboardEmpty'))}</div>`);
+  } catch (e) {
+    box.innerHTML = `<div style="text-align:center;padding:30px;color:var(--text2)">${esc(t('errorLoading'))}</div>`;
+  }
 }
 
 // ── Stats: resumen semanal/mensual ──────────────────────────────────────

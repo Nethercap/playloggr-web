@@ -131,6 +131,20 @@
     display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text2);
     background: var(--bg2); border: 1px solid var(--border); padding: 8px 14px; border-radius: 20px;
   }
+  /* Prueba social por escala: numeros reales de la base, no promesas. Se
+     piden a /public/stats (cacheado 1h) y la fila queda oculta si falla --
+     una landing con tres guiones donde deberian ir numeros es peor que sin
+     la fila. */
+  .counters {
+    display: none; gap: 44px; justify-content: center; flex-wrap: wrap; margin: 38px 0 0;
+  }
+  .counters.on { display: flex; }
+  .counter b {
+    display: block; font-size: 30px; font-weight: 800; line-height: 1;
+    font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
+  }
+  .counter span { font-size: 12px; color: var(--text2); }
+  @media (max-width: 720px) { .counters { gap: 26px; } .counter b { font-size: 23px; } }
 
 
   /* ── Preview de biblioteca (screenshot real, recortado) ── */
@@ -304,6 +318,7 @@
       <a href="#que-es">What is Playloggr?</a>
       <a href="#funcionalidades">Features</a>
       <a href="#contacto">Contact</a>
+      <a href="/actividad">Activity</a>
       <a href="https://play.google.com/store/apps/details?id=com.playloggr.app" target="_blank" rel="noopener">Download app</a>
       <a href="https://discord.gg/ksF4AaMt4j" target="_blank" rel="noopener">Join Discord</a>
       <div class="lang-switch" id="lang-switch"></div>
@@ -330,6 +345,14 @@
       <span class="pill"><i class="ti ti-trophy"></i> 139 unlockable achievements</span>
       <span class="pill"><i class="ti ti-stopwatch"></i> Live session timer</span>
       <span class="pill"><i class="ti ti-users"></i> Public profile to share</span>
+    </div>
+
+    <div class="counters" id="counters">
+      <div class="counter"><b id="c-games">—</b><span>games tracked</span></div>
+      <div class="counter"><b id="c-hours">—</b><span>hours logged</span></div>
+      <div class="counter"><b id="c-users">—</b><span>players</span></div>
+    </div>
+
     <div class="preview-panel">
       <img class="preview-shot" src="/assets/preview-cards.png" alt="List view of the game library in Playloggr" loading="lazy" />
     </div>
@@ -578,5 +601,30 @@
   })();
 </script>
 
+
+<script>
+/* Contadores publicos de la landing. Si la API no responde la fila no se
+   muestra nunca (arranca en display:none), asi la landing no queda con
+   huecos ni ceros falsos. */
+(function () {
+  var box = document.getElementById('counters');
+  if (!box) return;
+  fetch('https://api.playloggr.com/api/v1/public/stats')
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) {
+      if (!d || !d.games_tracked) return;
+      var lang = document.documentElement.lang || 'es';
+      function put(id, n) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = Number(n).toLocaleString(lang);
+      }
+      put('c-games', d.games_tracked);
+      put('c-hours', d.hours_tracked);
+      put('c-users', d.users);
+      box.classList.add('on');
+    })
+    .catch(function () {});
+})();
+</script>
 </body>
 </html>
