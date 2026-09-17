@@ -440,6 +440,9 @@
     .header-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
     .sidebar-only-label { display:none; }
     .sidebar-widget { display:none; }
+    /* Titulo bajo el nombre: dorado, en mayusculas chicas. Mismo tono que
+       la medalla de oro para que se lea como algo ganado, no como un tag. */
+    .user-title { display:inline-block; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#E0B84C; line-height:1.3; }
     .empty-start { padding:48px 20px 40px; }
     .empty-start-title { font-size:20px; font-weight:700; color:var(--text); margin-bottom:6px; }
     .empty-start-sub { font-size:13.5px; color:var(--text2); margin-bottom:26px; }
@@ -753,6 +756,7 @@
 
     /* ── Panel de perfil (avatar + nombre + nivel) — mobile y web ── */
     .profile-panel { display:flex; align-items:center; gap:12px; background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:7px 16px; margin-bottom:14px; }
+    .profile-panel-row { display:flex; align-items:center; gap:12px; }
     .profile-panel-info { display:flex; flex-direction:column; gap:3px; min-width:0; }
     .profile-panel-name { font-size:14px; font-weight:600; display:flex; align-items:center; gap:6px; }
     .profile-panel-sub { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
@@ -789,7 +793,8 @@
          antes quedaban en su propia fila ocupando espacio aparte. */
       #connector-row { display:none !important; }
 
-      .profile-panel { padding:8px 12px; gap:10px; }
+      .profile-panel { padding:8px 12px; }
+      .profile-panel-row { gap:10px; }
       .profile-panel-name { font-size:13px; }
 
       /* Stat cards: los 6 entran en una sola linea sin scroll, como en la
@@ -2716,6 +2721,8 @@ const I18N = {
     fromGamePlan: 'de tu Plan de juego', noFoldersYet: 'No está en ninguna lista', never: 'Nunca', errorLoading: 'Error al cargar',
     communityActivity: 'Actividad de la comunidad',
     leaderboardTab: 'Tabla global', yourPosition: 'Tu posición',
+    titleUse: 'Usar como título', titleCurrent: 'Tu título', titleClear: 'Quitar título',
+    titleSet: 'Título actualizado', titleCleared: 'Título quitado',
     leaderboardEmpty: 'Todavía no hay nadie con XP en la tabla.',
     leaderboardPrivacyNote: 'Los perfiles privados no se listan, pero sí cuentan para tu posición.',
     of: 'de', achievementsUnlocked: 'logros desbloqueados', errorLoadingAchievements: 'Error al cargar logros',
@@ -2994,6 +3001,8 @@ const I18N = {
     fromGamePlan: 'from your Game plan', noFoldersYet: 'Not on any list yet', never: 'Never', errorLoading: 'Error loading',
     communityActivity: 'Community activity',
     leaderboardTab: 'Leaderboard', yourPosition: 'Your position',
+    titleUse: 'Use as title', titleCurrent: 'Your title', titleClear: 'Remove title',
+    titleSet: 'Title updated', titleCleared: 'Title removed',
     leaderboardEmpty: 'No one has XP on the board yet.',
     leaderboardPrivacyNote: 'Private profiles are not listed, but they do count toward your position.',
     of: 'of', achievementsUnlocked: 'achievements unlocked', errorLoadingAchievements: 'Error loading achievements',
@@ -3272,6 +3281,8 @@ const I18N = {
     fromGamePlan: 'do seu Plano de jogo', noFoldersYet: 'Não está em nenhuma lista', never: 'Nunca', errorLoading: 'Erro ao carregar',
     communityActivity: 'Atividade da comunidade',
     leaderboardTab: 'Tabela global', yourPosition: 'Sua posição',
+    titleUse: 'Usar como título', titleCurrent: 'Seu título', titleClear: 'Remover título',
+    titleSet: 'Título atualizado', titleCleared: 'Título removido',
     leaderboardEmpty: 'Ainda não há ninguém com XP na tabela.',
     leaderboardPrivacyNote: 'Perfis privados não são listados, mas contam para a sua posição.',
     of: 'de', achievementsUnlocked: 'conquistas desbloqueadas', errorLoadingAchievements: 'Erro ao carregar conquistas',
@@ -6817,6 +6828,7 @@ async function loadLeaderboard() {
         <a href="${PUBLIC_PROFILE_BASE}/${encodeURIComponent(r.username)}" target="_blank" rel="noopener"
           style="font-size:13.5px;font-weight:600;color:inherit;text-decoration:none;flex:1;min-width:0;
           overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.username)}</a>
+        ${r.title ? titleHtml(r.title, 9) : ''}
         <span style="font-size:11.5px;color:var(--text2);flex-shrink:0">${esc(t('levelLabel'))} ${r.level}</span>
         <span style="font-size:11.5px;color:var(--green);font-weight:600;flex-shrink:0;min-width:56px;text-align:right">${r.xp.toLocaleString()} XP</span>
       </div>`;
@@ -8168,6 +8180,20 @@ const ACHIEVEMENT_LABELS_PT = {
   streak_365: { name: 'Um Ano Seguido', description: 'Entre 365 dias seguidos' },
 };
 
+// Nombre del titulo en el idioma de la app. Recibe {id, name} tal como lo
+// devuelve el backend (name en español); la tabla traduce por id.
+function titleLabel(title) {
+  if (!title || !title.id) return '';
+  const table = currentLang === 'en' ? ACHIEVEMENT_LABELS_EN : currentLang === 'pt' ? ACHIEVEMENT_LABELS_PT : null;
+  return (table && table[title.id] && table[title.id].name) || title.name || '';
+}
+
+function titleHtml(title, size = 10) {
+  const label = titleLabel(title);
+  if (!label) return '';
+  return `<span class="user-title" style="font-size:${size}px">${esc(label)}</span>`;
+}
+
 function achievementInfo(a) {
   const table = currentLang === 'en' ? ACHIEVEMENT_LABELS_EN : currentLang === 'pt' ? ACHIEVEMENT_LABELS_PT : null;
   if (table && table[a.id]) {
@@ -8231,6 +8257,9 @@ function renderAchievementsPanel() {
         <div style="font-size:11px;color:var(--text2);margin-top:2px">${info.description}</div>
         <div style="font-size:10px;color:var(--text2);margin-top:4px">+${a.xp} XP · ${a.global_pct}% ${t('ofUsers')}</div>
       </div>
+      ${a.unlocked ? (d.selected_title === a.id
+        ? `<button onclick="selectCosmetic('title', null)" title="${esc(t('titleClear'))}" style="flex-shrink:0;font-size:10px;font-weight:700;padding:4px 9px;border-radius:6px;border:1px solid #E0B84C;background:rgba(224,184,76,.15);color:#E0B84C;cursor:pointer;white-space:nowrap"><i class="ti ti-check"></i> ${esc(t('titleCurrent'))}</button>`
+        : `<button onclick="selectCosmetic('title', '${a.id}')" style="flex-shrink:0;font-size:10px;padding:4px 9px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;white-space:nowrap">${esc(t('titleUse'))}</button>`) : ''}
     </div>`; };
 
   const categoriesHtml = Object.entries(byCategory).map(([cat, items]) => `
@@ -11580,6 +11609,7 @@ let userFont   = 'default';
 let userUnlockedFrames = ['none'];
 let userUnlockedFonts  = ['default'];
 let userTrophy = false;
+let userTitle = null;   // { id, name } del logro elegido como titulo, o null
 let userEmail  = '';
 
 let _currentAnnouncementId = null;
@@ -11785,6 +11815,7 @@ async function loadPremiumStatus() {
     userUnlockedFrames = d.unlocked_frames || ['none'];
     userUnlockedFonts  = d.unlocked_fonts || ['default'];
     userTrophy = d.trophy || false;
+    userTitle  = d.title || null;
     userEmail  = d.email || '';
     if (d.language === 'en' || d.language === 'es' || d.language === 'pt') {
       currentLang = d.language;
@@ -12344,6 +12375,11 @@ function applyPremiumUI() {
   if (headerUpgradeBtn) headerUpgradeBtn.style.display = isPremium ? 'none' : 'inline-block';
   const premiumMenuBtn = document.getElementById('mobile-premium-menu-btn');
   if (premiumMenuBtn) premiumMenuBtn.style.display = isPremium ? 'none' : 'flex';
+  const titleLine = document.getElementById('profile-title-line');
+  if (titleLine) {
+    titleLine.innerHTML = titleHtml(userTitle, 9.5);
+    titleLine.style.display = userTitle ? '' : 'none';
+  }
   const homeBadge = document.getElementById('user-level-badge');
   if (homeBadge) homeBadge.innerHTML = levelBadgeHtml({ level: userLevel, badge_tier: userBadgeTier, trophy: userTrophy }, 13);
   const cfgBadge = document.getElementById('cfg-level-badge');
@@ -12432,7 +12468,7 @@ function renderCosmeticPickers() {
 
 async function selectCosmetic(kind, id) {
   try {
-    const body = kind === 'frame' ? { frame: id } : { font: id };
+    const body = kind === 'frame' ? { frame: id } : kind === 'title' ? { title: id } : { font: id };
     const res = await fetch(`${apiBase()}/api/v1/user/cosmetics`, {
       method: 'PATCH',
       headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
@@ -12440,7 +12476,15 @@ async function selectCosmetic(kind, id) {
     });
     const d = await res.json();
     if (!res.ok) throw new Error(d.detail || 'Error');
-    if (kind === 'frame') userFrame = id; else userFont = id;
+    if (kind === 'frame') userFrame = id;
+    else if (kind === 'title') {
+      const a = (_achievementsData && _achievementsData.achievements || []).find(x => x.id === id);
+      userTitle = id && a ? { id, name: a.name } : null;
+      if (_achievementsData) _achievementsData.selected_title = id;
+      renderAchievementsPanel();
+      showToast(id ? t('titleSet') : t('titleCleared'));
+    }
+    else userFont = id;
     applyPremiumUI();
   } catch (e) {
     showToast(e.message || 'No se pudo actualizar', true);
@@ -14096,7 +14140,15 @@ async function onLoginSuccess() {
   _initGameListSwipe();
 
   const profilePanel = document.getElementById('profile-panel');
+  // El panel es una columna: la fila de siempre (avatar, nombre, nivel,
+  // plan, compartir) arriba, y el titulo -- si hay -- en una fila propia de
+  // ancho completo. Adentro de la columna de info no entraba: mide ~50px
+  // reales y "Coleccionista PlayStation" se partia en 3 lineas.
+  profilePanel.style.flexDirection = 'column';
+  profilePanel.style.alignItems = 'stretch';
+  profilePanel.style.gap = '4px';
   profilePanel.innerHTML = `
+    <div class="profile-panel-row">
     <div style="cursor:pointer;flex-shrink:0" onclick="openConfigPanel().then(()=>switchConfigTab('avatar'))" data-i18n-title="customizeAvatar" title="Personalizar avatar">
       <div id="avatar-thumb-box" style="width:68px;height:68px;position:relative"></div>
     </div>
@@ -14124,6 +14176,8 @@ async function onLoginSuccess() {
       <i class="ti ti-share"></i>
     </button>
     <div id="plat-status-row" style="display:flex;gap:6px"></div>
+    </div>
+    <div id="profile-title-line" style="display:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-left:2px"></div>
   `;
   applyI18n();
 
