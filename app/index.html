@@ -2851,7 +2851,7 @@ const I18N = {
     wowEyebrow: 'Tu biblioteca', wowGames: 'juegos', wowHours: 'horas', wowShare: 'Compartir',
     wowLife: 'Son {days} días de tu vida jugando',
     streakDaysShort: 'días de racha', shareLibrary: 'Compartir mi biblioteca', shareLibraryShort: 'Compartir',
-    reviewPromptTitle: '¿Qué te pareció?', reviewPromptCta: 'Escribir reseña', reviewPromptLater: 'Ahora no',
+    reviewPromptTitle: '¿Qué te pareció?', reviewPromptTitleDropped: '¿Por qué lo dejaste?', reviewPromptCta: 'Escribir reseña', reviewPromptLater: 'Ahora no',
     notifPrefsLabel: 'Notificaciones', notifPrefsNews: 'Novedades (lanzamientos, juegos gratis, lo más jugado)',
     notifPrefsStreak: 'Recordatorio de racha', notifPrefsHint: 'Los avisos sobre vos (te siguieron, tu resumen semanal) siempre llegan.',
     tourTitleSteam: 'Sincronizá tus plataformas', tourBodySteam: 'Tocá acá para conectar Steam, PlayStation, GOG, Xbox o Epic Games y traer tu biblioteca automáticamente.',
@@ -3134,7 +3134,7 @@ const I18N = {
     wowEyebrow: 'Your library', wowGames: 'games', wowHours: 'hours', wowShare: 'Share',
     wowLife: "That's {days} days of your life playing",
     streakDaysShort: 'day streak', shareLibrary: 'Share my library', shareLibraryShort: 'Share',
-    reviewPromptTitle: 'What did you think?', reviewPromptCta: 'Write a review', reviewPromptLater: 'Not now',
+    reviewPromptTitle: 'What did you think?', reviewPromptTitleDropped: 'Why did you drop it?', reviewPromptCta: 'Write a review', reviewPromptLater: 'Not now',
     notifPrefsLabel: 'Notifications', notifPrefsNews: 'News (releases, free games, most played)',
     notifPrefsStreak: 'Streak reminder', notifPrefsHint: 'Notices about you (new followers, your weekly summary) always arrive.',
     tourTitleSteam: 'Sync your platforms', tourBodySteam: 'Tap here to connect Steam, PlayStation, GOG, Xbox or Epic Games and bring in your library automatically.',
@@ -3417,7 +3417,7 @@ const I18N = {
     wowEyebrow: 'Sua biblioteca', wowGames: 'jogos', wowHours: 'horas', wowShare: 'Compartilhar',
     wowLife: 'São {days} dias da sua vida jogando',
     streakDaysShort: 'dias de sequência', shareLibrary: 'Compartilhar minha biblioteca', shareLibraryShort: 'Compartilhar',
-    reviewPromptTitle: 'O que você achou?', reviewPromptCta: 'Escrever avaliação', reviewPromptLater: 'Agora não',
+    reviewPromptTitle: 'O que você achou?', reviewPromptTitleDropped: 'Por que você largou?', reviewPromptCta: 'Escrever avaliação', reviewPromptLater: 'Agora não',
     notifPrefsLabel: 'Notificações', notifPrefsNews: 'Novidades (lançamentos, jogos grátis, mais jogados)',
     notifPrefsStreak: 'Lembrete de sequência', notifPrefsHint: 'Avisos sobre você (novos seguidores, seu resumo semanal) sempre chegam.',
     tourTitleSteam: 'Sincronize suas plataformas', tourBodySteam: 'Toque aqui para conectar Steam, PlayStation, GOG, Xbox ou Epic Games e trazer sua biblioteca automaticamente.',
@@ -6591,7 +6591,9 @@ async function changeStatus(gameId, newStatus) {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
     loadGlobalStats();
-    if (newStatus === 'Completado') maybeAskForReview(gameId, g && g.name);
+    // Completar y abandonar son los dos momentos con algo para contar: en
+    // uno que te parecio, en el otro por que lo dejaste.
+    if (newStatus === 'Completado' || newStatus === 'Abandonado') maybeAskForReview(gameId, g && g.name, newStatus);
   } catch(e) {}
 }
 
@@ -6600,7 +6602,7 @@ async function changeStatus(gameId, newStatus) {
 // toda la vida de la app. Las reseñas son ademas el contenido que llena los
 // perfiles publicos, asi que este prompt alimenta el crecimiento organico.
 // Se ofrece, no se impone: un toast que se va solo, maximo uno por dia.
-function maybeAskForReview(gameId, gameName) {
+function maybeAskForReview(gameId, gameName, status) {
   try {
     const today = new Date().toISOString().slice(0, 10);
     if (localStorage.getItem('pl_review_prompt') === today) return;
@@ -6613,7 +6615,7 @@ function maybeAskForReview(gameId, gameName) {
     box-shadow:0 10px 32px rgba(0,0,0,.5);display:flex;align-items:center;gap:12px;max-width:min(460px,92vw)`;
   el.innerHTML = `
     <div style="flex:1;min-width:0">
-      <div style="font-size:13px;font-weight:600;margin-bottom:2px">${esc(t('reviewPromptTitle'))}</div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:2px">${esc(t(status === 'Abandonado' ? 'reviewPromptTitleDropped' : 'reviewPromptTitle'))}</div>
       <div style="font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(gameName || '')}</div>
     </div>
     <button id="review-prompt-no" style="background:none;border:none;color:var(--text2);font-size:12px;cursor:pointer">${esc(t('reviewPromptLater'))}</button>
@@ -7996,9 +7998,9 @@ const ACHIEVEMENT_LABELS_EN = {
   rate_25: { name: 'Veteran Critic', description: 'Rate 25 games' },
   rate_50: { name: 'Established Critic', description: 'Rate 50 games' },
   rate_100: { name: 'Legendary Critic', description: 'Rate 100 games' },
-  reviewer: { name: 'Reviewer', description: 'Rate a community game' },
-  reviewer_5: { name: 'Active Reviewer', description: 'Rate 5 community games' },
-  reviewer_10: { name: 'Expert Reviewer', description: 'Rate 10 community games' },
+  reviewer: { name: 'Rater', description: 'Rate a community game' },
+  reviewer_5: { name: 'Active Rater', description: 'Rate 5 community games' },
+  reviewer_10: { name: 'Expert Rater', description: 'Rate 10 community games' },
   first_friend: { name: 'Sociable', description: 'Add your first friend' },
   add_3_friends: { name: 'Close Circle', description: 'Add 3 friends' },
   add_5_friends: { name: 'Social Circle', description: 'Add 5 friends' },
@@ -8048,7 +8050,7 @@ const ACHIEVEMENT_LABELS_EN = {
   perfectionist_15: { name: 'Expert Perfectionist', description: 'Rate 15 games with 5 stars' },
   honest_critic_3: { name: 'Honest Critic', description: 'Rate 3 games with 1 star' },
   honest_critic_10: { name: 'Relentless Critic', description: 'Rate 10 games with 1 star' },
-  reviewer_25: { name: 'Legendary Reviewer', description: 'Rate 25 community games' },
+  reviewer_25: { name: 'Legendary Rater', description: 'Rate 25 community games' },
   night_owl: { name: 'Night Owl', description: 'Log a session started between midnight and 5am' },
   night_owl_5: { name: 'Nocturnal Bird', description: 'Log 5 nighttime sessions' },
   early_bird: { name: 'Early Bird', description: 'Log a session started between 5am and 8am' },
