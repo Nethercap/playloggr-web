@@ -76,8 +76,13 @@
   .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; }
   .logo { display: flex; align-items: center; gap: 8px; font-family: var(--font-retro); font-size: 12px; letter-spacing: 0.5px; }
   .logo .dot { width: 10px; height: 10px; border-radius: 3px; background: var(--green); }
-  .nav-links { display: flex; align-items: center; gap: 28px; }
-  .nav-links a:not(.btn-primary) { font-size: 14px; color: var(--text2); transition: color 0.15s; }
+  /* nowrap + gap mas chico: al sumar "Actividad" el nav paso de largo y
+     los items se partian en dos lineas ("Descargar / app"), encima el logo
+     quedaba pisado por el primer link. */
+  .nav-links { display: flex; align-items: center; gap: 20px; }
+  .logo { flex-shrink: 0; }
+  .nav-links a:not(.btn-primary) { font-size: 14px; color: var(--text2); transition: color 0.15s; white-space: nowrap; }
+  .nav-links .btn-primary { white-space: nowrap; }
   .nav-links a:not(.btn-primary):hover { color: var(--text); }
   .btn-primary {
     background: var(--green); color: #fff; padding: 9px 18px; border-radius: 8px;
@@ -315,7 +320,6 @@
     <div class="logo"><img src="/favicon.svg" alt="Playloggr" width="28" height="28" style="border-radius:7px" /> Playloggr</div>
     <button class="nav-toggle" id="nav-toggle" aria-label="Menu"><i class="ti ti-menu-2"></i></button>
     <div class="nav-links" id="nav-links">
-      <a href="#que-es">What is Playloggr?</a>
       <a href="#funcionalidades">Features</a>
       <a href="#contacto">Contact</a>
       <a href="/actividad">Activity</a>
