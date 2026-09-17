@@ -1001,7 +1001,7 @@
   <button id="mobile-epic-menu-btn" onclick="toggleHeaderMoreMenu();toggleConnectorMenu('epic')" class="mobile-sidebar-item"><img src="https://cdn.simpleicons.org/epicgames/888887"> Epic</button>
 
   <div class="mobile-sidebar-group" data-i18n="menuProgress">Mi progreso</div>
-  <button onclick="toggleHeaderMoreMenu();openStreakPanel()" class="mobile-sidebar-item"><img src="streak_avatars/bonfire.png" style="width:18px;height:18px;object-fit:contain" onerror="this.style.display='none'"> <span data-i18n="streak">Racha</span></button>
+  <button onclick="toggleHeaderMoreMenu();openStreakPanel()" class="mobile-sidebar-item"><i class="ti ti-flame" style="color:#EF9F27"></i> <span data-i18n="streak">Racha</span></button>
   <button onclick="openAchievementsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-trophy" data-cp-icon="logros"></i> <span data-i18n="achievements">Logros</span></button>
   <button onclick="toggleHeaderMoreMenu();openConfigPanel().then(()=>switchConfigTab('avatar'))" class="mobile-sidebar-item"><i class="ti ti-user-star"></i> <span data-i18n="levelAndAvatar">Nivel y avatar</span></button>
   <button onclick="openListsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-folder" data-cp-icon="carpetas"></i> <span data-i18n="folders">Listas</span></button>
@@ -8134,11 +8134,14 @@ function renderProfileStreakChip() {
   if (!el) return;
   const days = (streakState && streakState.streak_days) || 0;
   if (!days) { el.innerHTML = ''; return; }
+  // Icono vectorial y no bonfire.png: ese PNG necesita un filtro CSS para
+  // verse naranja (ver renderStreakModal) y a 11px quedaba invisible, dejando
+  // un numero suelto sin contexto. El ti-flame es el mismo que ya usa la
+  // notificacion de racha en NOTIF_TYPE_META.
   el.innerHTML = `<button onclick="openStreakPanel()" data-i18n-title="streak" title="Racha"
-    style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:#EF9F27;
-    background:rgba(239,159,39,.14);border:none;padding:2px 8px;border-radius:20px;cursor:pointer;line-height:1.6">
-    <img src="streak_avatars/bonfire.png" style="width:11px;height:11px;object-fit:contain" onerror="this.style.display='none'">
-    ${days}</button>`;
+    style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:#EF9F27;
+    background:rgba(239,159,39,.14);border:none;padding:2px 7px;border-radius:6px;cursor:pointer">
+    <i class="ti ti-flame" style="font-size:11px"></i>${days}</button>`;
 }
 
 async function openStreakPanel() {
@@ -11859,11 +11862,12 @@ function _renderShareCardBadges() {
      <span style="font-family:'Press Start 2P',monospace;color:${tierColor};font-size:11px">${userLevel}</span>${trophy}`,
     'var(--text)');
 
+  // Sin icono a proposito: el texto ya dice "N dias de racha", bonfire.png es
+  // negro (necesita un filtro CSS que html2canvas no exporta) y una fuente de
+  // iconos puede salir como cuadrito en la imagen generada.
   const days = (streakState && streakState.streak_days) || 0;
-  const streak = days > 0 ? _shareChip(
-    `<img src="streak_avatars/bonfire.png" style="width:14px;height:14px;object-fit:contain" onerror="this.style.display='none'">
-     ${days} ${esc(t('streakDaysShort'))}`,
-    '#EF9F27') : '';
+  const streak = days > 0
+    ? _shareChip(`${days} ${esc(t('streakDaysShort'))}`, '#EF9F27') : '';
 
   box.innerHTML = level + streak;
 }
@@ -13903,12 +13907,18 @@ async function onLoginSuccess() {
       <div class="profile-panel-name">
         <span id="user-name-span">${authUser}</span>
       </div>
-      <div class="profile-panel-level" style="font-size:11px;color:var(--text2);display:flex;align-items:center;gap:3px;flex-wrap:wrap">
+      <div class="profile-panel-level" style="font-size:11px;color:var(--text2);display:flex;align-items:center;gap:3px">
         <span id="user-level-badge"></span>
-        <span id="profile-streak-chip"></span>
       </div>
       <div class="profile-panel-sub">
-        <span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px"></span>
+        <!-- Plan y racha van juntos y sin wrap entre ellos: son dos pildoras
+             chicas que entran en una linea. El boton de "Hacerse Premium"
+             queda afuera del span para que siga bajando solo -- en el panel de
+             220px no entra al lado y se cortaba contra el borde. -->
+        <span style="display:inline-flex;align-items:center;gap:6px;flex-wrap:nowrap">
+          <span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px"></span>
+          <span id="profile-streak-chip"></span>
+        </span>
         <button id="header-upgrade-btn" onclick="startPaddleCheckout()" style="display:none;font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer">✨ Hacerse Premium</button>
       </div>
     </div>
