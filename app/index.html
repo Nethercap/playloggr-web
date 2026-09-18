@@ -3468,6 +3468,7 @@ const I18N = {
 function t(key) { return (I18N[currentLang] && I18N[currentLang][key]) || I18N.es[key] || key; }
 
 function applyI18n() {
+  loadAchievementLabels();   // async, no bloquea; en español no hace nada
   document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
   document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.getAttribute('data-i18n-html')); });
   document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.getAttribute('data-i18n-title')); });
@@ -7946,307 +7947,46 @@ function categoryLabel(c) {
   return c;
 }
 
-const ACHIEVEMENT_LABELS_EN = {
-  first_session: { name: 'First Session', description: 'Log your first play session' },
-  session_3h: { name: 'Marathon', description: 'Log a session of 3 hours or more' },
-  session_5h: { name: 'Epic Session', description: 'Log a session of 5 hours or more' },
-  sessions_10: { name: 'Steady Player', description: 'Log 10 play sessions' },
-  sessions_50: { name: 'Regular Player', description: 'Log 50 play sessions' },
-  sessions_100: { name: 'Hardcore Player', description: 'Log 100 play sessions' },
-  sessions_5_days: { name: 'Gaming Routine', description: 'Play on 5 different days' },
-  sessions_15_days: { name: 'Solid Habit', description: 'Play on 15 different days' },
-  complete_1: { name: 'First Win', description: 'Complete 1 game' },
-  complete_5: { name: 'Streaker', description: 'Complete 5 games' },
-  complete_10: { name: 'Finisher', description: 'Complete 10 games' },
-  complete_25: { name: 'Backlog Crusher', description: 'Complete 25 games' },
-  complete_50: { name: 'Ending Hunter', description: 'Complete 50 games' },
-  hours_10: { name: 'First Hours', description: 'Log 10 hours played' },
-  hours_50: { name: 'Dedicated Player', description: 'Log 50 hours played' },
-  hours_100: { name: 'Committed Player', description: 'Log 100 hours played' },
-  hours_200: { name: 'Tireless Player', description: 'Log 200 hours played' },
-  hours_350: { name: 'Marathoner', description: 'Log 350 hours played' },
-  hours_500: { name: 'Legend', description: 'Log 500 hours played' },
-  multi_platform_session: { name: 'Multiplatform', description: 'Log sessions on 2 different platforms' },
-  first_game: { name: 'Rookie Collector', description: 'Add your first game' },
-  add_5_games: { name: 'Collector', description: 'Add 5 games to your library' },
-  add_10_games: { name: 'Active Collector', description: 'Add 10 games to your library' },
-  add_20_games: { name: 'Librarian', description: 'Add 20 games to your library' },
-  add_50_games: { name: 'Grand Librarian', description: 'Add 50 games to your library' },
-  library_100: { name: 'Full Library', description: 'Reach 100 games in your library' },
-  library_150: { name: 'Premium Library', description: 'Reach 150 games in your library' },
-  library_250: { name: 'Great Collector', description: 'Reach 250 games in your library' },
-  library_400: { name: 'Living Archive', description: 'Reach 400 games in your library' },
-  library_600: { name: 'Personal Museum', description: 'Reach 600 games in your library' },
-  wishlist_5: { name: 'Wish List', description: 'Add 5 games to your wishlist' },
-  wishlist_10: { name: 'Dreamer', description: 'Add 10 games to your wishlist' },
-  wishlist_25: { name: 'Premium Wishlist', description: 'Add 25 games to your wishlist' },
-  wishlist_50: { name: 'Dream Collector', description: 'Add 50 games to your wishlist' },
-  wishlist_100: { name: 'Infinite Wishlist', description: 'Add 100 games to your wishlist' },
-  hide_1: { name: 'Minimalist', description: 'Hide 1 game' },
-  hide_5: { name: 'Curator', description: 'Hide 5 games' },
-  hide_10: { name: 'Expert Curator', description: 'Hide 10 games' },
-  delete_1: { name: 'Eraser', description: 'Delete 1 game' },
-  delete_5: { name: 'Deep Clean', description: 'Delete 5 games' },
-  folder_creator: { name: 'Organizer', description: 'Create 1 folder' },
-  folders_3: { name: 'Active Organizer', description: 'Create 3 folders' },
-  folders_5: { name: 'Archivist', description: 'Create 5 folders' },
-  folders_10: { name: 'Expert Archivist', description: 'Create 10 folders' },
-  folders_20: { name: 'Master Archivist', description: 'Create 20 folders' },
-  platforms_3: { name: 'Total Multiplatform', description: 'Have games on at least 3 different platforms' },
-  covers_1: { name: 'Cover Designer', description: 'Customize the cover of 1 game' },
-  covers_10: { name: 'Visual Curator', description: 'Customize the cover of 10 games' },
-  rate_1: { name: 'Rookie Critic', description: 'Rate 1 game' },
-  rate_5: { name: 'Active Critic', description: 'Rate 5 games' },
-  rate_10: { name: 'Expert Critic', description: 'Rate 10 games' },
-  rate_25: { name: 'Veteran Critic', description: 'Rate 25 games' },
-  rate_50: { name: 'Established Critic', description: 'Rate 50 games' },
-  rate_100: { name: 'Legendary Critic', description: 'Rate 100 games' },
-  reviewer: { name: 'Rater', description: 'Rate a community game' },
-  reviewer_5: { name: 'Active Rater', description: 'Rate 5 community games' },
-  reviewer_10: { name: 'Expert Rater', description: 'Rate 10 community games' },
-  first_friend: { name: 'Sociable', description: 'Add your first friend' },
-  add_3_friends: { name: 'Close Circle', description: 'Add 3 friends' },
-  add_5_friends: { name: 'Social Circle', description: 'Add 5 friends' },
-  add_10_friends: { name: 'Social Network', description: 'Add 10 friends' },
-  add_20_friends: { name: 'Influencer', description: 'Add 20 friends' },
-  popular: { name: 'Popular', description: 'Receive 5 friend requests' },
-  popular_10: { name: 'Very Popular', description: 'Receive 10 friend requests' },
-  steam_sync: { name: 'Connected', description: 'Sync your Steam library' },
-  wishlist_sync: { name: 'Wishlist Connected', description: 'Sync your Steam wishlist' },
-  steam_full_sync: { name: 'Full Sync', description: 'Sync your Steam library and wishlist' },
-  restaurador: { name: 'Restorer', description: 'Restore deleted Steam games' },
-  steam_100_games: { name: 'Steam Library', description: 'Sync 100 or more Steam games' },
-  steam_500_hours: { name: 'Steam Veteran', description: 'Log 500 hours played on Steam games' },
-  gog_sync: { name: 'Connected (GOG)', description: 'Sync your GOG library' },
-  gog_100_games: { name: 'GOG Library', description: 'Sync 100 or more GOG games' },
-  gog_500_hours: { name: 'GOG Veteran', description: 'Log 500 hours played on GOG games' },
-  xbox_sync: { name: 'Connected (Xbox)', description: 'Sync your Xbox library' },
-  xbox_100_games: { name: 'Xbox Library', description: 'Sync 100 or more Xbox games' },
-  epic_sync: { name: 'Connected (Epic)', description: 'Sync your Epic library' },
-  epic_100_games: { name: 'Epic Library', description: 'Sync 100 or more Epic games' },
-  community_10: { name: 'Community Contribution', description: 'Add 10 new games to the community' },
-  community_25: { name: 'Active Contributor', description: 'Add 25 new games to the community' },
-  community_50: { name: 'Community Pillar', description: 'Add 50 new games to the community' },
-  avatar_first: { name: 'In Your Image', description: 'Customize your avatar for the first time' },
-  full_outfit: { name: 'Fully Dressed', description: 'Equip every avatar slot at once' },
-  veteran_6mo: { name: 'Veteran', description: 'Have an active account for 6 months' },
-  veteran_1y: { name: 'Veteran+', description: 'Have an active account for 1 year' },
-  veteran_2y: { name: 'Founder', description: 'Have an active account for 2 years' },
-  veteran_3y: { name: 'Pioneer', description: 'Have an active account for 3 years' },
-  profile_public: { name: 'In the Spotlight', description: 'Make your profile public' },
-  playstation_5: { name: 'PlayStation Player', description: 'Have 5 PlayStation games' },
-  playstation_15: { name: 'PlayStation Fan', description: 'Have 15 PlayStation games' },
-  playstation_25: { name: 'PlayStation Collector', description: 'Have 25 PlayStation games' },
-  xbox_5: { name: 'Xbox Player', description: 'Have 5 Xbox games' },
-  xbox_15: { name: 'Xbox Fan', description: 'Have 15 Xbox games' },
-  xbox_25: { name: 'Xbox Collector', description: 'Have 25 Xbox games' },
-  nintendo_5: { name: 'Nintendo Player', description: 'Have 5 Nintendo games' },
-  nintendo_15: { name: 'Nintendo Fan', description: 'Have 15 Nintendo games' },
-  nintendo_25: { name: 'Nintendo Collector', description: 'Have 25 Nintendo games' },
-  pc_5: { name: 'PC Player', description: 'Have 5 PC games' },
-  pc_15: { name: 'PC Fan', description: 'Have 15 PC games' },
-  pc_25: { name: 'PC Collector', description: 'Have 25 PC games' },
-  retro_3: { name: 'Retrogamer', description: 'Have 3 retro games (classic consoles)' },
-  retro_10: { name: 'Expert Retrogamer', description: 'Have 10 retro games (classic consoles)' },
-  vr_gamer: { name: 'Virtual Reality', description: 'Have 1 Meta Quest game' },
-  perfectionist_5: { name: 'Perfectionist', description: 'Rate 5 games with 5 stars' },
-  perfectionist_15: { name: 'Expert Perfectionist', description: 'Rate 15 games with 5 stars' },
-  honest_critic_3: { name: 'Honest Critic', description: 'Rate 3 games with 1 star' },
-  honest_critic_10: { name: 'Relentless Critic', description: 'Rate 10 games with 1 star' },
-  reviewer_25: { name: 'Legendary Rater', description: 'Rate 25 community games' },
-  night_owl: { name: 'Night Owl', description: 'Log a session started between midnight and 5am' },
-  night_owl_5: { name: 'Nocturnal Bird', description: 'Log 5 nighttime sessions' },
-  early_bird: { name: 'Early Bird', description: 'Log a session started between 5am and 8am' },
-  weekend_warrior: { name: 'Weekend Warrior', description: 'Log a session on the weekend' },
-  weekend_warrior_5: { name: 'Full Weekend', description: 'Log 5 weekend sessions' },
-  dedicated_50h: { name: 'Faithful to a Game', description: 'Log 50 hours on a single game' },
-  dedicated_100h: { name: 'Devoted to a Game', description: 'Log 100 hours on a single game' },
-  dedicated_200h: { name: 'Obsessed', description: 'Log 200 hours on a single game' },
-  multi_platform_session_3: { name: 'Digital Nomad', description: 'Log sessions on 3 different platforms' },
-  complete_100: { name: 'Backlog Master', description: 'Complete 100 games' },
-  hours_750: { name: 'Total Dedication', description: 'Log 750 hours played' },
-  hours_1000: { name: 'A Thousand Hours', description: 'Log 1000 hours played' },
-  sessions_250: { name: 'Session After Session', description: 'Log 250 play sessions' },
-  library_800: { name: 'Supreme Collector', description: 'Reach 800 games in your library' },
-  wishlist_150: { name: 'Infinite Wishes', description: 'Add 150 games to your wishlist' },
-  folders_15: { name: 'Dedicated Archivist', description: 'Create 15 lists' },
-  big_folder: { name: 'Big List', description: 'Have a list with 10 or more games' },
-  big_folder_25: { name: 'Huge List', description: 'Have a list with 25 or more games' },
-  organizer_50: { name: 'Organizer', description: 'Organize 50 games into lists' },
-  organizer_100: { name: 'Great Organizer', description: 'Organize 100 games into lists' },
-  add_15_friends: { name: 'Growing Community', description: 'Add 15 friends' },
-  popular_20: { name: 'Celebrity', description: 'Receive 20 friend requests' },
-  steam_wishlist_10: { name: 'Steam Wishlist', description: 'Have 10 games synced in your Steam wishlist' },
-  steam_wishlist_25: { name: 'Big Steam Wishlist', description: 'Have 25 games synced in your Steam wishlist' },
-  steam_3000_hours: { name: 'Steam Legend', description: 'Log 3000 hours played on Steam' },
-  community_75: { name: 'Outstanding Contributor', description: 'Add 75 new games to the community' },
-  community_100: { name: 'Founding Pillar', description: 'Add 100 new games to the community' },
-  review_1: { name: 'First Review', description: 'Write your first review' },
-  review_10: { name: 'Reviewer', description: 'Write 10 reviews' },
-  review_20: { name: 'Active Reviewer', description: 'Write 20 reviews' },
-  review_50: { name: 'Expert Reviewer', description: 'Write 50 reviews' },
-  review_100: { name: 'Legendary Reviewer', description: 'Write 100 reviews' },
-  streak_7:   { name: 'One Week Streak', description: 'Log in 7 days in a row' },
-  streak_14:  { name: 'Two Week Streak', description: 'Log in 14 days in a row' },
-  streak_30:  { name: 'One Month Streak', description: 'Log in 30 days in a row' },
-  streak_90:  { name: 'Three Month Streak', description: 'Log in 90 days in a row' },
-  streak_180: { name: 'Six Month Streak', description: 'Log in 180 days in a row' },
-  streak_365: { name: 'One Year Streak', description: 'Log in 365 days in a row' },
-};
-
-const ACHIEVEMENT_LABELS_PT = {
-  first_session: { name: 'Primeira Sessão', description: 'Registre sua primeira sessão de jogo' },
-  session_3h: { name: 'Maratona', description: 'Registre uma sessão de 3 horas ou mais' },
-  session_5h: { name: 'Sessão Épica', description: 'Registre uma sessão de 5 horas ou mais' },
-  sessions_10: { name: 'Jogador Constante', description: 'Registre 10 sessões de jogo' },
-  sessions_50: { name: 'Jogador Regular', description: 'Registre 50 sessões de jogo' },
-  sessions_100: { name: 'Jogador Hardcore', description: 'Registre 100 sessões de jogo' },
-  sessions_5_days: { name: 'Rotina Gamer', description: 'Jogue em 5 dias diferentes' },
-  sessions_15_days: { name: 'Hábito Sólido', description: 'Jogue em 15 dias diferentes' },
-  complete_1: { name: 'Primeira Vitória', description: 'Complete 1 jogo' },
-  complete_5: { name: 'Sequência', description: 'Complete 5 jogos' },
-  complete_10: { name: 'Finalizador', description: 'Complete 10 jogos' },
-  complete_25: { name: 'Destruidor de Backlog', description: 'Complete 25 jogos' },
-  complete_50: { name: 'Caçador de Finais', description: 'Complete 50 jogos' },
-  hours_10: { name: 'Primeiras Horas', description: 'Registre 10 horas jogadas' },
-  hours_50: { name: 'Jogador Dedicado', description: 'Registre 50 horas jogadas' },
-  hours_100: { name: 'Jogador Comprometido', description: 'Registre 100 horas jogadas' },
-  hours_200: { name: 'Jogador Incansável', description: 'Registre 200 horas jogadas' },
-  hours_350: { name: 'Maratonista', description: 'Registre 350 horas jogadas' },
-  hours_500: { name: 'Lenda', description: 'Registre 500 horas jogadas' },
-  multi_platform_session: { name: 'Multiplataforma', description: 'Registre sessões em 2 plataformas diferentes' },
-  first_game: { name: 'Colecionador Iniciante', description: 'Adicione seu primeiro jogo' },
-  add_5_games: { name: 'Colecionador', description: 'Adicione 5 jogos à sua biblioteca' },
-  add_10_games: { name: 'Colecionador Ativo', description: 'Adicione 10 jogos à sua biblioteca' },
-  add_20_games: { name: 'Bibliotecário', description: 'Adicione 20 jogos à sua biblioteca' },
-  add_50_games: { name: 'Grande Bibliotecário', description: 'Adicione 50 jogos à sua biblioteca' },
-  library_100: { name: 'Biblioteca Completa', description: 'Alcance 100 jogos na sua biblioteca' },
-  library_150: { name: 'Biblioteca Premium', description: 'Alcance 150 jogos na sua biblioteca' },
-  library_250: { name: 'Grande Colecionador', description: 'Alcance 250 jogos na sua biblioteca' },
-  library_400: { name: 'Arquivo Vivo', description: 'Alcance 400 jogos na sua biblioteca' },
-  library_600: { name: 'Museu Pessoal', description: 'Alcance 600 jogos na sua biblioteca' },
-  wishlist_5: { name: 'Lista de Desejos', description: 'Adicione 5 jogos aos seus desejados' },
-  wishlist_10: { name: 'Sonhador', description: 'Adicione 10 jogos aos seus desejados' },
-  wishlist_25: { name: 'Desejados Premium', description: 'Adicione 25 jogos aos seus desejados' },
-  wishlist_50: { name: 'Colecionador de Sonhos', description: 'Adicione 50 jogos aos seus desejados' },
-  wishlist_100: { name: 'Desejados Infinitos', description: 'Adicione 100 jogos aos seus desejados' },
-  hide_1: { name: 'Minimalista', description: 'Oculte 1 jogo' },
-  hide_5: { name: 'Curador', description: 'Oculte 5 jogos' },
-  hide_10: { name: 'Curador Especialista', description: 'Oculte 10 jogos' },
-  delete_1: { name: 'Apagador', description: 'Exclua 1 jogo' },
-  delete_5: { name: 'Faxina Geral', description: 'Exclua 5 jogos' },
-  folder_creator: { name: 'Organizador', description: 'Crie 1 pasta' },
-  folders_3: { name: 'Organizador Ativo', description: 'Crie 3 pastas' },
-  folders_5: { name: 'Arquivista', description: 'Crie 5 pastas' },
-  folders_10: { name: 'Arquivista Especialista', description: 'Crie 10 pastas' },
-  folders_20: { name: 'Mestre Arquivista', description: 'Crie 20 pastas' },
-  platforms_3: { name: 'Multiplataforma Total', description: 'Tenha jogos em pelo menos 3 plataformas diferentes' },
-  covers_1: { name: 'Designer de Capas', description: 'Personalize a capa de 1 jogo' },
-  covers_10: { name: 'Curador Visual', description: 'Personalize a capa de 10 jogos' },
-  rate_1: { name: 'Crítico Iniciante', description: 'Avalie 1 jogo' },
-  rate_5: { name: 'Crítico Ativo', description: 'Avalie 5 jogos' },
-  rate_10: { name: 'Crítico Especialista', description: 'Avalie 10 jogos' },
-  rate_25: { name: 'Crítico Veterano', description: 'Avalie 25 jogos' },
-  rate_50: { name: 'Crítico Consagrado', description: 'Avalie 50 jogos' },
-  rate_100: { name: 'Crítico Lendário', description: 'Avalie 100 jogos' },
-  reviewer: { name: 'Avaliador', description: 'Avalie um jogo da comunidade' },
-  reviewer_5: { name: 'Avaliador Ativo', description: 'Avalie 5 jogos da comunidade' },
-  reviewer_10: { name: 'Avaliador Especialista', description: 'Avalie 10 jogos da comunidade' },
-  first_friend: { name: 'Sociável', description: 'Adicione seu primeiro amigo' },
-  add_3_friends: { name: 'Círculo Próximo', description: 'Adicione 3 amigos' },
-  add_5_friends: { name: 'Círculo Social', description: 'Adicione 5 amigos' },
-  add_10_friends: { name: 'Rede Social', description: 'Adicione 10 amigos' },
-  add_20_friends: { name: 'Influenciador', description: 'Adicione 20 amigos' },
-  popular: { name: 'Popular', description: 'Receba 5 solicitações de amizade' },
-  popular_10: { name: 'Muito Popular', description: 'Receba 10 solicitações de amizade' },
-  steam_sync: { name: 'Conectado', description: 'Sincronize sua biblioteca da Steam' },
-  wishlist_sync: { name: 'Desejados Conectados', description: 'Sincronize seus desejados da Steam' },
-  steam_full_sync: { name: 'Sincronização Completa', description: 'Sincronize sua biblioteca e desejados da Steam' },
-  restaurador: { name: 'Restaurador', description: 'Restaure jogos apagados da Steam' },
-  steam_100_games: { name: 'Biblioteca Steam', description: 'Sincronize 100 jogos ou mais da Steam' },
-  steam_500_hours: { name: 'Veterano da Steam', description: 'Registre 500 horas jogadas em jogos da Steam' },
-  gog_sync: { name: 'Conectado (GOG)', description: 'Sincronize sua biblioteca da GOG' },
-  gog_100_games: { name: 'Biblioteca GOG', description: 'Sincronize 100 jogos ou mais da GOG' },
-  gog_500_hours: { name: 'Veterano da GOG', description: 'Registre 500 horas jogadas em jogos da GOG' },
-  xbox_sync: { name: 'Conectado (Xbox)', description: 'Sincronize sua biblioteca do Xbox' },
-  xbox_100_games: { name: 'Biblioteca Xbox', description: 'Sincronize 100 jogos ou mais do Xbox' },
-  epic_sync: { name: 'Conectado (Epic)', description: 'Sincronize sua biblioteca da Epic' },
-  epic_100_games: { name: 'Biblioteca Epic', description: 'Sincronize 100 jogos ou mais da Epic' },
-  community_10: { name: 'Contribuição para a Comunidade', description: 'Adicione 10 novos jogos à comunidade' },
-  community_25: { name: 'Contribuidor Ativo', description: 'Adicione 25 novos jogos à comunidade' },
-  community_50: { name: 'Pilar da Comunidade', description: 'Adicione 50 novos jogos à comunidade' },
-  avatar_first: { name: 'À Sua Imagem', description: 'Personalize seu avatar pela primeira vez' },
-  full_outfit: { name: 'Totalmente Equipado', description: 'Equipe todos os espaços do avatar de uma vez' },
-  veteran_6mo: { name: 'Veterano', description: 'Tenha uma conta ativa há 6 meses' },
-  veteran_1y: { name: 'Veterano+', description: 'Tenha uma conta ativa há 1 ano' },
-  veteran_2y: { name: 'Fundador', description: 'Tenha uma conta ativa há 2 anos' },
-  veteran_3y: { name: 'Pioneiro', description: 'Tenha uma conta ativa há 3 anos' },
-  profile_public: { name: 'Em Destaque', description: 'Torne seu perfil público' },
-  playstation_5: { name: 'Jogador PlayStation', description: 'Tenha 5 jogos de PlayStation' },
-  playstation_15: { name: 'Fã de PlayStation', description: 'Tenha 15 jogos de PlayStation' },
-  playstation_25: { name: 'Colecionador PlayStation', description: 'Tenha 25 jogos de PlayStation' },
-  xbox_5: { name: 'Jogador Xbox', description: 'Tenha 5 jogos de Xbox' },
-  xbox_15: { name: 'Fã de Xbox', description: 'Tenha 15 jogos de Xbox' },
-  xbox_25: { name: 'Colecionador Xbox', description: 'Tenha 25 jogos de Xbox' },
-  nintendo_5: { name: 'Jogador Nintendo', description: 'Tenha 5 jogos de Nintendo' },
-  nintendo_15: { name: 'Fã de Nintendo', description: 'Tenha 15 jogos de Nintendo' },
-  nintendo_25: { name: 'Colecionador Nintendo', description: 'Tenha 25 jogos de Nintendo' },
-  pc_5: { name: 'Jogador PC', description: 'Tenha 5 jogos de PC' },
-  pc_15: { name: 'Fã de PC', description: 'Tenha 15 jogos de PC' },
-  pc_25: { name: 'Colecionador PC', description: 'Tenha 25 jogos de PC' },
-  retro_3: { name: 'Retrogamer', description: 'Tenha 3 jogos retrô (consoles clássicos)' },
-  retro_10: { name: 'Retrogamer Especialista', description: 'Tenha 10 jogos retrô (consoles clássicos)' },
-  vr_gamer: { name: 'Realidade Virtual', description: 'Tenha 1 jogo de Meta Quest' },
-  perfectionist_5: { name: 'Perfeccionista', description: 'Avalie 5 jogos com 5 estrelas' },
-  perfectionist_15: { name: 'Perfeccionista Especialista', description: 'Avalie 15 jogos com 5 estrelas' },
-  honest_critic_3: { name: 'Crítico Honesto', description: 'Avalie 3 jogos com 1 estrela' },
-  honest_critic_10: { name: 'Crítico Implacável', description: 'Avalie 10 jogos com 1 estrela' },
-  reviewer_25: { name: 'Avaliador Lendário', description: 'Avalie 25 jogos da comunidade' },
-  night_owl: { name: 'Coruja Noturna', description: 'Registre uma sessão iniciada entre meia-noite e 5h' },
-  night_owl_5: { name: 'Ave Noturna', description: 'Registre 5 sessões noturnas' },
-  early_bird: { name: 'Madrugador', description: 'Registre uma sessão iniciada entre 5h e 8h' },
-  weekend_warrior: { name: 'Guerreiro de Fim de Semana', description: 'Registre uma sessão no fim de semana' },
-  weekend_warrior_5: { name: 'Fim de Semana Completo', description: 'Registre 5 sessões de fim de semana' },
-  dedicated_50h: { name: 'Fiel a um Jogo', description: 'Registre 50 horas em um único jogo' },
-  dedicated_100h: { name: 'Devotado a um Jogo', description: 'Registre 100 horas em um único jogo' },
-  dedicated_200h: { name: 'Obcecado', description: 'Registre 200 horas em um único jogo' },
-  multi_platform_session_3: { name: 'Nômade Digital', description: 'Registre sessões em 3 plataformas diferentes' },
-  complete_100: { name: 'Mestre do Backlog', description: 'Complete 100 jogos' },
-  hours_750: { name: 'Dedicação Total', description: 'Registre 750 horas jogadas' },
-  hours_1000: { name: 'Mil Horas', description: 'Registre 1000 horas jogadas' },
-  sessions_250: { name: 'Sessão Após Sessão', description: 'Registre 250 sessões de jogo' },
-  library_800: { name: 'Colecionador Supremo', description: 'Alcance 800 jogos na sua biblioteca' },
-  wishlist_150: { name: 'Desejos Infinitos', description: 'Adicione 150 jogos aos seus desejados' },
-  folders_15: { name: 'Arquivista Dedicado', description: 'Crie 15 listas' },
-  big_folder: { name: 'Lista Grande', description: 'Tenha uma lista com 10 ou mais jogos' },
-  big_folder_25: { name: 'Lista Enorme', description: 'Tenha uma lista com 25 ou mais jogos' },
-  organizer_50: { name: 'Organizador', description: 'Organize 50 jogos em listas' },
-  organizer_100: { name: 'Grande Organizador', description: 'Organize 100 jogos em pastas' },
-  add_15_friends: { name: 'Comunidade Crescente', description: 'Adicione 15 amigos' },
-  popular_20: { name: 'Celebridade', description: 'Receba 20 solicitações de amizade' },
-  steam_wishlist_10: { name: 'Desejados Steam', description: 'Tenha 10 jogos sincronizados nos seus desejados da Steam' },
-  steam_wishlist_25: { name: 'Grandes Desejados Steam', description: 'Tenha 25 jogos sincronizados nos seus desejados da Steam' },
-  steam_3000_hours: { name: 'Lenda da Steam', description: 'Registre 3000 horas jogadas na Steam' },
-  community_75: { name: 'Contribuidor Excepcional', description: 'Adicione 75 novos jogos à comunidade' },
-  community_100: { name: 'Pilar Fundador', description: 'Adicione 100 novos jogos à comunidade' },
-  review_1: { name: 'Primeira Resenha', description: 'Escreva sua primeira resenha' },
-  review_10: { name: 'Resenhista', description: 'Escreva 10 resenhas' },
-  review_20: { name: 'Resenhista Ativo', description: 'Escreva 20 resenhas' },
-  review_50: { name: 'Resenhista Especialista', description: 'Escreva 50 resenhas' },
-  review_100: { name: 'Resenhista Lendário', description: 'Escreva 100 resenhas' },
-  streak_7:   { name: 'Uma Semana Seguida', description: 'Entre 7 dias seguidos' },
-  streak_14:  { name: 'Duas Semanas Seguidas', description: 'Entre 14 dias seguidos' },
-  streak_30:  { name: 'Um Mês Seguido', description: 'Entre 30 dias seguidos' },
-  streak_90:  { name: 'Três Meses Seguidos', description: 'Entre 90 dias seguidos' },
-  streak_180: { name: 'Seis Meses Seguidos', description: 'Entre 180 dias seguidos' },
-  streak_365: { name: 'Um Ano Seguido', description: 'Entre 365 dias seguidos' },
-};
+// Nombres/descripciones de logros traducidos: vienen del backend
+// (GET /achievements/labels?lang=), que es la unica copia — antes la web
+// tenia sus dos tablas (EN/PT, 145 entradas cada una) que habia que mantener
+// a mano a la par del backend y de la app. En español no hace falta nada:
+// el catalogo ya viene en español. Se cachea por idioma en localStorage;
+// hasta que llega, titleLabel/achievementInfo caen al nombre en español.
+var ACHIEVEMENT_LABELS = null;   // {id: {name, description}} del idioma actual, o null en español
+var _achievementLabelsLang = null;   // var: applyI18n corre antes de que el script llegue hasta aca
+async function loadAchievementLabels() {
+  const lang = currentLang;
+  if (lang === 'es') { ACHIEVEMENT_LABELS = null; _achievementLabelsLang = 'es'; return; }
+  if (_achievementLabelsLang === lang && ACHIEVEMENT_LABELS) return;
+  const key = `achLabels_${lang}`;
+  try {
+    const cached = JSON.parse(localStorage.getItem(key) || 'null');
+    if (cached && cached.labels && (Date.now() - (cached.at || 0)) < 86400000) {
+      ACHIEVEMENT_LABELS = cached.labels; _achievementLabelsLang = lang;
+      return;
+    }
+  } catch (e) {}
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/achievements/labels?lang=${lang}`);
+    if (!res.ok) return;
+    const d = await res.json();
+    if (d && d.labels) {
+      ACHIEVEMENT_LABELS = d.labels; _achievementLabelsLang = lang;
+      try { localStorage.setItem(key, JSON.stringify({ at: Date.now(), labels: d.labels })); } catch (e) {}
+      // Lo unico que puede haberse pintado antes de que llegaran: el titulo
+      // bajo el nombre. El resto (panel de logros, perfiles) se pide despues.
+      const titleLine = document.getElementById('profile-title-line');
+      if (titleLine && typeof userTitle !== 'undefined' && userTitle) titleLine.innerHTML = titleHtml(userTitle, 9.5);
+    }
+  } catch (e) {}
+}
 
 // Nombre del titulo en el idioma de la app. Recibe {id, name} tal como lo
 // devuelve el backend (name en español); la tabla traduce por id.
 function titleLabel(title) {
   if (!title || !title.id) return '';
-  const table = currentLang === 'en' ? ACHIEVEMENT_LABELS_EN : currentLang === 'pt' ? ACHIEVEMENT_LABELS_PT : null;
+  const table = currentLang === 'es' ? null : ACHIEVEMENT_LABELS;
   return (table && table[title.id] && table[title.id].name) || title.name || '';
 }
 
@@ -8257,7 +7997,7 @@ function titleHtml(title, size = 10) {
 }
 
 function achievementInfo(a) {
-  const table = currentLang === 'en' ? ACHIEVEMENT_LABELS_EN : currentLang === 'pt' ? ACHIEVEMENT_LABELS_PT : null;
+  const table = currentLang === 'es' ? null : ACHIEVEMENT_LABELS;
   if (table && table[a.id]) {
     return { name: table[a.id].name, description: table[a.id].description };
   }
@@ -8272,7 +8012,7 @@ async function openAchievementsPanel() {
   const el = document.getElementById('achievements-content');
   el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div>${t('loading')}</div>`;
   try {
-    const res = await fetch(`${apiBase()}/api/v1/achievements`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const res = await fetch(`${apiBase()}/api/v1/achievements?lang=${currentLang}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
     const d = await res.json();
     if (!res.ok) throw new Error(d.detail || 'Error');
     _achievementsData = d;
@@ -9777,7 +9517,7 @@ async function checkAchievements() {
       // desbloqueado aparezca ya, sin recargar.
       if (document.getElementById('cfg-frame-picker')) renderCosmeticPickers();
       if (d.newly_unlocked && d.newly_unlocked.length > 0) {
-        d.newly_unlocked.forEach(a => queueToast(`🏆 ${a.name}  +${a.xp} XP`));
+        d.newly_unlocked.forEach(a => queueToast(`🏆 ${achievementInfo(a).name}  +${a.xp} XP`));
       }
       // Solo mostramos "subiste de nivel" si ya habiamos chequeado el nivel
       // real al menos una vez en esta carga de pagina — el primer chequeo
