@@ -2765,6 +2765,7 @@ const I18N = {
     noAchievements: 'Este juego no tiene logros, o el perfil de Steam es privado', addedToRanking: 'Agregado al ranking',
     fromGamePlan: 'de tu Plan de juego', noFoldersYet: 'No está en ninguna lista', never: 'Nunca', errorLoading: 'Error al cargar',
     communityActivity: 'Actividad de la comunidad',
+    nowFollowing: 'Ahora seguís a {user}',
     leaderboardTab: 'Tabla global', yourPosition: 'Tu posición',
     titleUse: 'Usar como título', titleCurrent: 'Tu título', titleClear: 'Quitar título',
     profileBanner: 'Banner de perfil', profileBannerHint: 'Se ve en tu perfil público y cuando compartís el link.',
@@ -3048,6 +3049,7 @@ const I18N = {
     noAchievements: 'This game has no achievements, or the Steam profile is private', addedToRanking: 'Added to ranking',
     fromGamePlan: 'from your Game plan', noFoldersYet: 'Not on any list yet', never: 'Never', errorLoading: 'Error loading',
     communityActivity: 'Community activity',
+    nowFollowing: "You're now following {user}",
     leaderboardTab: 'Leaderboard', yourPosition: 'Your position',
     titleUse: 'Use as title', titleCurrent: 'Your title', titleClear: 'Remove title',
     profileBanner: 'Profile banner', profileBannerHint: 'Shown on your public profile and when you share the link.',
@@ -3331,6 +3333,7 @@ const I18N = {
     noAchievements: 'Este jogo não tem conquistas, ou o perfil da Steam é privado', addedToRanking: 'Adicionado ao ranking',
     fromGamePlan: 'do seu Plano de jogo', noFoldersYet: 'Não está em nenhuma lista', never: 'Nunca', errorLoading: 'Erro ao carregar',
     communityActivity: 'Atividade da comunidade',
+    nowFollowing: 'Agora você segue {user}',
     leaderboardTab: 'Tabela global', yourPosition: 'Sua posição',
     titleUse: 'Usar como título', titleCurrent: 'Seu título', titleClear: 'Remover título',
     profileBanner: 'Banner do perfil', profileBannerHint: 'Aparece no seu perfil público e quando você compartilha o link.',
@@ -10058,10 +10061,9 @@ async function addFriendByUsername() {
   if (!username) return;
   const msg = document.getElementById('friends-msg');
   try {
-    const res = await fetch(`${apiBase()}/api/v1/friends/add`, {
+    const res = await fetch(`${apiBase()}/api/v1/follow/${encodeURIComponent(username)}`, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username }),
+      headers: { 'Authorization': `Bearer ${authToken}` },
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Error');
@@ -10069,7 +10071,7 @@ async function addFriendByUsername() {
     document.getElementById('friend-add-preview').style.display = 'none';
     msg.style.display = 'block';
     msg.style.color = 'var(--green)';
-    msg.textContent = data.status === 'accepted' ? t('alreadyFriends') : t('requestSentWaiting');
+    msg.textContent = t('nowFollowing').replace('{user}', username);
     checkAchievements();
     await loadFriendsList();
     loadWidgetFriends();
@@ -10080,8 +10082,10 @@ async function addFriendByUsername() {
   }
 }
 
+// Sin solicitudes en el modelo de seguidores: "aceptar" a alguien que te
+// sigue es seguirlo de vuelta.
 async function acceptFriendRequest(username) {
-  await fetch(`${apiBase()}/api/v1/friends/requests/${encodeURIComponent(username)}/accept`, {
+  await fetch(`${apiBase()}/api/v1/follow/${encodeURIComponent(username)}`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${authToken}` }
   });
@@ -14394,13 +14398,14 @@ async function loadWidgetFriends() {
   const el = document.getElementById('widget-friends-list');
   if (!el) return;
   try {
-    const [friendsRes, requestsRes] = await Promise.all([
-      fetch(`${apiBase()}/api/v1/friends`, { headers: { 'Authorization': `Bearer ${authToken}` } }),
-      fetch(`${apiBase()}/api/v1/friends/requests`, { headers: { 'Authorization': `Bearer ${authToken}` } }),
-    ]);
-    const d = await friendsRes.json();
-    const requests = requestsRes.ok ? ((await requestsRes.json()).requests || []) : [];
-    const friends = d.friends || [];
+    // Seguimiento unilateral: el widget muestra a quien SEGUIS. Las
+    // solicitudes ya no existen en este modelo. (Quedo a medias en la
+    // migracion: seguia pidiendo /friends y /friends/requests, que son del
+    // modelo viejo y estan por borrarse del backend.)
+    const followingRes = await fetch(`${apiBase()}/api/v1/me/following`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    const d = await followingRes.json();
+    const requests = [];
+    const friends = d.users || [];
     // Mismo cache que usa el panel completo de Amigos (loadFriendsList) —
     // openFriendProfile lo usa para mostrar el avatar+marco en el titulo, y
     // se puede entrar a un perfil desde este widget sin haber abierto antes
