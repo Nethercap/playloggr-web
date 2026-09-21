@@ -10916,6 +10916,12 @@ function loginWithGoogle() {
         window.gtag('event', 'sign_up', { method: 'google' });
         window.gtag('event', 'conversion', { send_to: ADS_SIGNUP_CONVERSION_LABEL });
       }
+      trackSignupPixel();
+      fetch(`${apiBase()}/api/v1/user/attribution`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(getAttribution()),
+      }).catch(() => {});
       localStorage.setItem('gb_needs_username', 'true');
       document.getElementById('set-username-input').value = '';
       document.getElementById('set-username-err').style.display = 'none';
@@ -12451,7 +12457,7 @@ async function submitAuth() {
   }
 
   const endpoint = isRegister ? '/api/v1/auth/register' : '/api/v1/auth/login';
-  const body     = isRegister ? { email, password, username, turnstile_token: turnstileToken } : { email, password };
+  const body     = isRegister ? { email, password, username, turnstile_token: turnstileToken, attribution: getAttribution() } : { email, password };
 
   document.getElementById('login-btn').textContent = 'Cargando...';
   try {
@@ -12481,6 +12487,7 @@ async function submitAuth() {
       window.gtag('event', 'sign_up', { method: 'email' });
       window.gtag('event', 'conversion', { send_to: ADS_SIGNUP_CONVERSION_LABEL });
     }
+    if (isRegister) trackSignupPixel();
 
     if (data.verification_required) {
       openVerifyEmail(data.email || email);
@@ -14379,6 +14386,50 @@ async function syncAll(page = 1, silent = false) {
   }
 }
 
+// ── Atribucion de origen: UTMs y referrer externo de la visita, guardados
+// hasta que el usuario se registra (se mandan en /auth/register o en
+// /user/attribution para Google). La landing corre el mismo codigo; como
+// localStorage es por origen, lo que capturo playloggr.com llega a /app/.
+// Regla: una visita con utm_source o referrer externo pisa lo anterior
+// (ultimo toque no-directo); una directa solo se guarda si no habia nada.
+function captureAttribution() {
+  try {
+    const p = new URLSearchParams(location.search);
+    let ref = document.referrer || '';
+    try { if (ref && new URL(ref).host === location.host) ref = ''; } catch (e) {}
+    const utm = p.get('utm_source') || '';
+    const prev = JSON.parse(localStorage.getItem('pl_attr') || 'null');
+    if (!utm && !ref && prev) return;
+    localStorage.setItem('pl_attr', JSON.stringify({
+      source: utm, medium: p.get('utm_medium') || '', campaign: p.get('utm_campaign') || '',
+      content: p.get('utm_content') || '', referrer: ref.slice(0, 255),
+      landing: (location.pathname + location.search).slice(0, 120), ts: Date.now(),
+    }));
+  } catch (e) {}
+}
+function getAttribution() {
+  let a = null;
+  try { a = JSON.parse(localStorage.getItem('pl_attr') || 'null'); } catch (e) {}
+  return Object.assign({}, a || {}, { client: 'web' });
+}
+captureAttribution();
+
+// ── Pixel de Meta (Instagram/Facebook Ads) — mismo gate de consentimiento
+// que GA4. Vacio = no carga nada. Se completa con el ID de Events Manager.
+const META_PIXEL_ID = '';
+function loadMetaPixel() {
+  if (window.__fbqLoaded || !META_PIXEL_ID) return;
+  window.__fbqLoaded = true;
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  window.fbq('init', META_PIXEL_ID);
+  window.fbq('track', 'PageView');
+}
+function trackSignupPixel() {
+  if (typeof window.fbq === 'function') window.fbq('track', 'CompleteRegistration');
+}
+
 // ── Google Analytics (GA4) + Google Ads — misma property/cuenta que la
 // landing, carga diferida hasta que el usuario acepte cookies. El
 // consentimiento se comparte con playloggr.com porque localStorage es por
@@ -14406,13 +14457,14 @@ function loadGoogleAnalytics() {
 function setCookieConsent(accepted) {
   localStorage.setItem('pl_cookie_consent', accepted ? 'accepted' : 'rejected');
   document.getElementById('cookie-banner').style.display = 'none';
-  if (accepted) loadGoogleAnalytics();
+  if (accepted) { loadGoogleAnalytics(); loadMetaPixel(); }
 }
 
 function initCookieBanner() {
   const consent = localStorage.getItem('pl_cookie_consent');
   if (consent === 'accepted') {
     loadGoogleAnalytics();
+    loadMetaPixel();
   } else if (consent === null) {
     document.getElementById('cookie-banner').style.display = 'block';
   }

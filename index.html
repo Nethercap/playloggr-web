@@ -572,6 +572,38 @@
   navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
   navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
 
+  // ── Atribucion de origen (UTM / referrer) — mismo codigo que la app en
+  // /app/: localStorage es por origen, asi que lo que se captura aca llega
+  // al registro. No es una cookie de terceros: es nuestra, y solo se usa
+  // para saber que canal trae usuarios que activan.
+  (function captureAttribution() {
+    try {
+      const p = new URLSearchParams(location.search);
+      let ref = document.referrer || '';
+      try { if (ref && new URL(ref).host === location.host) ref = ''; } catch (e) {}
+      const utm = p.get('utm_source') || '';
+      const prev = JSON.parse(localStorage.getItem('pl_attr') || 'null');
+      if (!utm && !ref && prev) return;
+      localStorage.setItem('pl_attr', JSON.stringify({
+        source: utm, medium: p.get('utm_medium') || '', campaign: p.get('utm_campaign') || '',
+        content: p.get('utm_content') || '', referrer: ref.slice(0, 255),
+        landing: (location.pathname + location.search).slice(0, 120), ts: Date.now(),
+      }));
+    } catch (e) {}
+  })();
+
+  // ── Pixel de Meta — mismo gate de consentimiento que GA4. Vacio = no carga.
+  const META_PIXEL_ID = '';
+  function loadMetaPixel() {
+    if (window.__fbqLoaded || !META_PIXEL_ID) return;
+    window.__fbqLoaded = true;
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    window.fbq('init', META_PIXEL_ID);
+    window.fbq('track', 'PageView');
+  }
+
   // ── Google Analytics (GA4) — carga diferida hasta que el usuario acepte cookies ──
   const GA_MEASUREMENT_ID = 'G-G24M6XTDJ1';
 
@@ -592,13 +624,14 @@
   function setCookieConsent(accepted) {
     localStorage.setItem('pl_cookie_consent', accepted ? 'accepted' : 'rejected');
     document.getElementById('cookie-banner').style.display = 'none';
-    if (accepted) loadGoogleAnalytics();
+    if (accepted) { loadGoogleAnalytics(); loadMetaPixel(); }
   }
 
   (function initCookieBanner() {
     const consent = localStorage.getItem('pl_cookie_consent');
     if (consent === 'accepted') {
       loadGoogleAnalytics();
+      loadMetaPixel();
     } else if (consent === null) {
       document.getElementById('cookie-banner').style.display = 'block';
     }
