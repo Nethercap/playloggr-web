@@ -98,7 +98,7 @@
   .hero::before {
     content: ""; position: absolute; inset: 0;
     background-image:
-      linear-gradient(180deg, rgba(10,8,14,0.55) 0%, rgba(10,8,14,0.82) 55%, var(--bg) 100%),
+      linear-gradient(180deg, rgba(10,8,14,0.62) 0%, rgba(10,8,14,0.80) 38%, rgba(10,8,14,0.88) 62%, var(--bg) 100%),
       url('/assets/hero-bg.jpg');
     background-size: cover; background-position: center 30%;
     z-index: 0;
@@ -301,6 +301,9 @@
     .nav-toggle { display: block; }
     h1 { font-size: 32px; }
     .feature-grid { grid-template-columns: 1fr; }
+    .pill-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 28px; }
+    .pill { font-size: 12px; padding: 8px 10px; justify-content: center; text-align: center; }
+    .counters { gap: 26px; margin-top: 28px; }
     .section { padding: 52px 0; }
     /* La foto de fondo del desktop es panoramica (16:9) -- en un
        contenedor angosto "cover" termina zoomeando demasiado y el sujeto
@@ -309,7 +312,7 @@
        (compuesta para ese aspecto) que ya encuadra bien sin ajustes. */
     .hero::before {
       background-image:
-        linear-gradient(180deg, rgba(10,8,14,0.55) 0%, rgba(10,8,14,0.82) 55%, var(--bg) 100%),
+        linear-gradient(180deg, rgba(10,8,14,0.62) 0%, rgba(10,8,14,0.80) 38%, rgba(10,8,14,0.88) 62%, var(--bg) 100%),
         url('/assets/hero-bg-mobile.jpg');
       background-position: center top; background-size: cover;
     }
@@ -344,7 +347,7 @@
       Sync your library, level up, and share your profile.
     </p>
     <div class="hero-ctas">
-      <a href="/app/" class="btn-primary">Create a free account</a>
+      <a href="/app/?register=1" class="btn-primary">Create a free account</a>
       <a href="https://play.google.com/store/apps/details?id=com.playloggr.app" target="_blank" rel="noopener" class="btn-gray">Get it on Google Play</a>
     </div>
 
@@ -372,8 +375,8 @@
 <section class="section" id="activity-section">
   <div class="wrap">
     <div class="section-header">
-      <div class="section-eyebrow">Live</div>
-      <h2>What the community is playing right now</h2>
+      <div class="section-eyebrow">Activity</div>
+      <h2>What's happening in the community</h2>
     </div>
     <div class="act-list" id="act-list"></div>
     <a class="act-all" href="/actividad?lang=en">See all activity →</a>
@@ -420,7 +423,7 @@
       <div class="feature-card">
         <div class="f-icon"><i class="ti ti-trophy"></i></div>
         <h3>Achievements and levels</h3>
-        <p>139 achievements to unlock, with XP and levels as you progress. All free: premium unlocks the cosmetics.</p>
+        <p><span class="ach-n">139</span> achievements to unlock, with XP and levels as you progress. All free: premium unlocks the cosmetics.</p>
       </div>
       <div class="feature-card">
         <div class="f-icon"><i class="ti ti-chart-bar"></i></div>
@@ -436,6 +439,7 @@
         <div class="f-icon"><i class="ti ti-users"></i></div>
         <h3>Social backlog</h3>
         <p>Follow other players, see what they're playing in real time, and share your public profile with your lists, rankings and reviews.</p>
+        <p style="margin-top:8px">And every month everyone votes for the <strong>game of the month</strong>.</p>
       </div>
       <div class="feature-card">
         <div class="f-icon"><i class="ti ti-palette"></i></div>
@@ -451,11 +455,6 @@
         <div class="f-icon"><i class="ti ti-color-swatch"></i></div>
         <h3>Premium themes <span class="badge-premium">Premium</span></h3>
         <p>Themes and interface inspired by iconic video games.</p>
-      </div>
-      <div class="feature-card">
-        <div class="f-icon"><i class="ti ti-calendar-event"></i></div>
-        <h3>Game of the month and year</h3>
-        <p>Vote for your pick between the 2nd and 9th of each month and check the result and the history of past months. Game of the year, coming soon.</p>
       </div>
     </div>
 
@@ -484,7 +483,7 @@
           <li><span class="check"><i class="ti ti-check"></i></span> Write and read <strong>game reviews</strong></li>
           <li><span class="check"><i class="ti ti-check"></i></span> Your own statistics (global)</li>
           <li><span class="check"><i class="ti ti-check"></i></span> Vote in <strong>Game of the month</strong></li>
-          <li><span class="check"><i class="ti ti-check"></i></span> All <strong>139 achievements</strong>, XP and every level</li>
+          <li><span class="check"><i class="ti ti-check"></i></span> All <strong><span class="ach-n">139</span> achievements</strong>, XP and every level</li>
           <li><span class="cross"><i class="ti ti-x"></i></span> Avatar customization</li>
           <li><span class="cross"><i class="ti ti-x"></i></span> Recent stats and games in common</li>
         </ul>
@@ -658,8 +657,15 @@
       put('c-games', d.games_tracked);
       put('c-hours', d.hours_tracked);
       put('c-users', d.users);
-      var ac = document.getElementById('ach-count');
-      if (ac && d.achievements) ac.textContent = d.achievements + ' ';
+      // Un solo numero para toda la pagina: antes el pill del hero decia el
+      // valor real de la API y dos parrafos mas abajo seguia diciendo 139.
+      if (d.achievements) {
+        var ac = document.getElementById('ach-count');
+        if (ac) ac.textContent = d.achievements + ' ';
+        Array.prototype.forEach.call(document.querySelectorAll('.ach-n'), function (el) {
+          el.textContent = d.achievements;
+        });
+      }
       box.classList.add('on');
     })
     .catch(function () {});

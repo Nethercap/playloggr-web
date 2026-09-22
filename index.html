@@ -98,7 +98,7 @@
   .hero::before {
     content: ""; position: absolute; inset: 0;
     background-image:
-      linear-gradient(180deg, rgba(10,8,14,0.55) 0%, rgba(10,8,14,0.82) 55%, var(--bg) 100%),
+      linear-gradient(180deg, rgba(10,8,14,0.62) 0%, rgba(10,8,14,0.80) 38%, rgba(10,8,14,0.88) 62%, var(--bg) 100%),
       url('/assets/hero-bg.jpg');
     background-size: cover; background-position: center 30%;
     z-index: 0;
@@ -301,6 +301,9 @@
     .nav-toggle { display: block; }
     h1 { font-size: 32px; }
     .feature-grid { grid-template-columns: 1fr; }
+    .pill-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 28px; }
+    .pill { font-size: 12px; padding: 8px 10px; justify-content: center; text-align: center; }
+    .counters { gap: 26px; margin-top: 28px; }
     .section { padding: 52px 0; }
     /* La foto de fondo del desktop es panoramica (16:9) -- en un
        contenedor angosto "cover" termina zoomeando demasiado y el sujeto
@@ -309,7 +312,7 @@
        (compuesta para ese aspecto) que ya encuadra bien sin ajustes. */
     .hero::before {
       background-image:
-        linear-gradient(180deg, rgba(10,8,14,0.55) 0%, rgba(10,8,14,0.82) 55%, var(--bg) 100%),
+        linear-gradient(180deg, rgba(10,8,14,0.62) 0%, rgba(10,8,14,0.80) 38%, rgba(10,8,14,0.88) 62%, var(--bg) 100%),
         url('/assets/hero-bg-mobile.jpg');
       background-position: center top; background-size: cover;
     }
@@ -344,7 +347,7 @@
       Sincronizá tu biblioteca, subí de nivel y compartí tu perfil.
     </p>
     <div class="hero-ctas">
-      <a href="/app/" class="btn-primary">Crear cuenta gratis</a>
+      <a href="/app/?register=1" class="btn-primary">Crear cuenta gratis</a>
       <a href="https://play.google.com/store/apps/details?id=com.playloggr.app" target="_blank" rel="noopener" class="btn-gray">Descargar en Google Play</a>
     </div>
 
@@ -362,7 +365,7 @@
     </div>
 
     <div class="preview-panel">
-      <img class="preview-shot" src="/assets/preview-cards.png" alt="Vista de lista de la biblioteca en Playloggr" loading="lazy" />
+      <img class="preview-shot" src="/assets/preview-cards-es.png" alt="Vista de lista de la biblioteca en Playloggr" loading="lazy" />
     </div>
   </div>
 </header>
@@ -372,8 +375,8 @@
 <section class="section" id="activity-section">
   <div class="wrap">
     <div class="section-header">
-      <div class="section-eyebrow">En vivo</div>
-      <h2>Qué está jugando la comunidad ahora</h2>
+      <div class="section-eyebrow">Actividad</div>
+      <h2>Qué está pasando en la comunidad</h2>
     </div>
     <div class="act-list" id="act-list"></div>
     <a class="act-all" href="/actividad">Ver toda la actividad →</a>
@@ -420,7 +423,7 @@
       <div class="feature-card">
         <div class="f-icon"><i class="ti ti-trophy"></i></div>
         <h3>Logros y niveles</h3>
-        <p>139 logros para desbloquear, con XP y niveles a medida que avanzás. Todo gratis: premium desbloquea los cosméticos.</p>
+        <p><span class="ach-n">139</span> logros para desbloquear, con XP y niveles a medida que avanzás. Todo gratis: premium desbloquea los cosméticos.</p>
       </div>
       <div class="feature-card">
         <div class="f-icon"><i class="ti ti-chart-bar"></i></div>
@@ -436,6 +439,7 @@
         <div class="f-icon"><i class="ti ti-users"></i></div>
         <h3>Backlog social</h3>
         <p>Seguí a otros jugadores, mirá qué están jugando en tiempo real y compartí tu perfil público con tus listas, rankings y reseñas.</p>
+        <p style="margin-top:8px">Y cada mes se vota el <strong>juego del mes</strong> entre todos.</p>
       </div>
       <div class="feature-card">
         <div class="f-icon"><i class="ti ti-palette"></i></div>
@@ -451,11 +455,6 @@
         <div class="f-icon"><i class="ti ti-color-swatch"></i></div>
         <h3>Temas premium <span class="badge-premium">Premium</span></h3>
         <p>Temas e interfaz inspirados en videojuegos icónicos.</p>
-      </div>
-      <div class="feature-card">
-        <div class="f-icon"><i class="ti ti-calendar-event"></i></div>
-        <h3>Juego del mes y del año</h3>
-        <p>Votá tu candidato entre el 2 y el 9 de cada mes y mirá el resultado y el historial de meses anteriores. Juego del año, próximamente.</p>
       </div>
     </div>
 
@@ -484,7 +483,7 @@
           <li><span class="check"><i class="ti ti-check"></i></span> Escribir y ver <strong>reseñas de juegos</strong></li>
           <li><span class="check"><i class="ti ti-check"></i></span> Estadísticas propias (globales)</li>
           <li><span class="check"><i class="ti ti-check"></i></span> Votar en <strong>Juego del mes</strong></li>
-          <li><span class="check"><i class="ti ti-check"></i></span> Los <strong>139 logros</strong>, XP y todos los niveles</li>
+          <li><span class="check"><i class="ti ti-check"></i></span> Los <strong><span class="ach-n">139</span> logros</strong>, XP y todos los niveles</li>
           <li><span class="cross"><i class="ti ti-x"></i></span> Personalización de avatar</li>
           <li><span class="cross"><i class="ti ti-x"></i></span> Estadísticas recientes y juegos en común</li>
         </ul>
@@ -659,8 +658,15 @@
       put('c-games', d.games_tracked);
       put('c-hours', d.hours_tracked);
       put('c-users', d.users);
-      var ac = document.getElementById('ach-count');
-      if (ac && d.achievements) ac.textContent = d.achievements + ' ';
+      // Un solo numero para toda la pagina: antes el pill del hero decia el
+      // valor real de la API y dos parrafos mas abajo seguia diciendo 139.
+      if (d.achievements) {
+        var ac = document.getElementById('ach-count');
+        if (ac) ac.textContent = d.achievements + ' ';
+        Array.prototype.forEach.call(document.querySelectorAll('.ach-n'), function (el) {
+          el.textContent = d.achievements;
+        });
+      }
       box.classList.add('on');
     })
     .catch(function () {});

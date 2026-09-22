@@ -940,15 +940,37 @@
 </div>
 
 <style>
+  /* La misma foto de la landing: venir de playloggr.com y caer en una caja
+     gris plana parecia otro producto. Si la imagen no carga (la app tambien
+     se sirve desde api.playloggr.com) queda el color de fondo de siempre. */
   #login-screen {
     position:fixed;inset:0;background:var(--bg3);
     display:flex;align-items:center;justify-content:center;
     z-index:999;
   }
+  #login-screen::before {
+    content:"";position:absolute;inset:0;
+    background-image:
+      linear-gradient(180deg, rgba(10,8,14,0.72) 0%, rgba(10,8,14,0.88) 60%, var(--bg3) 100%),
+      url('https://playloggr.com/assets/hero-bg.jpg');
+    background-size:cover;background-position:center 30%;
+  }
   .login-card {
-    background:var(--bg);border:0.5px solid var(--border);
+    background:rgba(18,20,19,0.86);backdrop-filter:blur(10px);
+    border:0.5px solid var(--border);
     border-radius:var(--radius-lg);padding:32px 36px;
-    width:360px;max-width:95vw;
+    width:360px;max-width:95vw;position:relative;z-index:1;
+  }
+  .login-perks { list-style:none;margin:18px 0 0;padding:0;display:flex;flex-direction:column;gap:7px; }
+  .login-perks li { font-size:11.5px;color:var(--text2);display:flex;align-items:flex-start;gap:7px;line-height:1.35; }
+  .login-perks i { color:#1D9E75;font-size:13px;flex-shrink:0;margin-top:1px; }
+  @media (max-width:600px) {
+    #login-screen::before {
+      background-image:
+        linear-gradient(180deg, rgba(10,8,14,0.72) 0%, rgba(10,8,14,0.88) 60%, var(--bg3) 100%),
+        url('https://playloggr.com/assets/hero-bg-mobile.jpg');
+      background-position:center top;
+    }
   }
   .login-title { font-size:20px;font-weight:500;margin-bottom:4px;display:flex;align-items:center;gap:9px; }
   .login-sub { font-size:13px;color:var(--text2);margin-bottom:24px; }
@@ -967,7 +989,7 @@
 
 <div id="login-screen">
   <div class="login-card" style="position:relative">
-    <button onclick="toggleLanguage()" id="lang-toggle-btn-login" style="position:absolute;top:0;right:0;padding:5px 10px;font-size:12px;font-weight:600;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" title="Language / Idioma">EN</button>
+    <button onclick="toggleLanguage()" id="lang-toggle-btn-login" style="position:absolute;top:10px;right:12px;padding:5px 10px;font-size:12px;font-weight:600;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" title="Language / Idioma">EN</button>
     <div class="login-title">
       <i class="ti ti-device-gamepad-2" style="color:#1D9E75;font-size:22px"></i>
       Playloggr
@@ -982,8 +1004,13 @@
           <span data-i18n="continueWithGoogle">Continuar con Google</span>
         </button>
         <div style="text-align:center">
-          <a onclick="showEmailLogin()" style="font-size:12px;color:var(--text2);cursor:pointer;text-decoration:underline" data-i18n="useEmailPassword">Usar email y contraseña</a>
+          <a onclick="showEmailLogin()" id="email-login-link" style="font-size:12px;color:var(--text2);cursor:pointer;text-decoration:underline" data-i18n="useEmailPassword">Usar email y contraseña</a>
         </div>
+        <ul class="login-perks">
+          <li><i class="ti ti-check"></i><span data-i18n="loginPerkFree">Gratis, sin tarjeta</span></li>
+          <li><i class="ti ti-check"></i><span data-i18n="loginPerkNoPassword">Nunca te pedimos la contraseña de Steam ni de PlayStation</span></li>
+          <li><i class="ti ti-check"></i><span data-i18n="loginPerkGame">Logros, niveles y racha por jugar lo que ya jugás</span></li>
+        </ul>
       </div>
 
       <!-- Email login (hidden by default) -->
@@ -2803,6 +2830,10 @@ const I18N = {
     errorLoadingGames: 'Error al cargar los juegos', lastSync: 'última sync',
     logout: 'Salir', folder: 'Lista', clear: 'Limpiar',
     loginSubtitle: 'Iniciá sesión para continuar', createAccount: 'Creá tu cuenta',
+    createAccountFree: 'Creá tu cuenta gratis', registerWithEmail: 'Registrarme con email',
+    loginPerkFree: 'Gratis, sin tarjeta',
+    loginPerkNoPassword: 'Nunca te pedimos la contraseña de Steam ni de PlayStation',
+    loginPerkGame: 'Logros, niveles y racha por jugar lo que ya jugás',
     continueWithGoogle: 'Continuar con Google', useEmailPassword: 'Usar email y contraseña',
     saveErrorRetry: 'Error al guardar. Intentá de nuevo.', saveError: 'Error al guardar',
     errorLoadingFriends: 'Error al cargar amigos',
@@ -3087,6 +3118,10 @@ const I18N = {
     errorLoadingGames: 'Error loading games', lastSync: 'last sync',
     logout: 'Log out', folder: 'List', clear: 'Clear',
     loginSubtitle: 'Log in to continue', createAccount: 'Create your account',
+    createAccountFree: 'Create your free account', registerWithEmail: 'Sign up with email',
+    loginPerkFree: 'Free, no card needed',
+    loginPerkNoPassword: 'We never ask for your Steam or PlayStation password',
+    loginPerkGame: 'Achievements, levels and a streak for playing what you already play',
     continueWithGoogle: 'Continue with Google', useEmailPassword: 'Use email and password',
     saveErrorRetry: 'Error saving. Please try again.', saveError: 'Error saving',
     errorLoadingFriends: 'Error loading friends',
@@ -3371,6 +3406,10 @@ const I18N = {
     errorLoadingGames: 'Erro ao carregar os jogos', lastSync: 'última sincronização',
     logout: 'Sair', folder: 'Lista', clear: 'Limpar',
     loginSubtitle: 'Entre para continuar', createAccount: 'Crie sua conta',
+    createAccountFree: 'Crie sua conta grátis', registerWithEmail: 'Cadastrar com e-mail',
+    loginPerkFree: 'Grátis, sem cartão',
+    loginPerkNoPassword: 'Nunca pedimos sua senha da Steam nem da PlayStation',
+    loginPerkGame: 'Conquistas, níveis e sequência por jogar o que você já joga',
     continueWithGoogle: 'Continuar com o Google', useEmailPassword: 'Usar email e senha',
     saveErrorRetry: 'Erro ao salvar. Tente novamente.', saveError: 'Erro ao salvar',
     errorLoadingFriends: 'Erro ao carregar amigos',
@@ -6814,6 +6853,28 @@ function applyFilters() {
 function showEmailLogin() {
   document.getElementById('google-login-section').style.display = 'none';
   document.getElementById('email-login-section').style.display  = 'block';
+}
+
+// La landing manda /app/?register=1 desde "Crear cuenta gratis": sin esto la
+// pantalla siguiente decia "Inicia sesion para continuar" y habia que hacer
+// dos clicks mas para encontrar el registro. No toca el flujo de Google,
+// que sirve igual para entrar y para registrarse.
+function applyRegisterIntent() {
+  try {
+    if (new URLSearchParams(location.search).get('register') !== '1') return;
+  } catch (e) { return; }
+  const sub = document.getElementById('login-subtitle');
+  if (sub) { sub.textContent = t('createAccountFree'); sub.setAttribute('data-i18n', 'createAccountFree'); }
+  const link = document.getElementById('email-login-link');
+  if (link) { link.textContent = t('registerWithEmail'); link.setAttribute('data-i18n', 'registerWithEmail'); }
+  const onEmail = document.getElementById('email-login-section');
+  if (link) {
+    link.onclick = function () {
+      showEmailLogin();
+      if (!isRegister) toggleAuthMode();   // el form abre ya en modo registro
+    };
+  }
+  if (onEmail && onEmail.style.display !== 'none' && !isRegister) toggleAuthMode();
 }
 
 function showGoogleLogin() {
@@ -14267,6 +14328,7 @@ window.fetch = function(url, opts={}) {
 };
 
 applyI18n();
+if (typeof applyRegisterIntent === 'function') applyRegisterIntent();
 
 // Auto-login si hay token guardado
 if (authToken) {
