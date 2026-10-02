@@ -912,6 +912,37 @@
     @keyframes frameRgbSpin {
       to { transform: rotate(360deg); }
     }
+
+    /* ── Premium: identidad dorado→violeta (antes usaba el mismo verde que
+       cualquier boton y no se distinguia). Mismos tonos que la app. ── */
+    .pl-premium-grad { background: linear-gradient(135deg, #E0B84C, #8E7CE8); color: #1B1430; }
+    .pl-premium-text { background: linear-gradient(135deg, #E0B84C, #8E7CE8); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .pl-premium-btn { width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:13px 16px; border:none; border-radius:10px; cursor:pointer;
+      background: linear-gradient(135deg, #E0B84C, #8E7CE8); color:#1B1430; font-size:15px; font-weight:700; }
+    .pl-premium-btn:hover { filter: brightness(1.06); }
+    .pl-premium-btn-sm { padding:8px 12px; font-size:12.5px; border-radius:8px; }
+    .pl-premium-badge { display:inline-flex; align-items:center; gap:3px; padding:2px 6px; border-radius:6px; font-size:9px; font-weight:800; letter-spacing:.4px;
+      background: linear-gradient(135deg, #E0B84C, #8E7CE8); color:#1B1430; white-space:nowrap; flex-shrink:0; }
+    .pl-premium-mark { display:inline-flex; vertical-align:-2px; margin-left:4px; }
+    .pl-link-btn { background:none; border:none; color:var(--text2); font-size:12.5px; cursor:pointer; padding:6px 4px; }
+    .pl-link-btn:hover { color:var(--text); text-decoration:underline; }
+    .pl-teaser { display:block; width:100%; box-sizing:border-box; padding:14px; margin-bottom:12px; border-radius:12px;
+      background: rgba(142,124,232,.08); border:1px solid rgba(142,124,232,.4); }
+    .pl-teaser-chip { padding:4px 9px; border-radius:20px; font-size:11.5px; font-weight:600; background:var(--bg); border:1px solid rgba(224,184,76,.6); }
+    .pl-locked-panel { padding:14px; border-radius:12px; background:var(--bg2); border:1px solid rgba(142,124,232,.35); text-align:left; }
+    .pl-try-chip { margin-left:auto; display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:8px; font-size:11px; font-weight:600;
+      color:#8E7CE8; border:1px solid rgba(142,124,232,.6); flex-shrink:0; }
+    .pl-limit-counter { padding:2px 7px; border-radius:10px; font-size:11px; font-weight:700; border:1px solid rgba(136,135,128,.7); color:var(--text2); cursor:pointer; }
+    .pl-limit-counter.full { border-color:#E0B84C; color:#E0B84C; }
+    .pl-preview-bar { position:fixed; left:50%; transform:translateX(-50%); bottom:20px; z-index:99; width:min(520px, calc(100% - 32px));
+      display:flex; align-items:center; gap:10px; padding:8px 8px 8px 14px; border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,.35); box-sizing:border-box; }
+    .pl-preview-bar button { border:none; border-radius:8px; cursor:pointer; font-weight:700; font-size:12.5px; padding:8px 12px; }
+    .pl-preview-exit { background:transparent; color:#1B1430; }
+    .pl-preview-keep { background:#1B1430; color:#fff; }
+    .pl-compare { width:100%; border-collapse:collapse; background:var(--bg2); border-radius:12px; overflow:hidden; font-size:12.5px; }
+    .pl-compare td, .pl-compare th { padding:10px 8px; border-top:1px solid var(--border); text-align:center; }
+    .pl-compare tr:first-child th { border-top:none; }
+    .pl-compare td:first-child { text-align:left; padding-left:12px; }
   </style>
   <script>
     // Aplicar el tema guardado ANTES del primer paint — si esto esperara
@@ -1559,7 +1590,8 @@
           <option value="game_count" data-i18n="quantity">Cantidad</option>
         </select>
         <button id="rankings-sort-dir-btn" onclick="_rankingsSortDirToggle()" style="padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px;color:var(--text)">↓</button>
-        <button id="rankings-new-btn" onclick="openRankingCreate()" style="margin-left:auto;padding:6px 14px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer">
+        <span id="rankings-limit-counter" style="margin-left:auto"></span>
+        <button id="rankings-new-btn" onclick="openRankingCreate()" style="padding:6px 14px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer">
           <i class="ti ti-plus"></i> <span data-i18n="newRanking">Nuevo ranking</span>
         </button>
       </div>
@@ -1967,9 +1999,9 @@
             <span id="cfg-premium-badge" style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px"></span>
           </div>
         </div>
-        <button id="cfg-upgrade-btn" onclick="startPaddleCheckout()" style="display:none;padding:12px;border-radius:8px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;font-size:13px;font-weight:600;text-align:left">
+        <button id="cfg-upgrade-btn" onclick="setView('premium')" style="display:none;padding:12px;border-radius:8px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;font-size:13px;font-weight:600;text-align:left">
           <i class="ti ti-crown"></i> <span data-i18n="upgradeToPremiumBtn">Actualizar a Premium — USD $6.99 (pago único, impuestos según checkout)</span>
-          <div style="font-size:11px;color:rgba(255,255,255,0.85);margin-top:2px;font-weight:400" data-i18n="premiumBenefitsShort">Desbloqueá logros, XP y nivel, personalización completa de avatar y más listas/rankings/amigos.</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.85);margin-top:2px;font-weight:400" data-i18n="premiumBenefitsShort">Marcos, banners y fuentes por nivel, avatar completo, temas, carpetas y rankings ilimitados, plan de juego y más.</div>
         </button>
         <button onclick="confirmDeleteLibrary()"
           style="padding:10px;border-radius:8px;border:0.5px solid var(--red);background:transparent;color:var(--red);cursor:pointer;font-size:13px;text-align:left">
@@ -2680,26 +2712,65 @@ const I18N = {
     gameThemeHint: 'Cambia toda la estética de la app: colores y tipografía. Solo visible en tu cuenta.',
     gameThemeInspiredBy: 'inspirado en',
     upgradeToPremiumBtn: 'Actualizar a Premium — USD $6.99 (pago único, impuestos según checkout)',
-    premiumBenefitsShort: 'Desbloqueá logros, XP y nivel, personalización completa de avatar y más listas/rankings/amigos.',
+    premiumBenefitsShort: 'Marcos, banners y fuentes por nivel, avatar completo, temas, listas y rankings ilimitados, plan de juego y más.',
     evolveToPremium: 'Evolucioná a Premium',
     premiumActiveTitle: '¡Ya sos Premium!', premiumTitle: 'Playloggr Premium',
     premiumActiveSubtitle: 'Gracias por apoyar el proyecto. Tenés acceso a todo lo de abajo.',
     premiumSubtitle: 'Pago único, para siempre. Sin suscripción.',
+    paywallBuyWithPrice: 'Comprar Premium · {price}',
+    paywallOneTime: 'Pago único · para siempre · sin suscripción',
+    paywallSeeAll: 'Ver todo lo que incluye',
+    paywallAlsoIncludes: 'Además incluye',
+    paywallGeneralTitle: 'Llevá tu perfil al siguiente nivel',
+    paywallGeneralDetail: 'Todo lo esencial de Playloggr es gratis. Premium suma cosméticos, temas y herramientas extra, con un solo pago.',
+    seePremium: 'Ver Premium',
+    premiumMemberTooltip: 'Usuario Premium',
+    compareTitle: 'Gratis vs Premium',
+    cmpLibrary: 'Biblioteca, deseados y sincronización',
+    cmpAchievements: 'Logros, XP y niveles',
+    cmpRankings: 'Rankings',
+    cmpAvatar: 'Editor de avatar',
+    cmpAvatarBasic: 'Básico',
+    cmpStats: 'Stats recientes y de amigos',
+    themePreviewLabel: 'Vista previa · {seconds}s',
+    themePreviewKeep: 'Quedátelo',
+    themePreviewExit: 'Salir',
+    themePreviewTry: 'Probar',
+    themePreviewHint: 'Los temas son Premium, pero podés probar cualquiera durante 45 segundos.',
+    cosmeticsReadyTitle: 'Tu nivel {level} ya desbloqueó',
+    cosmeticsReadyCta: 'Activalos con Premium',
+    cosmeticsNextTier: 'Tu primer marco y banner se desbloquean en nivel {level}. Con Premium los vas a poder lucir.',
+    pickThemeCta: 'Elegir un tema',
+    customizeAvatarCta: 'Personalizar avatar',
     checkoutLoadError: 'No se pudo cargar el checkout de pago. Recargá la página e intentá de nuevo.',
-    pbAchievementsTitle: 'Logros, XP y nivel',
-    pbAchievementsDetail: 'La versión gratis no desbloquea logros ni suma XP: no hay subida de nivel. Premium sube hasta nivel 150.',
+    pbAchievementsTitle: 'Marcos, banners y fuentes por nivel',
+    pbAchievementsDetail: 'Los logros, el XP y los niveles son gratis para todos. Premium te da los marcos de avatar, banners de perfil y fuentes de nombre que desbloquea cada nivel.',
     pbThemesTitle: 'Temas de videojuego',
-    pbThemesDetail: 'Cyberpunk 2077, Portal, Undertale, Fallout, Elden Ring, Counter-Strike, StarCraft II, Doom y más, con detalles propios de cada uno.',
+    pbThemesDetail: 'Temas inspirados en Cyberpunk 2077, Portal, Undertale, Fallout, Elden Ring, Counter-Strike, StarCraft II, Doom y más, con detalles propios de cada uno.',
     pbAvatarTitle: 'Personalización de avatar',
     pbAvatarDetail: 'Todas las prendas y estilos del editor de avatar, sin restricciones.',
     pbGamePlanTitle: 'Plan de juego',
     pbGamePlanDetail: 'Organizá tu backlog en pasos concretos, con horas estimadas por HowLongToBeat.',
     pbStatsTitle: 'Estadísticas de actividad reciente',
     pbStatsDetail: 'Seguimiento detallado de lo que jugaste, calificaste y avanzaste en las últimas semanas.',
-    pbFoldersTitle: 'Carpetas y rankings ilimitados',
-    pbFoldersDetail: 'La versión gratis limita a 10 carpetas y 3 rankings. Premium no tiene límite.',
-    pbFriendsTitle: 'Más amigos',
-    pbFriendsDetail: 'La versión gratis limita a 3 amigos. Premium no tiene límite.',
+    pbFoldersTitle: 'Listas y rankings ilimitados',
+    pbFoldersDetail: 'La versión gratis permite 10 listas por sección y 3 rankings. Premium no tiene límite.',
+    paywallFoldersTitle: 'Llegaste a 10 listas',
+    paywallFoldersDetail: 'La versión gratis permite hasta 10 listas por sección. Con Premium creás todas las que quieras.',
+    cmpFolders: 'Listas',
+    paywallRankingsTitle: 'Llegaste a 3 rankings',
+    paywallRankingsDetail: 'La versión gratis permite hasta 3 rankings. Con Premium creás todos los que quieras.',
+    paywallTaxNote: 'Precio en dólares; los impuestos se calculan en el checkout.',
+    cosmeticsFramesOne: '1 marco',
+    cosmeticsFramesMany: '{count} marcos',
+    cosmeticsBannersOne: '1 banner',
+    cosmeticsBannersMany: '{count} banners',
+    cosmeticsFontsOne: '1 fuente',
+    cosmeticsFontsMany: '{count} fuentes',
+    pbFriendsTitle: 'Juegos en común y stats de amigos',
+    pbFriendsDetail: 'Mirá qué juegos tenés en común con cada amigo y compará sus estadísticas.',
+    pbStreakAvatarsTitle: 'Avatares de racha',
+    pbStreakAvatarsDetail: 'Cada 10 días de racha elegís un avatar exclusivo para tu perfil.',
     close: 'Cerrar', search: 'Buscar...',
     chooseUsername: 'Elegí tu nombre de usuario',
     usernameHint: 'Solo letras y números, sin espacios ni tildes. Lo van a ver tus amigos.',
@@ -2731,7 +2802,7 @@ const I18N = {
     planTotalPct: 'Progreso del plan', planTotalHours: 'Horas totales del plan', planHoursPlayed: 'Horas jugadas del plan',
     planName: 'Nombre del plan (opcional)', planNamePrompt: 'Nombre del plan',
     premiumRequiredTitle: 'Función premium', planPremiumRequired: 'Plan de juego requiere la versión premium', buyPremium: 'Hacerse Premium',
-    premiumLevelHint: 'subí hasta nivel 150',
+    premiumLevelHint: 'desbloqueá los cosméticos de tu nivel',
     resumePlan: 'Reanudar plan', deletePlan: 'Eliminar plan', deletePlanConfirm: '¿Eliminar este plan? No se puede deshacer.',
     periodLastWeek: 'Última semana', periodLastMonth: 'Último mes',
     periodNoData: 'Todavía no hay datos para este período', periodNoStatusChanges: 'Sin cambios de estado',
@@ -2788,6 +2859,7 @@ const I18N = {
     gamesLower: 'juegos', wishlistLower: 'deseados', removeFriend: 'Quitar amigo', block: 'Bloquear',
     alreadyFriends: 'Ya son amigos', requestSentWaiting: 'Solicitud enviada, esperando confirmación',
     premiumLabel: 'Premium', ofUsers: 'de usuarios', levelLabel: 'Nivel', maxLevelReached: 'Nivel máximo alcanzado',
+    freeLabel: 'Gratis',
     achievements: 'Logros', globalRanking: 'Ranking global', usersLower: 'usuarios', onlySteam: 'Solo disponible para juegos de Steam',
     noAchievements: 'Este juego no tiene logros, o el perfil de Steam es privado', addedToRanking: 'Agregado al ranking',
     fromGamePlan: 'de tu Plan de juego', noFoldersYet: 'No está en ninguna lista', never: 'Nunca', errorLoading: 'Error al cargar',
@@ -2907,10 +2979,11 @@ const I18N = {
     noRankingsYet: 'No tenés rankings todavía. Creá uno.', noRankingGamesYet: 'Este ranking está vacío. Agregá juegos.',
     rankingLimitReached: 'Máximo 25 juegos por ranking', rankingFreeLimitReached: 'Límite de la versión gratis (3 rankings). Actualizá a premium para crear más.',
     removeFromRanking: 'Quitar del ranking', date: 'Fecha', quantity: 'Cantidad',
-    premiumThanksTitle: '¡Gracias por ser premium!', premiumThanksBody: 'Disfrutá de todas las funcionalidades de Playloggr.', premiumThanksBtn: 'Genial',
+    premiumThanksTitle: '¡Gracias por ser premium!', premiumThanksBody: 'Ya tenés todo desbloqueado. ¿Por dónde querés empezar?', premiumThanksBtn: 'Genial',
     streakDaysLabel: 'días seguidos', streakXpGained: 'XP por tu racha', streakNextRewardIn: 'Próxima recompensa en',
     streakDay: 'día', streakDays: 'días',
     streakRewardPreviewXp: 'XP extra', streakRewardPreviewAvatar: 'avatar exclusivo', streakRewardPreviewFont: 'nueva fuente de nombre', streakRewardPreviewAchievement: 'logro de racha',
+    streakRewardPreviewFrames: 'marcos y banners por nivel',
     streakAvatarCreditTitle: '¡Desbloqueaste un avatar de racha!', streakAvatarCreditBody: 'Elegí cuál querés agregar a tu colección.',
     streakUnlockBtn: 'Desbloquear', streakEquipNowBtn: 'Equipar ahora',
     streakUnlockedFontTitle: '¡Nueva fuente desbloqueada!', streakUnlockedFontBody: 'Ya podés usar esta fuente en tu nombre de usuario, desde Configuración.',
@@ -2968,16 +3041,41 @@ const I18N = {
     gameThemeHint: 'Changes the whole look of the app: colors and typography. Only visible on your account.',
     gameThemeInspiredBy: 'inspired by',
     upgradeToPremiumBtn: 'Upgrade to Premium — USD $6.99 (one-time payment, taxes may apply at checkout)',
-    premiumBenefitsShort: 'Unlock achievements, XP and levels, full avatar customization, and more lists/rankings/friends.',
+    premiumBenefitsShort: 'Frames, banners and fonts by level, full avatar, themes, unlimited lists and rankings, game plan and more.',
     evolveToPremium: 'Level up to Premium',
     premiumActiveTitle: 'You\'re already Premium!', premiumTitle: 'Playloggr Premium',
     premiumActiveSubtitle: 'Thanks for supporting the project. You have access to everything below.',
     premiumSubtitle: 'One-time payment, forever. No subscription.',
+    paywallBuyWithPrice: 'Buy Premium · {price}',
+    paywallOneTime: 'One-time payment · forever · no subscription',
+    paywallSeeAll: 'See everything included',
+    paywallAlsoIncludes: 'Also includes',
+    paywallGeneralTitle: 'Take your profile to the next level',
+    paywallGeneralDetail: 'Everything essential in Playloggr is free. Premium adds cosmetics, themes and extra tools, with a single payment.',
+    seePremium: 'See Premium',
+    premiumMemberTooltip: 'Premium user',
+    compareTitle: 'Free vs Premium',
+    cmpLibrary: 'Library, wishlist and sync',
+    cmpAchievements: 'Achievements, XP and levels',
+    cmpRankings: 'Rankings',
+    cmpAvatar: 'Avatar editor',
+    cmpAvatarBasic: 'Basic',
+    cmpStats: 'Recent and friend stats',
+    themePreviewLabel: 'Preview · {seconds}s',
+    themePreviewKeep: 'Keep it',
+    themePreviewExit: 'Exit',
+    themePreviewTry: 'Try it',
+    themePreviewHint: 'Themes are Premium, but you can try any of them for 45 seconds.',
+    cosmeticsReadyTitle: 'Your level {level} already unlocked',
+    cosmeticsReadyCta: 'Activate them with Premium',
+    cosmeticsNextTier: 'Your first frame and banner unlock at level {level}. With Premium you\'ll be able to show them off.',
+    pickThemeCta: 'Pick a theme',
+    customizeAvatarCta: 'Customize avatar',
     checkoutLoadError: 'Could not load the payment checkout. Reload the page and try again.',
-    pbAchievementsTitle: 'Achievements, XP and level',
-    pbAchievementsDetail: 'The free tier doesn\'t unlock achievements or earn XP: no leveling up. Premium levels up to 150.',
+    pbAchievementsTitle: 'Frames, banners and fonts by level',
+    pbAchievementsDetail: 'Achievements, XP and levels are free for everyone. Premium gives you the avatar frames, profile banners and username fonts each level unlocks.',
     pbThemesTitle: 'Video game themes',
-    pbThemesDetail: 'Cyberpunk 2077, Portal, Undertale, Fallout, Elden Ring, Counter-Strike, StarCraft II, Doom, and more, each with its own details.',
+    pbThemesDetail: 'Themes inspired by Cyberpunk 2077, Portal, Undertale, Fallout, Elden Ring, Counter-Strike, StarCraft II, Doom and more, each with its own details.',
     pbAvatarTitle: 'Avatar customization',
     pbAvatarDetail: 'All outfits and styles in the avatar editor, no restrictions.',
     pbGamePlanTitle: 'Game plan',
@@ -2985,9 +3083,23 @@ const I18N = {
     pbStatsTitle: 'Recent activity statistics',
     pbStatsDetail: 'Detailed tracking of what you played, rated, and made progress on in recent weeks.',
     pbFoldersTitle: 'Unlimited lists and rankings',
-    pbFoldersDetail: 'The free tier limits you to 10 lists and 3 rankings. Premium has no limit.',
-    pbFriendsTitle: 'More friends',
-    pbFriendsDetail: 'The free tier limits you to 3 friends. Premium has no limit.',
+    pbFoldersDetail: 'The free version allows 10 lists per section and 3 rankings. Premium has no limit.',
+    paywallFoldersTitle: 'You\'ve reached 10 lists',
+    paywallFoldersDetail: 'The free version allows up to 10 lists per section. With Premium you can create as many as you want.',
+    cmpFolders: 'Lists',
+    paywallRankingsTitle: 'You\'ve reached 3 rankings',
+    paywallRankingsDetail: 'The free version allows up to 3 rankings. With Premium you can create as many as you want.',
+    paywallTaxNote: 'Price in US dollars; taxes are calculated at checkout.',
+    cosmeticsFramesOne: '1 frame',
+    cosmeticsFramesMany: '{count} frames',
+    cosmeticsBannersOne: '1 banner',
+    cosmeticsBannersMany: '{count} banners',
+    cosmeticsFontsOne: '1 font',
+    cosmeticsFontsMany: '{count} fonts',
+    pbFriendsTitle: 'Games in common and friend stats',
+    pbFriendsDetail: 'See which games you share with each friend and compare their stats.',
+    pbStreakAvatarsTitle: 'Streak avatars',
+    pbStreakAvatarsDetail: 'Every 10 days of streak you pick an exclusive avatar for your profile.',
     close: 'Close', search: 'Search...',
     chooseUsername: 'Choose your username',
     usernameHint: 'Letters and numbers only, no spaces or accents. Your friends will see it.',
@@ -3019,7 +3131,7 @@ const I18N = {
     planTotalPct: 'Plan progress', planTotalHours: 'Total plan hours', planHoursPlayed: 'Plan hours played',
     planName: 'Plan name (optional)', planNamePrompt: 'Plan name',
     premiumRequiredTitle: 'Premium feature', planPremiumRequired: 'Game plan requires the premium version', buyPremium: 'Go Premium',
-    premiumLevelHint: 'level up to 150',
+    premiumLevelHint: 'unlock your level\'s cosmetics',
     resumePlan: 'Resume plan', deletePlan: 'Delete plan', deletePlanConfirm: 'Delete this plan? This cannot be undone.',
     periodLastWeek: 'Last week', periodLastMonth: 'Last month',
     periodNoData: 'No data yet for this period', periodNoStatusChanges: 'No status changes',
@@ -3076,6 +3188,7 @@ const I18N = {
     gamesLower: 'games', wishlistLower: 'wishlist', removeFriend: 'Remove friend', block: 'Block',
     alreadyFriends: 'You are already friends', requestSentWaiting: 'Request sent, waiting for confirmation',
     premiumLabel: 'Premium', ofUsers: 'of users', levelLabel: 'Level', maxLevelReached: 'Max level reached',
+    freeLabel: 'Free',
     achievements: 'Achievements', globalRanking: 'Global ranking', usersLower: 'users', onlySteam: 'Only available for Steam games',
     noAchievements: 'This game has no achievements, or the Steam profile is private', addedToRanking: 'Added to ranking',
     fromGamePlan: 'from your Game plan', noFoldersYet: 'Not on any list yet', never: 'Never', errorLoading: 'Error loading',
@@ -3195,10 +3308,11 @@ const I18N = {
     noRankingsYet: "You don't have any rankings yet. Create one.", noRankingGamesYet: 'This ranking is empty. Add games.',
     rankingLimitReached: 'Maximum 25 games per ranking', rankingFreeLimitReached: 'Free version limit (3 rankings). Upgrade to premium to create more.',
     removeFromRanking: 'Remove from ranking', date: 'Date', quantity: 'Quantity',
-    premiumThanksTitle: 'Thanks for going premium!', premiumThanksBody: 'Enjoy all of Playloggr\'s features.', premiumThanksBtn: 'Great',
+    premiumThanksTitle: 'Thanks for going premium!', premiumThanksBody: 'Everything is unlocked. Where do you want to start?', premiumThanksBtn: 'Great',
     streakDaysLabel: 'day streak', streakXpGained: 'XP for your streak', streakNextRewardIn: 'Next reward in',
     streakDay: 'day', streakDays: 'days',
     streakRewardPreviewXp: 'bonus XP', streakRewardPreviewAvatar: 'exclusive avatar', streakRewardPreviewFont: 'new username font', streakRewardPreviewAchievement: 'streak achievement',
+    streakRewardPreviewFrames: 'frames and banners by level',
     streakAvatarCreditTitle: 'You unlocked a streak avatar!', streakAvatarCreditBody: 'Pick which one to add to your collection.',
     streakUnlockBtn: 'Unlock', streakEquipNowBtn: 'Equip now',
     streakUnlockedFontTitle: 'New font unlocked!', streakUnlockedFontBody: 'You can now use this font for your username, from Settings.',
@@ -3256,16 +3370,41 @@ const I18N = {
     gameThemeHint: 'Muda toda a estética do app: cores e tipografia. Visível só na sua conta.',
     gameThemeInspiredBy: 'inspirado em',
     upgradeToPremiumBtn: 'Atualizar para Premium — USD $6.99 (pagamento único, impostos podem ser cobrados no checkout)',
-    premiumBenefitsShort: 'Desbloqueie conquistas, XP e níveis, personalização completa de avatar e mais listas/rankings/amigos.',
+    premiumBenefitsShort: 'Molduras, banners e fontes por nível, avatar completo, temas, listas e rankings ilimitados, plano de jogo e mais.',
     evolveToPremium: 'Evolua para Premium',
     premiumActiveTitle: 'Você já é Premium!', premiumTitle: 'Playloggr Premium',
     premiumActiveSubtitle: 'Obrigado por apoiar o projeto. Você tem acesso a tudo abaixo.',
     premiumSubtitle: 'Pagamento único, para sempre. Sem assinatura.',
+    paywallBuyWithPrice: 'Comprar Premium · {price}',
+    paywallOneTime: 'Pagamento único · para sempre · sem assinatura',
+    paywallSeeAll: 'Ver tudo o que inclui',
+    paywallAlsoIncludes: 'Também inclui',
+    paywallGeneralTitle: 'Leve seu perfil ao próximo nível',
+    paywallGeneralDetail: 'Tudo o que é essencial no Playloggr é grátis. O Premium adiciona cosméticos, temas e ferramentas extras, com um único pagamento.',
+    seePremium: 'Ver Premium',
+    premiumMemberTooltip: 'Usuário Premium',
+    compareTitle: 'Grátis vs Premium',
+    cmpLibrary: 'Biblioteca, desejos e sincronização',
+    cmpAchievements: 'Conquistas, XP e níveis',
+    cmpRankings: 'Rankings',
+    cmpAvatar: 'Editor de avatar',
+    cmpAvatarBasic: 'Básico',
+    cmpStats: 'Estatísticas recentes e de amigos',
+    themePreviewLabel: 'Prévia · {seconds}s',
+    themePreviewKeep: 'Ficar com ele',
+    themePreviewExit: 'Sair',
+    themePreviewTry: 'Testar',
+    themePreviewHint: 'Os temas são Premium, mas você pode testar qualquer um por 45 segundos.',
+    cosmeticsReadyTitle: 'Seu nível {level} já desbloqueou',
+    cosmeticsReadyCta: 'Ative-os com o Premium',
+    cosmeticsNextTier: 'Sua primeira moldura e banner desbloqueiam no nível {level}. Com o Premium você vai poder exibi-los.',
+    pickThemeCta: 'Escolher um tema',
+    customizeAvatarCta: 'Personalizar avatar',
     checkoutLoadError: 'Não foi possível carregar o checkout de pagamento. Recarregue a página e tente novamente.',
-    pbAchievementsTitle: 'Conquistas, XP e nível',
-    pbAchievementsDetail: 'A versão gratuita não desbloqueia conquistas nem soma XP: não há subida de nível. Premium sobe até o nível 150.',
+    pbAchievementsTitle: 'Molduras, banners e fontes por nível',
+    pbAchievementsDetail: 'Conquistas, XP e níveis são grátis para todos. O Premium te dá as molduras de avatar, banners de perfil e fontes de nome que cada nível desbloqueia.',
     pbThemesTitle: 'Temas de videogame',
-    pbThemesDetail: 'Cyberpunk 2077, Portal, Undertale, Fallout, Elden Ring, Counter-Strike, StarCraft II, Doom e mais, com detalhes próprios de cada um.',
+    pbThemesDetail: 'Temas inspirados em Cyberpunk 2077, Portal, Undertale, Fallout, Elden Ring, Counter-Strike, StarCraft II, Doom e mais, cada um com seus próprios detalhes.',
     pbAvatarTitle: 'Personalização de avatar',
     pbAvatarDetail: 'Todas as roupas e estilos do editor de avatar, sem restrições.',
     pbGamePlanTitle: 'Plano de jogo',
@@ -3273,9 +3412,23 @@ const I18N = {
     pbStatsTitle: 'Estatísticas de atividade recente',
     pbStatsDetail: 'Acompanhamento detalhado do que você jogou, avaliou e avançou nas últimas semanas.',
     pbFoldersTitle: 'Listas e rankings ilimitados',
-    pbFoldersDetail: 'A versão gratuita limita a 10 listas e 3 rankings. Premium não tem limite.',
-    pbFriendsTitle: 'Mais amigos',
-    pbFriendsDetail: 'A versão gratuita limita a 3 amigos. Premium não tem limite.',
+    pbFoldersDetail: 'A versão gratuita permite 10 listas por seção e 3 rankings. O Premium não tem limite.',
+    paywallFoldersTitle: 'Você chegou a 10 listas',
+    paywallFoldersDetail: 'A versão gratuita permite até 10 listas por seção. Com o Premium você cria quantas quiser.',
+    cmpFolders: 'Listas',
+    paywallRankingsTitle: 'Você chegou a 3 rankings',
+    paywallRankingsDetail: 'A versão gratuita permite até 3 rankings. Com o Premium você cria quantos quiser.',
+    paywallTaxNote: 'Preço em dólares; os impostos são calculados no checkout.',
+    cosmeticsFramesOne: '1 moldura',
+    cosmeticsFramesMany: '{count} molduras',
+    cosmeticsBannersOne: '1 banner',
+    cosmeticsBannersMany: '{count} banners',
+    cosmeticsFontsOne: '1 fonte',
+    cosmeticsFontsMany: '{count} fontes',
+    pbFriendsTitle: 'Jogos em comum e estatísticas de amigos',
+    pbFriendsDetail: 'Veja quais jogos você tem em comum com cada amigo e compare as estatísticas deles.',
+    pbStreakAvatarsTitle: 'Avatares de sequência',
+    pbStreakAvatarsDetail: 'A cada 10 dias de sequência você escolhe um avatar exclusivo para o seu perfil.',
     close: 'Fechar', search: 'Buscar...',
     chooseUsername: 'Escolha seu nome de usuário',
     usernameHint: 'Somente letras e números, sem espaços ou acentos. Seus amigos vão ver.',
@@ -3307,7 +3460,7 @@ const I18N = {
     planTotalPct: 'Progresso do plano', planTotalHours: 'Horas totais do plano', planHoursPlayed: 'Horas jogadas do plano',
     planName: 'Nome do plano (opcional)', planNamePrompt: 'Nome do plano',
     premiumRequiredTitle: 'Função premium', planPremiumRequired: 'Plano de jogo requer a versão premium', buyPremium: 'Tornar-se Premium',
-    premiumLevelHint: 'suba até o nível 150',
+    premiumLevelHint: 'desbloqueie os cosméticos do seu nível',
     resumePlan: 'Retomar plano', deletePlan: 'Excluir plano', deletePlanConfirm: 'Excluir este plano? Não pode ser desfeito.',
     periodLastWeek: 'Última semana', periodLastMonth: 'Último mês',
     periodNoData: 'Ainda não há dados para este período', periodNoStatusChanges: 'Sem mudanças de status',
@@ -3364,6 +3517,7 @@ const I18N = {
     gamesLower: 'jogos', wishlistLower: 'desejados', removeFriend: 'Remover amigo', block: 'Bloquear',
     alreadyFriends: 'Vocês já são amigos', requestSentWaiting: 'Solicitação enviada, aguardando confirmação',
     premiumLabel: 'Premium', ofUsers: 'dos usuários', levelLabel: 'Nível', maxLevelReached: 'Nível máximo atingido',
+    freeLabel: 'Grátis',
     achievements: 'Conquistas', globalRanking: 'Ranking global', usersLower: 'usuários', onlySteam: 'Disponível apenas para jogos da Steam',
     noAchievements: 'Este jogo não tem conquistas, ou o perfil da Steam é privado', addedToRanking: 'Adicionado ao ranking',
     fromGamePlan: 'do seu Plano de jogo', noFoldersYet: 'Não está em nenhuma lista', never: 'Nunca', errorLoading: 'Erro ao carregar',
@@ -3483,10 +3637,11 @@ const I18N = {
     noRankingsYet: 'Você ainda não tem rankings. Crie um.', noRankingGamesYet: 'Este ranking está vazio. Adicione jogos.',
     rankingLimitReached: 'Máximo de 25 jogos por ranking', rankingFreeLimitReached: 'Limite da versão gratuita (3 rankings). Atualize para premium para criar mais.',
     removeFromRanking: 'Remover do ranking', date: 'Data', quantity: 'Quantidade',
-    premiumThanksTitle: 'Obrigado por ser premium!', premiumThanksBody: 'Aproveite todos os recursos do Playloggr.', premiumThanksBtn: 'Ótimo',
+    premiumThanksTitle: 'Obrigado por ser premium!', premiumThanksBody: 'Tudo está desbloqueado. Por onde você quer começar?', premiumThanksBtn: 'Ótimo',
     streakDaysLabel: 'dias seguidos', streakXpGained: 'XP pela sua sequência', streakNextRewardIn: 'Próxima recompensa em',
     streakDay: 'dia', streakDays: 'dias',
     streakRewardPreviewXp: 'XP extra', streakRewardPreviewAvatar: 'avatar exclusivo', streakRewardPreviewFont: 'nova fonte de nome', streakRewardPreviewAchievement: 'conquista de sequência',
+    streakRewardPreviewFrames: 'molduras e banners por nível',
     streakAvatarCreditTitle: 'Você desbloqueou um avatar de sequência!', streakAvatarCreditBody: 'Escolha qual adicionar à sua coleção.',
     streakUnlockBtn: 'Desbloquear', streakEquipNowBtn: 'Equipar agora',
     streakUnlockedFontTitle: 'Nova fonte desbloqueada!', streakUnlockedFontBody: 'Agora você pode usar essa fonte no seu nome de usuário, em Configurações.',
@@ -6427,6 +6582,7 @@ function setView(view) {
     cardColorMode = s.cardColor;
     renderGames();
     applyGameTheme(s.gameTheme);
+    if (_themePreview) _setGameThemeAttr(_themePreview.key);
     _appearanceSnapshot = null;
     _appearancePendingBody = {};
   }
@@ -6948,7 +7104,7 @@ async function loadLeaderboard() {
           font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center">${pos}</span>
         <a href="${PUBLIC_PROFILE_BASE}/${encodeURIComponent(r.username)}" target="_blank" rel="noopener"
           style="font-size:13.5px;font-weight:600;color:inherit;text-decoration:none;flex:1;min-width:0;
-          overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.username)}</a>
+          overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.username)}${premiumMarkHtml(r.is_premium, 13)}</a>
         ${r.title ? titleHtml(r.title, 9) : ''}
         <span style="font-size:11.5px;color:var(--text2);flex-shrink:0">${esc(t('levelLabel'))} ${r.level}</span>
         <span style="font-size:11.5px;color:var(--green);font-weight:600;flex-shrink:0;min-width:56px;text-align:right">${r.xp.toLocaleString()} XP</span>
@@ -7418,9 +7574,7 @@ async function loadGlobalRankings() {
           <div>${section(t('mostWished'), rankList(d.recent.most_wished, 'count', '', usersSuffix))}</div>
         </div>
         ` : `
-        <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg2);border-radius:8px;color:var(--text2);font-size:12px">
-          <i class="ti ti-lock"></i> ${t('premiumRequiredRecentStats')}
-        </div>
+        ${premiumLockedPanelHtml(t('premiumRequiredRecentStats'), 'recentStats')}
         `}
       </div>
     `;
@@ -7595,12 +7749,23 @@ function renderAppearanceTab() {
   if (gtGroup) {
     gtGroup.style.display = '';
     const current = document.documentElement.dataset.gameTheme || 'none';
-    document.getElementById('cfg-gametheme-options').innerHTML = GAME_THEMES().map(([key, label]) => {
+    const previewKey = _themePreview && _themePreview.key;
+    // Gratis: en vez de una lista de nombres bloqueados, cada tema se puede
+    // probar unos segundos (ver startThemePreview).
+    const hint = isPremium ? '' : `<div style="display:flex;align-items:center;gap:8px;width:100%;grid-column:1/-1;margin-bottom:4px">
+        ${premiumBadgeHtml()}<span style="font-size:12px;color:var(--text2)">${esc(t('themePreviewHint'))}</span></div>`;
+    document.getElementById('cfg-gametheme-options').innerHTML = hint + GAME_THEMES().map(([key, label]) => {
       const locked = !isPremium && key !== 'none';
+      const previewing = previewKey === key;
+      const active = previewKey ? previewing : current === key;
+      const onclick = locked
+        ? (previewing ? 'endThemePreview()' : `startThemePreview('${key}')`)
+        : `endThemePreview(true);applyGameTheme('${key}')`;
       return `
-        <button type="button" class="cfg-choice-btn ${current === key ? 'active' : ''}" style="justify-content:flex-start;text-align:left;opacity:${locked ? 0.5 : 1}"
-          title="${locked ? t('buyPremium') : ''}"
-          onclick="${locked ? 'startPaddleCheckout()' : `applyGameTheme('${key}')`}">${locked ? '<i class="ti ti-lock" style="font-size:12px;margin-right:4px"></i>' : ''}${label}</button>
+        <button type="button" class="cfg-choice-btn ${active ? 'active' : ''}" style="justify-content:flex-start;text-align:left;${previewing ? 'border-color:#8E7CE8;' : ''}"
+          onclick="${onclick}">${label}${locked && !previewing
+            ? `<span class="pl-try-chip"><i class="ti ti-player-play"></i> ${esc(t('themePreviewTry'))}</span>`
+            : ''}${previewing ? '<i class="ti ti-eye" style="margin-left:auto;color:#8E7CE8"></i>' : ''}</button>
       `;
     }).join('');
   }
@@ -7792,7 +7957,7 @@ function renderRacePicker() {
     AVATAR_BODY_OPTIONS.map((r, i) => {
       const active = currentAvatarConfig.body === r;
       const locked = !isPremium && i > 0;
-      return `<div onclick="${locked ? 'startPaddleCheckout()' : `setAvatarRace('${r}')`}" title="${locked ? t('buyPremium') : r}" style="width:44px;height:44px;flex-shrink:0;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid ${active ? 'var(--green)' : 'transparent'};overflow:hidden;position:relative;opacity:${locked ? 0.35 : 1}">
+      return `<div onclick="${locked ? `openPaywall('avatar')` : `setAvatarRace('${r}')`}" title="${locked ? t('buyPremium') : r}" style="width:44px;height:44px;flex-shrink:0;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid ${active ? 'var(--green)' : 'transparent'};overflow:hidden;position:relative;opacity:${locked ? 0.35 : 1}">
         <img src="avatar_pixel/body/${r}.png" style="width:40px;height:40px;image-rendering:pixelated" />
         ${locked ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35)"><i class="ti ti-lock" style="font-size:16px;color:#fff"></i></div>` : ''}
       </div>`;
@@ -7800,7 +7965,7 @@ function renderRacePicker() {
   }</div>`;
 }
 function setAvatarRace(r) {
-  if (!isPremium && r !== AVATAR_BODY_OPTIONS[0]) { startPaddleCheckout(); return; }
+  if (!isPremium && r !== AVATAR_BODY_OPTIONS[0]) { openPaywall('avatar'); return; }
   currentAvatarConfig.body = r;
   refreshAvatarControls();
 }
@@ -7815,12 +7980,12 @@ function renderColorOnlyPicker(containerId, category, style, colors) {
     colors.map(c => {
       const active = c === currentColor;
       const locked = !isPremium && c !== AVATAR_FREE_COLOR;
-      return `<button onclick="${locked ? 'startPaddleCheckout()' : `setAvatarColorOnly('${category}','${style}','${c}')`}" title="${locked ? t('buyPremium') : c}" style="width:26px;height:26px;border-radius:50%;background:${AVATAR_COLOR_SWATCH[c]};border:2px solid ${active ? 'var(--text)' : 'transparent'};cursor:pointer;padding:0;position:relative;opacity:${locked ? 0.35 : 1}">${locked ? '<i class="ti ti-lock" style="font-size:10px;color:#fff"></i>' : ''}</button>`;
+      return `<button onclick="${locked ? `openPaywall('avatar')` : `setAvatarColorOnly('${category}','${style}','${c}')`}" title="${locked ? t('buyPremium') : c}" style="width:26px;height:26px;border-radius:50%;background:${AVATAR_COLOR_SWATCH[c]};border:2px solid ${active ? 'var(--text)' : 'transparent'};cursor:pointer;padding:0;position:relative;opacity:${locked ? 0.35 : 1}">${locked ? '<i class="ti ti-lock" style="font-size:10px;color:#fff"></i>' : ''}</button>`;
     }).join('')
   }</div>`;
 }
 function setAvatarColorOnly(category, style, color) {
-  if (!isPremium && color !== AVATAR_FREE_COLOR) { startPaddleCheckout(); return; }
+  if (!isPremium && color !== AVATAR_FREE_COLOR) { openPaywall('avatar'); return; }
   currentAvatarConfig[category] = `${style}_${color}`;
   refreshAvatarControls();
 }
@@ -7848,7 +8013,7 @@ function renderLayerPicker(containerId, category, styleColorMap, allowNone) {
     const firstColor = styleColorMap[s][0];
     const active = !!value && s === currentStyle;
     const locked = !isPremium;
-    return `<div onclick="${locked ? 'startPaddleCheckout()' : `setAvatarLayerStyle('${category}', '${s}')`}" title="${locked ? t('buyPremium') : s}" style="width:44px;height:44px;flex-shrink:0;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid ${active ? 'var(--green)' : 'transparent'};overflow:hidden;position:relative;opacity:${locked ? 0.35 : 1}">
+    return `<div onclick="${locked ? `openPaywall('avatar')` : `setAvatarLayerStyle('${category}', '${s}')`}" title="${locked ? t('buyPremium') : s}" style="width:44px;height:44px;flex-shrink:0;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid ${active ? 'var(--green)' : 'transparent'};overflow:hidden;position:relative;opacity:${locked ? 0.35 : 1}">
       <img src="avatar_pixel/${category}/${s}_${firstColor}.png" style="width:40px;height:40px;image-rendering:pixelated" />
       ${locked ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35)"><i class="ti ti-lock" style="font-size:16px;color:#fff"></i></div>` : ''}
     </div>`;
@@ -7872,18 +8037,18 @@ const AVATAR_CATEGORY_MAPS = {
 };
 
 function setAvatarLayer(category, value) {
-  if (!isPremium && value !== null) { startPaddleCheckout(); return; }
+  if (!isPremium && value !== null) { openPaywall('avatar'); return; }
   currentAvatarConfig[category] = value;
   refreshAvatarControls();
 }
 function setAvatarLayerStyle(category, style) {
-  if (!isPremium) { startPaddleCheckout(); return; }
+  if (!isPremium) { openPaywall('avatar'); return; }
   const color = AVATAR_CATEGORY_MAPS[category][style][0];
   currentAvatarConfig[category] = `${style}_${color}`;
   refreshAvatarControls();
 }
 function setAvatarLayerColor(category, color) {
-  if (!isPremium) { startPaddleCheckout(); return; }
+  if (!isPremium) { openPaywall('avatar'); return; }
   const style = currentAvatarConfig[category].split('_')[0];
   currentAvatarConfig[category] = `${style}_${color}`;
   refreshAvatarControls();
@@ -8145,7 +8310,7 @@ function renderAchievementsPanel() {
         ${d.all_completed ? '<i class="ti ti-trophy" style="font-size:26px;color:#EF9F27"></i>' : ''}
       </div>
       <div style="font-size:11px;color:var(--text2);margin-top:10px">${d.unlocked_count} ${t('of')} ${d.total_count} ${t('achievementsUnlocked')}</div>
-      ${!isPremium ? `<button onclick="startPaddleCheckout()" style="width:100%;margin-top:10px;padding:8px;border-radius:8px;border:none;background:var(--green);color:var(--on-accent);font-size:12px;font-weight:600;cursor:pointer">✨ ${t('buyPremium')} — ${t('premiumLevelHint')}</button>` : ''}
+      ${!isPremium ? `<div style="margin-top:12px">${levelCosmeticsTeaserHtml()}</div>` : ''}
     </div>
     ${categoriesHtml || (_achievementsOnlyLocked ? `<div style="text-align:center;padding:24px;color:var(--text2)">${t('allAchievementsUnlocked')}</div>` : '')}
   `;
@@ -8305,8 +8470,9 @@ function renderStreakModal() {
       <div style="${retro};font-size:11px">${t('streakFreeUpsellTitle')}</div>
       <div style="margin-top:8px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
         <span style="${retro};font-size:8px;color:#EF9F27;border:1px solid #EF9F27;border-radius:14px;padding:6px 10px">${t('streakRewardPreviewAvatar')}</span>
-        <span style="${retro};font-size:8px;color:#EF9F27;border:1px solid #EF9F27;border-radius:14px;padding:6px 10px">${t('streakRewardPreviewXp')}</span>
-      </div>`;
+        <span style="${retro};font-size:8px;color:#EF9F27;border:1px solid #EF9F27;border-radius:14px;padding:6px 10px">${t('streakRewardPreviewFrames')}</span>
+      </div>
+      <button class="pl-premium-btn pl-premium-btn-sm" style="margin-top:12px" onclick="closeStreakModal();openPaywall('streakAvatars')"><i class="ti ti-crown"></i> ${esc(t('seePremium'))}</button>`;
   }
 
   html += `<button onclick="closeStreakModal()" style="${retro};font-size:10px;margin-top:16px;background:none;border:none;color:var(--text2);cursor:pointer;padding:8px">${t('streakClose')}</button>`;
@@ -8896,7 +9062,7 @@ function _showPlanPremiumGate() {
       </div>
       <div class="modal-actions">
         <button class="btn-cancel" onclick="this.closest('.modal-overlay').remove()">${t('cancel')}</button>
-        <button class="btn-save" style="background:var(--green)" onclick="this.closest('.modal-overlay').remove();startPaddleCheckout()">✨ ${t('buyPremium')}</button>
+        <button class="btn-save" style="background:var(--green)" onclick="this.closest('.modal-overlay').remove();openPaywall('gamePlan')">✨ ${t('seePremium')}</button>
       </div>
     </div>`;
   document.body.appendChild(overlay);
@@ -9365,7 +9531,7 @@ function _renderPlanPremiumRequiredDialog() {
     </div>`;
   document.getElementById('plan-wizard-actions').innerHTML = `
     <button class="btn-cancel" onclick="_closePlanWizard()">${t('cancel')}</button>
-    <button class="btn-save" style="background:var(--green)" onclick="_closePlanWizard();startPaddleCheckout()">✨ ${t('buyPremium')}</button>`;
+    <button class="btn-save" style="background:var(--green)" onclick="_closePlanWizard();openPaywall('gamePlan')">✨ ${t('seePremium')}</button>`;
 }
 
 function _renderPlanResumeChoiceDialog(currentHours) {
@@ -9939,7 +10105,7 @@ async function openFriendProfile(username) {
        </div>`
     : '<i class="ti ti-user"></i>';
   document.getElementById('friend-profile-title').innerHTML =
-    `${avatarHtml} ${levelBadgeHtml(li)}<span style="${usernameFontStyle(li && li.font)}">${esc(username)}</span>`
+    `${avatarHtml} ${levelBadgeHtml(li)}<span style="${usernameFontStyle(li && li.font)}">${esc(username)}</span>${premiumMarkHtml(li && li.is_premium, 15)}`
     + `<span id="friend-follow-slot" style="margin-left:auto;display:flex;gap:6px;align-items:center"></span>`;
   document.getElementById('friend-profile-overlay').classList.add('open');
   renderFollowButton(username);
@@ -10049,6 +10215,7 @@ async function loadFriendCommonGames() {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
     const data = await res.json();
+    if (isPremiumError(res, data)) { list.innerHTML = premiumLockedPanelHtml(data.detail, 'friends'); return; }
     if (!res.ok) throw new Error(data.detail || 'Error');
     const games = data.common_games || [];
     list.innerHTML = games.length
@@ -10161,6 +10328,7 @@ async function loadFriendStats() {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
     const d = await res.json();
+    if (isPremiumError(res, d)) { el.innerHTML = premiumLockedPanelHtml(d.detail, 'friends'); return; }
     if (!res.ok) throw new Error(d.detail || 'Error');
     const byStatus   = d.by_status   || [];
     const byPlatform = d.by_platform || [];
@@ -11694,7 +11862,7 @@ async function loadPremiumStatus() {
     // restauro un tema desde localStorage antes de saber esto (ver el
     // "try" cerca de applyGameTheme, que aplica de inmediato para evitar
     // flash) y la cuenta no es premium, se revierte.
-    if (!isPremium && document.documentElement.dataset.gameTheme) {
+    if (!isPremium && document.documentElement.dataset.gameTheme && !_themePreview) {
       delete document.documentElement.dataset.gameTheme;
       localStorage.removeItem('pl_game_theme');
     }
@@ -11731,6 +11899,11 @@ async function pollForPremium(attempt = 0) {
   const wasPremium = isPremium;
   await loadPremiumStatus();
   if (isPremium && !wasPremium) {
+    if (_themePreview) {
+      const key = _themePreview.key;
+      endThemePreview(true);
+      applyGameTheme(key);
+    }
     showPremiumThanksPopup();
     return;
   }
@@ -11742,11 +11915,17 @@ function showPremiumThanksPopup() {
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay open';
   overlay.innerHTML = `
-    <div class="modal" style="max-width:360px;text-align:center">
-      <div style="font-size:40px;margin-bottom:8px">🎉</div>
-      <div class="modal-title" style="justify-content:center">${t('premiumThanksTitle')}</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">${t('premiumThanksBody')}</p>
-      <button class="btn-save" style="width:100%" onclick="this.closest('.modal-overlay').remove()">${t('premiumThanksBtn')}</button>
+    <div class="modal" style="max-width:360px;text-align:center;padding:0;overflow:hidden">
+      <div class="pl-premium-grad" style="padding:24px"><i class="ti ti-crown" style="font-size:52px"></i></div>
+      <div style="padding:18px 20px 14px">
+        <div style="font-size:19px;font-weight:800">${esc(t('premiumThanksTitle'))}</div>
+        <p style="font-size:13px;color:var(--text2);margin:6px 0 16px">${esc(t('premiumThanksBody'))}</p>
+        <button class="pl-premium-btn" onclick="this.closest('.modal-overlay').remove();openConfigPanel();setTimeout(()=>switchConfigTab('appearance'),50)">
+          <i class="ti ti-palette"></i> ${esc(t('pickThemeCta'))}</button>
+        <button class="btn-cancel" style="width:100%;margin-top:8px" onclick="this.closest('.modal-overlay').remove();openConfigPanel();setTimeout(()=>switchConfigTab('avatar'),50)">
+          ${esc(t('customizeAvatarCta'))}</button>
+        <button class="pl-link-btn" style="margin-top:6px" onclick="this.closest('.modal-overlay').remove()">${esc(t('premiumThanksBtn'))}</button>
+      </div>
     </div>`;
   document.body.appendChild(overlay);
 }
@@ -11774,40 +11953,255 @@ function _ensurePaddleReady() {
   _paddleReady = true;
 }
 
+// ── Premium: paywall con contexto, vista previa de temas, teaser ─────────
+// Antes cada candado llamaba a startPaddleCheckout() directo: el checkout de
+// Paddle se abria sin que el usuario viera que desbloqueaba ni cuanto salia.
+const PREMIUM_PRICE_LABEL = 'USD $6.99';
+let _premiumHighlight = 'general';
+
+const PAYWALL_FEATURES = {
+  general:       { icon: 'ti-crown',       title: 'paywallGeneralTitle',  detail: 'paywallGeneralDetail' },
+  themes:        { icon: 'ti-palette',     title: 'pbThemesTitle',        detail: 'pbThemesDetail' },
+  avatar:        { icon: 'ti-user-square', title: 'pbAvatarTitle',        detail: 'pbAvatarDetail' },
+  frames:        { icon: 'ti-sparkles',    title: 'pbAchievementsTitle',  detail: 'pbAchievementsDetail' },
+  banners:       { icon: 'ti-sparkles',    title: 'pbAchievementsTitle',  detail: 'pbAchievementsDetail' },
+  fonts:         { icon: 'ti-sparkles',    title: 'pbAchievementsTitle',  detail: 'pbAchievementsDetail' },
+  streakAvatars: { icon: 'ti-flame',       title: 'pbStreakAvatarsTitle', detail: 'pbStreakAvatarsDetail' },
+  gamePlan:      { icon: 'ti-route',       title: 'pbGamePlanTitle',      detail: 'pbGamePlanDetail' },
+  recentStats:   { icon: 'ti-chart-line',  title: 'pbStatsTitle',         detail: 'pbStatsDetail' },
+  friends:       { icon: 'ti-users',       title: 'pbFriendsTitle',       detail: 'pbFriendsDetail' },
+  folders:       { icon: 'ti-folders',     title: 'paywallFoldersTitle',  detail: 'paywallFoldersDetail' },
+  rankings:      { icon: 'ti-trophy',      title: 'paywallRankingsTitle', detail: 'paywallRankingsDetail' },
+};
+
+function premiumBadgeHtml() {
+  return `<span class="pl-premium-badge"><i class="ti ti-crown" style="font-size:10px"></i>${esc(t('premiumLabel').toUpperCase())}</span>`;
+}
+
+/** Corona chica junto al nombre de un usuario Premium (ranking, amigos). */
+function premiumMarkHtml(isPrem, size = 14) {
+  if (!isPrem) return '';
+  return `<span class="pl-premium-mark" title="${esc(t('premiumMemberTooltip'))}"><i class="ti ti-crown pl-premium-text" style="font-size:${size}px"></i></span>`;
+}
+
+/** Panel inline para una funcion bloqueada: mensaje + boton al paywall. */
+function premiumLockedPanelHtml(message, feature) {
+  return `<div class="pl-locked-panel">
+    <div style="display:flex;align-items:center;gap:10px">${premiumBadgeHtml()}<span style="font-size:12.5px;color:var(--text2)">${esc(message)}</span></div>
+    <button class="pl-premium-btn pl-premium-btn-sm" style="margin-top:12px" onclick="openPaywall('${feature}')"><i class="ti ti-crown"></i> ${esc(t('seePremium'))}</button>
+  </div>`;
+}
+
+/** 403 del backend por una funcion/limite de la version gratis. */
+function isPremiumError(res, data) {
+  return res && res.status === 403 && /premium/i.test((data && data.detail) || '');
+}
+
+function openPaywall(feature = 'general') {
+  if (isPremium) return;
+  _premiumHighlight = feature;
+  closePaywall();
+  const f = PAYWALL_FEATURES[feature] || PAYWALL_FEATURES.general;
+  const extras = ['themes', 'frames', 'avatar', 'gamePlan', 'folders']
+    .filter(k => PAYWALL_FEATURES[k].title !== f.title).slice(0, 3);
+  const overlay = document.createElement('div');
+  overlay.id = 'paywall-overlay';
+  overlay.className = 'modal-overlay open';
+  overlay.onclick = e => { if (e.target === overlay) closePaywall(); };
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:400px;text-align:center">
+      <div class="pl-premium-grad" style="width:64px;height:64px;border-radius:50%;margin:4px auto 12px;display:flex;align-items:center;justify-content:center">
+        <i class="ti ${f.icon}" style="font-size:32px"></i>
+      </div>
+      <div style="font-size:19px;font-weight:700">${esc(t(f.title))}</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.4;margin-top:6px">${esc(t(f.detail))}</div>
+      <div style="text-align:left;margin-top:18px;font-size:11px;font-weight:600;letter-spacing:.8px;color:var(--text2);text-transform:uppercase">${esc(t('paywallAlsoIncludes'))}</div>
+      ${extras.map(k => `<div style="display:flex;align-items:center;gap:10px;margin-top:8px;text-align:left">
+        <i class="ti ${PAYWALL_FEATURES[k].icon} pl-premium-text" style="font-size:19px"></i>
+        <span style="font-size:13.5px;font-weight:500">${esc(t(PAYWALL_FEATURES[k].title))}</span></div>`).join('')}
+      <button class="pl-premium-btn" style="margin-top:18px" onclick="closePaywall();startPaddleCheckout()">
+        <i class="ti ti-crown"></i> ${esc(t('paywallBuyWithPrice').replace('{price}', PREMIUM_PRICE_LABEL))}
+      </button>
+      <div style="font-size:11.5px;color:var(--text2);margin-top:8px">${esc(t('paywallOneTime'))}</div>
+      <div style="font-size:10.5px;color:var(--text2);margin-top:2px">${esc(t('paywallTaxNote'))}</div>
+      <div style="display:flex;justify-content:center;gap:16px;margin-top:8px">
+        <button class="pl-link-btn" onclick="closePaywall();setView('premium')">${esc(t('paywallSeeAll'))}</button>
+        <button class="pl-link-btn" onclick="closePaywall()">${esc(t('close'))}</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function closePaywall() {
+  const o = document.getElementById('paywall-overlay');
+  if (o) o.remove();
+}
+
+/** "7/10" junto a listas/rankings en cuentas gratis; tocarlo abre el paywall. */
+function freeLimitCounterHtml(used, max, feature) {
+  if (isPremium) return '';
+  return `<span class="pl-limit-counter ${used >= max ? 'full' : ''}" onclick="openPaywall('${feature}')">${Math.min(used, max)}/${max}</span>`;
+}
+const FREE_FOLDERS_LIMIT = 10;
+const FREE_RANKINGS_LIMIT = 3;
+
+// Vista previa de temas (gratis): se aplica unos segundos sin guardarlo en
+// localStorage, con una barra de cuenta regresiva, y vuelve solo al anterior.
+const THEME_PREVIEW_MS = 45000;
+let _themePreview = null;
+
+function _setGameThemeAttr(key) {
+  if (key && key !== 'none') {
+    document.documentElement.dataset.gameTheme = key;
+    ensureGameThemeFontsLoaded();
+  } else {
+    delete document.documentElement.dataset.gameTheme;
+  }
+}
+
+function startThemePreview(key) {
+  if (isPremium) { applyGameTheme(key); return; }
+  const prev = _themePreview ? _themePreview.prev : (document.documentElement.dataset.gameTheme || 'none');
+  endThemePreview(true);
+  _themePreview = { key, prev, endsAt: Date.now() + THEME_PREVIEW_MS };
+  _setGameThemeAttr(key);
+  _themePreview.timer = setTimeout(() => endThemePreview(), THEME_PREVIEW_MS);
+  _themePreview.tick = setInterval(_renderThemePreviewBar, 1000);
+  _renderThemePreviewBar();
+  renderAppearanceTab();
+}
+
+function endThemePreview(silent) {
+  if (!_themePreview) return;
+  clearTimeout(_themePreview.timer);
+  clearInterval(_themePreview.tick);
+  const prev = _themePreview.prev;
+  _themePreview = null;
+  const bar = document.getElementById('theme-preview-bar');
+  if (bar) bar.remove();
+  if (!silent) {
+    _setGameThemeAttr(prev);
+    renderAppearanceTab();
+  }
+}
+
+function _renderThemePreviewBar() {
+  if (!_themePreview) return;
+  let bar = document.getElementById('theme-preview-bar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'theme-preview-bar';
+    bar.className = 'pl-preview-bar pl-premium-grad';
+    document.body.appendChild(bar);
+  }
+  const secs = Math.max(0, Math.ceil((_themePreview.endsAt - Date.now()) / 1000));
+  const def = GAME_THEME_DEFS.find(d => d[0] === _themePreview.key);
+  bar.innerHTML = `
+    <i class="ti ti-eye" style="font-size:18px"></i>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:11px;font-weight:600">${esc(t('themePreviewLabel').replace('{seconds}', secs))}</div>
+      <div style="font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(def ? def[1] : '')}</div>
+    </div>
+    <button class="pl-preview-exit" onclick="endThemePreview()">${esc(t('themePreviewExit'))}</button>
+    <button class="pl-preview-keep" onclick="openPaywall('themes')">${esc(t('themePreviewKeep'))}</button>`;
+}
+
+/** Gratis: lo que el nivel YA desbloqueo (marcos, banners, fuentes) y que se
+ *  activa con Premium. Los niveles son gratis; se paga lucirlos. */
+function levelCosmeticsTeaserHtml() {
+  if (isPremium) return '';
+  const lvl = userLevel || 1;
+  const frames = kFrameTiers.filter(([id, l]) => id !== 'none' && lvl >= l);
+  const banners = kBannerTiers.filter(([id, l]) => id !== 'none' && lvl >= l).length;
+  const fonts = kFontTiers.filter(([id, l]) => id !== 'default' && lvl >= l).length;
+  const head = frames.length
+    ? t('cosmeticsReadyTitle').replace('{level}', lvl)
+    : t('cosmeticsNextTier').replace('{level}', kFrameTiers[1][1]);
+  const count = (n, one, many) => esc(n === 1 ? t(one) : t(many).replace('{count}', n));
+  const chip = txt => `<span class="pl-teaser-chip">${txt}</span>`;
+  return `<div class="pl-teaser">
+    <div style="display:flex;align-items:center;gap:8px">${premiumBadgeHtml()}
+      <span style="font-size:13px;${frames.length ? 'font-weight:700' : 'color:var(--text2)'}">${esc(head)}</span></div>
+    ${frames.length ? `
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+        ${chip(count(frames.length, 'cosmeticsFramesOne', 'cosmeticsFramesMany'))}
+        ${banners ? chip(count(banners, 'cosmeticsBannersOne', 'cosmeticsBannersMany')) : ''}
+        ${fonts ? chip(count(fonts, 'cosmeticsFontsOne', 'cosmeticsFontsMany')) : ''}
+      </div>
+      <div style="display:flex;gap:10px;margin-top:12px">
+        ${frames.slice(-4).map(([id]) => `<div class="${frameAnimClass(id)}" style="width:34px;height:34px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;${frameWrapStyle(id)}">${frameBadgeHtml(id)}</div>`).join('')}
+      </div>` : ''}
+    <button class="pl-premium-btn pl-premium-btn-sm" style="margin-top:12px" onclick="openPaywall('frames')">
+      <i class="ti ti-crown"></i> ${esc(t(frames.length ? 'cosmeticsReadyCta' : 'seePremium'))}</button>
+  </div>`;
+}
+
 function PREMIUM_BENEFITS() {
   return [
-    { icon: 'ti-trophy',          title: t('pbAchievementsTitle'), detail: t('pbAchievementsDetail') },
-    { icon: 'ti-palette',         title: t('pbThemesTitle'), detail: t('pbThemesDetail') },
-    { icon: 'ti-user-square',     title: t('pbAvatarTitle'), detail: t('pbAvatarDetail') },
-    { icon: 'ti-route',           title: t('pbGamePlanTitle'), detail: t('pbGamePlanDetail') },
-    { icon: 'ti-chart-line',      title: t('pbStatsTitle'), detail: t('pbStatsDetail') },
-    { icon: 'ti-folders',         title: t('pbFoldersTitle'), detail: t('pbFoldersDetail') },
-    { icon: 'ti-users',           title: t('pbFriendsTitle'), detail: t('pbFriendsDetail') },
+    { key: 'themes',        icon: 'ti-palette',     title: t('pbThemesTitle'),        detail: t('pbThemesDetail') },
+    { key: 'frames',        icon: 'ti-sparkles',    title: t('pbAchievementsTitle'),  detail: t('pbAchievementsDetail') },
+    { key: 'avatar',        icon: 'ti-user-square', title: t('pbAvatarTitle'),        detail: t('pbAvatarDetail') },
+    { key: 'streakAvatars', icon: 'ti-flame',       title: t('pbStreakAvatarsTitle'), detail: t('pbStreakAvatarsDetail') },
+    { key: 'gamePlan',      icon: 'ti-route',       title: t('pbGamePlanTitle'),      detail: t('pbGamePlanDetail') },
+    { key: 'recentStats',   icon: 'ti-chart-line',  title: t('pbStatsTitle'),         detail: t('pbStatsDetail') },
+    { key: 'friends',       icon: 'ti-users',       title: t('pbFriendsTitle'),       detail: t('pbFriendsDetail') },
+    { key: 'folders',       icon: 'ti-folders',     title: t('pbFoldersTitle'),       detail: t('pbFoldersDetail') },
   ];
+}
+
+// Que beneficio de la lista corresponde a la funcion que trajo al usuario.
+function _benefitKeyFor(feature) {
+  if (feature === 'banners' || feature === 'fonts') return 'frames';
+  if (feature === 'rankings') return 'folders';
+  return feature;
 }
 
 function renderPremiumView() {
   const body = document.getElementById('premium-view-body');
   if (!body) return;
-  const rows = PREMIUM_BENEFITS().map(b => `
-    <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px">
-      <div style="background:rgba(29,158,117,0.12);border-radius:10px;padding:8px;flex-shrink:0"><i class="ti ${b.icon}" style="color:var(--green);font-size:20px"></i></div>
+  const hl = _benefitKeyFor(_premiumHighlight);
+  const all = PREMIUM_BENEFITS();
+  const ordered = [...all.filter(b => b.key === hl), ...all.filter(b => b.key !== hl)];
+  const rows = ordered.map(b => `
+    <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:10px;padding:12px;border-radius:12px;
+      ${b.key === hl ? 'background:rgba(142,124,232,.10);border:1.5px solid #8E7CE8' : 'border:1.5px solid transparent'}">
+      <div class="pl-premium-grad" style="border-radius:10px;padding:8px;flex-shrink:0;display:flex"><i class="ti ${b.icon}" style="font-size:20px"></i></div>
       <div>
-        <div style="font-weight:600;font-size:14px">${b.title}</div>
-        <div style="font-size:12.5px;color:var(--text2);line-height:1.4;margin-top:2px">${b.detail}</div>
+        <div style="font-weight:700;font-size:14px">${esc(b.title)}</div>
+        <div style="font-size:12.5px;color:var(--text2);line-height:1.4;margin-top:2px">${esc(b.detail)}</div>
       </div>
     </div>`).join('');
+  const yes = '<i class="ti ti-circle-check" style="color:var(--green);font-size:18px"></i>';
+  const no = '<i class="ti ti-minus" style="color:var(--text2);font-size:16px"></i>';
+  const cmp = [
+    [t('cmpLibrary'), yes, yes],
+    [t('cmpAchievements'), yes, yes],
+    [t('cmpFolders'), '10', '<b>∞</b>'],
+    [t('cmpRankings'), '3', '<b>∞</b>'],
+    [t('pbAchievementsTitle'), no, yes],
+    [t('cmpAvatar'), esc(t('cmpAvatarBasic')), yes],
+    [t('pbStreakAvatarsTitle'), no, yes],
+    [t('pbThemesTitle'), no, yes],
+    [t('pbGamePlanTitle'), no, yes],
+    [t('cmpStats'), no, yes],
+  ];
   body.innerHTML = `
-    <div style="background:rgba(29,158,117,0.12);border:1px solid rgba(29,158,117,0.4);border-radius:16px;padding:20px;text-align:center;margin-bottom:20px">
-      <i class="ti ti-key" style="color:var(--green);font-size:32px"></i>
-      <div style="font-size:19px;font-weight:700;margin-top:6px">${isPremium ? t('premiumActiveTitle') : t('premiumTitle')}</div>
-      <div style="font-size:13px;color:var(--text2);margin-top:4px">${isPremium ? t('premiumActiveSubtitle') : t('premiumSubtitle')}</div>
+    <div class="pl-premium-grad" style="border-radius:18px;padding:24px 20px 20px;text-align:center;margin-bottom:20px">
+      <i class="ti ti-crown" style="font-size:40px"></i>
+      <div style="font-size:21px;font-weight:800;margin-top:6px">${esc(isPremium ? t('premiumActiveTitle') : t('premiumTitle'))}</div>
+      <div style="font-size:13px;opacity:.8;margin-top:4px">${esc(isPremium ? t('premiumActiveSubtitle') : t('paywallOneTime'))}</div>
     </div>
-    ${rows}
     ${isPremium ? '' : `
-    <button onclick="startPaddleCheckout()" style="width:100%;margin-top:8px;padding:14px;border-radius:8px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;font-size:15px;font-weight:600">
-      <i class="ti ti-crown"></i> ${t('upgradeToPremiumBtn')}
-    </button>`}
+    <button class="pl-premium-btn" style="margin-bottom:6px" onclick="startPaddleCheckout()">
+      <i class="ti ti-crown"></i> ${esc(t('paywallBuyWithPrice').replace('{price}', PREMIUM_PRICE_LABEL))}
+    </button>
+    <div style="font-size:10.5px;color:var(--text2);text-align:center;margin-bottom:18px">${esc(t('paywallTaxNote'))}</div>`}
+    ${rows}
+    <div style="font-size:16px;font-weight:700;margin:18px 0 10px">${esc(t('compareTitle'))}</div>
+    <table class="pl-compare">
+      <tr><th></th><th style="color:var(--text2);font-size:12px">${esc(t('freeLabel'))}</th><th>${premiumBadgeHtml()}</th></tr>
+      ${cmp.map(([label, free, prem]) => `<tr><td>${esc(label)}</td><td>${free}</td><td>${prem}</td></tr>`).join('')}
+    </table>
   `;
 }
 
@@ -12314,11 +12708,11 @@ function applyPremiumUI() {
   ['premium-badge', 'cfg-premium-badge'].forEach(id => {
     const badge = document.getElementById(id);
     if (!badge) return;
-    badge.textContent = isPremium ? 'Premium' : 'Gratis';
+    badge.textContent = isPremium ? t('premiumLabel') : t('freeLabel');
     badge.style.background = isPremium ? 'rgba(29,158,117,0.15)' : 'rgba(136,135,128,0.25)';
     badge.style.color      = isPremium ? 'var(--green)' : 'var(--text2)';
     badge.style.cursor     = isPremium ? 'default' : 'pointer';
-    badge.onclick = isPremium ? null : startPaddleCheckout;
+    badge.onclick = isPremium ? null : () => setView('premium');
   });
   const upgradeBtn = document.getElementById('cfg-upgrade-btn');
   if (upgradeBtn) upgradeBtn.style.display = isPremium ? 'none' : 'block';
@@ -12372,32 +12766,31 @@ function renderCosmeticPickers() {
   const unlockInfo = document.getElementById('cfg-font-unlock-info');
   if (unlockInfo) unlockInfo.style.display = isPremium ? 'none' : '';
 
-  if (!isPremium) {
-    const lockedMsg = `<div style="display:flex;flex-direction:column;gap:8px;padding:10px;background:var(--bg3);border-radius:8px">
-      <div style="display:flex;align-items:center;gap:8px;color:var(--text2);font-size:12px"><i class="ti ti-lock"></i>${t('requiresPremiumHint')}</div>
-      <button onclick="startPaddleCheckout()" style="padding:8px;border-radius:8px;border:none;background:var(--green);color:var(--on-accent);font-size:12px;font-weight:600;cursor:pointer">✨ ${t('buyPremium')}</button>
-    </div>`;
-    frameEl.innerHTML = lockedMsg;
-    fontEl.innerHTML  = lockedMsg;
-    if (bannerEl) bannerEl.innerHTML = lockedMsg;
-    return;
-  }
+  // Gratis: antes los tres selectores se reemplazaban por un candado (y eso
+  // dejaba sin poder elegir las fuentes ganadas con la racha). Ahora se ven
+  // los mismos selectores: lo que el nivel ya alcanzo, a color y con la marca
+  // de Premium, y tocar algo bloqueado abre el paywall.
 
   if (bannerEl) bannerEl.innerHTML = kBannerTiers.map(([id, level, name]) => {
     const unlocked = userUnlockedBanners.includes(id);
+    const reachable = !isPremium && id !== 'none' && userLevel >= level;
     const selected = userBanner === id;
     const css = bannerCss(id);
-    return `<div onclick="${unlocked ? `selectCosmetic('banner','${id}')` : ''}"
-        style="display:inline-flex;flex-direction:column;gap:3px;cursor:${unlocked ? 'pointer' : 'default'};opacity:${unlocked ? 1 : 0.35};margin:0 8px 8px 0;width:76px">
+    const onclick = unlocked ? `selectCosmetic('banner','${id}')` : (!isPremium ? `openPaywall('banners')` : '');
+    return `<div onclick="${onclick}"
+        style="display:inline-flex;flex-direction:column;gap:3px;cursor:${onclick ? 'pointer' : 'default'};opacity:${unlocked || reachable ? 1 : 0.35};margin:0 8px 8px 0;width:76px">
       <div style="height:34px;border-radius:7px;background:${css || 'var(--bg2)'};border:${selected ? '2px solid var(--green)' : '1px solid var(--border)'};display:flex;align-items:center;justify-content:center;box-sizing:border-box">
-        ${unlocked ? (selected ? '<i class="ti ti-check" style="font-size:13px;color:#fff;text-shadow:0 0 4px #000"></i>' : '') : '<i class="ti ti-lock" style="font-size:12px;color:var(--text2)"></i>'}
+        ${unlocked ? (selected ? '<i class="ti ti-check" style="font-size:13px;color:#fff;text-shadow:0 0 4px #000"></i>' : '')
+          : reachable ? '<span class="pl-premium-badge"><i class="ti ti-crown" style="font-size:10px"></i></span>'
+          : '<i class="ti ti-lock" style="font-size:12px;color:var(--text2)"></i>'}
       </div>
       <span style="font-size:9px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${name} · Nv.${level}</span>
     </div>`;
   }).join('');
 
-  frameEl.innerHTML = kFrameTiers.map(([id, level, name]) => {
+  frameEl.innerHTML = levelCosmeticsTeaserHtml() + kFrameTiers.map(([id, level, name]) => {
     const unlocked = userUnlockedFrames.includes(id);
+    const reachable = !isPremium && id !== 'none' && userLevel >= level;
     const selected = userFrame === id;
     // El check de "seleccionado" va como badge en una esquina en vez de un
     // outline, para no confundirse con el borde de color de los marcos reales.
@@ -12406,10 +12799,11 @@ function renderCosmeticPickers() {
            <i class="ti ti-check" style="font-size:9px;color:#fff"></i>
          </div>`
       : '';
-    return `<div onclick="${unlocked ? `selectCosmetic('frame','${id}')` : ''}"
-        style="display:inline-flex;flex-direction:column;align-items:center;gap:2px;cursor:${unlocked ? 'pointer' : 'default'};opacity:${unlocked ? 1 : 0.35};margin:0 8px 8px 0">
+    const onclick = unlocked ? `selectCosmetic('frame','${id}')` : (!isPremium ? `openPaywall('frames')` : '');
+    return `<div onclick="${onclick}"
+        style="display:inline-flex;flex-direction:column;align-items:center;gap:2px;cursor:${onclick ? 'pointer' : 'default'};opacity:${unlocked || reachable ? 1 : 0.35};margin:0 8px 8px 0">
       <div class="${frameAnimClass(id)}" style="width:36px;height:36px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;${frameWrapStyle(id)}">
-        ${unlocked ? frameBadgeHtml(id) : '<i class="ti ti-lock" style="font-size:12px;color:var(--text2)"></i>'}
+        ${unlocked || reachable ? frameBadgeHtml(id) : '<i class="ti ti-lock" style="font-size:12px;color:var(--text2)"></i>'}
         ${selectedBadge}
       </div>
       <span style="font-size:9px;color:var(--text2)">Nv.${level}</span>
@@ -12417,14 +12811,15 @@ function renderCosmeticPickers() {
   }).join('');
 
   fontEl.innerHTML = kFontTiers.map(([id, level, name]) => {
-    // Gratis: las fuentes tambien se pueden desbloquear via racha (no solo
-    // por nivel, que las cuentas gratis nunca alcanzan porque no generan
-    // XP) — ver streak_font_unlocks / AppState.unlockedStreakFonts.
+    // Gratis: las fuentes por nivel son de Premium (el nivel en si es
+    // gratis), pero tambien se desbloquean via racha — ver
+    // streak_font_unlocks / AppState.unlockedStreakFonts.
     const streakUnlocked = streakState && streakState.unlocked_font_ids && streakState.unlocked_font_ids.includes(id);
     const unlocked = userUnlockedFonts.includes(id) || streakUnlocked;
     const selected = userFont === id;
-    return `<div onclick="${unlocked ? `selectCosmetic('font','${id}')` : ''}"
-        style="display:inline-flex;align-items:center;gap:4px;cursor:${unlocked ? 'pointer' : 'default'};opacity:${unlocked ? 1 : 0.4};margin:0 8px 8px 0;padding:6px 10px;background:var(--bg3);border-radius:8px;${selected ? 'outline:2px solid var(--green)' : ''}">
+    const onclick = unlocked ? `selectCosmetic('font','${id}')` : (!isPremium ? `openPaywall('fonts')` : '');
+    return `<div onclick="${onclick}"
+        style="display:inline-flex;align-items:center;gap:4px;cursor:${onclick ? 'pointer' : 'default'};opacity:${unlocked ? 1 : 0.4};margin:0 8px 8px 0;padding:6px 10px;background:var(--bg3);border-radius:8px;${selected ? 'outline:2px solid var(--green)' : ''}">
       ${unlocked ? '' : '<i class="ti ti-lock" style="font-size:11px;color:var(--text2)"></i>'}
       <span style="${usernameFontStyle(id)};font-size:12px">${name}</span>
       <span style="font-size:9px;color:var(--text2)">Nv.${level}</span>
@@ -12964,6 +13359,7 @@ function renderFolderList(page) {
         </select>
         <button id="folder-sort-list-btn" onclick="toggleFolderSortDir()"
           style="padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">${folderSortDir==="asc"?"↑":"↓"}</button>
+        ${freeLimitCounterHtml(currentSectionFolders().length, FREE_FOLDERS_LIMIT, 'folders')}
         <button onclick="openCreateFolder()"
           style="padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer">
           <i class="ti ti-plus"></i> Nueva lista
@@ -13000,6 +13396,10 @@ function renderFolderList(page) {
 
 // Create folder
 function openCreateFolder() {
+  if (!isPremium && currentSectionFolders().length >= FREE_FOLDERS_LIMIT) {
+    openPaywall('folders');
+    return;
+  }
   document.getElementById('folder-name-input').value = '';
   document.getElementById('folder-private-input').checked = false;
   document.getElementById('folder-dropdown').classList.remove('open');
@@ -13021,6 +13421,7 @@ async function saveFolderCreate() {
       body: JSON.stringify({ name, section, is_public }),
     });
     const data = await res.json();
+    if (isPremiumError(res, data)) { closeFolderCreate(); openPaywall('folders'); return; }
     if (!res.ok) throw new Error(data.detail || 'Error');
     userFolders[section].push(data);
     checkAchievements();
@@ -13555,6 +13956,8 @@ function renderRankingsList(page) {
   if (page) _rankingsPage = page;
   document.getElementById('rankings-list-panel').style.display = '';
   document.getElementById('ranking-detail-panel').style.display = 'none';
+  const limitEl = document.getElementById('rankings-limit-counter');
+  if (limitEl) limitEl.innerHTML = freeLimitCounterHtml(currentRankings.length, FREE_RANKINGS_LIMIT, 'rankings');
   const grid = document.getElementById('rankings-grid');
   if (!currentRankings.length) {
     grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">${t('noRankingsYet')}</div>`;
@@ -13582,8 +13985,8 @@ function renderRankingsList(page) {
 }
 
 function openRankingCreate() {
-  if (!isPremium && currentRankings.length >= 3) {
-    showToast(t('rankingFreeLimitReached'), true);
+  if (!isPremium && currentRankings.length >= FREE_RANKINGS_LIMIT) {
+    openPaywall('rankings');
     return;
   }
   document.getElementById('ranking-name-input').value = '';
@@ -13610,6 +14013,7 @@ async function createRanking(name, is_public) {
       body: JSON.stringify({ name, is_public }),
     });
     const data = await res.json();
+    if (isPremiumError(res, data)) { openPaywall('rankings'); return; }
     if (!res.ok) throw new Error(data.detail || 'Error');
     await loadRankings();
   } catch(e) {
@@ -14136,7 +14540,7 @@ async function onLoginSuccess() {
           <span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px"></span>
           <span id="profile-streak-chip"></span>
         </span>
-        <button id="header-upgrade-btn" onclick="startPaddleCheckout()" style="display:none;font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer">✨ Hacerse Premium</button>
+        <button id="header-upgrade-btn" onclick="setView('premium')" style="display:none;font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer">✨ Hacerse Premium</button>
       </div>
     </div>
     <button onclick="openShareCard()" data-i18n-title="shareLibrary" title="Compartir mi biblioteca"
@@ -14250,7 +14654,7 @@ async function loadWidgetFriends() {
           ${f.in_session ? `<div style="position:absolute;bottom:-1px;right:-1px;width:13px;height:13px;border-radius:50%;background:#1D9E75;border:1.5px solid var(--bg);display:flex;align-items:center;justify-content:center" title="${t('inSession')}"><i class="ti ti-player-play-filled" style="font-size:7px;color:#fff"></i></div>` : ''}
         </div>
         <div class="sidebar-widget-row-text">
-          <div class="sidebar-widget-row-name">${esc(f.username)}</div>
+          <div class="sidebar-widget-row-name">${esc(f.username)}${premiumMarkHtml(f.level_info && f.level_info.is_premium, 12)}</div>
           <div class="sidebar-widget-row-sub">${f.in_session ? t('inSession') : `${f.library_count} ${gamesLabel(f.library_count)}`}</div>
         </div>
       </div>
