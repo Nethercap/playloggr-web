@@ -8394,7 +8394,7 @@ function renderProfileStreakChip() {
   // notificacion de racha en NOTIF_TYPE_META.
   el.innerHTML = `<button onclick="openStreakPanel()" data-i18n-title="streak" title="Racha"
     style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:#EF9F27;
-    background:rgba(239,159,39,.14);border:none;padding:2px 7px;border-radius:6px;cursor:pointer">
+    background:rgba(239,159,39,.14);border:none;padding:2px 7px;border-radius:6px;cursor:pointer;white-space:nowrap;flex-shrink:0">
     <i class="ti ti-flame" style="font-size:11px"></i>${days}</button>`;
 }
 
@@ -14532,11 +14532,13 @@ async function onLoginSuccess() {
         <span id="user-level-badge"></span>
       </div>
       <div class="profile-panel-sub">
-        <!-- Plan y racha van juntos y sin wrap entre ellos: son dos pildoras
-             chicas que entran en una linea. El boton de "Hacerse Premium"
-             queda afuera del span para que siga bajando solo -- en el panel de
-             220px no entra al lado y se cortaba contra el borde. -->
-        <span style="display:inline-flex;align-items:center;gap:6px;flex-wrap:nowrap">
+        <!-- Plan y racha van juntos, pero CON wrap: en el panel de 220px la
+             columna de info mide ~70px y "Gratis" + la racha no entran en una
+             linea -- con nowrap la racha se salia de la columna y quedaba
+             tapada por el boton de compartir. Si no entra, baja abajo del plan.
+             El boton de "Hacerse Premium" queda afuera del span para que siga
+             bajando solo. -->
+        <span style="display:inline-flex;align-items:center;gap:4px 6px;flex-wrap:wrap">
           <span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px"></span>
           <span id="profile-streak-chip"></span>
         </span>
