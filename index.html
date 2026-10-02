@@ -166,6 +166,8 @@
      peor que no tenerla. */
   #activity-section { display: none; }
   #activity-section.on { display: block; }
+  /* Corona de usuario Premium junto al nombre (mismo degradado que la app). */
+  .act-pm { margin-left: 3px; background: linear-gradient(135deg, #E0B84C, #8E7CE8); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .act-list { display: grid; gap: 8px; max-width: 620px; margin: 0 auto; }
   .act-row {
     display: flex; align-items: center; gap: 12px; padding: 10px 14px;
@@ -701,7 +703,9 @@
         return '<div class="act-row">' + cover +
           '<div class="act-body"><div class="act-line">' +
           '<a href="/u/' + encodeURIComponent(i.username) + q + '">' +
-          esc(i.username) + '</a> ' + esc(i.verb) + ' <strong>' + esc(i.game) + '</strong>' + stars +
+          esc(i.username) + '</a>' +
+          (i.is_premium ? '<span class="act-pm" title="Usuario Premium">♛</span>' : '') +
+          ' ' + esc(i.verb) + ' <strong>' + esc(i.game) + '</strong>' + stars +
           '</div><div class="act-time">' + esc(i.ago) + '</div></div></div>';
       }).join('');
       sec.classList.add('on');
