@@ -159,10 +159,12 @@
     :root[data-game-theme="portal"] body           { font-family:'Titillium Web', -apple-system, sans-serif; }
     :root[data-game-theme="starcraft2"] body       { font-family:'Rajdhani', -apple-system, sans-serif; }
     :root[data-game-theme="doom"] body             { font-family:'Metal Mania', cursive; }
-    /* Creepster (letras chorreadas) solo en titulos — ilegible en texto chico. */
-    :root[data-game-theme="halloween"] body        { font-family:'Grenze', Georgia, serif; }
+    /* Creepster (letras chorreadas) solo en titulos — ilegible en texto chico.
+       El resto en Mulish: una gotica (Grenze) quedaba apretada y rara en
+       menus, pills y botones chicos. */
+    :root[data-game-theme="halloween"] body        { font-family:'Mulish', -apple-system, sans-serif; }
     :root[data-game-theme="halloween"] .header-title,
-    :root[data-game-theme="halloween"] .modal-title { font-family:'Creepster', 'Grenze', cursive; font-weight:400; letter-spacing:.04em; color:var(--green); }
+    :root[data-game-theme="halloween"] .modal-title { font-family:'Creepster', cursive; font-weight:400; letter-spacing:.04em; color:var(--green); }
 
     /* Roles que en el resto de la UI no leen --green (sidebar/drawer, boton
        de play, horas/fecha de la card) — solo se pisan cuando hay un tema de
@@ -659,7 +661,7 @@
     .sync-btn:disabled { opacity:.5; pointer-events:none; }
     .plat-chip { display:flex; align-items:center; gap:3px; font-size:11px; color:var(--text2); padding:3px 7px; border-radius:20px; border:0.5px solid var(--border); background:var(--bg2); }
     .cfg-choice-btn { flex:1; padding:8px; font-size:12px; border-radius:8px; border:0.5px solid var(--border); background:var(--bg3); color:var(--text2); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; }
-    .cfg-choice-btn.active { border-color:var(--green); color:var(--green); background:rgba(29,158,117,0.1); font-weight:600; }
+    .cfg-choice-btn.active { border-color:var(--green); color:var(--green); background:color-mix(in srgb, var(--green) 10%, transparent); font-weight:600; }
     .dot { width:6px; height:6px; border-radius:50%; background:var(--gray); }
     .dot.ok { background:var(--green); } .dot.err { background:var(--red); }
 
@@ -3828,7 +3830,7 @@ function ensureGameThemeFontsLoaded() {
   const link = document.createElement('link');
   link.id = 'game-theme-fonts';
   link.rel = 'stylesheet';
-  link.href = 'https://fonts.googleapis.com/css2?family=Play:wght@400;700&family=VT323&family=Share+Tech+Mono&family=Cinzel:wght@600;700&family=EB+Garamond&family=Mulish:wght@600;700&family=PT+Sans&family=Press+Start+2P&family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;600;700&family=Titillium+Web:wght@400;600;700&family=Rajdhani:wght@500;600;700&family=Metal+Mania&family=Creepster&family=Grenze:wght@400;600;700&display=swap';
+  link.href = 'https://fonts.googleapis.com/css2?family=Play:wght@400;700&family=VT323&family=Share+Tech+Mono&family=Cinzel:wght@600;700&family=EB+Garamond&family=Mulish:wght@400;500;600;700&family=PT+Sans&family=Press+Start+2P&family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;600;700&family=Titillium+Web:wght@400;600;700&family=Rajdhani:wght@500;600;700&family=Metal+Mania&family=Creepster&display=swap';
   document.head.appendChild(link);
 }
 
