@@ -138,6 +138,17 @@
       --green:#CC1E1E; --green-dark:#8F1414;
       --accent-sidebar:#D4A017; --accent-play:#CC1E1E; --accent-meta:#D4A017; --accent-unselected:#888888;
     }
+    /* Halloween — tema de temporada, gratis para todos durante octubre (ver
+       isGameThemeFree/isGameThemeAvailable). Noche violeta casi negra,
+       naranja calabaza de acento, verde slime para el play, texto hueso.
+       Mismo tema que _halloweenTheme en game_theme.dart. --green es naranja
+       claro: el texto encima va oscuro (--on-accent), igual que Guaca-Guaca. */
+    :root[data-game-theme="halloween"] {
+      --bg:#1C1226; --bg2:#261833; --bg3:#0E0912; --text:#F1E6D2; --text2:#A88FC0;
+      --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.16); --ring:rgba(255,117,24,0.8);
+      --green:#FF7518; --green-dark:#C2570C; --on-accent:#140B1A;
+      --accent-sidebar:#FF7518; --accent-play:#8BE04E; --accent-meta:#A88FC0; --accent-unselected:#6E5A80;
+    }
     :root[data-game-theme="cyberpunk"] body       { font-family:'Play', -apple-system, sans-serif; }
     :root[data-game-theme="atomicGreen"] body,
     :root[data-game-theme="atomicAmbar"] body      { font-family:'Share Tech Mono', monospace; }
@@ -148,6 +159,10 @@
     :root[data-game-theme="portal"] body           { font-family:'Titillium Web', -apple-system, sans-serif; }
     :root[data-game-theme="starcraft2"] body       { font-family:'Rajdhani', -apple-system, sans-serif; }
     :root[data-game-theme="doom"] body             { font-family:'Metal Mania', cursive; }
+    /* Creepster (letras chorreadas) solo en titulos — ilegible en texto chico. */
+    :root[data-game-theme="halloween"] body        { font-family:'Grenze', Georgia, serif; }
+    :root[data-game-theme="halloween"] .header-title,
+    :root[data-game-theme="halloween"] .modal-title { font-family:'Creepster', 'Grenze', cursive; font-weight:400; letter-spacing:.04em; color:var(--green); }
 
     /* Roles que en el resto de la UI no leen --green (sidebar/drawer, boton
        de play, horas/fecha de la card) — solo se pisan cuando hay un tema de
@@ -407,6 +422,49 @@
       border-width: 2px !important; border-style: solid !important;
       border-color: #7A7A7A #262626 #262626 #7A7A7A !important;
       border-radius: 3px !important;
+    }
+
+    /* Halloween — brillo naranja de farol en cards/sidebar (mismo mecanismo
+       que Guaca-Guaca) + telaraña en la esquina superior izquierda (SVG
+       inline, igual al _CobwebNeonBorder de Flutter) + luna naranja difusa
+       en el fondo de la pagina. */
+    :root[data-game-theme="halloween"] body {
+      background-image:
+        radial-gradient(circle at 88% 6%, rgba(255,117,24,0.16) 0, rgba(255,117,24,0.05) 14%, transparent 32%),
+        radial-gradient(ellipse at 10% 100%, rgba(120,70,160,0.18) 0, transparent 45%);
+      background-attachment: fixed;
+    }
+    :root[data-game-theme="halloween"] .game-card,
+    :root[data-game-theme="halloween"] .lib-grid-tile {
+      position: relative;
+      border-radius: 8px;
+      border: 1.3px solid var(--ring);
+      box-shadow: 0 0 7px rgba(255,117,24,0.45), inset 0 0 3px rgba(255,117,24,0.35);
+    }
+    :root[data-game-theme="halloween"] .game-card::before,
+    :root[data-game-theme="halloween"] .lib-grid-tile::before {
+      content: '';
+      position: absolute; top: 2px; left: 2px;
+      width: 26px; height: 26px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 26' fill='none' stroke='%23F1E6D2' stroke-opacity='.5' stroke-width='.7'%3E%3Cpath d='M0 0L24 0M0 0L22.2 9.2M0 0L17 17M0 0L9.2 22.2M0 0L0 24'/%3E%3Cpath d='M8 0Q6.8 1.1 7.4 3.1Q6.1 4.6 5.7 5.7Q4.6 6.1 3.1 7.4Q1.1 6.8 0 8'/%3E%3Cpath d='M14 0Q11.9 1.9 12.9 5.4Q10.7 8 9.9 9.9Q8 10.7 5.4 12.9Q1.9 11.9 0 14'/%3E%3Cpath d='M20 0Q17 2.7 18.5 7.7Q15.3 11.5 14.1 14.1Q11.5 15.3 7.7 18.5Q2.7 17 0 20'/%3E%3C/svg%3E") no-repeat;
+      pointer-events: none;
+      z-index: 1;
+    }
+    :root[data-game-theme="halloween"] .mobile-sidebar {
+      border-left: 1.4px solid var(--ring);
+      box-shadow: -6px 0 14px rgba(255,117,24,0.4);
+    }
+    :root[data-game-theme="halloween"] .nav-pill.active,
+    :root[data-game-theme="halloween"] .view-mode-btn.active,
+    :root[data-game-theme="halloween"] .fbtn.active,
+    :root[data-game-theme="halloween"] .btn-save {
+      color: var(--on-accent) !important;
+    }
+    :root[data-game-theme="halloween"] .subtab-pill.active {
+      background: transparent !important;
+      border-radius: 0 !important;
+      border-bottom: 3px solid var(--green);
+      color: var(--green) !important;
     }
 
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; padding: 20px; }
@@ -932,6 +990,8 @@
     .pl-locked-panel { padding:14px; border-radius:12px; background:var(--bg2); border:1px solid rgba(142,124,232,.35); text-align:left; }
     .pl-try-chip { margin-left:auto; display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:8px; font-size:11px; font-weight:600;
       color:#8E7CE8; border:1px solid rgba(142,124,232,.6); flex-shrink:0; }
+    .pl-seasonal-chip { margin-left:auto; display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:8px; font-size:11px; font-weight:700;
+      color:#FF7518; background:rgba(255,117,24,.13); border:1px solid rgba(255,117,24,.7); flex-shrink:0; white-space:nowrap; }
     .pl-limit-counter { padding:2px 7px; border-radius:10px; font-size:11px; font-weight:700; border:1px solid rgba(136,135,128,.7); color:var(--text2); cursor:pointer; }
     .pl-limit-counter.full { border-color:#E0B84C; color:#E0B84C; }
     .pl-preview-bar { position:fixed; left:50%; transform:translateX(-50%); bottom:20px; z-index:99; width:min(520px, calc(100% - 32px));
@@ -2737,6 +2797,7 @@ const I18N = {
     themePreviewExit: 'Salir',
     themePreviewTry: 'Probar',
     themePreviewHint: 'Los temas son Premium, pero podés probar cualquiera durante 45 segundos.',
+    seasonalThemeFree: 'Gratis en octubre',
     cosmeticsReadyTitle: 'Tu nivel {level} ya desbloqueó',
     cosmeticsReadyCta: 'Activalos con Premium',
     cosmeticsNextTier: 'Tu primer marco y banner se desbloquean en nivel {level}. Con Premium los vas a poder lucir.',
@@ -3066,6 +3127,7 @@ const I18N = {
     themePreviewExit: 'Exit',
     themePreviewTry: 'Try it',
     themePreviewHint: 'Themes are Premium, but you can try any of them for 45 seconds.',
+    seasonalThemeFree: 'Free in October',
     cosmeticsReadyTitle: 'Your level {level} already unlocked',
     cosmeticsReadyCta: 'Activate them with Premium',
     cosmeticsNextTier: 'Your first frame and banner unlock at level {level}. With Premium you\'ll be able to show them off.',
@@ -3395,6 +3457,7 @@ const I18N = {
     themePreviewExit: 'Sair',
     themePreviewTry: 'Testar',
     themePreviewHint: 'Os temas são Premium, mas você pode testar qualquer um por 45 segundos.',
+    seasonalThemeFree: 'Grátis em outubro',
     cosmeticsReadyTitle: 'Seu nível {level} já desbloqueou',
     cosmeticsReadyCta: 'Ative-os com o Premium',
     cosmeticsNextTier: 'Sua primeira moldura e banner desbloqueiam no nível {level}. Com o Premium você vai poder exibi-los.',
@@ -3736,6 +3799,7 @@ async function loadAppearanceSettings() {
 // recalcularse cada vez que cambia el idioma.
 const GAME_THEME_DEFS = [
   ['none',        'Playloggr (por defecto)', null],
+  ['halloween',   'Halloween', null],
   ['cyberpunk',   'Cyberpunk', null],
   ['atomicGreen', 'Atomic Green', 'Fallout 3'],
   ['atomicAmbar', 'Atomic Ambar', 'Fallout: New Vegas'],
@@ -3747,8 +3811,16 @@ const GAME_THEME_DEFS = [
   ['starcraft2',  'Koprulu', 'StarCraft II'],
   ['doom',        'Knee-Deep', 'Doom'],
 ];
+// Temas de temporada (Halloween): gratis para todos, no Premium, y solo
+// existen durante su mes — fuera de octubre no aparece en la lista y, si
+// habia quedado elegido, vuelve al de por defecto. Mismo criterio que
+// GameThemeMeta.isSeasonal/isAvailable en la app Flutter.
+function isSeasonalGameTheme(key) { return key === 'halloween'; }
+function isGameThemeFree(key) { return !key || key === 'none' || isSeasonalGameTheme(key); }
+function isGameThemeAvailable(key) { return key !== 'halloween' || new Date().getMonth() === 9; }
+
 function GAME_THEMES() {
-  return GAME_THEME_DEFS.map(([key, name, game]) => [key, game ? `${name} — ${t('gameThemeInspiredBy')} ${game}` : name]);
+  return GAME_THEME_DEFS.filter(([key]) => isGameThemeAvailable(key)).map(([key, name, game]) => [key, game ? `${name} — ${t('gameThemeInspiredBy')} ${game}` : name]);
 }
 
 function ensureGameThemeFontsLoaded() {
@@ -3756,7 +3828,7 @@ function ensureGameThemeFontsLoaded() {
   const link = document.createElement('link');
   link.id = 'game-theme-fonts';
   link.rel = 'stylesheet';
-  link.href = 'https://fonts.googleapis.com/css2?family=Play:wght@400;700&family=VT323&family=Share+Tech+Mono&family=Cinzel:wght@600;700&family=EB+Garamond&family=Mulish:wght@600;700&family=PT+Sans&family=Press+Start+2P&family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;600;700&family=Titillium+Web:wght@400;600;700&family=Rajdhani:wght@500;600;700&family=Metal+Mania&display=swap';
+  link.href = 'https://fonts.googleapis.com/css2?family=Play:wght@400;700&family=VT323&family=Share+Tech+Mono&family=Cinzel:wght@600;700&family=EB+Garamond&family=Mulish:wght@600;700&family=PT+Sans&family=Press+Start+2P&family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;600;700&family=Titillium+Web:wght@400;600;700&family=Rajdhani:wght@500;600;700&family=Metal+Mania&family=Creepster&family=Grenze:wght@400;600;700&display=swap';
   document.head.appendChild(link);
 }
 
@@ -3777,7 +3849,9 @@ function applyGameTheme(key) {
 // habilitada para este feature.
 try {
   const savedGameTheme = localStorage.getItem('pl_game_theme');
-  if (savedGameTheme && savedGameTheme !== 'none') {
+  if (savedGameTheme && !isGameThemeAvailable(savedGameTheme)) {
+    localStorage.removeItem('pl_game_theme');
+  } else if (savedGameTheme && savedGameTheme !== 'none') {
     document.documentElement.dataset.gameTheme = savedGameTheme;
     ensureGameThemeFontsLoaded();
   }
@@ -4095,15 +4169,39 @@ function _heartIconSvg(fill) {
           <defs><clipPath id="${clipId}"><rect x="0" y="0" width="8" height="16"/></clipPath></defs>
           <path fill="${bright}" d="${HEART_PATH}" clip-path="url(#${clipId})"/>`;
 }
+// Calabaza pixel art para Halloween (mismo path que assets/icons/halloween/
+// pumpkin_full.svg en Flutter) — misma logica de base tenue + mitad
+// recortada que el corazon de Undertale.
+const PUMPKIN_PATHS = [
+  ['#6BBF3A', 'M7 0h2v3h-2zM9 1h3v1h-3z'],
+  ['#FF7518', 'M3 3h10v1h1v1h1v7h-1v1h-1v1h-10v-1h-1v-1h-1v-7h1v-1h1z'],
+  ['#1A0F24', 'M4 6h3v2h-3zM9 6h3v2h-3zM4 9h8v1h-1v1h-2v-1h-2v1h-2v-1h-1z'],
+];
+function _pumpkinIconSvg(fill) {
+  const paths = PUMPKIN_PATHS.map(([c, d]) => `<path fill="${c}" d="${d}"/>`).join('');
+  if (fill === 'full') return paths;
+  const dim = `<g opacity="0.3">${paths}</g>`;
+  if (fill === 'none') return dim;
+  const clipId = 'pumpkin-half-clip-' + Math.random().toString(36).slice(2);
+  return `${dim}<defs><clipPath id="${clipId}"><rect x="0" y="0" width="8" height="16"/></clipPath></defs>
+          <g clip-path="url(#${clipId})">${paths}</g>`;
+}
+// Icono de calificacion propio del tema activo (16x16), o null si usa estrellas.
+function _themedRatingIconSvg(fill) {
+  const theme = document.documentElement.dataset.gameTheme;
+  if (theme === 'undertale') return _heartIconSvg(fill);
+  if (theme === 'halloween') return _pumpkinIconSvg(fill);
+  return null;
+}
 function starPickerHtml(gameId, currentRating) {
-  const isUndertale = document.documentElement.dataset.gameTheme === 'undertale';
   const stars = [];
   for (let i = 1; i <= 5; i++) {
     let fill = 'none';
     if (currentRating >= i)            fill = 'full';
     else if (currentRating >= i - 0.5) fill = 'half';
-    if (isUndertale) {
-      stars.push(`<svg width="18" height="18" viewBox="0 0 16 16" style="cursor:pointer;flex-shrink:0" onclick="starClick('${gameId}',${i},event)">${_heartIconSvg(fill)}</svg>`);
+    const themedIcon = _themedRatingIconSvg(fill);
+    if (themedIcon) {
+      stars.push(`<svg width="18" height="18" viewBox="0 0 16 16" style="cursor:pointer;flex-shrink:0" onclick="starClick('${gameId}',${i},event)">${themedIcon}</svg>`);
       continue;
     }
     const amber = 'var(--amber)';
@@ -4658,14 +4756,14 @@ function detailRatingStep(gameId, criterion, delta) {
 }
 
 function bigStarPickerHtml(gameId, criterion, currentRating) {
-  const isUndertale = document.documentElement.dataset.gameTheme === 'undertale';
   const stars = [];
   for (let i = 1; i <= 5; i++) {
     let fill = 'none';
     if (currentRating >= i)            fill = 'full';
     else if (currentRating >= i - 0.5) fill = 'half';
-    if (isUndertale) {
-      stars.push(`<svg width="30" height="30" viewBox="0 0 16 16" style="cursor:pointer;flex-shrink:0" onclick="detailStarClick('${gameId}','${criterion}',${i},event)">${_heartIconSvg(fill)}</svg>`);
+    const themedIcon = _themedRatingIconSvg(fill);
+    if (themedIcon) {
+      stars.push(`<svg width="30" height="30" viewBox="0 0 16 16" style="cursor:pointer;flex-shrink:0" onclick="detailStarClick('${gameId}','${criterion}',${i},event)">${themedIcon}</svg>`);
       continue;
     }
     const amber = 'var(--amber)';
@@ -7755,7 +7853,7 @@ function renderAppearanceTab() {
     const hint = isPremium ? '' : `<div style="display:flex;align-items:center;gap:8px;width:100%;grid-column:1/-1;margin-bottom:4px">
         ${premiumBadgeHtml()}<span style="font-size:12px;color:var(--text2)">${esc(t('themePreviewHint'))}</span></div>`;
     document.getElementById('cfg-gametheme-options').innerHTML = hint + GAME_THEMES().map(([key, label]) => {
-      const locked = !isPremium && key !== 'none';
+      const locked = !isPremium && !isGameThemeFree(key);
       const previewing = previewKey === key;
       const active = previewKey ? previewing : current === key;
       const onclick = locked
@@ -7763,7 +7861,9 @@ function renderAppearanceTab() {
         : `endThemePreview(true);applyGameTheme('${key}')`;
       return `
         <button type="button" class="cfg-choice-btn ${active ? 'active' : ''}" style="justify-content:flex-start;text-align:left;${previewing ? 'border-color:#8E7CE8;' : ''}"
-          onclick="${onclick}">${label}${locked && !previewing
+          onclick="${onclick}">${label}${isSeasonalGameTheme(key)
+            ? `<span class="pl-seasonal-chip">🎃 ${esc(t('seasonalThemeFree'))}</span>`
+            : ''}${locked && !previewing
             ? `<span class="pl-try-chip"><i class="ti ti-player-play"></i> ${esc(t('themePreviewTry'))}</span>`
             : ''}${previewing ? '<i class="ti ti-eye" style="margin-left:auto;color:#8E7CE8"></i>' : ''}</button>
       `;
@@ -11861,8 +11961,9 @@ async function loadPremiumStatus() {
     // Los temas de videojuego (ver applyGameTheme) son Premium — si se
     // restauro un tema desde localStorage antes de saber esto (ver el
     // "try" cerca de applyGameTheme, que aplica de inmediato para evitar
-    // flash) y la cuenta no es premium, se revierte.
-    if (!isPremium && document.documentElement.dataset.gameTheme && !_themePreview) {
+    // flash) y la cuenta no es premium, se revierte. Los de temporada
+    // (Halloween) son gratis mientras duran.
+    if (!isPremium && !isGameThemeFree(document.documentElement.dataset.gameTheme) && !_themePreview) {
       delete document.documentElement.dataset.gameTheme;
       localStorage.removeItem('pl_game_theme');
     }
