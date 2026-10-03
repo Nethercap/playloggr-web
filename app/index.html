@@ -3820,6 +3820,11 @@ const GAME_THEME_DEFS = [
 function isSeasonalGameTheme(key) { return key === 'halloween'; }
 function isGameThemeFree(key) { return !key || key === 'none' || isSeasonalGameTheme(key); }
 function isGameThemeAvailable(key) { return key !== 'halloween' || new Date().getMonth() === 9; }
+// En octubre Halloween es el tema por defecto: se aplica a quien nunca
+// eligio uno (sin 'pl_game_theme' guardado). Quien elige "Playloggr (por
+// defecto)" en ese mes queda guardado como 'none' explicito, para que no se
+// le vuelva a poner.
+function defaultGameTheme() { return isGameThemeAvailable('halloween') ? 'halloween' : 'none'; }
 
 function GAME_THEMES() {
   return GAME_THEME_DEFS.filter(([key]) => isGameThemeAvailable(key)).map(([key, name, game]) => [key, game ? `${name} — ${t('gameThemeInspiredBy')} ${game}` : name]);
@@ -3841,7 +3846,8 @@ function applyGameTheme(key) {
     ensureGameThemeFontsLoaded();
   } else {
     delete document.documentElement.dataset.gameTheme;
-    localStorage.removeItem('pl_game_theme');
+    if (defaultGameTheme() !== 'none') localStorage.setItem('pl_game_theme', 'none');
+    else localStorage.removeItem('pl_game_theme');
   }
   renderAppearanceTab();
 }
@@ -3850,11 +3856,14 @@ function applyGameTheme(key) {
 // se revierte en loadPremiumStatus() si la cuenta logueada no es la
 // habilitada para este feature.
 try {
-  const savedGameTheme = localStorage.getItem('pl_game_theme');
+  let savedGameTheme = localStorage.getItem('pl_game_theme');
   if (savedGameTheme && !isGameThemeAvailable(savedGameTheme)) {
     localStorage.removeItem('pl_game_theme');
-  } else if (savedGameTheme && savedGameTheme !== 'none') {
-    document.documentElement.dataset.gameTheme = savedGameTheme;
+    savedGameTheme = null;
+  }
+  const initialGameTheme = savedGameTheme || defaultGameTheme();
+  if (initialGameTheme !== 'none') {
+    document.documentElement.dataset.gameTheme = initialGameTheme;
     ensureGameThemeFontsLoaded();
   }
 } catch (e) {}
@@ -11966,8 +11975,8 @@ async function loadPremiumStatus() {
     // flash) y la cuenta no es premium, se revierte. Los de temporada
     // (Halloween) son gratis mientras duran.
     if (!isPremium && !isGameThemeFree(document.documentElement.dataset.gameTheme) && !_themePreview) {
-      delete document.documentElement.dataset.gameTheme;
       localStorage.removeItem('pl_game_theme');
+      _setGameThemeAttr(defaultGameTheme());
     }
     if (d.username) {
       authUser = d.username;
