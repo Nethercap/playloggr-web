@@ -933,9 +933,13 @@
       /* Stat cards: los 6 entran en una sola linea sin scroll, como en la
          app (en vez de la grilla 2x3/3x2 de escritorio) — se van
          achicando parejo (flex:1) hasta entrar todos. */
-      .stats-row { display:flex !important; flex-wrap:nowrap; gap:4px; }
-      .stat-card { padding:6px 3px; flex:1 1 0; min-width:0; text-align:center; overflow:hidden; }
-      .stat-label { font-size:6.5px; white-space:normal; line-height:1.15; letter-spacing:0; overflow-wrap:break-word; word-break:break-word; }
+      /* Como _GlobalStatsBar de la app: fila que se desliza de costado si no
+         entra, cada caja de su propio ancho y etiqueta de 9px que nunca se
+         corta (a 6.5px con word-break partia "COMPLETADOS" en "COMPLETADO/S"). */
+      .stats-row { display:flex !important; flex-wrap:nowrap; gap:4px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+      .stats-row::-webkit-scrollbar { display:none; }
+      .stat-card { padding:6px 8px; flex:1 0 auto; text-align:center; }
+      .stat-label { font-size:9px; white-space:nowrap; line-height:1.2; letter-spacing:0; }
       .stat-value { font-size:15px; white-space:nowrap; }
 
       /* Selector de vista + carpetas: scroll horizontal, no wrap, como los tabs de la app */
@@ -980,19 +984,69 @@
        se oculta mientras haya cualquier modal-overlay abierto. */
     body:has(.modal-overlay.open) .fab-add-btn { display:none !important; }
 
-    /* ── Navegacion mobile como la app de Android (<=640px) ───────────────
-       Barra inferior Juegos · Comunidad · Estadisticas · Perfil en vez del
-       menu "⋮" (mismo cambio que la app, ver home_screen.dart _buildTabs).
-       body[data-mnav] dice que pestaña esta activa (lo pone _syncMobileNav
+    /* ── Navegacion por secciones, como la app de Android ─────────────────
+       Juegos · Comunidad · Estadisticas · Perfil (mismo cambio que la app,
+       ver home_screen.dart _buildTabs) en vez del menu "⋮": en mobile como
+       barra inferior y en escritorio como pestañas en el encabezado.
+       body[data-mnav] dice que seccion esta activa (lo pone _syncMobileNav
        desde setView) y de eso cuelga que se ve de la pantalla:
-       - juegos: perfil, totales y barra de vistas; los filtros (buscar,
-         vista, orden) quedan plegados detras del boton de filtros, como el
-         _FilterPanel de la app.
-       - perfil: el mismo #mobile-sidebar, pero como pagina completa en vez
-         de cajon (son las mismas opciones que la pestaña Perfil de la app),
-         con el panel de perfil arriba.
-       Escritorio no cambia: todo esto vive dentro de la media query. */
-    .mnav, .mnav-only, .mprofile-title, #community-view { display:none; }
+       - juegos: perfil, totales y barra de vistas/filtros. En mobile los
+         filtros (buscar, vista, orden) quedan plegados detras del boton de
+         filtros, como el _FilterPanel de la app.
+       - perfil (body.mprofile-page, solo la vista 'profile' — no Rankings/
+         Config/etc. que cuelgan de la misma seccion): el mismo
+         #mobile-sidebar, pero como pagina en vez de cajon (son las mismas
+         opciones que la pestaña Perfil de la app). */
+    .mnav, .mnav-only, .mprofile-title, #community-view, #dnav { display:none; }
+    .mnav-btn {
+      flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+      background:none; border:none; color:var(--text2); font-size:11px; font-weight:600; cursor:pointer; padding:0;
+    }
+    .mnav-ic { position:relative; width:56px; height:30px; border-radius:15px; display:flex; align-items:center; justify-content:center; font-size:21px; transition:background .15s; }
+    .mnav-btn.active { color:var(--text); }
+    .mnav-btn.active .mnav-ic { background:color-mix(in srgb, var(--green) 22%, transparent); color:var(--green); }
+    .mnav-dot { display:none; position:absolute; top:4px; right:15px; width:8px; height:8px; border-radius:50%; background:#E24B4A; }
+    .has-dot > .mnav-ic > .mnav-dot, .mcomm-tile.has-dot > .mnav-dot, .dnav-btn.has-dot > .mnav-dot { display:block; }
+    .mnav-hbtn { position:relative; margin-left:4px; padding:5px 10px; font-size:14px; border-radius:6px; border:0.5px solid var(--border); background:var(--bg2); color:var(--text2); cursor:pointer; align-items:center; }
+    .mnav-hbtn.on { border-color:var(--green); color:var(--green); }
+    .mnav-hbtn[hidden] { display:none !important; }
+
+    /* El cajon no se abre nunca con la navegacion por secciones (ver
+       toggleHeaderMoreMenu): sin el boton "⋮" y sin la animacion, que hacia
+       entrar/salir la pagina de Perfil deslizandose. */
+    body[data-mnav] #header-more-btn { display:none !important; }
+    body[data-mnav] .mobile-sidebar { transition:none; }
+    /* Estadisticas tiene seccion propia y Rankings vive en Perfil. */
+    body[data-mnav] #view-stats, body[data-mnav] #view-rankings { display:none !important; }
+    body[data-mnav]:not([data-mnav="juegos"]) #library-toolbar { display:none !important; }
+
+    /* Perfil como pagina */
+    body.mprofile-page .mobile-sidebar { transform:none; box-shadow:none; background:var(--bg3); max-width:none; scrollbar-width:thin; }
+    body.mprofile-page .mobile-sidebar-backdrop { display:none !important; }
+    body.mprofile-page .mobile-sidebar-header { display:none; }
+    body.mprofile-page .mprofile-title { display:block; padding:18px 16px 10px; font-size:19px; font-weight:700; }
+    /* El grupo Comunidad del cajon ya es una seccion propia. */
+    body.mprofile-page .mside-community { display:none !important; }
+
+    /* Comunidad */
+    #community-view { flex-direction:column; gap:4px; }
+    .mcomm-tiles { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:4px 0 6px; }
+    .mcomm-tile {
+      position:relative; display:flex; flex-direction:column; align-items:center; gap:6px; padding:14px 6px;
+      background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg); color:var(--text);
+      font-size:12.5px; font-weight:600; cursor:pointer;
+    }
+    .mcomm-tile i { font-size:26px; color:var(--accent-sidebar, var(--green)); }
+    .mcomm-tile .mnav-dot { top:8px; right:10px; }
+    .mcomm-row { display:flex; gap:10px; align-items:center; padding:10px 2px; border-bottom:0.5px solid var(--border); }
+    .mcomm-row img, .mcomm-ph { width:34px; height:46px; border-radius:4px; object-fit:cover; flex-shrink:0; background:var(--bg2); display:flex; align-items:center; justify-content:center; }
+    .mcomm-line { font-size:13px; line-height:1.35; }
+    .mcomm-line a { color:var(--text); font-weight:700; text-decoration:none; }
+    .mcomm-time { font-size:11px; color:var(--text2); margin-top:2px; }
+    .mcomm-stars { color:var(--amber); margin-left:4px; }
+    .mcomm-all { display:block; text-align:center; padding:14px; font-size:13px; color:var(--green); text-decoration:none; font-weight:600; }
+
+    /* ── Mobile (<=640px): barra inferior ── */
     @media (max-width:640px) {
       body[data-mnav] .mnav { display:flex; }
       .mnav {
@@ -1000,74 +1054,78 @@
         height:calc(64px + env(safe-area-inset-bottom)); padding-bottom:env(safe-area-inset-bottom);
         background:var(--bg); border-top:0.5px solid var(--border);
       }
-      .mnav-btn {
-        flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
-        background:none; border:none; color:var(--text2); font-size:11px; font-weight:600; cursor:pointer; padding:0;
-      }
-      .mnav-ic { position:relative; width:56px; height:30px; border-radius:15px; display:flex; align-items:center; justify-content:center; font-size:21px; transition:background .15s; }
-      .mnav-btn.active { color:var(--text); }
-      .mnav-btn.active .mnav-ic { background:color-mix(in srgb, var(--green) 22%, transparent); color:var(--green); }
-      .mnav-dot { display:none; position:absolute; top:4px; right:15px; width:8px; height:8px; border-radius:50%; background:#E24B4A; }
-      .has-dot > .mnav-ic > .mnav-dot, .mcomm-tile.has-dot > .mnav-dot { display:block; }
-
       body[data-mnav] { padding-bottom:calc(76px + env(safe-area-inset-bottom)); }
       body[data-mnav] .fab-add-btn { bottom:calc(80px + env(safe-area-inset-bottom)); }
       body[data-mnav] #bulk-action-bar,
       body[data-mnav] .pl-preview-bar { bottom:calc(76px + env(safe-area-inset-bottom)); }
-      body[data-mnav] #header-more-btn { display:none !important; }
 
       /* Encabezado: en Juegos, accesos de la AppBar de la app (Premium,
-         Listas, Filtros); en el resto, el titulo de la pestaña. */
+         Listas, Filtros); en el resto, el titulo de la seccion. */
       body[data-mnav] .mnav-only { display:inline-flex; }
       body[data-mnav]:not([data-mnav="juegos"]) .mnav-games-only { display:none !important; }
       body[data-mnav]:not([data-mnav="juegos"]) .header-title .brand-icon,
       body[data-mnav]:not([data-mnav="juegos"]) .header-title .brand-name { display:none; }
       body[data-mnav="juegos"] #mnav-title { display:none; }
-      .mnav-hbtn { position:relative; margin-left:4px; padding:5px 10px; font-size:14px; border-radius:6px; border:0.5px solid var(--border); background:var(--bg2); color:var(--text2); cursor:pointer; align-items:center; }
-      .mnav-hbtn.on { border-color:var(--green); color:var(--green); }
-      .mnav-hbtn[hidden] { display:none !important; }
 
-      body[data-mnav]:not([data-mnav="juegos"]) #right-sidebar,
-      body[data-mnav]:not([data-mnav="juegos"]) #library-toolbar { display:none !important; }
-      /* En mobile solo Biblioteca y Deseados: Estadisticas tiene pestaña
-         propia, Listas esta en el encabezado y Rankings en Perfil. */
-      body[data-mnav] #view-stats, body[data-mnav] #view-lists, body[data-mnav] #view-rankings { display:none !important; }
+      body[data-mnav]:not([data-mnav="juegos"]) #right-sidebar { display:none !important; }
+      /* Listas esta en el encabezado. */
+      body[data-mnav] #view-lists { display:none !important; }
       body[data-mnav="juegos"]:not(.mnav-filters-open) #filter-bar { display:none !important; }
 
-      /* Perfil (solo la vista 'profile', no Rankings/Config/etc. que cuelgan
-         de la misma pestaña): el sidebar pasa de cajon a pagina completa
-         (debajo de los modales, z-index 100, y de la barra inferior). */
+      /* Perfil: pagina completa, debajo de los modales (z-index 100) y de
+         la barra inferior, con el panel de perfil arriba. */
       body.mprofile-page .mobile-sidebar {
-        top:0; bottom:calc(64px + env(safe-area-inset-bottom)); left:0; right:0; width:auto; max-width:none;
-        transform:none; box-shadow:none; border:none; z-index:95; background:var(--bg3); padding-bottom:16px;
+        top:0; bottom:calc(64px + env(safe-area-inset-bottom)); left:0; right:0; width:auto;
+        border:none; z-index:95; padding-bottom:16px;
       }
-      /* Sin la animacion de cajon: entraba y salia deslizandose por encima de
-         la vista nueva al cambiar de pestaña. */
-      body[data-mnav] .mobile-sidebar { transition:none; }
-      body.mprofile-page .mobile-sidebar-backdrop { display:none !important; }
-      body.mprofile-page .mobile-sidebar-header { display:none; }
-      /* El grupo Comunidad del cajon ya es una pestaña propia. */
-      body.mprofile-page .mside-community { display:none !important; }
-      body.mprofile-page .mprofile-title { display:block; padding:18px 16px 10px; font-size:19px; font-weight:700; }
       body.mprofile-page .mobile-sidebar .profile-panel { margin:0 12px 6px; }
+    }
 
-      /* Comunidad */
-      #community-view { flex-direction:column; gap:4px; }
-      .mcomm-tiles { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:4px 0 6px; }
-      .mcomm-tile {
-        position:relative; display:flex; flex-direction:column; align-items:center; gap:6px; padding:14px 6px;
-        background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg); color:var(--text);
-        font-size:12.5px; font-weight:600; cursor:pointer;
+    /* ── Escritorio (>640px): pestañas en el encabezado ── */
+    @media (min-width:641px) {
+      body[data-mnav] #dnav { display:flex; }
+      #dnav { gap:4px; position:absolute; left:50%; transform:translateX(-50%); }
+      .dnav-btn {
+        position:relative; display:inline-flex; align-items:center; gap:7px; padding:7px 14px; border-radius:8px;
+        border:none; background:transparent; color:var(--text2); font-size:13px; font-weight:600; cursor:pointer;
       }
-      .mcomm-tile i { font-size:26px; color:var(--accent-sidebar, var(--green)); }
-      .mcomm-tile .mnav-dot { top:8px; right:10px; }
-      .mcomm-row { display:flex; gap:10px; align-items:center; padding:10px 2px; border-bottom:0.5px solid var(--border); }
-      .mcomm-row img, .mcomm-ph { width:34px; height:46px; border-radius:4px; object-fit:cover; flex-shrink:0; background:var(--bg2); display:flex; align-items:center; justify-content:center; }
-      .mcomm-line { font-size:13px; line-height:1.35; }
-      .mcomm-line a { color:var(--text); font-weight:700; text-decoration:none; }
-      .mcomm-time { font-size:11px; color:var(--text2); margin-top:2px; }
-      .mcomm-stars { color:var(--amber); margin-left:4px; }
-      .mcomm-all { display:block; text-align:center; padding:14px; font-size:13px; color:var(--green); text-decoration:none; font-weight:600; }
+      .dnav-btn i { font-size:16px; }
+      .dnav-btn:hover { background:var(--bg2); color:var(--text); }
+      .dnav-btn.active { background:color-mix(in srgb, var(--green) 16%, transparent); color:var(--green); }
+      .dnav-btn .mnav-dot { top:5px; right:6px; }
+
+      /* Fuera de Juegos no hay columna de filtros: el contenido usa ese ancho. */
+      body[data-mnav]:not([data-mnav="juegos"]) { padding-left:32px; }
+
+      /* Perfil: la lista del cajon como pagina en la columna central (el
+         panel de perfil sigue en la columna derecha, como siempre). */
+      body.mprofile-page .mobile-sidebar {
+        top:68px; bottom:0; left:32px; right:auto; width:min(640px, calc(100vw - 344px)); z-index:79;
+        border:none; padding:0 0 24px;
+      }
+      body.mprofile-page .mobile-sidebar-item { border-radius:8px; }
+      body.mprofile-page .mobile-sidebar-item:hover { background:var(--bg2); }
+    }
+
+    /* Boton "Ver detalle" de la card (antes "•••", que parecia un menu). */
+    .detail-btn { display:inline-flex; align-items:center; gap:2px; font-size:11.5px; padding:3px 6px 3px 10px; border-radius:6px; border:0.5px solid var(--border2); background:transparent; color:var(--text2); cursor:pointer; font-weight:600; }
+    .detail-btn i { font-size:14px; }
+
+    /* Jerarquia de la card: el nombre manda; horas y fecha (game-foot) van
+       mas chicas, como dato secundario. */
+    .game-card .game-name { font-size:15px; font-weight:600; }
+    .game-card .game-foot span { font-size:11.5px; }
+
+    /* Zonas tocables de al menos ~44px en pantallas tactiles para los
+       controles chicos de la card (el "+" de calificar por criterios mide
+       16px y el casillero de seleccion es chico): un ::after invisible
+       agranda el area sin cambiar como se ven. */
+    @media (pointer:coarse) {
+      .rate-detail-btn, .bulk-check { position:relative; }
+      .bulk-check::after { content:''; position:absolute; inset:-12px; }
+      /* El "+" esta a 6px de la 5a estrella: se agranda mas en alto que en
+         ancho para no robarle toques a la estrella. */
+      .rate-detail-btn::after { content:''; position:absolute; inset:-14px -5px; }
     }
 
     /* ── Seleccion masiva (bulk actions) ──────────────────────────────────
@@ -1177,7 +1235,7 @@
 <body>
 
 <!-- Play Session Floating Timer -->
-<div id="play-timer-bar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(90deg,#1D9E75,#157a5b);color:#fff;padding:10px 20px;display:none;align-items:center;gap:14px;box-shadow:0 2px 12px rgba(0,0,0,0.4)">
+<div id="play-timer-bar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(90deg,var(--green),var(--green-dark));color:var(--on-accent);padding:10px 20px;display:none;align-items:center;gap:14px;box-shadow:0 2px 12px rgba(0,0,0,0.4)">
   <div style="font-size:18px">🎮</div>
   <div style="flex:1;min-width:0">
     <div id="play-timer-game" style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
@@ -1211,7 +1269,7 @@
   }
   .login-perks { list-style:none;margin:18px 0 0;padding:0;display:flex;flex-direction:column;gap:7px; }
   .login-perks li { font-size:11.5px;color:var(--text2);display:flex;align-items:flex-start;gap:7px;line-height:1.35; }
-  .login-perks i { color:#1D9E75;font-size:13px;flex-shrink:0;margin-top:1px; }
+  .login-perks i { color:var(--green);font-size:13px;flex-shrink:0;margin-top:1px; }
   @media (max-width:600px) {
     #login-screen::before {
       background-image:
@@ -1225,11 +1283,11 @@
   .login-group { display:flex;flex-direction:column;gap:5px;margin-bottom:14px; }
   .login-group label { font-size:12px;color:var(--text2);font-weight:500; }
   .login-group input { font-size:13px;padding:8px 10px;border-radius:var(--radius-md);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);width:100%; }
-  .login-btn { width:100%;font-size:13px;padding:9px;border-radius:var(--radius-md);border:none;background:#1D9E75;color:#fff;font-weight:500;cursor:pointer;margin-top:4px; }
-  .login-btn:hover { background:#0F6E56; }
+  .login-btn { width:100%;font-size:13px;padding:9px;border-radius:var(--radius-md);border:none;background:var(--green);color:var(--on-accent);font-weight:500;cursor:pointer;margin-top:4px; }
+  .login-btn:hover { background:var(--green-dark); }
   .login-err { font-size:12px;color:#E24B4A;margin-top:8px;display:none; }
   .login-toggle { font-size:12px;color:var(--text2);text-align:center;margin-top:16px; }
-  .login-toggle a { color:#1D9E75;cursor:pointer;text-decoration:none; }
+  .login-toggle a { color:var(--green);cursor:pointer;text-decoration:none; }
   .user-chip { display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2); }
   .logout-btn { font-size:11px;padding:3px 9px;border-radius:var(--radius-md);border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer; }
   .logout-btn:hover { background:var(--bg2); }
@@ -1239,7 +1297,7 @@
   <div class="login-card" style="position:relative">
     <button onclick="toggleLanguage()" id="lang-toggle-btn-login" style="position:absolute;top:10px;right:12px;padding:5px 10px;font-size:12px;font-weight:600;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" title="Language / Idioma">EN</button>
     <div class="login-title">
-      <i class="ti ti-device-gamepad-2" style="color:#1D9E75;font-size:22px"></i>
+      <i class="ti ti-device-gamepad-2" style="color:var(--green);font-size:22px"></i>
       Playloggr
     </div>
     <div class="login-sub" id="login-subtitle" data-i18n="loginSubtitle">Iniciá sesión para continuar</div>
@@ -1299,7 +1357,7 @@
 <!-- Sidebar mobile (reemplaza el menu "..." chico) — mismas opciones que el drawer de la app -->
 <div class="mobile-sidebar-backdrop" id="mobile-sidebar-backdrop" onclick="toggleHeaderMoreMenu()"></div>
 <div class="mobile-sidebar" id="mobile-sidebar">
-  <div class="mobile-sidebar-header"><i class="ti ti-device-gamepad-2" style="color:#1D9E75"></i> Playloggr</div>
+  <div class="mobile-sidebar-header"><i class="ti ti-device-gamepad-2" style="color:var(--green)"></i> Playloggr</div>
   <div class="mprofile-title" data-i18n="navProfile">Perfil</div>
   <div id="mprofile-panel-slot"></div>
 
@@ -1331,7 +1389,7 @@
   <a href="https://playloggr.com/actividad" target="_blank" rel="noopener" class="mobile-sidebar-item mside-community" style="text-decoration:none"><i class="ti ti-activity"></i> <span data-i18n="communityActivity">Actividad de la comunidad</span></a>
 
   <div class="mobile-sidebar-group" data-i18n="menuAccount">Cuenta</div>
-  <button id="mobile-premium-menu-btn" onclick="setView('premium');toggleHeaderMoreMenu()" class="mobile-sidebar-item" style="display:none"><i class="ti ti-key" style="color:#1D9E75"></i> <span data-i18n="evolveToPremium">Evolucioná a Premium</span></button>
+  <button id="mobile-premium-menu-btn" onclick="setView('premium');toggleHeaderMoreMenu()" class="mobile-sidebar-item" style="display:none"><i class="ti ti-key" style="color:var(--green)"></i> <span data-i18n="evolveToPremium">Evolucioná a Premium</span></button>
   <button onclick="openConfigPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-settings" data-cp-icon="configuracion"></i> <span data-i18n="config">Configuración</span></button>
   <a href="https://play.google.com/store/apps/details?id=com.playloggr.app" target="_blank" rel="noopener" class="mobile-sidebar-item" style="text-decoration:none"><img src="https://cdn.simpleicons.org/googleplay/888887" style="width:16px;height:16px"> <span data-i18n="downloadApp">Descargar la app</span></a>
   <a href="https://discord.gg/ksF4AaMt4j" target="_blank" rel="noopener" class="mobile-sidebar-item" style="text-decoration:none"><i class="ti ti-brand-discord" style="color:#5865F2"></i> <span data-i18n="joinDiscord">Unite a Discord</span></a>
@@ -1343,10 +1401,17 @@
 
   <div class="header">
     <div class="header-title" onclick="goHome()" style="cursor:pointer" title="Ir al inicio">
-      <i class="ti ti-device-gamepad-2 brand-icon" style="font-size:20px;color:#1D9E75"></i>
+      <i class="ti ti-device-gamepad-2 brand-icon" style="font-size:20px;color:var(--green)"></i>
       <span class="brand-name">Playloggr</span>
       <span id="mnav-title" class="mnav-only"></span>
     </div>
+    <!-- Escritorio: mismas secciones que la barra inferior de mobile -->
+    <nav id="dnav" aria-label="Secciones">
+      <button class="dnav-btn" data-tab="juegos" onclick="mobileNavTab('juegos')"><i class="ti ti-device-gamepad-2"></i><span data-i18n="navGames">Juegos</span></button>
+      <button class="dnav-btn" data-tab="comunidad" id="dnav-tab-comunidad" onclick="mobileNavTab('comunidad')"><i class="ti ti-users"></i><span data-i18n="menuCommunity">Comunidad</span><span class="mnav-dot"></span></button>
+      <button class="dnav-btn" data-tab="stats" onclick="mobileNavTab('stats')"><i class="ti ti-chart-bar"></i><span data-i18n="stats">Estadísticas</span></button>
+      <button class="dnav-btn" data-tab="perfil" onclick="mobileNavTab('perfil')"><i class="ti ti-user"></i><span data-i18n="navProfile">Perfil</span></button>
+    </nav>
     <div class="header-right">
       <input type="hidden" id="api-url" value="https://api.playloggr.com" />
       <!-- Language toggle -->
@@ -1716,7 +1781,7 @@
   </button>
 
   <!-- Barra inferior (mobile), como la NavigationBar de la app -->
-  <nav class="mnav" id="mnav">
+  <nav class="mnav" id="mnav" aria-label="Secciones">
     <button class="mnav-btn" data-tab="juegos" onclick="mobileNavTab('juegos')">
       <span class="mnav-ic"><i class="ti ti-device-gamepad-2"></i></span><span data-i18n="navGames">Juegos</span>
     </button>
@@ -2428,7 +2493,7 @@
 <!-- Novedades: agregar juego desde un lanzamiento -->
 <div class="modal-overlay" id="novedades-add-overlay">
   <div class="modal" style="max-width:380px">
-    <div class="modal-title"><i class="ti ti-plus" style="color:#1D9E75"></i> <span id="novedades-add-name">-</span></div>
+    <div class="modal-title"><i class="ti ti-plus" style="color:var(--green)"></i> <span id="novedades-add-name">-</span></div>
     <div class="modal-grid">
       <div class="modal-group full">
         <label data-i18n="choosePlatform">Elegí la plataforma</label>
@@ -2692,7 +2757,7 @@
 <!-- Hours Modal -->
 <div class="modal-overlay" id="hours-overlay">
   <div class="modal" style="max-width:320px">
-    <div class="modal-title"><i class="ti ti-clock" style="color:#1D9E75"></i> <span data-i18n="hoursPlayed">Horas jugadas</span></div>
+    <div class="modal-title"><i class="ti ti-clock" style="color:var(--green)"></i> <span data-i18n="hoursPlayed">Horas jugadas</span></div>
     <div class="modal-group full" style="margin-top:12px">
       <label id="hours-modal-label">Juego</label>
       <input type="number" id="hours-input" min="0" step="0.1" placeholder="0.0" style="font-size:24px;text-align:center;padding:12px" />
@@ -2707,7 +2772,7 @@
 <!-- Last Played Modal -->
 <div class="modal-overlay" id="lastplayed-overlay">
   <div class="modal" style="max-width:320px">
-    <div class="modal-title"><i class="ti ti-calendar-event" style="color:#1D9E75"></i> <span data-i18n="lastPlayed">Última vez jugado</span></div>
+    <div class="modal-title"><i class="ti ti-calendar-event" style="color:var(--green)"></i> <span data-i18n="lastPlayed">Última vez jugado</span></div>
     <div class="modal-group full" style="margin-top:12px">
       <label id="lastplayed-modal-label">Juego</label>
       <input type="date" id="lastplayed-input" style="font-size:16px;padding:10px" />
@@ -2723,7 +2788,7 @@
 <!-- Selector de carpeta (popup, no dropdown) -->
 <div class="modal-overlay" id="folder-dropdown">
   <div class="modal" style="max-width:320px;padding:0">
-    <div class="modal-title" style="padding:16px 16px 0"><i class="ti ti-folder" style="color:#1D9E75"></i> <span data-i18n="folders">Listas</span></div>
+    <div class="modal-title" style="padding:16px 16px 0"><i class="ti ti-folder" style="color:var(--green)"></i> <span data-i18n="folders">Listas</span></div>
     <div id="folder-list-items" style="margin-top:8px;max-height:60vh;overflow-y:auto"></div>
     <div style="padding:10px 16px;text-align:right">
       <button class="btn-cancel" onclick="toggleFolderDropdown()" data-i18n="close">Cerrar</button>
@@ -2734,7 +2799,7 @@
 <!-- Rating detail modal (calificacion por criterio) -->
 <div class="modal-overlay" id="accessible-edit-overlay">
   <div class="modal" style="max-width:420px">
-    <div class="modal-title" style="font-size:18px"><i class="ti ti-zoom-in" style="color:#1D9E75"></i> <span id="accessible-edit-title"></span></div>
+    <div class="modal-title" style="font-size:18px"><i class="ti ti-zoom-in" style="color:var(--green)"></i> <span id="accessible-edit-title"></span></div>
     <div id="accessible-edit-body" style="font-size:16px"></div>
     <div style="text-align:right;margin-top:16px">
       <button class="btn-cancel" onclick="closeAccessibleEditModal()" style="font-size:15px;padding:8px 18px" data-i18n="close">Cerrar</button>
@@ -2754,7 +2819,7 @@
 <!-- Verify Email Modal -->
 <div class="modal-overlay" id="verify-email-overlay" style="z-index:1000">
   <div class="modal">
-    <div class="modal-title"><i class="ti ti-mail-check" style="color:#1D9E75"></i> <span data-i18n="verifyEmailTitle">Confirmá tu cuenta</span></div>
+    <div class="modal-title"><i class="ti ti-mail-check" style="color:var(--green)"></i> <span data-i18n="verifyEmailTitle">Confirmá tu cuenta</span></div>
     <div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6" id="verify-email-hint" data-i18n="verifyEmailHint">
       Te enviamos un código de 6 dígitos a tu email. Ingresalo para activar tu cuenta.
     </div>
@@ -2773,7 +2838,7 @@
 <!-- Reset Password Modal -->
 <div class="modal-overlay" id="reset-overlay" style="z-index:1000">
   <div class="modal">
-    <div class="modal-title"><i class="ti ti-lock-open" style="color:#1D9E75"></i> <span data-i18n="resetPassword">Recuperar contraseña</span></div>
+    <div class="modal-title"><i class="ti ti-lock-open" style="color:var(--green)"></i> <span data-i18n="resetPassword">Recuperar contraseña</span></div>
     <div class="modal-grid">
       <div class="modal-group full">
         <label data-i18n="email">Email</label>
@@ -2804,10 +2869,10 @@
 <!-- Settings Modal -->
 <div class="modal-overlay" id="settings-overlay">
   <div class="modal">
-    <div class="modal-title"><i class="ti ti-settings" style="color:#1D9E75"></i> <span data-i18n="steamSettings">Ajustes de Steam</span></div>
+    <div class="modal-title"><i class="ti ti-settings" style="color:var(--green)"></i> <span data-i18n="steamSettings">Ajustes de Steam</span></div>
     <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.6" data-i18n-html="steamSettingsHint">
       Ingresá tu Steam ID para sincronizar tu biblioteca.<br>
-      Lo encontrás en <a href="https://www.steamidfinder.com" target="_blank" style="color:#1D9E75">steamidfinder.com</a> — es un número como <code style="background:var(--bg2);padding:1px 5px;border-radius:4px">76561198012345678</code>
+      Lo encontrás en <a href="https://www.steamidfinder.com" target="_blank" style="color:var(--green)">steamidfinder.com</a> — es un número como <code style="background:var(--bg2);padding:1px 5px;border-radius:4px">76561198012345678</code>
     </div>
     <div class="modal-grid">
       <div class="modal-group full">
@@ -2826,7 +2891,7 @@
 
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
-    <div class="modal-title"><i class="ti ti-plus" style="color:#1D9E75"></i> <span data-i18n="addGame">Agregar juego</span></div>
+    <div class="modal-title"><i class="ti ti-plus" style="color:var(--green)"></i> <span data-i18n="addGame">Agregar juego</span></div>
     <div class="modal-grid">
       <div class="modal-group full" style="position:relative">
         <label data-i18n="gameName">Nombre del juego</label>
@@ -2902,7 +2967,7 @@
 
 <div class="modal-overlay" id="announcement-overlay">
   <div class="modal" style="max-width:400px">
-    <div class="modal-title"><i class="ti ti-speakerphone" style="color:#1D9E75"></i> <span id="announcement-title-text">Aviso</span></div>
+    <div class="modal-title"><i class="ti ti-speakerphone" style="color:var(--green)"></i> <span id="announcement-title-text">Aviso</span></div>
     <div id="announcement-message-text" style="font-size:14px;line-height:1.5;margin:12px 0;white-space:pre-wrap;max-height:50vh;overflow-y:auto"></div>
     <div class="modal-actions">
       <button class="btn-save" onclick="closeAnnouncementPopup()" data-i18n="ok">Entendido</button>
@@ -2998,6 +3063,7 @@ const I18N = {
     themePreviewHint: 'Los temas son Premium, pero podés probar cualquiera durante 45 segundos.',
     seasonalThemeFree: 'Gratis en octubre',
     navGames: 'Juegos', navProfile: 'Perfil', filtersLabel: 'Filtros', seeAllActivity: 'Ver toda la actividad', activityEmpty: 'Todavía no hay actividad para mostrar',
+    seeDetail: 'Ver detalle',
     cosmeticsReadyTitle: 'Tu nivel {level} ya desbloqueó',
     cosmeticsReadyCta: 'Activalos con Premium',
     cosmeticsNextTier: 'Tu primer marco y banner se desbloquean en nivel {level}. Con Premium los vas a poder lucir.',
@@ -3088,7 +3154,7 @@ const I18N = {
     resetPassword: 'Recuperar contraseña', recoveryCodeDigits: 'Código de recuperación (6 dígitos)',
     newPassword: 'Nueva contraseña', changePassword: 'Cambiar contraseña',
     steamSettings: 'Ajustes de Steam',
-    steamSettingsHint: 'Ingresá tu Steam ID para sincronizar tu biblioteca.<br>Lo encontrás en <a href="https://www.steamidfinder.com" target="_blank" style="color:#1D9E75">steamidfinder.com</a> — es un número como <code style="background:var(--bg2);padding:1px 5px;border-radius:4px">76561198012345678</code>',
+    steamSettingsHint: 'Ingresá tu Steam ID para sincronizar tu biblioteca.<br>Lo encontrás en <a href="https://www.steamidfinder.com" target="_blank" style="color:var(--green)">steamidfinder.com</a> — es un número como <code style="background:var(--bg2);padding:1px 5px;border-radius:4px">76561198012345678</code>',
     rated: 'Calificados', byStatus: 'Por estado', byPlatform: 'Por plataforma', byRating: 'Por calificación',
     errorLoadingStats: 'Error al cargar estadísticas', usersSuffix: 'usuarios', noData: 'Sin datos',
     historical: 'Histórico', mostInLibrary: 'En más bibliotecas', mostPlayed: 'Más jugados',
@@ -3329,6 +3395,7 @@ const I18N = {
     themePreviewHint: 'Themes are Premium, but you can try any of them for 45 seconds.',
     seasonalThemeFree: 'Free in October',
     navGames: 'Games', navProfile: 'Profile', filtersLabel: 'Filters', seeAllActivity: 'See all activity', activityEmpty: 'No activity to show yet',
+    seeDetail: 'Details',
     cosmeticsReadyTitle: 'Your level {level} already unlocked',
     cosmeticsReadyCta: 'Activate them with Premium',
     cosmeticsNextTier: 'Your first frame and banner unlock at level {level}. With Premium you\'ll be able to show them off.',
@@ -3419,7 +3486,7 @@ const I18N = {
     resetPassword: 'Reset password', recoveryCodeDigits: 'Recovery code (6 digits)',
     newPassword: 'New password', changePassword: 'Change password',
     steamSettings: 'Steam settings',
-    steamSettingsHint: 'Enter your Steam ID to sync your library.<br>Find it at <a href="https://www.steamidfinder.com" target="_blank" style="color:#1D9E75">steamidfinder.com</a> — it\'s a number like <code style="background:var(--bg2);padding:1px 5px;border-radius:4px">76561198012345678</code>',
+    steamSettingsHint: 'Enter your Steam ID to sync your library.<br>Find it at <a href="https://www.steamidfinder.com" target="_blank" style="color:var(--green)">steamidfinder.com</a> — it\'s a number like <code style="background:var(--bg2);padding:1px 5px;border-radius:4px">76561198012345678</code>',
     rated: 'Rated', byStatus: 'By status', byPlatform: 'By platform', byRating: 'By rating',
     errorLoadingStats: 'Error loading stats', usersSuffix: 'users', noData: 'No data',
     historical: 'All time', mostInLibrary: 'In most libraries', mostPlayed: 'Most played',
@@ -3660,6 +3727,7 @@ const I18N = {
     themePreviewHint: 'Os temas são Premium, mas você pode testar qualquer um por 45 segundos.',
     seasonalThemeFree: 'Grátis em outubro',
     navGames: 'Jogos', navProfile: 'Perfil', filtersLabel: 'Filtros', seeAllActivity: 'Ver toda a atividade', activityEmpty: 'Ainda não há atividade para mostrar',
+    seeDetail: 'Ver detalhes',
     cosmeticsReadyTitle: 'Seu nível {level} já desbloqueou',
     cosmeticsReadyCta: 'Ative-os com o Premium',
     cosmeticsNextTier: 'Sua primeira moldura e banner desbloqueiam no nível {level}. Com o Premium você vai poder exibi-los.',
@@ -3750,7 +3818,7 @@ const I18N = {
     resetPassword: 'Recuperar senha', recoveryCodeDigits: 'Código de recuperação (6 dígitos)',
     newPassword: 'Nova senha', changePassword: 'Alterar senha',
     steamSettings: 'Configurações da Steam',
-    steamSettingsHint: 'Digite seu Steam ID para sincronizar sua biblioteca.<br>Encontre em <a href="https://www.steamidfinder.com" target="_blank" style="color:#1D9E75">steamidfinder.com</a> — é um número como <code style="background:var(--bg2);padding:1px 5px;border-radius:4px">76561198012345678</code>',
+    steamSettingsHint: 'Digite seu Steam ID para sincronizar sua biblioteca.<br>Encontre em <a href="https://www.steamidfinder.com" target="_blank" style="color:var(--green)">steamidfinder.com</a> — é um número como <code style="background:var(--bg2);padding:1px 5px;border-radius:4px">76561198012345678</code>',
     rated: 'Avaliados', byStatus: 'Por status', byPlatform: 'Por plataforma', byRating: 'Por avaliação',
     errorLoadingStats: 'Erro ao carregar estatísticas', usersSuffix: 'usuários', noData: 'Sem dados',
     historical: 'Histórico', mostInLibrary: 'Em mais bibliotecas', mostPlayed: 'Mais jogados',
@@ -3931,6 +3999,8 @@ function applyI18n() {
   document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
   document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.getAttribute('data-i18n-html')); });
   document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.getAttribute('data-i18n-title')); });
+  if (typeof _syncAriaLabels === 'function') _syncAriaLabels();
+  if (document.body.dataset.mnav && typeof _syncMobileNav === 'function') _syncMobileNav(currentView);
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.getAttribute('data-i18n-placeholder')); });
   document.querySelectorAll('.status-select option[value]').forEach(opt => {
     opt.textContent = typeof statusLabel === 'function' ? statusLabel(opt.value) : opt.value;
@@ -4437,7 +4507,7 @@ function starPickerHtml(gameId, currentRating) {
     }
     stars.push(`<svg width="18" height="18" viewBox="0 0 24 24" style="cursor:pointer;flex-shrink:0" onclick="starClick('${gameId}',${i},event)">${poly}</svg>`);
   }
-  const detailBtn = `<button onclick="openRatingDetailModal('${gameId}')" title="${t('rateByCriteria') || 'Calificar por criterios'}" style="width:16px;height:16px;min-width:16px;border-radius:50%;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:11px;line-height:1;padding:0;flex-shrink:0">+</button>`;
+  const detailBtn = `<button class="rate-detail-btn" onclick="openRatingDetailModal('${gameId}')" title="${t('rateByCriteria') || 'Calificar por criterios'}" style="width:16px;height:16px;min-width:16px;border-radius:50%;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:11px;line-height:1;padding:0;flex-shrink:0">+</button>`;
   return `<span style="display:inline-flex;align-items:center;flex-wrap:wrap;gap:6px">
             <span style="display:inline-flex;align-items:center;gap:2px">${stars.join('')}</span>
             ${detailBtn}
@@ -5564,7 +5634,7 @@ function updateCommunityStatLocally(gameId, oldRating, newRating) {
   }
 
   el.innerHTML = `<i class="ti ti-users" style="font-size:11px"></i> ${count > 0 ? avg.toFixed(1) : '0.0'} (${count})`;
-  el.style.display = 'inline-flex';
+  el.style.display = count > 0 ? 'inline-flex' : 'none';
 }
 
 // ── Steam review score ──────────────────────────────────────────────
@@ -5835,7 +5905,10 @@ function gameCardHtml(g, opts) {
   // en "…" y parpadear.
   const cs = communityStatsCache[g.id];
   const communityHtml = `<i class="ti ti-users" style="font-size:11px"></i> ${cs ? `${cs.rating_count > 0 ? cs.avg_rating : '0.0'} (${cs.rating_count})` : '…'}`;
-  const communityStyle = 'display:inline-flex';
+  // Solo cuando hay al menos una calificacion — "0.0 (0)" repetido en cada
+  // card era ruido. El texto queda en el DOM igual (oculto): de ahi lo lee
+  // updateCommunityStatLocally para recalcular al calificar.
+  const communityStyle = cs && cs.rating_count > 0 ? 'display:inline-flex' : 'display:none';
 
   return `<div class="game-card" id="card-${g.id}" style="${cardColorStyle(g.status)}" ondblclick="handleCardDoubleTap('${g.id}', event)"${collapseAttr}>
     <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0">
@@ -5864,11 +5937,11 @@ function gameCardHtml(g, opts) {
             </select>
           </div>
           <button class="play-btn" data-gid="${g.id}" onclick="togglePlaySession('${g.id}')" title="Registrar sesión de juego"
-            style="width:34px;height:34px;min-width:34px;border-radius:50%;border:1.5px solid #1D9E75;background:transparent;color:#1D9E75;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;padding:0">▶</button>
+            style="width:34px;height:34px;min-width:34px;border-radius:50%;border:1.5px solid var(--green);background:transparent;color:var(--green);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;padding:0">▶</button>
         </div>
       </div>
       <div style="display:flex;justify-content:flex-end;margin-top:4px">
-        <button onclick="openGameDetailView('${g.id}')" title="Ver detalle" style="font-size:12px;padding:2px 10px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-weight:700">•••</button>
+        <button class="detail-btn" onclick="openGameDetailView('${g.id}')" title="${esc(t('seeDetail'))}" aria-label="${esc(t('seeDetail'))}"><span>${esc(t('seeDetail'))}</span><i class="ti ti-chevron-right"></i></button>
       </div>
     </div>
   </div>`;
@@ -10296,10 +10369,10 @@ async function loadFriendsList() {
       html += `<div style="font-weight:600;font-size:12px;margin:12px 0 4px">${t('followingLabel')} (${friends.length})</div>`;
       html += friends.map(f => {
         const sessionBadge = f.in_session
-          ? `<span style="background:#1D9E75;color:#fff;font-size:10px;padding:2px 6px;border-radius:6px;margin-left:6px">${t('inSession')}</span>`
+          ? `<span style="background:var(--green);color:var(--on-accent);font-size:10px;padding:2px 6px;border-radius:6px;margin-left:6px">${t('inSession')}</span>`
           : '';
         const subtitle = f.in_session
-          ? `<span style="color:#1D9E75">${esc(f.session_game || '')} · ${esc(f.session_platform || '')}</span>`
+          ? `<span style="color:var(--green)">${esc(f.session_game || '')} · ${esc(f.session_platform || '')}</span>`
           : `${f.library_count} ${gamesLabel(f.library_count)} · ${f.wishlist_count} ${t('wishlistLower')} · ${Math.round(f.total_hours)} hs`;
         const frameId = f.level_info && f.level_info.frame;
         const fontId  = f.level_info && f.level_info.font;
@@ -10759,11 +10832,40 @@ function _closeSteamMenuOutside(e) {
 }
 
 let _headerMoreOpen = false;
-// ── Navegacion mobile (barra inferior, como la app de Android) ──────────
-// Cada vista cuelga de una pestaña; setView() llama a _syncMobileNav, que
-// marca body[data-mnav] (el CSS de la seccion "Navegacion mobile" decide que
-// se ve) y la pestaña activa. En escritorio data-mnav tambien se setea pero
-// no tiene efecto: todo el CSS esta dentro de la media query.
+// ── Nombre accesible de los botones que son solo un icono ──────────────
+// Campana, filtros, listas, compartir, play, etc. solo tienen un title (el
+// cartelito al pasar el mouse): los lectores de pantalla no siempre lo leen
+// y en el celular no hay mouse. A todo boton/enlace con title y sin texto
+// visible se le pone ese title como aria-label (marcado con data-aria-auto
+// para poder actualizarlo al cambiar de idioma). Un observer cubre lo que se
+// arma despues (cards, modales, listas), con debounce.
+function _syncAriaLabels() {
+  document.querySelectorAll('button[title], a[title]').forEach(el => {
+    if (el.hasAttribute('aria-label') && !el.dataset.ariaAuto) return;
+    // Texto que es solo simbolos ("▶", "+", "✕") no cuenta como nombre.
+    if (!el.title || /[\p{L}\p{N}]/u.test(el.innerText)) {
+      if (el.dataset.ariaAuto) { el.removeAttribute('aria-label'); delete el.dataset.ariaAuto; }
+      return;
+    }
+    if (el.getAttribute('aria-label') !== el.title) el.setAttribute('aria-label', el.title);
+    el.dataset.ariaAuto = '1';
+  });
+}
+(function _initAriaLabels() {
+  let timer = null;
+  const schedule = () => { clearTimeout(timer); timer = setTimeout(_syncAriaLabels, 400); };
+  new MutationObserver(muts => {
+    // Ignorar los cambios que hace la propia funcion (aria-label).
+    if (muts.some(m => m.type === 'childList')) schedule();
+  }).observe(document.body, { childList: true, subtree: true });
+  schedule();
+})();
+
+// ── Navegacion por secciones, como la app de Android ─────────────────────
+// Cada vista cuelga de una seccion; setView() llama a _syncMobileNav, que
+// marca body[data-mnav] (el CSS de "Navegacion por secciones" decide que se
+// ve) y la seccion activa en la barra inferior (mobile) y en las pestañas
+// del encabezado (escritorio).
 const MNAV_TAB_OF_VIEW = {
   library: 'juegos', wishlist: 'juegos', lists: 'juegos',
   community: 'comunidad', novedades: 'comunidad', gameOfMonth: 'comunidad',
@@ -10779,25 +10881,70 @@ function _isMobileNav() {
 
 function _syncMobileNav(view) {
   const tab = MNAV_TAB_OF_VIEW[view] || 'juegos';
+  const prevTab = document.body.dataset.mnav;
   if (tab === 'juegos' && view !== 'lists') _mnavLastGamesView = view;
   document.body.dataset.mnav = tab;
-  document.querySelectorAll('#mnav .mnav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('#mnav .mnav-btn, #dnav .dnav-btn').forEach(b => {
+    const on = b.dataset.tab === tab;
+    b.classList.toggle('active', on);
+    if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+  });
   const title = document.getElementById('mnav-title');
   if (title) title.textContent = MNAV_TITLE_KEY[tab] ? t(MNAV_TITLE_KEY[tab]) : '';
+  _syncBackButton(prevTab, tab);
 
-  // Perfil: el panel de perfil (avatar, nombre, nivel) va arriba de la
-  // pagina, como _ProfileHeader en la app; al salir vuelve a su lugar.
-  const isProfilePage = view === 'profile' && window.matchMedia('(max-width:640px)').matches;
+  // Perfil: la lista del cajon como pagina. En mobile ademas el panel de
+  // perfil (avatar, nombre, nivel) va arriba, como _ProfileHeader en la
+  // app — en escritorio ya se ve en la columna derecha. Al salir vuelve a
+  // su lugar.
+  const isProfilePage = view === 'profile';
+  const panelOnPage = isProfilePage && window.matchMedia('(max-width:640px)').matches;
   document.body.classList.toggle('mprofile-page', isProfilePage);
   const panel = document.getElementById('profile-panel');
   const slot  = document.getElementById('mprofile-panel-slot');
   const home  = document.getElementById('right-sidebar');
   if (panel && slot && home) {
-    if (isProfilePage && panel.parentElement !== slot) slot.appendChild(panel);
-    else if (!isProfilePage && panel.parentElement === slot) home.insertBefore(panel, home.firstChild);
+    if (panelOnPage && panel.parentElement !== slot) slot.appendChild(panel);
+    else if (!panelOnPage && panel.parentElement === slot) home.insertBefore(panel, home.firstChild);
   }
   if (isProfilePage) document.getElementById('mobile-sidebar').scrollTop = 0;
 }
+
+// Boton Atras del celular: como en la app (PopScope en _buildTabs), desde
+// cualquier otra seccion vuelve a Juegos en vez de salir de la web. Al salir
+// de Juegos se agrega una entrada al historial; Atras la consume y vuelve.
+// Si se vuelve a Juegos por otro lado (la pestaña, el logo), esa entrada se
+// descarta con history.back() para que el proximo Atras haga lo normal.
+let _mnavHistoryPushed = false;
+let _mnavPopping = false;
+function _syncBackButton(prevTab, tab) {
+  if (!_isMobileNav() || _mnavPopping) return;
+  if (prevTab === 'juegos' && tab !== 'juegos' && !_mnavHistoryPushed) {
+    history.pushState({ mnav: tab }, '');
+    _mnavHistoryPushed = true;
+  } else if (tab === 'juegos' && _mnavHistoryPushed) {
+    _mnavHistoryPushed = false;
+    _mnavPopping = true;
+    history.back();
+  }
+}
+window.addEventListener('popstate', () => {
+  if (_mnavPopping) { _mnavPopping = false; return; }
+  if (!_mnavHistoryPushed) return;
+  _mnavHistoryPushed = false;
+  // Con un modal abierto, Atras solo lo cierra (y se vuelve a poner la
+  // entrada, para que el siguiente Atras vuelva a Juegos).
+  const openModals = document.querySelectorAll('.modal-overlay.open');
+  if (openModals.length) {
+    openModals.forEach(o => o.classList.remove('open'));
+    history.pushState({ mnav: document.body.dataset.mnav }, '');
+    _mnavHistoryPushed = true;
+    return;
+  }
+  _mnavPopping = true;
+  setView(_mnavLastGamesView);
+  _mnavPopping = false;
+});
 
 function mobileNavTab(tab) {
   if (tab === 'juegos') {
@@ -10833,6 +10980,7 @@ function _initMobileNavBadges() {
       document.getElementById(tileId)?.classList.toggle('has-dot', on);
     });
     document.getElementById('mnav-tab-comunidad')?.classList.toggle('has-dot', any);
+    document.getElementById('dnav-tab-comunidad')?.classList.toggle('has-dot', any);
   };
   const obs = new MutationObserver(update);
   pairs.forEach(([dotId]) => {
@@ -10873,11 +11021,11 @@ async function loadCommunityActivity() {
 function toggleHeaderMoreMenu() {
   const sidebar  = document.getElementById('mobile-sidebar');
   const backdrop = document.getElementById('mobile-sidebar-backdrop');
-  // Mobile con barra inferior: el cajon no se abre nunca (sus opciones son la
-  // pestaña Perfil), pero cada item sigue llamando a esta funcion "para
+  // Con la navegacion por secciones el cajon no se abre nunca (sus opciones
+  // son la seccion Perfil), pero cada item sigue llamando a esta funcion "para
   // cerrarlo" — a veces despues de navegar, cuando la pagina de Perfil ya se
   // cerro; si alternara, lo dejaba abierto como cajon encima de la vista nueva.
-  if (_isMobileNav()) {
+  if (document.body.dataset.mnav) {
     _headerMoreOpen = false;
     sidebar.classList.remove('open');
     backdrop.classList.remove('open');
@@ -11878,7 +12026,7 @@ async function loadCommunityStats(gameIds) {
       if (!el) return;
       const avgText = stats.avg_rating ? stats.avg_rating : '0.0';
       el.innerHTML = `<i class="ti ti-users" style="font-size:11px"></i> ${avgText} (${stats.rating_count || 0})`;
-      el.style.display = 'inline-flex';
+      el.style.display = stats.rating_count > 0 ? 'inline-flex' : 'none';
     });
   } catch(e) {}
 }
@@ -12197,12 +12345,12 @@ function renderNotifBell() {
 const NOTIF_TYPE_META = {
   friend_request:          { icon: 'ti-users',          color: '#E24B4A', go: () => openFriendsPanel() },
   period_summary:          { icon: 'ti-chart-bar',      color: '#66C0F4', go: () => { openStatsPanel(); switchStatsTab('period'); markNotificationsRead(); } },
-  plan_week_reminder:      { icon: 'ti-route',           color: '#1D9E75', go: () => setView('plan') },
-  news_friends_playing:    { icon: 'ti-sparkles',       color: '#1D9E75', go: () => setView('novedades') },
-  news_popular_wishlist:   { icon: 'ti-sparkles',       color: '#1D9E75', go: () => setView('novedades') },
-  news_most_hours:         { icon: 'ti-sparkles',       color: '#1D9E75', go: () => setView('novedades') },
-  news_new_releases:       { icon: 'ti-sparkles',       color: '#1D9E75', go: () => setView('novedades') },
-  news_free_games:         { icon: 'ti-sparkles',       color: '#1D9E75', go: () => setView('novedades') },
+  plan_week_reminder:      { icon: 'ti-route',           color: 'var(--green)', go: () => setView('plan') },
+  news_friends_playing:    { icon: 'ti-sparkles',       color: 'var(--green)', go: () => setView('novedades') },
+  news_popular_wishlist:   { icon: 'ti-sparkles',       color: 'var(--green)', go: () => setView('novedades') },
+  news_most_hours:         { icon: 'ti-sparkles',       color: 'var(--green)', go: () => setView('novedades') },
+  news_new_releases:       { icon: 'ti-sparkles',       color: 'var(--green)', go: () => setView('novedades') },
+  news_free_games:         { icon: 'ti-sparkles',       color: 'var(--green)', go: () => setView('novedades') },
   game_of_month_open:      { icon: 'ti-stars',          color: '#EF9F27', go: () => { openGomPanel(); setGomTab('vote'); } },
   game_of_month_results:   { icon: 'ti-stars',          color: '#EF9F27', go: () => { openGomPanel(); setGomTab('history'); } },
   sync_reminder:           { icon: 'ti-refresh',        color: '#66C0F4', go: () => setView('library') },
@@ -14843,12 +14991,12 @@ function updatePlayButtons() {
     const gid = btn.dataset.gid;
     if (gid === playSession.gameId) {
       btn.innerHTML = playSession.status === 'active' ? '⏸' : '▶';
-      btn.style.background = playSession.status === 'active' ? '#1D9E75' : 'transparent';
-      btn.style.color = playSession.status === 'active' ? '#fff' : '#1D9E75';
+      btn.style.background = playSession.status === 'active' ? 'var(--green)' : 'transparent';
+      btn.style.color = playSession.status === 'active' ? 'var(--on-accent)' : 'var(--green)';
     } else {
       btn.innerHTML = '▶';
       btn.style.background = 'transparent';
-      btn.style.color = '#1D9E75';
+      btn.style.color = 'var(--green)';
     }
   });
 }
@@ -15110,7 +15258,7 @@ async function loadWidgetFriends() {
           <div style="width:30px;height:30px;border-radius:50%;overflow:hidden;background:var(--bg3);position:relative">
             <div style="width:30px;height:30px;position:relative;transform:translateY(-11.7%)">${_friendAvatarHtml(f, 30)}</div>
           </div>
-          ${f.in_session ? `<div style="position:absolute;bottom:-1px;right:-1px;width:13px;height:13px;border-radius:50%;background:#1D9E75;border:1.5px solid var(--bg);display:flex;align-items:center;justify-content:center" title="${t('inSession')}"><i class="ti ti-player-play-filled" style="font-size:7px;color:#fff"></i></div>` : ''}
+          ${f.in_session ? `<div style="position:absolute;bottom:-1px;right:-1px;width:13px;height:13px;border-radius:50%;background:var(--green);border:1.5px solid var(--bg);display:flex;align-items:center;justify-content:center" title="${t('inSession')}"><i class="ti ti-player-play-filled" style="font-size:7px;color:#fff"></i></div>` : ''}
         </div>
         <div class="sidebar-widget-row-text">
           <div class="sidebar-widget-row-name">${esc(f.username)}${premiumMarkHtml(f.level_info && f.level_info.is_premium, 12)}</div>
