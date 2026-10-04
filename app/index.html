@@ -154,11 +154,18 @@
     :root[data-game-theme="atomicAmbar"] body      { font-family:'Share Tech Mono', monospace; }
     :root[data-game-theme="erdtree"] body          { font-family:'EB Garamond', serif; }
     :root[data-game-theme="oldShooter"] body       { font-family:'PT Sans', -apple-system, sans-serif; }
-    :root[data-game-theme="pacman"] body           { font-family:'Silkscreen', monospace; }
+    :root[data-game-theme="pacman"] body           { font-family:'Rubik', -apple-system, sans-serif; }
     :root[data-game-theme="undertale"] body        { font-family:'Pixelify Sans', monospace; }
     :root[data-game-theme="portal"] body           { font-family:'Titillium Web', -apple-system, sans-serif; }
     :root[data-game-theme="starcraft2"] body       { font-family:'Rajdhani', -apple-system, sans-serif; }
-    :root[data-game-theme="doom"] body             { font-family:'Metal Mania', cursive; }
+    :root[data-game-theme="doom"] body             { font-family:'Oswald', -apple-system, sans-serif; }
+    /* Pac-Man y Doom: la fuente de caracter (pixel arcade / Metal Mania) solo
+       en titulos — en todo el texto, menus y botones chicos se leian mal
+       (mismo criterio que Halloween con Creepster). */
+    :root[data-game-theme="pacman"] .header-title,
+    :root[data-game-theme="pacman"] .modal-title    { font-family:'Press Start 2P', monospace; font-size:12px; line-height:1.5; color:var(--green); }
+    :root[data-game-theme="doom"] .header-title,
+    :root[data-game-theme="doom"] .modal-title      { font-family:'Metal Mania', cursive; font-weight:400; letter-spacing:.03em; color:var(--green); }
     /* Creepster (letras chorreadas) solo en titulos — ilegible en texto chico.
        El resto en Mulish: una gotica (Grenze) quedaba apretada y rara en
        menus, pills y botones chicos. */
@@ -248,6 +255,34 @@
     :root[data-game-theme="atomicAmbar"] .mobile-sidebar-item i[data-cp-icon="soporte"] { -webkit-mask-image: url(icons/atomic/soporte.svg); mask-image: url(icons/atomic/soporte.svg); }
     :root[data-game-theme="atomicGreen"] .mobile-sidebar-item i[data-cp-icon="cerrar_sesion"],
     :root[data-game-theme="atomicAmbar"] .mobile-sidebar-item i[data-cp-icon="cerrar_sesion"] { -webkit-mask-image: url(icons/atomic/cerrar_sesion.svg); mask-image: url(icons/atomic/cerrar_sesion.svg); }
+    /* Monitor CRT — Atomic Green/Ambar (Fallout): lineas de barrido y viñeta
+       por encima de todo (pointer-events:none, no intercepta clicks), brillo
+       de fosforo en el texto y un parpadeo muy sutil (apagado con
+       prefers-reduced-motion). Mismo efecto que ThemedScreenOverlay en la
+       app. */
+    :root[data-game-theme="atomicGreen"] body::after,
+    :root[data-game-theme="atomicAmbar"] body::after {
+      content: '';
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 2147483647;
+      background:
+        repeating-linear-gradient(to bottom, transparent 0, transparent 2px, rgba(0,0,0,0.16) 2px, rgba(0,0,0,0.16) 3px),
+        radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.35) 100%);
+      animation: crt-flicker 7s infinite;
+    }
+    @keyframes crt-flicker {
+      0%, 100% { opacity: 1; }
+      48% { opacity: 1; }
+      50% { opacity: 0.85; }
+      52% { opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      :root[data-game-theme="atomicGreen"] body::after,
+      :root[data-game-theme="atomicAmbar"] body::after { animation: none; }
+    }
+    :root[data-game-theme="atomicGreen"] body { text-shadow: 0 0 4px rgba(25,149,21,0.55); }
+    :root[data-game-theme="atomicAmbar"] body { text-shadow: 0 0 4px rgba(243,167,112,0.45); }
     :root[data-game-theme] .play-btn { border-color:var(--accent-play) !important; color:var(--accent-play) !important; }
     :root[data-game-theme] .game-foot { color:var(--accent-meta); }
     :root[data-game-theme] .game-card,
@@ -288,6 +323,13 @@
     :root[data-game-theme="erdtree"] .lib-grid-tile {
       border-width: 1.4px; border-style: solid; border-color: transparent;
       border-image: linear-gradient(135deg, var(--green-dark), var(--green), var(--green-dark)) 1;
+      box-shadow: 0 0 12px rgba(237,138,9,0.16);
+    }
+    /* Resplandor dorado del Arbol Aureo arriba de la pagina, como el cielo
+       del juego, y brillo tenue de "gracia" alrededor de cada card. */
+    :root[data-game-theme="erdtree"] body {
+      background-image: radial-gradient(ellipse 70% 45% at 50% -8%, rgba(237,138,9,0.2), rgba(237,138,9,0.05) 45%, transparent 70%);
+      background-attachment: fixed;
     }
     :root[data-game-theme="erdtree"] .mobile-sidebar {
       border-left: 1.4px solid var(--green);
@@ -401,24 +443,47 @@
       border-left: 2px solid var(--green);
     }
 
-    /* Glow neon celeste — Koprulu (StarCraft II), mismo mecanismo que
-       Guaca-Guaca con la paleta de SC2. */
+    /* Koprulu (StarCraft II) — cards con dos esquinas cortadas en diagonal
+       como los paneles de la UI del juego (antes era el mismo glow redondeado
+       de Guaca-Guaca). La card se recorta con clip-path y el borde es un
+       ::after con la misma forma menos la de adentro (evenodd), asi funciona
+       aunque "Color de card" le ponga otro fondo inline. clip-path tambien
+       recorta el box-shadow, por eso el brillo va por dentro. Panal de
+       hexagonos tenue de fondo. */
+    :root[data-game-theme="starcraft2"] body {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='17.32' height='30'%3E%3Cpath d='M0.00 -10.00L8.66 -5.00L8.66 5.00L0.00 10.00L-8.66 5.00L-8.66 -5.00ZM17.32 -10.00L25.98 -5.00L25.98 5.00L17.32 10.00L8.66 5.00L8.66 -5.00ZM8.66 5.00L17.32 10.00L17.32 20.00L8.66 25.00L0.00 20.00L0.00 10.00ZM0.00 20.00L8.66 25.00L8.66 35.00L0.00 40.00L-8.66 35.00L-8.66 25.00ZM17.32 20.00L25.98 25.00L25.98 35.00L17.32 40.00L8.66 35.00L8.66 25.00Z' fill='none' stroke='%234FC3F7' stroke-opacity='.07' stroke-width='1'/%3E%3C/svg%3E");
+    }
     :root[data-game-theme="starcraft2"] .game-card,
     :root[data-game-theme="starcraft2"] .lib-grid-tile {
-      border: 1.4px solid var(--ring);
-      box-shadow: 0 0 6px var(--ring), inset 0 0 3px var(--ring);
+      position: relative;
+      border: none;
+      box-shadow: inset 0 0 10px rgba(79,195,247,0.22);
+      clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    }
+    :root[data-game-theme="starcraft2"] .game-card::after,
+    :root[data-game-theme="starcraft2"] .lib-grid-tile::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: var(--ring);
+      pointer-events: none;
+      clip-path: polygon(evenodd,
+        10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px,
+        10.6px 1.5px, 1.5px 10.6px, 1.5px calc(100% - 1.5px), calc(100% - 10.6px) calc(100% - 1.5px),
+        calc(100% - 1.5px) calc(100% - 10.6px), calc(100% - 1.5px) 1.5px);
     }
     :root[data-game-theme="starcraft2"] .mobile-sidebar {
       border-left: 1.4px solid var(--ring);
       box-shadow: -6px 0 12px var(--ring);
     }
 
-    /* Relieve 3D estilo HUD — Knee-Deep (Doom), mismo mecanismo que Old
-       Shooter con la paleta gris/PLAYPAL. */
+    /* Panel hundido como los recuadros de la barra de estado del HUD —
+       Knee-Deep (Doom). Oscuro arriba-izq y claro abajo-der: el relieve hacia
+       afuera es el de Old Shooter y con el mismo los dos temas se sentian
+       iguales. El boton de play sigue saliente, como un boton. */
     :root[data-game-theme="doom"] .game-card,
     :root[data-game-theme="doom"] .lib-grid-tile {
       border-width: 2px; border-style: solid;
-      border-color: #7A7A7A #262626 #262626 #7A7A7A;
+      border-color: #262626 #7A7A7A #7A7A7A #262626;
     }
     :root[data-game-theme="doom"] .play-btn {
       border-width: 2px !important; border-style: solid !important;
@@ -3835,7 +3900,7 @@ function ensureGameThemeFontsLoaded() {
   const link = document.createElement('link');
   link.id = 'game-theme-fonts';
   link.rel = 'stylesheet';
-  link.href = 'https://fonts.googleapis.com/css2?family=Play:wght@400;700&family=VT323&family=Share+Tech+Mono&family=Cinzel:wght@600;700&family=EB+Garamond&family=Mulish:wght@400;500;600;700&family=PT+Sans&family=Press+Start+2P&family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;600;700&family=Titillium+Web:wght@400;600;700&family=Rajdhani:wght@500;600;700&family=Metal+Mania&family=Creepster&display=swap';
+  link.href = 'https://fonts.googleapis.com/css2?family=Play:wght@400;700&family=VT323&family=Share+Tech+Mono&family=Cinzel:wght@600;700&family=EB+Garamond&family=Mulish:wght@400;500;600;700&family=PT+Sans&family=Press+Start+2P&family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;600;700&family=Titillium+Web:wght@400;600;700&family=Rajdhani:wght@500;600;700&family=Metal+Mania&family=Oswald:wght@400;500;600&family=Rubik:wght@400;500;600;700&family=Creepster&display=swap';
   document.head.appendChild(link);
 }
 
@@ -4180,28 +4245,37 @@ function _heartIconSvg(fill) {
           <defs><clipPath id="${clipId}"><rect x="0" y="0" width="8" height="16"/></clipPath></defs>
           <path fill="${bright}" d="${HEART_PATH}" clip-path="url(#${clipId})"/>`;
 }
-// Calabaza pixel art para Halloween (mismo path que assets/icons/halloween/
-// pumpkin_full.svg en Flutter) — misma logica de base tenue + mitad
-// recortada que el corazon de Undertale.
+// Calabaza pixel art para Halloween (assets/icons/halloween/pumpkin_full.svg).
 const PUMPKIN_PATHS = [
   ['#6BBF3A', 'M7 0h2v3h-2zM9 1h3v1h-3z'],
   ['#FF7518', 'M3 3h10v1h1v1h1v7h-1v1h-1v1h-10v-1h-1v-1h-1v-7h1v-1h1z'],
   ['#1A0F24', 'M4 6h3v2h-3zM9 6h3v2h-3zM4 9h8v1h-1v1h-2v-1h-2v1h-2v-1h-1z'],
 ];
-function _pumpkinIconSvg(fill) {
-  const paths = PUMPKIN_PATHS.map(([c, d]) => `<path fill="${c}" d="${d}"/>`).join('');
-  if (fill === 'full') return paths;
-  const dim = `<g opacity="0.3">${paths}</g>`;
-  if (fill === 'none') return dim;
-  const clipId = 'pumpkin-half-clip-' + Math.random().toString(36).slice(2);
-  return `${dim}<defs><clipPath id="${clipId}"><rect x="0" y="0" width="8" height="16"/></clipPath></defs>
-          <g clip-path="url(#${clipId})">${paths}</g>`;
+// Dibujos 16x16 de calificacion por tema — mismos que los assets de la app
+// Flutter (assets/icons/<tema>/*.svg). `empty` = icono propio para "sin
+// calificar" (el pac-dot chico); si no hay, el dibujo lleno atenuado.
+const RATING_ART = {
+  halloween: { art: PUMPKIN_PATHS.map(([c, d]) => `<path fill="${c}" d="${d}"/>`).join('') },
+  pacman: {
+    art: '<circle cx="8" cy="8" r="5.5" fill="#FFB8AE"/>',
+    empty: '<circle cx="8" cy="8" r="2" fill="#FFB8AE" fill-opacity="0.55"/>',
+  },
+  doom: { art: '<path fill="#E3D9C6" fill-rule="evenodd" d="M5 1h6v1h2v1h1v5h-1v1h-1v1h-1v3h-6v-3h-1v-1h-1v-1h-1v-5h1v-1h2zM4 4v3h3v-3zM9 4v3h3v-3zM7 8v2h2v-2zM6 11v2h1v-2zM9 11v2h1v-2z"/>' },
+  erdtree: { art: '<path fill="none" stroke="#F0B23A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M8 1.5v13M8 7.5L3.5 3M8 7.5L12.5 3M5.5 14.5h5"/>' },
+};
+function _ratingArtSvg({ art, empty }, fill) {
+  if (fill === 'full') return art;
+  const base = empty || `<g opacity="0.3">${art}</g>`;
+  if (fill === 'none') return base;
+  const clipId = 'rating-half-clip-' + Math.random().toString(36).slice(2);
+  return `${base}<defs><clipPath id="${clipId}"><rect x="0" y="0" width="8" height="16"/></clipPath></defs>
+          <g clip-path="url(#${clipId})">${art}</g>`;
 }
 // Icono de calificacion propio del tema activo (16x16), o null si usa estrellas.
 function _themedRatingIconSvg(fill) {
   const theme = document.documentElement.dataset.gameTheme;
   if (theme === 'undertale') return _heartIconSvg(fill);
-  if (theme === 'halloween') return _pumpkinIconSvg(fill);
+  if (RATING_ART[theme]) return _ratingArtSvg(RATING_ART[theme], fill);
   return null;
 }
 function starPickerHtml(gameId, currentRating) {
