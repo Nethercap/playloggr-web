@@ -1236,13 +1236,13 @@
 
 <!-- Play Session Floating Timer -->
 <div id="play-timer-bar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(90deg,var(--green),var(--green-dark));color:var(--on-accent);padding:10px 20px;display:none;align-items:center;gap:14px;box-shadow:0 2px 12px rgba(0,0,0,0.4)">
-  <div style="font-size:18px">🎮</div>
-  <div style="flex:1;min-width:0">
-    <div id="play-timer-game" style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
-    <div id="play-timer-clock" style="font-size:18px;font-variant-numeric:tabular-nums;font-weight:700">00:00:00</div>
+  <div class="u-fs18">🎮</div>
+  <div class="u-flex1" style="min-width:0">
+    <div class="u-fs13" id="play-timer-game" style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+    <div class="u-fs18" id="play-timer-clock" style="font-variant-numeric:tabular-nums;font-weight:700">00:00:00</div>
   </div>
-  <button id="play-timer-pause" onclick="pausePlaySession()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:14px">⏸</button>
-  <button onclick="finishPlaySession()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:8px 16px;border-radius:20px;cursor:pointer;font-size:13px;font-weight:600">Finalizar</button>
+  <button class="u-fs14 u-pointer" id="play-timer-pause" onclick="pausePlaySession()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;width:34px;height:34px;border-radius:50%">⏸</button>
+  <button class="u-fs13 u-pointer" onclick="finishPlaySession()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:8px 16px;border-radius:20px;font-weight:600">Finalizar</button>
 </div>
 
 <style>
@@ -1291,13 +1291,84 @@
   .user-chip { display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2); }
   .logout-btn { font-size:11px;padding:3px 9px;border-radius:var(--radius-md);border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer; }
   .logout-btn:hover { background:var(--bg2); }
-</style>
+
+    /* ── Clases que reemplazan estilos inline repetidos del HTML fijo ──
+       (fase 1 del paso de inline a clases, ver web-inline-styles-cleanup).
+       Mismos valores exactos que tenian inline: no cambian nada visible. */
+    .hbtn { margin-left:4px; padding:5px 10px; font-size:12px; border-radius:6px; border:0.5px solid var(--border); background:var(--bg2); color:var(--text2); cursor:pointer; }
+    .hbtn-wrap { position:relative; margin-left:4px; }
+    .hdot { position:absolute; top:2px; right:2px; width:8px; height:8px; border-radius:50%; background:#E24B4A; }
+    .view-page { flex-direction:column; flex:1; overflow-y:auto; }
+    .page-col { padding:16px; width:100%; margin:0 auto; box-sizing:border-box; }
+    .seg-tab { padding:6px 18px; font-size:12px; border:0.5px solid var(--border); background:var(--bg2); color:var(--text2); cursor:pointer; border-radius:20px; }
+    .seg-tab-sm { padding:5px 14px; font-size:12px; border-radius:16px; border:0.5px solid var(--border); background:var(--bg2); color:var(--text2); cursor:pointer; }
+    .view-pill { padding:6px 16px; border-radius:20px; border:none; cursor:pointer; font-size:13px; font-weight:600; align-items:center; gap:5px; }
+    .field { margin-bottom:14px; }
+    .field-label { font-size:12px; color:var(--text2); margin-bottom:6px; }
+    .field-hint { font-size:10px; color:var(--text2); margin-top:4px; }
+    .form-msg { font-size:12px; margin-top:10px; }
+    .popup-menu { position:absolute; top:calc(100% + 4px); right:0; background:var(--bg2); border:0.5px solid var(--border2); border-radius:8px; z-index:300; min-width:220px; box-shadow:0 4px 16px rgba(0,0,0,0.3); padding:4px 0; }
+    .menu-section { padding:10px 14px; border-bottom:0.5px solid var(--border); }
+    .menu-heading { font-size:11px; color:var(--text2); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; }
+    .menu-input { flex:1; padding:5px 8px; font-size:12px; background:var(--bg3); border:0.5px solid var(--border); border-radius:6px; color:var(--text); min-width:0; }
+    .menu-action { padding:5px 10px; font-size:12px; border-radius:6px; border:none; background:var(--green); color:var(--on-accent); cursor:pointer; white-space:nowrap; }
+    .menu-sep { height:0.5px; background:var(--border); margin:4px 0; }
+    .menu-note { padding:8px 14px; font-size:10px; color:var(--text2); }
+    .btn-sm { padding:6px 12px; font-size:12px; border-radius:6px; border:0.5px solid var(--border); background:var(--bg2); color:var(--text2); cursor:pointer; }
+    .btn-sm-primary { padding:6px 14px; font-size:12px; border-radius:6px; border:none; background:var(--green); color:var(--on-accent); cursor:pointer; }
+    .spinner-block { margin:0 auto 12px; }
+    .state-msg { padding:40px; color:var(--text2); }
+    .state-msg-sm { padding:24px; color:var(--text2); }
+    .mini-input { padding:6px 8px; border:0.5px solid var(--border); border-radius:6px; color:var(--text); font-size:12px; }
+    .u-flex1 { flex:1; }
+    .u-rel { position:relative; }
+    .u-fs10 { font-size:10px; }
+    .u-fs11 { font-size:11px; }
+    .u-fs12 { font-size:12px; }
+    .u-fs13 { font-size:13px; }
+    .u-fs14 { font-size:14px; }
+    .u-fs16 { font-size:16px; }
+    .u-fs18 { font-size:18px; }
+    .u-accent { color:var(--green); }
+    .u-muted { color:var(--text2); }
+    .u-amber { color:var(--amber); }
+    .u-blue { color:var(--blue); }
+    .u-gray { color:var(--gray); }
+    .u-wish { color:#EF9F27; }
+    .u-mt2 { margin-top:2px; }
+    .u-mt4 { margin-top:4px; }
+    .u-mt6 { margin-top:6px; }
+    .u-mt8 { margin-top:8px; }
+    .u-mt12 { margin-top:12px; }
+    .u-mt16 { margin-top:16px; }
+    .u-mb12 { margin-bottom:12px; }
+    .u-mb10 { margin-bottom:10px; }
+    .u-gap6 { gap:6px; }
+    .u-gap8 { gap:8px; }
+    .u-no-underline { text-decoration:none; }
+    .u-z1000 { z-index:1000; }
+    .u-mw320 { max-width:320px; }
+    .u-mw340 { max-width:340px; }
+    .u-mw360 { max-width:360px; }
+    .u-mw380 { max-width:380px; }
+    .u-mw400 { max-width:400px; }
+    .u-mw420 { max-width:420px; }
+    .u-mw640 { max-width:640px; }
+    .u-mw720 { max-width:720px; }
+    .u-mw820 { max-width:820px; }
+    .u-mw960 { max-width:960px; }
+    .u-col { flex-direction:column; }
+    .u-center { justify-content:center; }
+    .u-items-center { align-items:center; }
+    .u-pointer { cursor:pointer; }
+
+  </style>
 
 <div id="login-screen">
-  <div class="login-card" style="position:relative">
-    <button onclick="toggleLanguage()" id="lang-toggle-btn-login" style="position:absolute;top:10px;right:12px;padding:5px 10px;font-size:12px;font-weight:600;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" title="Language / Idioma">EN</button>
+  <div class="login-card u-rel">
+    <button class="u-fs12 u-muted u-pointer" onclick="toggleLanguage()" id="lang-toggle-btn-login" style="position:absolute;top:10px;right:12px;padding:5px 10px;font-weight:600;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2)" title="Language / Idioma">EN</button>
     <div class="login-title">
-      <i class="ti ti-device-gamepad-2" style="color:var(--green);font-size:22px"></i>
+      <i class="ti ti-device-gamepad-2 u-accent" style="font-size:22px"></i>
       Playloggr
     </div>
     <div class="login-sub" id="login-subtitle" data-i18n="loginSubtitle">Iniciá sesión para continuar</div>
@@ -1305,12 +1376,12 @@
     <div id="login-form">
       <!-- Google login (default) -->
       <div id="google-login-section">
-        <button onclick="loginWithGoogle()" style="width:100%;padding:12px;border-radius:var(--radius-md);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px">
+        <button class="u-fs14 u-gap8 u-center u-items-center u-pointer" onclick="loginWithGoogle()" style="width:100%;padding:12px;border-radius:var(--radius-md);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);display:flex;margin-bottom:16px">
           <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
           <span data-i18n="continueWithGoogle">Continuar con Google</span>
         </button>
         <div style="text-align:center">
-          <a onclick="showEmailLogin()" id="email-login-link" style="font-size:12px;color:var(--text2);cursor:pointer;text-decoration:underline" data-i18n="useEmailPassword">Usar email y contraseña</a>
+          <a class="u-fs12 u-muted u-pointer" onclick="showEmailLogin()" id="email-login-link" style="text-decoration:underline" data-i18n="useEmailPassword">Usar email y contraseña</a>
         </div>
         <ul class="login-perks">
           <li><i class="ti ti-check"></i><span data-i18n="loginPerkFree">Gratis, sin tarjeta</span></li>
@@ -1334,20 +1405,20 @@
           <label data-i18n="password">Contraseña</label>
           <input type="password" id="l-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')submitAuth()" />
         </div>
-        <div id="turnstile-widget-wrap" style="display:none;margin-bottom:12px">
+        <div class="u-mb12" id="turnstile-widget-wrap" style="display:none">
           <div id="turnstile-widget"></div>
         </div>
         <div class="login-err" id="login-err"></div>
         <button class="login-btn" onclick="submitAuth()" id="login-btn" data-i18n="login">Iniciar sesión</button>
-        <div class="login-toggle" style="margin-top:8px">
+        <div class="login-toggle u-mt8">
           <span id="login-toggle-text" data-i18n="noAccount">¿No tenés cuenta?</span>
           <a onclick="toggleAuthMode()"> <span id="login-toggle-link" data-i18n="register">Registrate</span></a>
         </div>
-        <div class="login-toggle" style="margin-top:6px">
-          <a onclick="openReset()" style="color:var(--text2);font-size:11px" data-i18n="forgotPassword">¿Olvidaste tu contraseña?</a>
+        <div class="login-toggle u-mt6">
+          <a class="u-fs11" onclick="openReset()" style="color:var(--text2)" data-i18n="forgotPassword">¿Olvidaste tu contraseña?</a>
         </div>
-        <div style="text-align:center;margin-top:12px">
-          <a onclick="showGoogleLogin()" style="font-size:12px;color:var(--text2);cursor:pointer;text-decoration:underline" data-i18n="backToGoogle">← Volver a Google</a>
+        <div class="u-mt12" style="text-align:center">
+          <a class="u-fs12 u-muted u-pointer" onclick="showGoogleLogin()" style="text-decoration:underline" data-i18n="backToGoogle">← Volver a Google</a>
         </div>
       </div>
     </div>
@@ -1357,7 +1428,7 @@
 <!-- Sidebar mobile (reemplaza el menu "..." chico) — mismas opciones que el drawer de la app -->
 <div class="mobile-sidebar-backdrop" id="mobile-sidebar-backdrop" onclick="toggleHeaderMoreMenu()"></div>
 <div class="mobile-sidebar" id="mobile-sidebar">
-  <div class="mobile-sidebar-header"><i class="ti ti-device-gamepad-2" style="color:var(--green)"></i> Playloggr</div>
+  <div class="mobile-sidebar-header"><i class="ti ti-device-gamepad-2 u-accent"></i> Playloggr</div>
   <div class="mprofile-title" data-i18n="navProfile">Perfil</div>
   <div id="mprofile-panel-slot"></div>
 
@@ -1374,25 +1445,25 @@
   <button id="mobile-epic-menu-btn" onclick="toggleHeaderMoreMenu();toggleConnectorMenu('epic')" class="mobile-sidebar-item"><img src="https://cdn.simpleicons.org/epicgames/888887"> Epic</button>
 
   <div class="mobile-sidebar-group" data-i18n="menuProgress">Mi progreso</div>
-  <button onclick="toggleHeaderMoreMenu();openStreakPanel()" class="mobile-sidebar-item"><i class="ti ti-flame" style="color:#EF9F27"></i> <span data-i18n="streak">Racha</span></button>
+  <button onclick="toggleHeaderMoreMenu();openStreakPanel()" class="mobile-sidebar-item"><i class="ti ti-flame u-wish"></i> <span data-i18n="streak">Racha</span></button>
   <button onclick="openAchievementsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-trophy" data-cp-icon="logros"></i> <span data-i18n="achievements">Logros</span></button>
   <button onclick="toggleHeaderMoreMenu();openConfigPanel().then(()=>switchConfigTab('avatar'))" class="mobile-sidebar-item"><i class="ti ti-user-star"></i> <span data-i18n="levelAndAvatar">Nivel y avatar</span></button>
   <button onclick="openListsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-folder" data-cp-icon="carpetas"></i> <span data-i18n="folders">Listas</span></button>
   <button onclick="setView('rankings');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-medal" data-cp-icon="rankings"></i> <span data-i18n="rankings">Rankings</span></button>
   <button onclick="openMyReviewsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-message-star" data-cp-icon="mis_resenas"></i> <span data-i18n="myReviews">Reseñas</span></button>
-  <button onclick="setView('plan');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-route" data-cp-icon="plan_de_juego"></i> <span data-i18n="gamePlan" style="flex:1">Plan de juego</span><i class="ti ti-lock" id="plan-nav-lock-icon" style="display:none;font-size:13px;color:var(--text2)"></i></button>
+  <button onclick="setView('plan');toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-route" data-cp-icon="plan_de_juego"></i> <span class="u-flex1" data-i18n="gamePlan">Plan de juego</span><i class="ti ti-lock u-muted" id="plan-nav-lock-icon" style="display:none;font-size:13px"></i></button>
 
   <div class="mobile-sidebar-group mside-community" data-i18n="menuCommunity">Comunidad</div>
   <button onclick="openFriendsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item mside-community"><i class="ti ti-users" data-cp-icon="amigos"></i> <span data-i18n="friends">Seguidores</span></button>
   <button onclick="openGomPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item mside-community"><i class="ti ti-stars" data-cp-icon="juego_del_mes"></i> <span data-i18n="gameOfMonth">Juego del mes</span></button>
   <button onclick="setView('novedades');toggleHeaderMoreMenu()" class="mobile-sidebar-item mside-community"><i class="ti ti-sparkles" data-cp-icon="novedades"></i> <span data-i18n="novedades">Descubrir</span></button>
-  <a href="https://playloggr.com/actividad" target="_blank" rel="noopener" class="mobile-sidebar-item mside-community" style="text-decoration:none"><i class="ti ti-activity"></i> <span data-i18n="communityActivity">Actividad de la comunidad</span></a>
+  <a href="https://playloggr.com/actividad" target="_blank" rel="noopener" class="mobile-sidebar-item mside-community u-no-underline"><i class="ti ti-activity"></i> <span data-i18n="communityActivity">Actividad de la comunidad</span></a>
 
   <div class="mobile-sidebar-group" data-i18n="menuAccount">Cuenta</div>
-  <button id="mobile-premium-menu-btn" onclick="setView('premium');toggleHeaderMoreMenu()" class="mobile-sidebar-item" style="display:none"><i class="ti ti-key" style="color:var(--green)"></i> <span data-i18n="evolveToPremium">Evolucioná a Premium</span></button>
+  <button id="mobile-premium-menu-btn" onclick="setView('premium');toggleHeaderMoreMenu()" class="mobile-sidebar-item" style="display:none"><i class="ti ti-key u-accent"></i> <span data-i18n="evolveToPremium">Evolucioná a Premium</span></button>
   <button onclick="openConfigPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item"><i class="ti ti-settings" data-cp-icon="configuracion"></i> <span data-i18n="config">Configuración</span></button>
-  <a href="https://play.google.com/store/apps/details?id=com.playloggr.app" target="_blank" rel="noopener" class="mobile-sidebar-item" style="text-decoration:none"><img src="https://cdn.simpleicons.org/googleplay/888887" style="width:16px;height:16px"> <span data-i18n="downloadApp">Descargar la app</span></a>
-  <a href="https://discord.gg/ksF4AaMt4j" target="_blank" rel="noopener" class="mobile-sidebar-item" style="text-decoration:none"><i class="ti ti-brand-discord" style="color:#5865F2"></i> <span data-i18n="joinDiscord">Unite a Discord</span></a>
+  <a href="https://play.google.com/store/apps/details?id=com.playloggr.app" target="_blank" rel="noopener" class="mobile-sidebar-item u-no-underline"><img src="https://cdn.simpleicons.org/googleplay/888887" style="width:16px;height:16px"> <span data-i18n="downloadApp">Descargar la app</span></a>
+  <a href="https://discord.gg/ksF4AaMt4j" target="_blank" rel="noopener" class="mobile-sidebar-item u-no-underline"><i class="ti ti-brand-discord" style="color:#5865F2"></i> <span data-i18n="joinDiscord">Unite a Discord</span></a>
   <a href="mailto:nether.appdev@gmail.com" class="mobile-sidebar-item"><i class="ti ti-lifebuoy" data-cp-icon="soporte"></i> <span data-i18n="support">Soporte</span></a>
   <button onclick="logout()" class="mobile-sidebar-item"><i class="ti ti-logout" data-cp-icon="cerrar_sesion"></i> <span data-i18n="logout">Salir</span></button>
 </div>
@@ -1400,8 +1471,8 @@
 <div class="container">
 
   <div class="header">
-    <div class="header-title" onclick="goHome()" style="cursor:pointer" title="Ir al inicio">
-      <i class="ti ti-device-gamepad-2 brand-icon" style="font-size:20px;color:var(--green)"></i>
+    <div class="header-title u-pointer" onclick="goHome()" title="Ir al inicio">
+      <i class="ti ti-device-gamepad-2 brand-icon u-accent" style="font-size:20px"></i>
       <span class="brand-name">Playloggr</span>
       <span id="mnav-title" class="mnav-only"></span>
     </div>
@@ -1415,7 +1486,7 @@
     <div class="header-right">
       <input type="hidden" id="api-url" value="https://api.playloggr.com" />
       <!-- Language toggle -->
-      <button onclick="toggleLanguage()" id="lang-toggle-btn" style="margin-left:4px;padding:5px 10px;font-size:12px;font-weight:600;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" title="Language / Idioma">EN</button>
+      <button class="hbtn" onclick="toggleLanguage()" id="lang-toggle-btn" style="font-weight:600" title="Language / Idioma">EN</button>
       <!-- Mobile: accesos de la AppBar de Juegos de la app (Premium si es
            gratis, Listas, Filtros) — ver la seccion "Navegacion mobile". -->
       <button id="mnav-premium-btn" class="mnav-hbtn mnav-only mnav-games-only" onclick="setView('premium')" data-i18n-title="seePremium" title="Ver Premium" hidden style="color:#E0B84C">
@@ -1428,83 +1499,83 @@
         <i class="ti ti-filter"></i>
       </button>
       <!-- Notifications bell -->
-      <div style="position:relative;display:inline-block;margin-left:4px" id="notif-bell-wrap">
-        <button id="notif-bell-btn" onclick="openNotifModal()" style="position:relative;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="notifications" title="Notificaciones">
-          <i class="ti ti-bell" style="font-size:14px"></i>
+      <div class="hbtn-wrap" style="display:inline-block" id="notif-bell-wrap">
+        <button class="u-rel u-fs12 u-muted u-pointer" id="notif-bell-btn" onclick="openNotifModal()" style="padding:5px 10px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2)" data-i18n-title="notifications" title="Notificaciones">
+          <i class="ti ti-bell u-fs14"></i>
           <span class="sidebar-only-label" data-i18n="notifications">Notificaciones</span>
-          <span id="notif-bell-dot" style="display:none;position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:#E24B4A"></span>
+          <span class="hdot" id="notif-bell-dot" style="display:none"></span>
         </button>
       </div>
 
       <!-- Novedades button -->
-      <button id="novedades-icon-btn" onclick="setView('novedades')" style="position:relative;margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="novedades" title="Novedades">
-        <i class="ti ti-sparkles" style="font-size:14px"></i>
+      <button class="hbtn u-rel" id="novedades-icon-btn" onclick="setView('novedades')" data-i18n-title="novedades" title="Novedades">
+        <i class="ti ti-sparkles u-fs14"></i>
         <span class="sidebar-only-label" data-i18n="novedades">Novedades</span>
-        <span id="novedades-btn-dot" style="display:none;position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:#E24B4A"></span>
+        <span class="hdot" id="novedades-btn-dot" style="display:none"></span>
       </button>
 
       <!-- Friends button -->
-      <button id="friends-btn" onclick="openFriendsPanel()" style="position:relative;margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="friends" title="Amigos">
-        <i class="ti ti-users" style="font-size:14px"></i>
+      <button class="hbtn u-rel" id="friends-btn" onclick="openFriendsPanel()" data-i18n-title="friends" title="Amigos">
+        <i class="ti ti-users u-fs14"></i>
         <span class="sidebar-only-label" data-i18n="friends">Amigos</span>
-        <span id="friends-btn-dot" style="display:none;position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:#E24B4A"></span>
+        <span class="hdot" id="friends-btn-dot" style="display:none"></span>
       </button>
 
       <div class="nav-divider"></div>
 
       <!-- Achievements button -->
-      <button id="achievements-btn" onclick="openAchievementsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="achievements" title="Logros">
-        <i class="ti ti-trophy" style="font-size:14px"></i>
+      <button class="hbtn" id="achievements-btn" onclick="openAchievementsPanel()" data-i18n-title="achievements" title="Logros">
+        <i class="ti ti-trophy u-fs14"></i>
         <span class="sidebar-only-label" data-i18n="achievements">Logros</span>
       </button>
 
       <!-- Game of the month button -->
-      <button id="gom-icon-btn" onclick="openGomPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="gameOfMonth" title="Juego del mes">
-        <i class="ti ti-stars" style="font-size:14px"></i>
+      <button class="hbtn" id="gom-icon-btn" onclick="openGomPanel()" data-i18n-title="gameOfMonth" title="Juego del mes">
+        <i class="ti ti-stars u-fs14"></i>
         <span class="sidebar-only-label" data-i18n="gameOfMonth">Juego del mes</span>
       </button>
 
       <!-- My reviews button -->
-      <button id="myreviews-icon-btn" onclick="openMyReviewsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="myReviews" title="Reseñas">
-        <i class="ti ti-message-star" style="font-size:14px"></i>
+      <button class="hbtn" id="myreviews-icon-btn" onclick="openMyReviewsPanel()" data-i18n-title="myReviews" title="Reseñas">
+        <i class="ti ti-message-star u-fs14"></i>
         <span class="sidebar-only-label" data-i18n="myReviews">Reseñas</span>
       </button>
 
       <!-- Lists button -->
-      <button id="lists-icon-btn" onclick="openListsPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="folders" title="Listas">
-        <i class="ti ti-folder" style="font-size:14px"></i>
+      <button class="hbtn" id="lists-icon-btn" onclick="openListsPanel()" data-i18n-title="folders" title="Listas">
+        <i class="ti ti-folder u-fs14"></i>
         <span class="sidebar-only-label" data-i18n="folders">Listas</span>
       </button>
 
       <!-- Rankings button -->
-      <button id="rankings-icon-btn" onclick="setView('rankings')" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="rankings" title="Rankings">
-        <i class="ti ti-medal" style="font-size:14px"></i>
+      <button class="hbtn" id="rankings-icon-btn" onclick="setView('rankings')" data-i18n-title="rankings" title="Rankings">
+        <i class="ti ti-medal u-fs14"></i>
         <span class="sidebar-only-label" data-i18n="rankings">Rankings</span>
       </button>
 
       <div class="nav-divider"></div>
 
       <!-- Config button -->
-      <button id="config-btn" onclick="openConfigPanel()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="config" title="Configuración">
-        <i class="ti ti-settings" style="font-size:14px"></i>
+      <button class="hbtn" id="config-btn" onclick="openConfigPanel()" data-i18n-title="config" title="Configuración">
+        <i class="ti ti-settings u-fs14"></i>
         <span class="sidebar-only-label" data-i18n="config">Configuración</span>
       </button>
 
       <!-- Support button -->
-      <a id="support-link" href="mailto:nether.appdev@gmail.com" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center" data-i18n-title="support" title="Soporte">
-        <i class="ti ti-lifebuoy" style="font-size:14px"></i>
+      <a class="hbtn u-no-underline u-items-center" id="support-link" href="mailto:nether.appdev@gmail.com" style="display:inline-flex" data-i18n-title="support" title="Soporte">
+        <i class="ti ti-lifebuoy u-fs14"></i>
         <span class="sidebar-only-label" data-i18n="support">Soporte</span>
       </a>
 
       <!-- Logout button -->
-      <button id="logout-btn-header" onclick="logout()" style="margin-left:4px;padding:5px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="logout" title="Salir">
-        <i class="ti ti-logout" style="font-size:14px"></i>
+      <button class="hbtn" id="logout-btn-header" onclick="logout()" data-i18n-title="logout" title="Salir">
+        <i class="ti ti-logout u-fs14"></i>
         <span class="sidebar-only-label" data-i18n="logout">Salir</span>
       </button>
 
       <!-- Menu "..." (mobile): abre el sidebar completo, mismas opciones que el drawer de la app -->
-      <div style="position:relative;display:inline-block;margin-left:4px" id="header-more-wrap">
-        <button onclick="toggleHeaderMoreMenu()" id="header-more-btn" data-i18n-title="more" title="Más opciones" style="padding:5px 10px;font-size:14px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer">
+      <div class="hbtn-wrap" style="display:inline-block" id="header-more-wrap">
+        <button class="u-fs14 u-muted u-pointer" onclick="toggleHeaderMoreMenu()" id="header-more-btn" data-i18n-title="more" title="Más opciones" style="padding:5px 10px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2)">
           <i class="ti ti-dots-vertical"></i>
         </button>
       </div>
@@ -1512,16 +1583,16 @@
       <!-- Fuerza salto de línea dentro de .header-right (flex-wrap:wrap): un
            item con width:100% siempre arranca su propia fila — separa los
            conectores de los accesos directos de arriba. -->
-      <div style="width:100%;display:flex;flex-wrap:wrap;justify-content:flex-start;gap:8px" id="connector-row">
+      <div class="u-gap8" style="width:100%;display:flex;flex-wrap:wrap;justify-content:flex-start" id="connector-row">
 
-      <div style="position:relative;display:inline-block;margin-left:4px" id="steam-menu-wrap">
+      <div class="hbtn-wrap" style="display:inline-block" id="steam-menu-wrap">
         <button class="add-btn" onclick="toggleSteamMenu()" id="steam-menu-btn" title="Sincronizar Steam">
           <i class="ti ti-brand-steam"></i> <span class="sidebar-only-label">Steam ▾</span>
         </button>
       </div>
 
       <!-- PSN (beta) -->
-      <div style="position:relative;display:inline-block;margin-left:4px" id="psn-menu-wrap">
+      <div class="hbtn-wrap" style="display:inline-block" id="psn-menu-wrap">
         <button class="add-btn" onclick="togglePsnMenu()" id="psn-menu-btn" title="Sincronizar PSN">
           <img src="https://cdn.simpleicons.org/playstation/ffffff" style="width:13px;height:13px;vertical-align:-2px"> <span class="sidebar-only-label">PSN ▾</span>
         </button>
@@ -1543,18 +1614,18 @@
            menu tenga position:fixed — asi quedaban invisibles al abrirlos
            desde mobile aunque _positionFixedPopup los centrara como modal
            (bug real reportado: "la web mobile no muestra conectores"). -->
-      <div id="steam-menu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:300;min-width:220px;box-shadow:0 4px 16px rgba(0,0,0,0.3);padding:4px 0">
+      <div class="popup-menu" id="steam-menu" style="display:none">
           <!-- Steam ID section -->
-          <div id="steam-id-section" style="padding:10px 14px;border-bottom:0.5px solid var(--border)">
-            <div style="font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Steam ID</div>
-            <div style="display:flex;gap:6px">
-              <input id="steam-id-input" type="text" placeholder="Steam ID o URL..." data-i18n-placeholder="steamId"
-                style="flex:1;padding:5px 8px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);min-width:0"
+          <div class="menu-section" id="steam-id-section">
+            <div class="menu-heading">Steam ID</div>
+            <div class="u-gap6" style="display:flex">
+              <input class="menu-input" id="steam-id-input" type="text" placeholder="Steam ID o URL..." data-i18n-placeholder="steamId"
+               
                 onkeydown="if(event.key==='Enter') searchSteamProfile()" />
-              <button id="steam-id-search-btn" onclick="searchSteamProfile()" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;white-space:nowrap" data-i18n="searchAction">Buscar</button>
+              <button class="menu-action" id="steam-id-search-btn" onclick="searchSteamProfile()" data-i18n="searchAction">Buscar</button>
             </div>
-            <div style="font-size:10px;color:var(--text2);margin-top:4px" data-i18n="steamIdFindHint">Lo encontrás en la URL de tu perfil de Steam o en "Detalles de la cuenta".</div>
-            <div id="steam-id-current" style="font-size:10px;color:var(--text2);margin-top:4px"></div>
+            <div class="field-hint" data-i18n="steamIdFindHint">Lo encontrás en la URL de tu perfil de Steam o en "Detalles de la cuenta".</div>
+            <div class="field-hint" id="steam-id-current"></div>
           </div>
           <!-- Actions -->
           <div style="padding:4px 0">
@@ -1567,46 +1638,46 @@
             <button onclick="syncBoth()" class="steam-menu-item">
               <i class="ti ti-refresh"></i> <span data-i18n="syncAll">Sincronizar todo</span>
             </button>
-            <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
+            <div class="menu-sep"></div>
             <button onclick="restoreDeletedSteam('library')" class="steam-menu-item">
               <i class="ti ti-restore"></i> <span data-i18n="restoreLibrary">Restablecer biblioteca borrada</span>
             </button>
             <button onclick="restoreDeletedSteam('wishlist')" class="steam-menu-item">
               <i class="ti ti-restore"></i> <span data-i18n="restoreWishlist">Restablecer deseados borrados</span>
             </button>
-            <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
+            <div class="menu-sep"></div>
             <button onclick="deletePlatformLibrary('steam','Steam')" class="steam-menu-item" style="color:#e24b4a">
               <i class="ti ti-trash"></i> Borrar biblioteca
             </button>
           </div>
-          <div style="padding:8px 14px;font-size:10px;color:var(--text2)">⚠ <span data-i18n="steamProfilePublicHint">Tu perfil de Steam debe ser público para sincronizar.</span></div>
+          <div class="menu-note">⚠ <span data-i18n="steamProfilePublicHint">Tu perfil de Steam debe ser público para sincronizar.</span></div>
       </div>
 
-      <div id="psn-menu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:300;min-width:220px;box-shadow:0 4px 16px rgba(0,0,0,0.3);padding:4px 0">
-          <div id="psn-id-section" style="padding:10px 14px;border-bottom:0.5px solid var(--border)">
-            <div style="font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Online ID</div>
-            <div style="display:flex;gap:6px">
-              <input id="psn-id-input" type="text" placeholder="Tu Online ID de PSN..."
-                style="flex:1;padding:5px 8px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);min-width:0"
+      <div class="popup-menu" id="psn-menu" style="display:none">
+          <div class="menu-section" id="psn-id-section">
+            <div class="menu-heading">Online ID</div>
+            <div class="u-gap6" style="display:flex">
+              <input class="menu-input" id="psn-id-input" type="text" placeholder="Tu Online ID de PSN..."
+               
                 onkeydown="if(event.key==='Enter') searchPsnProfile()" />
-              <button id="psn-id-search-btn" onclick="searchPsnProfile()" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;white-space:nowrap" data-i18n="searchAction">Buscar</button>
+              <button class="menu-action" id="psn-id-search-btn" onclick="searchPsnProfile()" data-i18n="searchAction">Buscar</button>
             </div>
-            <div id="psn-id-current" style="font-size:10px;color:var(--text2);margin-top:4px"></div>
+            <div class="field-hint" id="psn-id-current"></div>
           </div>
           <div style="padding:4px 0">
             <button onclick="syncPsnLibrary()" class="steam-menu-item">
               <i class="ti ti-library"></i> <span data-i18n="syncLibrary">Sincronizar biblioteca</span>
             </button>
-            <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
+            <div class="menu-sep"></div>
             <button onclick="restoreDeletedPsn()" class="steam-menu-item">
               <i class="ti ti-restore"></i> <span data-i18n="restoreLibrary">Restablecer biblioteca borrada</span>
             </button>
-            <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
+            <div class="menu-sep"></div>
             <button onclick="deletePlatformLibrary('psn','PSN')" class="steam-menu-item" style="color:#e24b4a">
               <i class="ti ti-trash"></i> Borrar biblioteca
             </button>
           </div>
-          <div style="padding:8px 14px;font-size:10px;color:var(--text2)">⚠ <span data-i18n="psnProfilePublicHint">Tu perfil de PSN debe tener "Juegos" visible públicamente.</span></div>
+          <div class="menu-note">⚠ <span data-i18n="psnProfilePublicHint">Tu perfil de PSN debe tener "Juegos" visible públicamente.</span></div>
       </div>
 
       <div id="connector-menus"></div>
@@ -1630,12 +1701,12 @@
 
     <div class="sidebar-widget" id="widget-releases">
       <div class="sidebar-widget-title" style="justify-content:space-between">
-        <span style="display:flex;align-items:center;gap:6px">
+        <span class="u-gap6 u-items-center" style="display:flex">
           <i class="ti ti-sparkles" id="widget-releases-icon"></i> <span id="widget-releases-label">Recién salido</span>
         </span>
         <span style="display:flex;gap:2px">
-          <button onclick="toggleWidgetReleasesMode()" title="Recién salido / Próximos" style="background:none;border:none;color:var(--text2);cursor:pointer;padding:2px;display:flex">
-            <i class="ti ti-arrows-left-right" style="font-size:13px"></i>
+          <button class="u-muted u-pointer" onclick="toggleWidgetReleasesMode()" title="Recién salido / Próximos" style="background:none;border:none;padding:2px;display:flex">
+            <i class="ti ti-arrows-left-right u-fs13"></i>
           </button>
         </span>
       </div>
@@ -1646,93 +1717,93 @@
   <!-- Totales globales — solo tiene sentido en Biblioteca/Deseados, setView()
        lo oculta en cualquier otra vista (antes quedaba visible siempre, por
        arriba de Estadisticas/Rankings/etc, sin relacion con esa vista). -->
-  <div id="global-stats-panel" style="display:flex;gap:10px;margin-bottom:14px;align-items:flex-start">
-    <div class="stats-row" style="flex:1;margin-bottom:0">
+  <div class="field" id="global-stats-panel" style="display:flex;gap:10px;align-items:flex-start">
+    <div class="stats-row u-flex1" style="margin-bottom:0">
       <div class="stat-card"><div class="stat-label" data-i18n="total">Total</div><div class="stat-value" id="g-total">—</div></div>
-      <div class="stat-card" style="border-color:rgba(55,138,221,0.3)"><div class="stat-label" data-i18n="playing" style="color:var(--blue)">Jugando</div><div class="stat-value" id="g-playing" style="color:var(--blue)">—</div></div>
-      <div class="stat-card" style="border-color:rgba(29,158,117,0.3)"><div class="stat-label" data-i18n="completed" style="color:var(--green)">Completados</div><div class="stat-value" id="g-completed" style="color:var(--green)">—</div></div>
-      <div class="stat-card"><div class="stat-label" data-i18n="backlog" style="color:var(--gray)">Backlog</div><div class="stat-value" id="g-backlog" style="color:var(--gray)">—</div></div>
+      <div class="stat-card" style="border-color:rgba(55,138,221,0.3)"><div class="stat-label u-blue" data-i18n="playing">Jugando</div><div class="stat-value u-blue" id="g-playing">—</div></div>
+      <div class="stat-card" style="border-color:rgba(29,158,117,0.3)"><div class="stat-label u-accent" data-i18n="completed">Completados</div><div class="stat-value u-accent" id="g-completed">—</div></div>
+      <div class="stat-card"><div class="stat-label u-gray" data-i18n="backlog">Backlog</div><div class="stat-value u-gray" id="g-backlog">—</div></div>
       <div class="stat-card"><div class="stat-label" data-i18n="hours">Horas</div><div class="stat-value" id="g-hours">—</div></div>
-      <div class="stat-card" style="cursor:pointer;border-color:rgba(239,159,39,0.3)" onclick="setStatus('Deseados')" data-i18n-title="seeWishlist" title="Ver deseados">
-        <div class="stat-label" data-i18n="wishlist" style="color:var(--amber)">Deseados</div>
-        <div class="stat-value" id="g-wishlist" style="color:var(--amber)">—</div>
+      <div class="stat-card u-pointer" style="border-color:rgba(239,159,39,0.3)" onclick="setStatus('Deseados')" data-i18n-title="seeWishlist" title="Ver deseados">
+        <div class="stat-label u-amber" data-i18n="wishlist">Deseados</div>
+        <div class="stat-value u-amber" id="g-wishlist">—</div>
       </div>
     </div>
   </div>
   <!-- View selector + filters -->
   <div id="library-toolbar" style="border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:60;background:var(--bg3);padding-top:6px;margin-top:-6px">
-    <button id="toolbar-collapse-btn" onclick="toggleToolbarCollapsed()" title="Ocultar filtros" data-i18n-title="hideFilters"
-      style="display:none;order:-2;align-self:flex-end;margin-bottom:8px;width:26px;height:26px;border-radius:6px;border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);cursor:pointer;align-items:center;justify-content:center;padding:0;flex-shrink:0">
+    <button class="u-center u-items-center u-pointer" id="toolbar-collapse-btn" onclick="toggleToolbarCollapsed()" title="Ocultar filtros" data-i18n-title="hideFilters"
+      style="display:none;order:-2;align-self:flex-end;margin-bottom:8px;width:26px;height:26px;border-radius:6px;border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);padding:0;flex-shrink:0">
       <i class="ti ti-chevron-left" style="font-size:15px"></i>
     </button>
     <!-- Add button — en desktop va primero (ver #library-toolbar en la
          media query, order:-1); en mobile no se ve (es el FAB en su lugar). -->
-    <div id="add-game-btn-wrap" style="margin-left:auto;display:flex;gap:6px;align-items:center">
-      <button id="add-game-btn" class="nav-pill active" onclick="openModal()" style="display:none;padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:var(--green);cursor:pointer">
+    <div class="u-gap6 u-items-center" id="add-game-btn-wrap" style="margin-left:auto;display:flex">
+      <button id="add-game-btn" class="nav-pill active u-fs12 u-pointer" onclick="openModal()" style="display:none;padding:4px 12px;border-radius:6px;border:none;background:var(--green)">
         <i class="ti ti-plus"></i> <span data-i18n="addGame">Agregar juego</span>
       </button>
-      <button id="add-wishlist-btn" class="nav-pill active" onclick="openWishlistModal()" style="display:none;padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:#EF9F27;cursor:pointer">
+      <button id="add-wishlist-btn" class="nav-pill active u-fs12 u-pointer" onclick="openWishlistModal()" style="display:none;padding:4px 12px;border-radius:6px;border:none;background:#EF9F27">
         <i class="ti ti-star"></i> <span data-i18n="addWishlistGame">Agregar juego deseado</span>
       </button>
     </div>
     <!-- Main selector: Biblioteca / Deseados / Estadisticas / Listas / Rankings -->
     <div id="view-selector-row" style="display:flex;flex-wrap:wrap;padding:8px 0;gap:8px;align-items:center">
-      <button id="view-library" class="nav-pill active" onclick="setView('library')"
-        style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--green);display:inline-flex;align-items:center;gap:5px">
-        <i class="ti ti-books" style="font-size:14px"></i> <span data-i18n="library">Biblioteca</span>
+      <button id="view-library" class="nav-pill active view-pill" onclick="setView('library')"
+        style="background:var(--green);display:inline-flex">
+        <i class="ti ti-books u-fs14"></i> <span data-i18n="library">Biblioteca</span>
       </button>
-      <button id="view-wishlist" class="nav-pill" onclick="setView('wishlist')"
-        style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);display:inline-flex;align-items:center;gap:5px">
-        <i class="ti ti-bookmark" style="font-size:14px"></i> <span data-i18n="wishlist">Deseados</span>
+      <button id="view-wishlist" class="nav-pill view-pill" onclick="setView('wishlist')"
+        style="background:var(--bg2);display:inline-flex">
+        <i class="ti ti-bookmark u-fs14"></i> <span data-i18n="wishlist">Deseados</span>
       </button>
-      <button id="view-stats" class="nav-pill" onclick="setView('stats')" data-i18n-title="stats" title="Estadísticas"
-        style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);display:inline-flex;align-items:center;gap:5px;flex-shrink:0">
-        <i class="ti ti-chart-bar" style="font-size:14px"></i> <span data-i18n="stats">Estadísticas</span>
+      <button id="view-stats" class="nav-pill view-pill" onclick="setView('stats')" data-i18n-title="stats" title="Estadísticas"
+        style="background:var(--bg2);display:inline-flex;flex-shrink:0">
+        <i class="ti ti-chart-bar u-fs14"></i> <span data-i18n="stats">Estadísticas</span>
       </button>
       <!-- Listas y Rankings son vistas del mismo nivel que Biblioteca/Deseados/
            Estadisticas, pero vivian sueltas en el drawer: no habia criterio que
            explicara por que Estadisticas si y Rankings no. -->
-      <button id="view-lists" class="nav-pill" onclick="openListsPanel()" data-i18n-title="folders" title="Listas"
-        style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);display:inline-flex;align-items:center;gap:5px;flex-shrink:0">
-        <i class="ti ti-folder" style="font-size:14px"></i> <span data-i18n="folders">Listas</span>
+      <button id="view-lists" class="nav-pill view-pill" onclick="openListsPanel()" data-i18n-title="folders" title="Listas"
+        style="background:var(--bg2);display:inline-flex;flex-shrink:0">
+        <i class="ti ti-folder u-fs14"></i> <span data-i18n="folders">Listas</span>
       </button>
-      <button id="view-rankings" class="nav-pill" onclick="setView('rankings')" data-i18n-title="rankings" title="Rankings"
-        style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:var(--bg2);display:inline-flex;align-items:center;gap:5px;flex-shrink:0">
-        <i class="ti ti-medal" style="font-size:14px"></i> <span data-i18n="rankings">Rankings</span>
+      <button id="view-rankings" class="nav-pill view-pill" onclick="setView('rankings')" data-i18n-title="rankings" title="Rankings"
+        style="background:var(--bg2);display:inline-flex;flex-shrink:0">
+        <i class="ti ti-medal u-fs14"></i> <span data-i18n="rankings">Rankings</span>
       </button>
       <!-- Solo cuando lo que se ve es un subconjunto: sin filtros repetia
            exactamente el TOTAL y las HORAS de la fila de arriba. -->
-      <span id="sel-summary" style="display:none;margin-left:auto;font-size:12px;color:var(--text2)">
+      <span class="u-muted" id="sel-summary" style="display:none;margin-left:auto;font-size:12px">
         <span data-i18n="selected">Seleccionados</span>: <strong id="s-total">—</strong><br>
         <span data-i18n="hours">Horas</span>: <strong id="s-hours">—</strong>
       </span>
     </div>
 
     <!-- Filter bar -->
-    <div id="filter-bar" style="display:flex;flex-direction:column;gap:8px;padding:10px 0 12px">
+    <div class="u-gap8" id="filter-bar" style="display:flex;flex-direction:column;padding:10px 0 12px">
       <!-- Row 0: buscar. Va primero porque en una biblioteca de cientos de
            juegos es el control mas usado de la barra, y estaba ultimo: debajo
            de los 4 filtros, los toggles de vista, Ocultos y el orden. -->
-      <div id="filter-bar-row0" style="display:flex;align-items:center;gap:6px">
-        <div style="position:relative;flex:1;display:flex;align-items:center">
-          <i class="ti ti-search" style="position:absolute;left:9px;font-size:13px;color:var(--text2);pointer-events:none"></i>
-          <input type="text" id="search-input" placeholder="Buscar juego..." data-i18n-placeholder="searchGame" oninput="applyFilters()"
-            style="padding:5px 10px 5px 27px;font-size:12px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text);width:100%" />
+      <div class="u-gap6 u-items-center" id="filter-bar-row0" style="display:flex">
+        <div class="u-flex1 u-rel u-items-center" style="display:flex">
+          <i class="ti ti-search u-fs13 u-muted" style="position:absolute;left:9px;pointer-events:none"></i>
+          <input class="u-fs12" type="text" id="search-input" placeholder="Buscar juego..." data-i18n-placeholder="searchGame" oninput="applyFilters()"
+            style="padding:5px 10px 5px 27px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text);width:100%" />
         </div>
       </div>
 
       <!-- Row 1: filtros (estado/plataforma/genero/etc), swipeable -->
-      <div id="filter-bar-row1" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;row-gap:4px">
+      <div class="u-gap6" id="filter-bar-row1" style="display:flex;flex-wrap:wrap;align-items:center;row-gap:4px">
         <!-- Filter dropdowns injected by JS -->
-        <div id="filter-dropdowns" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"></div>
+        <div class="u-gap6" id="filter-dropdowns" style="display:flex;flex-wrap:wrap;align-items:center"></div>
       </div>
 
       <!-- Row 1b: vista lista/cuadricula + ocultos, en su propia linea -->
-      <div id="filter-bar-row1b" style="display:flex;gap:6px;align-items:center;margin-top:18px;padding-top:14px;border-top:0.5px solid var(--border)">
+      <div class="u-gap6" id="filter-bar-row1b" style="display:flex;align-items:center;margin-top:18px;padding-top:14px;border-top:0.5px solid var(--border)">
         <!-- List/Grid view toggle -->
         <div id="view-mode-toggle" style="display:flex;border:0.5px solid var(--border);border-radius:6px;overflow:hidden">
-          <button id="view-mode-list" class="view-mode-btn active" onclick="setLibraryViewMode('list')" title="Lista"><i class="ti ti-list" style="font-size:12px"></i></button>
-          <button id="view-mode-grid" class="view-mode-btn" onclick="setLibraryViewMode('grid')" title="Cuadrícula"><i class="ti ti-layout-grid" style="font-size:12px"></i></button>
+          <button id="view-mode-list" class="view-mode-btn active" onclick="setLibraryViewMode('list')" title="Lista"><i class="ti ti-list u-fs12"></i></button>
+          <button id="view-mode-grid" class="view-mode-btn" onclick="setLibraryViewMode('grid')" title="Cuadrícula"><i class="ti ti-layout-grid u-fs12"></i></button>
         </div>
 
         <!-- Densidad (Normal/Compacta) — solo desktop, ver #density-toggle
@@ -1744,23 +1815,23 @@
         </div>
 
         <!-- Hidden toggle -->
-        <button id="btn-hidden" onclick="toggleShowHidden()"
-          style="padding:4px 10px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;display:none;align-items:center;gap:4px">
-          <i class="ti ti-eye-off" style="font-size:12px"></i> <span data-i18n="hidden">Ocultos</span>
+        <button class="u-fs12 u-muted u-items-center u-pointer" id="btn-hidden" onclick="toggleShowHidden()"
+          style="padding:4px 10px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);display:none;gap:4px">
+          <i class="ti ti-eye-off u-fs12"></i> <span data-i18n="hidden">Ocultos</span>
         </button>
       </div>
 
       <!-- Row 2: sort + search -->
-      <div id="filter-bar-row2" style="display:flex;align-items:center;gap:6px;margin-top:18px;padding-top:14px;border-top:0.5px solid var(--border)">
-        <select id="sort-sel" onchange="applyFilters()" style="font-size:12px;padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text2)">
+      <div class="u-gap6" id="filter-bar-row2" style="display:flex;align-items:center;margin-top:18px;padding-top:14px;border-top:0.5px solid var(--border)">
+        <select class="u-fs12 u-muted" id="sort-sel" onchange="applyFilters()" style="padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px">
           <option value="name" data-i18n="name">Nombre</option>
           <option value="hours" data-i18n="hours">Horas</option>
           <option value="rating" data-i18n="rating">Calificación</option>
           <option value="platform" data-i18n="platform">Plataforma</option>
           <option value="status" data-i18n="status">Estado</option>
         </select>
-        <button onclick="toggleSortOrder()" id="sort-dir-btn"
-          style="padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">
+        <button class="u-fs13 u-pointer" onclick="toggleSortOrder()" id="sort-dir-btn"
+          style="padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px">
           ↑
         </button>
       </div>
@@ -1768,11 +1839,11 @@
   </div>
 
   <div id="toolbar-reopen-tab" onclick="toggleToolbarCollapsed()" title="Mostrar filtros" data-i18n-title="showFilters">
-    <i class="ti ti-chevron-right" style="font-size:13px"></i>
+    <i class="ti ti-chevron-right u-fs13"></i>
   </div>
 
   <div class="game-list" id="game-list">
-    <div class="empty"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="connectingBackend">Conectando con el backend...</span></div>
+    <div class="empty"><div class="spinner spinner-block"></div><span data-i18n="connectingBackend">Conectando con el backend...</span></div>
   </div>
 
   <!-- Boton flotante para agregar (mobile), reemplaza al boton inline -->
@@ -1809,113 +1880,113 @@
   </div>
 
   <!-- Stats view (full page) -->
-  <div id="stats-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
-    <div style="display:flex;align-items:center;padding:10px 16px;gap:8px;border-bottom:0.5px solid var(--border);flex-shrink:0">
-      <button id="stab-user" onclick="switchStatsTab('user')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--green);background:var(--bg2);color:var(--green);cursor:pointer;border-radius:20px;font-weight:600" data-i18n="myStats">Mis stats</button>
-      <button id="stab-global" onclick="switchStatsTab('global')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px" data-i18n="globalTab">Global</button>
-      <button id="stab-period" onclick="switchStatsTab('period')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px" data-i18n="periodTab">Semana/Mes</button>
-      <button id="stab-activity" onclick="switchStatsTab('activity')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px" data-i18n="activityTab">Actividad</button>
-      <button id="stab-leaderboard" onclick="switchStatsTab('leaderboard')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px" data-i18n="leaderboardTab">Tabla global</button>
-      <button onclick="openShareCard()" data-i18n-title="shareLibrary" title="Compartir mi biblioteca"
-        style="margin-left:auto;padding:6px 14px;font-size:12px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;border-radius:20px;font-weight:600">
+  <div class="view-page" id="stats-view" style="display:none">
+    <div class="u-gap8 u-items-center" style="display:flex;padding:10px 16px;border-bottom:0.5px solid var(--border);flex-shrink:0">
+      <button class="u-fs12 u-accent u-pointer" id="stab-user" onclick="switchStatsTab('user')"
+        style="padding:6px 18px;border:0.5px solid var(--green);background:var(--bg2);border-radius:20px;font-weight:600" data-i18n="myStats">Mis stats</button>
+      <button class="seg-tab" id="stab-global" onclick="switchStatsTab('global')"
+        data-i18n="globalTab">Global</button>
+      <button class="seg-tab" id="stab-period" onclick="switchStatsTab('period')"
+        data-i18n="periodTab">Semana/Mes</button>
+      <button class="seg-tab" id="stab-activity" onclick="switchStatsTab('activity')"
+        data-i18n="activityTab">Actividad</button>
+      <button class="seg-tab" id="stab-leaderboard" onclick="switchStatsTab('leaderboard')"
+        data-i18n="leaderboardTab">Tabla global</button>
+      <button class="u-fs12 u-pointer" onclick="openShareCard()" data-i18n-title="shareLibrary" title="Compartir mi biblioteca"
+        style="margin-left:auto;padding:6px 14px;border:none;background:var(--green);color:var(--on-accent);border-radius:20px;font-weight:600">
         <i class="ti ti-share"></i> <span data-i18n="shareLibraryShort">Compartir</span>
       </button>
     </div>
-    <div id="stats-user-tab" style="padding:16px;max-width:720px;width:100%;margin:0 auto;box-sizing:border-box">
-      <div id="stats-user-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
+    <div class="page-col u-mw720" id="stats-user-tab">
+      <div id="stats-user-content"><div class="state-msg" style="text-align:center"><div class="spinner spinner-block"></div><span data-i18n="loading">Cargando...</span></div></div>
     </div>
-    <div id="stats-global-tab" style="display:none;padding:16px;max-width:720px;width:100%;margin:0 auto;box-sizing:border-box">
-      <div id="stats-global-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
+    <div class="page-col u-mw720" id="stats-global-tab" style="display:none">
+      <div id="stats-global-content"><div class="state-msg" style="text-align:center"><div class="spinner spinner-block"></div><span data-i18n="loading">Cargando...</span></div></div>
     </div>
-    <div id="stats-period-tab" style="display:none;padding:16px;max-width:720px;width:100%;margin:0 auto;box-sizing:border-box">
-      <div style="display:flex;gap:8px;margin-bottom:14px">
-        <button id="ptab-week" onclick="switchPeriodType('week')"
-          style="padding:5px 14px;font-size:12px;border-radius:16px;border:0.5px solid var(--green);background:var(--bg2);color:var(--green);cursor:pointer;font-weight:600" data-i18n="periodWeek">Semana</button>
-        <button id="ptab-month" onclick="switchPeriodType('month')"
-          style="padding:5px 14px;font-size:12px;border-radius:16px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n="periodMonth">Mes</button>
-        <button id="period-share-btn" onclick="openPeriodShareCard()" style="display:none;margin-left:auto;padding:5px 14px;font-size:12px;border-radius:16px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;font-weight:600">
+    <div class="page-col u-mw720" id="stats-period-tab" style="display:none">
+      <div class="field u-gap8" style="display:flex">
+        <button class="u-fs12 u-accent u-pointer" id="ptab-week" onclick="switchPeriodType('week')"
+          style="padding:5px 14px;border-radius:16px;border:0.5px solid var(--green);background:var(--bg2);font-weight:600" data-i18n="periodWeek">Semana</button>
+        <button class="seg-tab-sm" id="ptab-month" onclick="switchPeriodType('month')"
+          data-i18n="periodMonth">Mes</button>
+        <button class="u-fs12 u-pointer" id="period-share-btn" onclick="openPeriodShareCard()" style="display:none;margin-left:auto;padding:5px 14px;border-radius:16px;border:none;background:var(--green);color:var(--on-accent);font-weight:600">
           <i class="ti ti-share"></i> <span data-i18n="shareLibraryShort">Compartir</span>
         </button>
       </div>
-      <div id="stats-period-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
+      <div id="stats-period-content"><div class="state-msg" style="text-align:center"><div class="spinner spinner-block"></div><span data-i18n="loading">Cargando...</span></div></div>
     </div>
-    <div id="stats-activity-tab" style="display:none;padding:16px;max-width:900px;width:100%;margin:0 auto;box-sizing:border-box">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-        <div style="display:flex;gap:8px">
-          <button id="atab-year" onclick="switchActivityRange('year')"
-            style="padding:5px 14px;font-size:12px;border-radius:16px;border:0.5px solid var(--green);background:var(--bg2);color:var(--green);cursor:pointer;font-weight:600" data-i18n="periodYear">Año</button>
-          <button id="atab-month" onclick="switchActivityRange('month')"
-            style="padding:5px 14px;font-size:12px;border-radius:16px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n="periodMonth">Mes</button>
-          <button id="atab-week" onclick="switchActivityRange('week')"
-            style="padding:5px 14px;font-size:12px;border-radius:16px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n="periodWeek">Semana</button>
+    <div class="page-col" id="stats-activity-tab" style="display:none;max-width:900px">
+      <div class="field u-gap8 u-items-center" style="display:flex;justify-content:space-between;flex-wrap:wrap">
+        <div class="u-gap8" style="display:flex">
+          <button class="u-fs12 u-accent u-pointer" id="atab-year" onclick="switchActivityRange('year')"
+            style="padding:5px 14px;border-radius:16px;border:0.5px solid var(--green);background:var(--bg2);font-weight:600" data-i18n="periodYear">Año</button>
+          <button class="seg-tab-sm" id="atab-month" onclick="switchActivityRange('month')"
+            data-i18n="periodMonth">Mes</button>
+          <button class="seg-tab-sm" id="atab-week" onclick="switchActivityRange('week')"
+            data-i18n="periodWeek">Semana</button>
         </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <button onclick="shiftActivityRange(-1)" style="width:26px;height:26px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer"><i class="ti ti-chevron-left"></i></button>
+        <div class="u-gap8 u-items-center" style="display:flex">
+          <button class="u-muted u-pointer" onclick="shiftActivityRange(-1)" style="width:26px;height:26px;border-radius:6px;border:0.5px solid var(--border2);background:transparent"><i class="ti ti-chevron-left"></i></button>
           <span id="activity-range-label" style="font-size:12.5px;font-weight:600;min-width:90px;text-align:center"></span>
-          <button onclick="shiftActivityRange(1)" style="width:26px;height:26px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer"><i class="ti ti-chevron-right"></i></button>
+          <button class="u-muted u-pointer" onclick="shiftActivityRange(1)" style="width:26px;height:26px;border-radius:6px;border:0.5px solid var(--border2);background:transparent"><i class="ti ti-chevron-right"></i></button>
         </div>
       </div>
-      <div id="activity-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
-      <div id="activity-detail" style="margin-top:14px;padding:12px 14px;border-radius:var(--radius-lg);background:var(--bg2);font-size:12.5px;color:var(--text2)" data-i18n="activityDetailHint">Hacé click en un día para ver el detalle.</div>
+      <div id="activity-content"><div class="state-msg" style="text-align:center"><div class="spinner spinner-block"></div><span data-i18n="loading">Cargando...</span></div></div>
+      <div class="u-muted" id="activity-detail" style="margin-top:14px;padding:12px 14px;border-radius:var(--radius-lg);background:var(--bg2);font-size:12.5px" data-i18n="activityDetailHint">Hacé click en un día para ver el detalle.</div>
     </div>
 
     <!-- Tabla global por XP. Hasta ahora el nivel era progresion privada: se
          subia sin saber nunca contra quien. -->
-    <div id="stats-leaderboard-tab" style="display:none;padding:16px;max-width:720px;width:100%;margin:0 auto;box-sizing:border-box">
-      <div id="leaderboard-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
+    <div class="page-col u-mw720" id="stats-leaderboard-tab" style="display:none">
+      <div id="leaderboard-content"><div class="state-msg" style="text-align:center"><div class="spinner spinner-block"></div><span data-i18n="loading">Cargando...</span></div></div>
     </div>
   </div>
 
   <!-- Novedades view (full page) -->
-  <div id="novedades-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
-    <div style="padding:16px;max-width:720px;width:100%;margin:0 auto;box-sizing:border-box">
-      <div id="novedades-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
+  <div class="view-page" id="novedades-view" style="display:none">
+    <div class="page-col u-mw720">
+      <div id="novedades-content"><div class="state-msg" style="text-align:center"><div class="spinner spinner-block"></div><span data-i18n="loading">Cargando...</span></div></div>
     </div>
   </div>
 
   <!-- Plan de juego view (full page) -->
-  <div id="plan-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
+  <div class="view-page" id="plan-view" style="display:none">
     <!-- Lista de planes -->
-    <div id="plan-list-panel" style="padding:16px;max-width:820px;width:100%;margin:0 auto;box-sizing:border-box">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-        <strong style="font-size:16px" data-i18n="gamePlan">Plan de juego</strong>
-        <button onclick="openGameStepWizard({mode:'new_plan'})" style="margin-left:auto;padding:6px 14px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer">
+    <div class="page-col u-mw820" id="plan-list-panel">
+      <div class="field u-gap8 u-items-center" style="display:flex">
+        <strong class="u-fs16" data-i18n="gamePlan">Plan de juego</strong>
+        <button class="btn-sm-primary" onclick="openGameStepWizard({mode:'new_plan'})" style="margin-left:auto">
           <i class="ti ti-plus"></i> <span data-i18n="newPlan">Nuevo plan</span>
         </button>
       </div>
-      <div id="plan-list-content"><div style="text-align:center;padding:40px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div></div>
+      <div id="plan-list-content"><div class="state-msg" style="text-align:center"><div class="spinner spinner-block"></div><span data-i18n="loading">Cargando...</span></div></div>
     </div>
 
     <!-- Detalle de plan -->
-    <div id="plan-detail-panel" style="display:none;padding:16px;max-width:820px;width:100%;margin:0 auto;box-sizing:border-box">
-      <a onclick="closePlanDetail()" style="font-size:12px;color:var(--text2);cursor:pointer" data-i18n="backToPlans">← Volver a Plan de juego</a>
-      <div id="plan-detail-content" style="margin-top:12px"></div>
+    <div class="page-col u-mw820" id="plan-detail-panel" style="display:none">
+      <a class="u-fs12 u-muted u-pointer" onclick="closePlanDetail()" data-i18n="backToPlans">← Volver a Plan de juego</a>
+      <div class="u-mt12" id="plan-detail-content"></div>
     </div>
   </div>
 
   <!-- Rankings view (full page) -->
-  <div id="rankings-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
+  <div class="view-page" id="rankings-view" style="display:none">
     <!-- Rankings list -->
-    <div id="rankings-list-panel" style="padding:16px;max-width:960px;width:100%;margin:0 auto;box-sizing:border-box">
-      <div style="display:flex;gap:6px;margin-bottom:12px;max-width:340px">
+    <div class="page-col u-mw960" id="rankings-list-panel">
+      <div class="u-mb12 u-gap6 u-mw340" style="display:flex">
         <button id="rankings-tab-mine" class="subtab-pill active" onclick="switchRankingTab('mine')">Mis rankings</button>
         <button id="rankings-tab-global" class="subtab-pill" onclick="switchRankingTab('global')">Globales</button>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-        <select id="rankings-sort-sel" onchange="_rankingsSortChange()" style="font-size:12px;padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text)">
+      <div class="field u-gap8 u-items-center" style="display:flex;flex-wrap:wrap">
+        <select class="u-fs12" id="rankings-sort-sel" onchange="_rankingsSortChange()" style="padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text)">
           <option value="votes" id="rankings-sort-opt-votes" style="display:none">Popularidad</option>
           <option value="name" data-i18n="name">Nombre</option>
           <option value="created_at" data-i18n="date">Fecha</option>
           <option value="game_count" data-i18n="quantity">Cantidad</option>
         </select>
-        <button id="rankings-sort-dir-btn" onclick="_rankingsSortDirToggle()" style="padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px;color:var(--text)">↓</button>
+        <button class="u-fs13 u-pointer" id="rankings-sort-dir-btn" onclick="_rankingsSortDirToggle()" style="padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text)">↓</button>
         <span id="rankings-limit-counter" style="margin-left:auto"></span>
-        <button id="rankings-new-btn" onclick="openRankingCreate()" style="padding:6px 14px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer">
+        <button class="btn-sm-primary" id="rankings-new-btn" onclick="openRankingCreate()">
           <i class="ti ti-plus"></i> <span data-i18n="newRanking">Nuevo ranking</span>
         </button>
       </div>
@@ -1923,25 +1994,25 @@
     </div>
 
     <!-- Ranking detail (grid of games, draggable) -->
-    <div id="ranking-detail-panel" style="display:none;padding:16px;max-width:960px;width:100%;margin:0 auto;box-sizing:border-box">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
-        <a onclick="closeRankingDetail()" style="font-size:12px;color:var(--text2);cursor:pointer" data-i18n="backToRankings">← Volver a rankings</a>
-        <strong id="ranking-detail-title" style="font-size:16px;margin-left:6px"></strong>
-        <span id="ranking-detail-count" style="font-size:12px;color:var(--text2)"></span>
-        <div style="margin-left:auto;display:flex;gap:8px">
-          <button id="ranking-compact-toggle" onclick="toggleRankingCompactView()" style="padding:6px 12px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" title="Vista compacta">
+    <div class="page-col u-mw960" id="ranking-detail-panel" style="display:none">
+      <div class="field u-items-center" style="display:flex;gap:10px;flex-wrap:wrap">
+        <a class="u-fs12 u-muted u-pointer" onclick="closeRankingDetail()" data-i18n="backToRankings">← Volver a rankings</a>
+        <strong class="u-fs16" id="ranking-detail-title" style="margin-left:6px"></strong>
+        <span class="u-fs12 u-muted" id="ranking-detail-count"></span>
+        <div class="u-gap8" style="margin-left:auto;display:flex">
+          <button class="btn-sm" id="ranking-compact-toggle" onclick="toggleRankingCompactView()" title="Vista compacta">
             <i class="ti ti-list"></i>
           </button>
-          <button onclick="openExportGridModal('ranking-detail-grid', rankingCompactView)" style="padding:6px 12px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" data-i18n-title="exportAsImage" title="Exportar como imagen">
+          <button class="btn-sm" onclick="openExportGridModal('ranking-detail-grid', rankingCompactView)" data-i18n-title="exportAsImage" title="Exportar como imagen">
             <i class="ti ti-photo-share"></i>
           </button>
-          <button onclick="openRankingRename()" style="padding:6px 12px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer">
+          <button class="btn-sm" onclick="openRankingRename()">
             <i class="ti ti-pencil"></i>
           </button>
-          <button onclick="confirmDeleteRanking()" style="padding:6px 12px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:#E24B4A;cursor:pointer">
+          <button class="u-fs12 u-pointer" onclick="confirmDeleteRanking()" style="padding:6px 12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:#E24B4A">
             <i class="ti ti-trash"></i>
           </button>
-          <button id="ranking-add-game-btn" onclick="openRankingAddGame()" style="padding:6px 14px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer">
+          <button class="btn-sm-primary" id="ranking-add-game-btn" onclick="openRankingAddGame()">
             <i class="ti ti-plus"></i> <span data-i18n="addGame">Agregar juego</span>
           </button>
         </div>
@@ -1952,7 +2023,7 @@
 
   <div class="footer">
     <span class="footer-note" id="count-label"></span>
-    <div style="display:flex;gap:8px">
+    <div class="u-gap8" style="display:flex">
 
     </div>
   </div>
@@ -1962,9 +2033,9 @@
      patron de setView() que stats/rankings/novedades/plan: oculta la
      biblioteca normal y muestra este contenedor hermano. Se abre con
      openGameDetailView(gameId), se cierra con closeGameDetailView(). -->
-<div id="game-detail-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
-  <div style="padding:16px;max-width:820px;width:100%;margin:0 auto;box-sizing:border-box">
-    <button onclick="closeGameDetailView()" style="padding:6px 14px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;margin-bottom:14px;display:flex;align-items:center;gap:6px">
+<div class="view-page" id="game-detail-view" style="display:none">
+  <div class="page-col u-mw820">
+    <button class="field u-fs12 u-muted u-gap6 u-items-center u-pointer" onclick="closeGameDetailView()" style="padding:6px 14px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);display:flex">
       <i class="ti ti-arrow-left"></i> <span data-i18n="close">Cerrar</span>
     </button>
     <div id="game-detail-content"></div>
@@ -1975,9 +2046,9 @@
 <!-- Wishlist Modal -->
 <div class="modal-overlay" id="wishlist-modal-overlay">
   <div class="modal">
-    <div class="modal-title"><i class="ti ti-star" style="color:#EF9F27"></i> <span data-i18n="addToWishlist">Agregar a deseados</span></div>
+    <div class="modal-title"><i class="ti ti-star u-wish"></i> <span data-i18n="addToWishlist">Agregar a deseados</span></div>
     <div class="modal-grid">
-      <div class="modal-group full" style="position:relative">
+      <div class="modal-group full u-rel">
         <label data-i18n="searchGameLabel">Buscar juego</label>
         <input type="text" id="wm-name" placeholder="Buscá tu juego..." data-i18n-placeholder="searchYourGame" autocomplete="off"
           oninput="searchSteamCatalogWishlist(this.value)" />
@@ -2033,37 +2104,37 @@
      plataforma es lo unico que correlaciona con volver, asi que ahora se
      pide explicitamente antes que cualquier otra cosa. -->
 <div class="modal-overlay" id="activate-overlay">
-  <div class="modal" style="max-width:400px;text-align:center">
+  <div class="modal u-mw400" style="text-align:center">
     <div style="font-size:34px;margin-bottom:6px">🎮</div>
-    <div class="modal-title" style="justify-content:center" data-i18n="activateTitle">Conectá tu biblioteca</div>
-    <p style="font-size:13px;color:var(--text2);line-height:1.5;margin:6px 0 18px" data-i18n="activateBody">
+    <div class="modal-title u-center" data-i18n="activateTitle">Conectá tu biblioteca</div>
+    <p class="u-fs13 u-muted" style="line-height:1.5;margin:6px 0 18px" data-i18n="activateBody">
       Tus juegos y tus horas aparecen solos. Nunca te pedimos tu contraseña.
     </p>
 
-    <button onclick="activateVia('steam')" style="width:100%;display:flex;align-items:center;justify-content:center;gap:9px;padding:14px;margin-bottom:10px;border:none;border-radius:10px;background:#1b2838;color:#fff;font-size:15px;font-weight:600;cursor:pointer">
+    <button class="u-mb10 u-center u-items-center u-pointer" onclick="activateVia('steam')" style="width:100%;display:flex;gap:9px;padding:14px;border:none;border-radius:10px;background:#1b2838;color:#fff;font-size:15px;font-weight:600">
       <img src="https://cdn.simpleicons.org/steam/ffffff" style="width:19px;height:19px">
       <span data-i18n="activateSteam">Conectar Steam</span>
     </button>
 
-    <button onclick="activateVia('psn')" style="width:100%;display:flex;align-items:center;justify-content:center;gap:9px;padding:14px;margin-bottom:16px;border:none;border-radius:10px;background:#003791;color:#fff;font-size:15px;font-weight:600;cursor:pointer">
+    <button class="u-center u-items-center u-pointer" onclick="activateVia('psn')" style="width:100%;display:flex;gap:9px;padding:14px;margin-bottom:16px;border:none;border-radius:10px;background:#003791;color:#fff;font-size:15px;font-weight:600">
       <img src="https://cdn.simpleicons.org/playstation/ffffff" style="width:19px;height:19px">
       <span data-i18n="activatePsn">Conectar PlayStation</span>
     </button>
 
-    <div style="font-size:11px;color:var(--text2);margin-bottom:8px" data-i18n="activateOther">Otras plataformas</div>
-    <div style="display:flex;gap:8px;justify-content:center;margin-bottom:18px">
-      <button onclick="activateVia('gog')" style="flex:1;padding:8px;border:0.5px solid var(--border2);border-radius:8px;background:transparent;color:var(--text2);font-size:12.5px;cursor:pointer">
+    <div class="u-fs11 u-muted" style="margin-bottom:8px" data-i18n="activateOther">Otras plataformas</div>
+    <div class="u-gap8 u-center" style="display:flex;margin-bottom:18px">
+      <button class="u-flex1 u-muted u-pointer" onclick="activateVia('gog')" style="padding:8px;border:0.5px solid var(--border2);border-radius:8px;background:transparent;font-size:12.5px">
         <img src="https://cdn.simpleicons.org/gogdotcom/888887" style="width:13px;height:13px;vertical-align:-2px"> GOG
       </button>
-      <button onclick="activateVia('xbox')" style="flex:1;padding:8px;border:0.5px solid var(--border2);border-radius:8px;background:transparent;color:var(--text2);font-size:12.5px;cursor:pointer">
+      <button class="u-flex1 u-muted u-pointer" onclick="activateVia('xbox')" style="padding:8px;border:0.5px solid var(--border2);border-radius:8px;background:transparent;font-size:12.5px">
         <i class="ti ti-brand-xbox"></i> Xbox
       </button>
-      <button onclick="activateVia('manual')" style="flex:1;padding:8px;border:0.5px solid var(--border2);border-radius:8px;background:transparent;color:var(--text2);font-size:12.5px;cursor:pointer">
+      <button class="u-flex1 u-muted u-pointer" onclick="activateVia('manual')" style="padding:8px;border:0.5px solid var(--border2);border-radius:8px;background:transparent;font-size:12.5px">
         <i class="ti ti-plus"></i> <span data-i18n="activateManual">A mano</span>
       </button>
     </div>
 
-    <button onclick="closeActivationPrompt()" style="background:none;border:none;color:var(--text2);font-size:11px;opacity:.65;cursor:pointer;text-decoration:underline" data-i18n="activateLater">Lo hago más tarde</button>
+    <button class="u-fs11 u-muted u-pointer" onclick="closeActivationPrompt()" style="background:none;border:none;opacity:.65;text-decoration:underline" data-i18n="activateLater">Lo hago más tarde</button>
   </div>
 </div>
 
@@ -2072,32 +2143,32 @@
      tarjeta esta pensada para compartirse (lleva el dominio adentro), que es
      el motor de crecimiento organico que hoy no existe. -->
 <div class="modal-overlay" id="welcome-stats-overlay">
-  <div class="modal" style="max-width:380px;padding:0;overflow:hidden">
+  <div class="modal u-mw380" style="padding:0;overflow:hidden">
     <div id="welcome-stats-card" style="padding:26px 22px;background:linear-gradient(160deg,#16231d,#111111);text-align:center">
-      <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--green);font-weight:700;margin-bottom:14px" data-i18n="wowEyebrow">Tu biblioteca</div>
-      <div id="welcome-stats-avatar" style="width:72px;height:72px;margin:0 auto 10px;border-radius:50%;overflow:hidden;background:var(--bg3);position:relative"></div>
+      <div class="field u-fs11 u-accent" style="letter-spacing:.08em;text-transform:uppercase;font-weight:700" data-i18n="wowEyebrow">Tu biblioteca</div>
+      <div class="u-rel" id="welcome-stats-avatar" style="width:72px;height:72px;margin:0 auto 10px;border-radius:50%;overflow:hidden;background:var(--bg3)"></div>
       <div id="welcome-stats-user" style="font-size:15px;font-weight:700;margin-bottom:9px"></div>
       <!-- Nivel + racha juntos, arriba de los numeros: son los dos datos de
            progreso que la gente comparte, y de nada sirve que el nivel viva
            solo en el header si la imagen que sale afuera no lo lleva. -->
-      <div id="welcome-stats-badges" style="display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:18px"></div>
-      <div style="display:flex;justify-content:center;gap:26px;margin-bottom:16px">
+      <div class="u-gap8 u-center u-items-center" id="welcome-stats-badges" style="display:flex;flex-wrap:wrap;margin-bottom:18px"></div>
+      <div class="u-center" style="display:flex;gap:26px;margin-bottom:16px">
         <div>
           <div id="welcome-stats-games" style="font-size:30px;font-weight:800;line-height:1">0</div>
-          <div style="font-size:10.5px;color:var(--text2);margin-top:3px" data-i18n="wowGames">juegos</div>
+          <div class="u-muted" style="font-size:10.5px;margin-top:3px" data-i18n="wowGames">juegos</div>
         </div>
         <div>
-          <div id="welcome-stats-hours" style="font-size:30px;font-weight:800;line-height:1;color:var(--green)">0</div>
-          <div style="font-size:10.5px;color:var(--text2);margin-top:3px" data-i18n="wowHours">horas</div>
+          <div class="u-accent" id="welcome-stats-hours" style="font-size:30px;font-weight:800;line-height:1">0</div>
+          <div class="u-muted" style="font-size:10.5px;margin-top:3px" data-i18n="wowHours">horas</div>
         </div>
       </div>
-      <div id="welcome-stats-life" style="font-size:12.5px;color:var(--text2);margin-bottom:14px"></div>
-      <div id="welcome-stats-breakdown" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap"></div>
+      <div class="field u-muted" id="welcome-stats-life" style="font-size:12.5px"></div>
+      <div class="u-gap8 u-center" id="welcome-stats-breakdown" style="display:flex;flex-wrap:wrap"></div>
       <div id="welcome-stats-url" style="margin-top:20px;font-size:10.5px;color:#777;letter-spacing:.04em">playloggr.com</div>
     </div>
-    <div style="display:flex;gap:8px;padding:14px 18px 18px">
-      <button class="btn-cancel" style="flex:1" onclick="closeWelcomeStats()" data-i18n="close">Cerrar</button>
-      <button class="btn-save" style="flex:1" onclick="shareWelcomeStats()"><i class="ti ti-download"></i> <span data-i18n="wowShare">Compartir</span></button>
+    <div class="u-gap8" style="display:flex;padding:14px 18px 18px">
+      <button class="btn-cancel u-flex1" onclick="closeWelcomeStats()" data-i18n="close">Cerrar</button>
+      <button class="btn-save u-flex1" onclick="shareWelcomeStats()"><i class="ti ti-download"></i> <span data-i18n="wowShare">Compartir</span></button>
     </div>
   </div>
 </div>
@@ -2107,32 +2178,32 @@
      en una imagen que se comparte sola. Misma tarjeta que la de biblioteca,
      otro contenido. -->
 <div class="modal-overlay" id="period-share-overlay">
-  <div class="modal" style="max-width:380px;padding:0;overflow:hidden">
+  <div class="modal u-mw380" style="padding:0;overflow:hidden">
     <div id="period-share-card" style="padding:26px 22px;background:linear-gradient(160deg,#16231d,#111111);text-align:center">
-      <div id="period-share-eyebrow" style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--green);font-weight:700;margin-bottom:3px"></div>
-      <div id="period-share-range" style="font-size:10.5px;color:var(--text2);margin-bottom:14px"></div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px">
-        <div id="period-share-avatar" style="width:40px;height:40px;border-radius:50%;overflow:hidden;background:var(--bg3);position:relative;flex-shrink:0"></div>
+      <div class="u-fs11 u-accent" id="period-share-eyebrow" style="letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin-bottom:3px"></div>
+      <div class="field u-muted" id="period-share-range" style="font-size:10.5px"></div>
+      <div class="u-center u-items-center" style="display:flex;gap:10px;margin-bottom:16px">
+        <div class="u-rel" id="period-share-avatar" style="width:40px;height:40px;border-radius:50%;overflow:hidden;background:var(--bg3);flex-shrink:0"></div>
         <div style="text-align:left">
-          <div id="period-share-user" style="font-size:14px;font-weight:700;line-height:1.2"></div>
+          <div class="u-fs14" id="period-share-user" style="font-weight:700;line-height:1.2"></div>
           <div id="period-share-title" style="line-height:1.2"></div>
         </div>
       </div>
-      <div id="period-share-hours" style="font-size:44px;font-weight:800;line-height:1;color:var(--green)">0</div>
-      <div style="font-size:11px;color:var(--text2);margin:4px 0 16px" id="period-share-hours-lbl"></div>
-      <div id="period-share-games" style="display:flex;flex-direction:column;gap:6px;text-align:left;margin-bottom:14px"></div>
-      <div id="period-share-chips" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap"></div>
+      <div class="u-accent" id="period-share-hours" style="font-size:44px;font-weight:800;line-height:1">0</div>
+      <div class="u-fs11 u-muted" style="margin:4px 0 16px" id="period-share-hours-lbl"></div>
+      <div class="field u-gap6 u-col" id="period-share-games" style="display:flex;text-align:left"></div>
+      <div class="u-gap8 u-center" id="period-share-chips" style="display:flex;flex-wrap:wrap"></div>
       <div id="period-share-url" style="margin-top:18px;font-size:10.5px;color:#777;letter-spacing:.04em">playloggr.com</div>
     </div>
-    <div style="display:flex;gap:8px;padding:14px 18px 18px">
-      <button class="btn-cancel" style="flex:1" onclick="document.getElementById('period-share-overlay').classList.remove('open')" data-i18n="close">Cerrar</button>
-      <button class="btn-save" style="flex:1" onclick="exportCardAsImage('period-share-card', 'playloggr-resumen.png')"><i class="ti ti-download"></i> <span data-i18n="wowShare">Compartir</span></button>
+    <div class="u-gap8" style="display:flex;padding:14px 18px 18px">
+      <button class="btn-cancel u-flex1" onclick="document.getElementById('period-share-overlay').classList.remove('open')" data-i18n="close">Cerrar</button>
+      <button class="btn-save u-flex1" onclick="exportCardAsImage('period-share-card', 'playloggr-resumen.png')"><i class="ti ti-download"></i> <span data-i18n="wowShare">Compartir</span></button>
     </div>
   </div>
 </div>
 
 <div class="modal-overlay" id="notif-modal-overlay">
-  <div class="modal" style="max-width:420px">
+  <div class="modal u-mw420">
     <div class="modal-title"><i class="ti ti-bell"></i> <span data-i18n="notifications">Notificaciones</span></div>
     <div id="notif-modal-list" style="max-height:360px;overflow-y:auto;margin:4px -6px 0"></div>
     <div class="modal-actions">
@@ -2142,14 +2213,14 @@
 </div>
 
 <div class="modal-overlay" id="export-grid-overlay">
-  <div class="modal" style="max-width:340px">
+  <div class="modal u-mw340">
     <div class="modal-title"><i class="ti ti-photo-share"></i> <span data-i18n="exportAsImage">Exportar como imagen</span></div>
     <div class="modal-grid">
       <div class="modal-group full">
         <label data-i18n="columnsPerRow">Juegos por fila</label>
-        <div style="display:flex;gap:8px">
-          <button id="export-cols-3" class="btn-cancel" style="flex:1" onclick="_exportGridSetCols(3)">3</button>
-          <button id="export-cols-5" class="btn-cancel" style="flex:1" onclick="_exportGridSetCols(5)">5</button>
+        <div class="u-gap8" style="display:flex">
+          <button id="export-cols-3" class="btn-cancel u-flex1" onclick="_exportGridSetCols(3)">3</button>
+          <button id="export-cols-5" class="btn-cancel u-flex1" onclick="_exportGridSetCols(5)">5</button>
         </div>
       </div>
     </div>
@@ -2161,7 +2232,7 @@
 </div>
 
 <div class="modal-overlay" id="cover-modal-overlay">
-  <div class="modal" style="max-width:360px">
+  <div class="modal u-mw360">
     <div class="modal-title"><i class="ti ti-photo"></i> <span data-i18n="changeCover">Cambiar portada</span></div>
     <div class="modal-grid">
       <div class="modal-group full">
@@ -2182,20 +2253,20 @@
 
 
 <!-- Configuración — vista propia (mismo criterio que Rankings/Listas/Reseñas/Juego del mes), no modal. -->
-<div id="config-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
-  <div style="padding:16px;max-width:640px;width:100%;margin:0 auto;box-sizing:border-box">
-    <div class="modal-title" style="margin-bottom:12px"><i class="ti ti-settings"></i> <span data-i18n="settings">Configuración</span></div>
+<div class="view-page" id="config-view" style="display:none">
+  <div class="page-col u-mw640">
+    <div class="modal-title u-mb12"><i class="ti ti-settings"></i> <span data-i18n="settings">Configuración</span></div>
 
     <!-- Tabs -->
-    <div style="display:flex;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:0.5px solid var(--border)">
-      <button id="tab-profile" onclick="switchConfigTab('profile')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--green);background:var(--bg2);color:var(--green);cursor:pointer;border-radius:20px;margin-right:6px;font-weight:600" data-i18n="profileTab">Perfil</button>
-      <button id="tab-avatar" onclick="switchConfigTab('avatar')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px" data-i18n="avatarTab">Avatar</button>
-      <button id="tab-account" onclick="switchConfigTab('account')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px" data-i18n="accountTab">Cuenta</button>
-      <button id="tab-appearance" onclick="switchConfigTab('appearance')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px" data-i18n="appearanceTab">Apariencia</button>
+    <div class="u-items-center" style="display:flex;margin-bottom:16px;padding-bottom:12px;border-bottom:0.5px solid var(--border)">
+      <button class="u-fs12 u-accent u-pointer" id="tab-profile" onclick="switchConfigTab('profile')"
+        style="padding:6px 18px;border:0.5px solid var(--green);background:var(--bg2);border-radius:20px;margin-right:6px;font-weight:600" data-i18n="profileTab">Perfil</button>
+      <button class="seg-tab" id="tab-avatar" onclick="switchConfigTab('avatar')"
+        style="margin-right:6px" data-i18n="avatarTab">Avatar</button>
+      <button class="seg-tab" id="tab-account" onclick="switchConfigTab('account')"
+        style="margin-right:6px" data-i18n="accountTab">Cuenta</button>
+      <button class="seg-tab" id="tab-appearance" onclick="switchConfigTab('appearance')"
+        style="margin-right:6px" data-i18n="appearanceTab">Apariencia</button>
     </div>
 
     <!-- Profile tab -->
@@ -2208,8 +2279,8 @@
 
         <div class="modal-group full">
           <label data-i18n="usernameFont">Fuente de nombre de usuario</label>
-          <div id="cfg-font-unlock-info" style="font-size:11px;color:var(--text2);margin:4px 0 6px" data-i18n="usernameFontsUnlockInfo"></div>
-          <div id="cfg-font-picker" style="margin-top:6px"></div>
+          <div class="u-fs11 u-muted" id="cfg-font-unlock-info" style="margin:4px 0 6px" data-i18n="usernameFontsUnlockInfo"></div>
+          <div class="u-mt6" id="cfg-font-picker"></div>
         </div>
 
         <div class="modal-group">
@@ -2222,163 +2293,163 @@
         </div>
         <div class="modal-group">
           <label data-i18n="profileVisibility">Perfil</label>
-          <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px">
+          <div class="u-mt6 u-items-center" style="display:flex;gap:10px">
+            <label class="u-gap6 u-items-center u-pointer" style="display:flex;font-size:13px">
               <input type="radio" name="cfg-visibility" value="public" checked> <span data-i18n="public">Público</span>
             </label>
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px">
+            <label class="u-gap6 u-items-center u-pointer" style="display:flex;font-size:13px">
               <input type="radio" name="cfg-visibility" value="private"> <span data-i18n="private">Privado</span>
             </label>
           </div>
         </div>
         <div class="modal-group full">
           <label data-i18n="notifPrefsLabel">Notificaciones</label>
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;margin-top:6px">
+          <label class="u-mt6 u-gap8 u-items-center u-pointer" style="display:flex;font-size:13px">
             <input type="checkbox" id="cfg-push-news" onchange="savePushPrefs()">
             <span data-i18n="notifPrefsNews">Novedades (lanzamientos, juegos gratis, lo más jugado)</span>
           </label>
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;margin-top:6px">
+          <label class="u-mt6 u-gap8 u-items-center u-pointer" style="display:flex;font-size:13px">
             <input type="checkbox" id="cfg-push-streak" onchange="savePushPrefs()">
             <span data-i18n="notifPrefsStreak">Recordatorio de racha</span>
           </label>
-          <div style="font-size:11px;color:var(--text2);margin-top:6px" data-i18n="notifPrefsHint">
+          <div class="u-fs11 u-muted u-mt6" data-i18n="notifPrefsHint">
             Los avisos sobre vos (te siguieron, tu resumen semanal) siempre llegan.
           </div>
         </div>
       </div>
-      <div id="cfg-profile-msg" style="font-size:12px;margin-top:8px;display:none"></div>
+      <div class="u-fs12 u-mt8" id="cfg-profile-msg" style="display:none"></div>
     </div>
 
     <!-- Avatar tab -->
     <div id="config-avatar" style="display:none">
-      <div style="margin-bottom:12px">
-        <label style="font-size:12px;color:var(--text2)" data-i18n="avatarFrame">Marco de avatar</label>
-        <div id="cfg-frame-picker" style="margin-top:6px"></div>
+      <div class="u-mb12">
+        <label class="u-fs12 u-muted" data-i18n="avatarFrame">Marco de avatar</label>
+        <div class="u-mt6" id="cfg-frame-picker"></div>
       </div>
-      <div style="margin-bottom:12px">
-        <label style="font-size:12px;color:var(--text2)" data-i18n="profileBanner">Banner de perfil</label>
-        <div style="font-size:11px;color:var(--text2);margin:2px 0 6px" data-i18n="profileBannerHint">Se ve en tu perfil público y cuando compartís el link.</div>
+      <div class="u-mb12">
+        <label class="u-fs12 u-muted" data-i18n="profileBanner">Banner de perfil</label>
+        <div class="u-fs11 u-muted" style="margin:2px 0 6px" data-i18n="profileBannerHint">Se ve en tu perfil público y cuando compartís el link.</div>
         <div id="cfg-banner-picker"></div>
       </div>
-      <div style="display:flex;justify-content:center;margin-bottom:12px;flex-shrink:0">
+      <div class="u-mb12 u-center" style="display:flex;flex-shrink:0">
         <div id="avatar-preview-box" style="width:180px;height:180px;background:var(--bg3);border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden">
-          <div id="avatar-preview-box2" style="width:150px;height:150px;position:relative"></div>
+          <div class="u-rel" id="avatar-preview-box2" style="width:150px;height:150px"></div>
         </div>
       </div>
 
       <div id="avatar-pickers-scroll" style="max-height:42vh;overflow-y:auto;padding-right:4px">
-      <div style="margin-bottom:14px">
-        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:2px" data-i18n="streakAvatarSectionTitle">Avatares de racha</label>
-        <div style="font-size:11px;color:var(--text2);margin-bottom:6px" data-i18n="streakAvatarLockedHint">Desbloqueá uno cada 10 días de racha</div>
+      <div class="field">
+        <label class="u-fs12 u-muted" style="display:block;margin-bottom:2px" data-i18n="streakAvatarSectionTitle">Avatares de racha</label>
+        <div class="u-fs11 u-muted" style="margin-bottom:6px" data-i18n="streakAvatarLockedHint">Desbloqueá uno cada 10 días de racha</div>
         <div id="avatar-streak-picker"></div>
-        <div id="avatar-streak-active-notice" style="display:none;font-size:11px;color:#EF9F27;background:rgba(239,159,39,0.12);border-radius:8px;padding:8px;margin-top:8px" data-i18n="streakAvatarActiveNotice"></div>
+        <div class="u-fs11 u-wish u-mt8" id="avatar-streak-active-notice" style="display:none;background:rgba(239,159,39,0.12);border-radius:8px;padding:8px" data-i18n="streakAvatarActiveNotice"></div>
       </div>
-      <div style="margin-bottom:14px">
-        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px" data-i18n="race">Raza</label>
+      <div class="field">
+        <label class="field-label" style="display:block" data-i18n="race">Raza</label>
         <div id="avatar-race-picker"></div>
       </div>
-      <div style="margin-bottom:14px">
-        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px" data-i18n="hair">Pelo</label>
+      <div class="field">
+        <label class="field-label" style="display:block" data-i18n="hair">Pelo</label>
         <div id="avatar-hair-picker"></div>
       </div>
-      <div style="margin-bottom:14px">
-        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px" data-i18n="headwear">Sombrero/Casco</label>
+      <div class="field">
+        <label class="field-label" style="display:block" data-i18n="headwear">Sombrero/Casco</label>
         <div id="avatar-headwear-picker"></div>
       </div>
-      <div style="margin-bottom:14px">
-        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px" data-i18n="shirt">Camisa</label>
+      <div class="field">
+        <label class="field-label" style="display:block" data-i18n="shirt">Camisa</label>
         <div id="avatar-shirt-picker"></div>
       </div>
-      <div style="margin-bottom:14px">
-        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px" data-i18n="pants">Pantalón</label>
+      <div class="field">
+        <label class="field-label" style="display:block" data-i18n="pants">Pantalón</label>
         <div id="avatar-pants-picker"></div>
       </div>
-      <div style="margin-bottom:14px">
-        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px" data-i18n="boots">Botas</label>
+      <div class="field">
+        <label class="field-label" style="display:block" data-i18n="boots">Botas</label>
         <div id="avatar-boots-picker"></div>
       </div>
-      <div style="margin-bottom:14px">
-        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px" data-i18n="gloves">Guantes</label>
+      <div class="field">
+        <label class="field-label" style="display:block" data-i18n="gloves">Guantes</label>
         <div id="avatar-gloves-picker"></div>
       </div>
-      <div style="margin-bottom:14px">
-        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px" data-i18n="shoulders">Hombreras</label>
+      <div class="field">
+        <label class="field-label" style="display:block" data-i18n="shoulders">Hombreras</label>
         <div id="avatar-shoulders-picker"></div>
       </div>
-      <div style="margin-bottom:14px">
-        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px" data-i18n="waist">Cinturón</label>
+      <div class="field">
+        <label class="field-label" style="display:block" data-i18n="waist">Cinturón</label>
         <div id="avatar-waist-picker"></div>
       </div>
-      <div style="font-size:10px;color:var(--text2);text-align:center;margin-top:4px">Avatar art: Intersect-Assets (AscensionGameDev), CC BY 4.0</div>
+      <div class="field-hint" style="text-align:center">Avatar art: Intersect-Assets (AscensionGameDev), CC BY 4.0</div>
       </div>
-      <div id="cfg-avatar-msg" style="font-size:12px;margin-top:8px;display:none"></div>
+      <div class="u-fs12 u-mt8" id="cfg-avatar-msg" style="display:none"></div>
     </div>
 
     <!-- Account tab -->
     <div id="config-account" style="display:none">
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <div style="padding:12px;background:var(--bg3);border-radius:8px;font-size:13px;color:var(--text2)">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-            <div style="display:flex;align-items:center"><span id="cfg-level-badge"></span><span id="cfg-email"></span></div>
-            <span id="cfg-premium-badge" style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px"></span>
+      <div class="u-col" style="display:flex;gap:12px">
+        <div class="u-fs13 u-muted" style="padding:12px;background:var(--bg3);border-radius:8px">
+          <div class="u-items-center" style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <div class="u-items-center" style="display:flex"><span id="cfg-level-badge"></span><span id="cfg-email"></span></div>
+            <span class="u-fs10" id="cfg-premium-badge" style="font-weight:600;padding:2px 8px;border-radius:6px"></span>
           </div>
         </div>
-        <button id="cfg-upgrade-btn" onclick="setView('premium')" style="display:none;padding:12px;border-radius:8px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;font-size:13px;font-weight:600;text-align:left">
+        <button class="u-fs13 u-pointer" id="cfg-upgrade-btn" onclick="setView('premium')" style="display:none;padding:12px;border-radius:8px;border:none;background:var(--green);color:var(--on-accent);font-weight:600;text-align:left">
           <i class="ti ti-crown"></i> <span data-i18n="upgradeToPremiumBtn">Actualizar a Premium — USD $6.99 (pago único, impuestos según checkout)</span>
-          <div style="font-size:11px;color:rgba(255,255,255,0.85);margin-top:2px;font-weight:400" data-i18n="premiumBenefitsShort">Marcos, banners y fuentes por nivel, avatar completo, temas, carpetas y rankings ilimitados, plan de juego y más.</div>
+          <div class="u-fs11 u-mt2" style="color:rgba(255,255,255,0.85);font-weight:400" data-i18n="premiumBenefitsShort">Marcos, banners y fuentes por nivel, avatar completo, temas, carpetas y rankings ilimitados, plan de juego y más.</div>
         </button>
-        <button onclick="confirmDeleteLibrary()"
-          style="padding:10px;border-radius:8px;border:0.5px solid var(--red);background:transparent;color:var(--red);cursor:pointer;font-size:13px;text-align:left">
+        <button class="u-fs13 u-pointer" onclick="confirmDeleteLibrary()"
+          style="padding:10px;border-radius:8px;border:0.5px solid var(--red);background:transparent;color:var(--red);text-align:left">
           <i class="ti ti-trash"></i> <span data-i18n="deleteLibrary">Eliminar biblioteca</span>
-          <div style="font-size:11px;color:var(--text2);margin-top:2px" data-i18n="deleteLibrarySubtitle">Borra todos los juegos de tu biblioteca y deseados.</div>
+          <div class="u-fs11 u-muted u-mt2" data-i18n="deleteLibrarySubtitle">Borra todos los juegos de tu biblioteca y deseados.</div>
         </button>
-        <button onclick="confirmDeleteAccount()"
-          style="padding:10px;border-radius:8px;border:0.5px solid var(--red);background:rgba(226,75,74,0.1);color:var(--red);cursor:pointer;font-size:13px;text-align:left">
+        <button class="u-fs13 u-pointer" onclick="confirmDeleteAccount()"
+          style="padding:10px;border-radius:8px;border:0.5px solid var(--red);background:rgba(226,75,74,0.1);color:var(--red);text-align:left">
           <i class="ti ti-user-x"></i> <span data-i18n="deleteAccount">Eliminar cuenta</span>
-          <div style="font-size:11px;color:var(--text2);margin-top:2px" data-i18n="deleteAccountSubtitle">Elimina permanentemente tu cuenta y todos tus datos.</div>
+          <div class="u-fs11 u-muted u-mt2" data-i18n="deleteAccountSubtitle">Elimina permanentemente tu cuenta y todos tus datos.</div>
         </button>
       </div>
     </div>
 
     <!-- Appearance tab -->
     <div id="config-appearance" style="display:none">
-      <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="u-col" style="display:flex;gap:16px">
         <div class="modal-group full">
           <label data-i18n="defaultView">Vista por defecto</label>
-          <div style="display:flex;gap:8px;margin-top:6px">
+          <div class="u-mt6 u-gap8" style="display:flex">
             <button class="cfg-choice-btn" data-group="view" data-value="list" onclick="setCfgChoice('view','list')"><i class="ti ti-list"></i> <span data-i18n="listViewOpt">Lista</span></button>
             <button class="cfg-choice-btn" data-group="view" data-value="grid" onclick="setCfgChoice('view','grid')"><i class="ti ti-layout-grid"></i> <span data-i18n="gridViewOpt">Cuadrícula</span></button>
           </div>
         </div>
         <div class="modal-group full">
           <label data-i18n="density">Densidad</label>
-          <div style="font-size:11px;color:var(--text2);margin-top:2px" data-i18n="densityHint">Modo compacto: una línea por juego (o 2 en cuadrícula), tocá para expandirlo.</div>
-          <div style="display:flex;gap:8px;margin-top:6px">
+          <div class="u-fs11 u-muted u-mt2" data-i18n="densityHint">Modo compacto: una línea por juego (o 2 en cuadrícula), tocá para expandirlo.</div>
+          <div class="u-mt6 u-gap8" style="display:flex">
             <button class="cfg-choice-btn" data-group="density" data-value="normal" onclick="setCompactMode(false)"><i class="ti ti-list-details"></i> <span data-i18n="densityNormal">Normal</span></button>
             <button class="cfg-choice-btn" data-group="density" data-value="compact" onclick="setCompactMode(true)"><i class="ti ti-baseline-density-medium"></i> <span data-i18n="densityCompact">Compacta</span></button>
           </div>
         </div>
         <div class="modal-group full">
           <label data-i18n="themeLabel">Tema</label>
-          <div style="display:flex;gap:8px;margin-top:6px">
+          <div class="u-mt6 u-gap8" style="display:flex">
             <button class="cfg-choice-btn" data-group="theme" data-value="light" onclick="setCfgChoice('theme','light')"><i class="ti ti-sun"></i> <span data-i18n="lightTheme">Claro</span></button>
             <button class="cfg-choice-btn" data-group="theme" data-value="dark" onclick="setCfgChoice('theme','dark')"><i class="ti ti-moon"></i> <span data-i18n="darkTheme">Oscuro</span></button>
           </div>
         </div>
         <div class="modal-group full">
           <label data-i18n="cardColorLabel">Color de card</label>
-          <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px" id="cfg-cardcolor-options"></div>
+          <div class="u-mt6 u-gap6 u-col" style="display:flex" id="cfg-cardcolor-options"></div>
         </div>
         <div class="modal-group full" id="cfg-gametheme-group" style="display:none">
           <label><span data-i18n="gameThemeLabel">Tema de videojuego</span>
-            <span style="font-size:10px;color:var(--amber);background:rgba(239,159,39,0.15);padding:2px 6px;border-radius:6px;margin-left:6px" data-i18n="experimentalTag">Experimental</span>
+            <span class="u-fs10 u-amber" style="background:rgba(239,159,39,0.15);padding:2px 6px;border-radius:6px;margin-left:6px" data-i18n="experimentalTag">Experimental</span>
           </label>
-          <div style="font-size:12px;color:var(--text2);margin-top:4px" data-i18n="gameThemeHint">Cambia toda la estética de la app: colores y tipografía. Solo visible en tu cuenta.</div>
-          <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px" id="cfg-gametheme-options"></div>
+          <div class="u-fs12 u-muted u-mt4" data-i18n="gameThemeHint">Cambia toda la estética de la app: colores y tipografía. Solo visible en tu cuenta.</div>
+          <div class="u-mt8 u-gap6 u-col" style="display:flex" id="cfg-gametheme-options"></div>
         </div>
         <div class="modal-group full">
           <label data-i18n="suggestionSettingsLabel">Sugerencia de la semana</label>
-          <div style="display:flex;gap:8px;margin-top:6px">
+          <div class="u-mt6 u-gap8" style="display:flex">
             <button class="cfg-choice-btn" data-group="suggestion" data-value="weekly" onclick="setSuggestionCfgChoice('weekly')"><i class="ti ti-calendar-week"></i> <span data-i18n="suggestionWeekly">Activada</span></button>
             <button class="cfg-choice-btn" data-group="suggestion" data-value="off" onclick="setSuggestionCfgChoice('off')"><i class="ti ti-eye-off"></i> <span data-i18n="suggestionDisable">Desactivada</span></button>
           </div>
@@ -2395,23 +2466,23 @@
 
 <!-- Friends Modal -->
 <div class="modal-overlay" id="friends-overlay">
-  <div class="modal" style="width:680px;max-width:92vw;max-height:82vh;display:flex;flex-direction:column">
+  <div class="modal u-col" style="width:680px;max-width:92vw;max-height:82vh;display:flex">
     <div class="modal-title"><i class="ti ti-users"></i> <span data-i18n="friends">Amigos</span></div>
-    <div style="display:flex;gap:8px;margin-bottom:10px">
-      <input type="text" id="friend-username-input" placeholder="Nombre de usuario..." data-i18n-placeholder="username"
-        style="flex:1;padding:8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"
+    <div class="u-mb10 u-gap8" style="display:flex">
+      <input class="u-flex1 u-fs13" type="text" id="friend-username-input" placeholder="Nombre de usuario..." data-i18n-placeholder="username"
+        style="padding:8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text)"
         oninput="onFriendUsernameInput(this.value)"
         onkeydown="if(event.key==='Enter') addFriendByUsername()" />
       <button class="btn-save" style="white-space:nowrap" onclick="addFriendByUsername()" data-i18n="add">Agregar</button>
     </div>
-    <div id="friend-add-preview" style="display:none;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border-radius:8px;margin-bottom:10px">
-      <div style="width:36px;height:36px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
-        <div id="friend-add-preview-box" style="width:32px;height:32px;position:relative"></div>
+    <div class="u-mb10 u-items-center" id="friend-add-preview" style="display:none;gap:10px;padding:8px 10px;background:var(--bg3);border-radius:8px">
+      <div class="u-center u-items-center" style="width:36px;height:36px;background:var(--bg2);border-radius:8px;display:flex;overflow:hidden;flex-shrink:0">
+        <div class="u-rel" id="friend-add-preview-box" style="width:32px;height:32px"></div>
       </div>
-      <div id="friend-add-preview-name" style="font-weight:600;font-size:13px"></div>
+      <div class="u-fs13" id="friend-add-preview-name" style="font-weight:600"></div>
     </div>
-    <div id="friends-msg" style="font-size:12px;margin-bottom:8px;display:none"></div>
-    <div id="friends-list" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:8px;min-height:120px"></div>
+    <div class="u-fs12" id="friends-msg" style="margin-bottom:8px;display:none"></div>
+    <div class="view-page u-gap8" id="friends-list" style="display:flex;min-height:120px"></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeFriendsPanel()" data-i18n="close">Cerrar</button>
     </div>
@@ -2420,16 +2491,16 @@
 
 <!-- Achievements Modal -->
 <div class="modal-overlay" id="achievements-overlay">
-  <div class="modal" style="max-width:520px;max-height:85vh;display:flex;flex-direction:column">
-    <div class="modal-title" style="display:flex;align-items:center;justify-content:space-between">
+  <div class="modal u-col" style="max-width:520px;max-height:85vh;display:flex">
+    <div class="modal-title u-items-center" style="display:flex;justify-content:space-between">
       <span><i class="ti ti-trophy"></i> <span data-i18n="achievements">Logros</span></span>
-      <button id="achievements-onlylocked-btn" onclick="toggleAchievementsOnlyLocked()"
-        style="font-size:11px;padding:5px 10px;border-radius:20px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:5px">
+      <button class="u-fs11 u-muted u-items-center u-pointer" id="achievements-onlylocked-btn" onclick="toggleAchievementsOnlyLocked()"
+        style="padding:5px 10px;border-radius:20px;border:0.5px solid var(--border);background:var(--bg2);display:flex;gap:5px">
         <i class="ti ti-lock-open"></i> Solo bloqueados
       </button>
     </div>
-    <div id="achievements-content" style="overflow-y:auto;flex:1">
-      <div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div>
+    <div class="u-flex1" id="achievements-content" style="overflow-y:auto">
+      <div class="state-msg-sm" style="text-align:center"><div class="spinner spinner-block"></div><span data-i18n="loading">Cargando...</span></div>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeAchievementsPanel()" data-i18n="close">Cerrar</button>
@@ -2438,40 +2509,40 @@
 </div>
 
 <div class="modal-overlay" id="streak-overlay">
-  <div class="modal" style="max-width:380px;text-align:center">
+  <div class="modal u-mw380" style="text-align:center">
     <div id="streak-content"></div>
   </div>
 </div>
 
 <!-- Juego del mes — vista propia (mismo criterio que Rankings/Listas/Reseñas), no modal. -->
-<div id="gom-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
-  <div style="padding:16px;max-width:520px;width:100%;margin:0 auto;box-sizing:border-box">
-    <strong style="font-size:16px;display:flex;align-items:center;gap:6px;margin-bottom:12px"><i class="ti ti-stars"></i> <span data-i18n="gameOfMonth">Juego del mes</span></strong>
-    <div style="display:flex;gap:6px;padding:0 2px 10px">
+<div class="view-page" id="gom-view" style="display:none">
+  <div class="page-col" style="max-width:520px">
+    <strong class="u-fs16 u-mb12 u-gap6 u-items-center" style="display:flex"><i class="ti ti-stars"></i> <span data-i18n="gameOfMonth">Juego del mes</span></strong>
+    <div class="u-gap6" style="display:flex;padding:0 2px 10px">
       <button id="gom-tab-vote" onclick="setGomTab('vote')" class="subtab-pill"></button>
       <button id="gom-tab-history" onclick="setGomTab('history')" class="subtab-pill"></button>
     </div>
     <div id="gom-content">
-      <div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div>
+      <div class="state-msg-sm" style="text-align:center"><div class="spinner spinner-block"></div><span data-i18n="loading">Cargando...</span></div>
     </div>
   </div>
 </div>
 
 <!-- Reseñas Modal -->
-<div id="myreviews-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
-  <div style="padding:16px;max-width:640px;width:100%;margin:0 auto;box-sizing:border-box">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-      <strong style="font-size:16px;display:flex;align-items:center;gap:6px"><i class="ti ti-message-star"></i> <span data-i18n="myReviews">Reseñas</span></strong>
+<div class="view-page" id="myreviews-view" style="display:none">
+  <div class="page-col u-mw640">
+    <div class="u-mb12 u-gap8 u-items-center" style="display:flex;justify-content:space-between;flex-wrap:wrap">
+      <strong class="u-fs16 u-gap6 u-items-center" style="display:flex"><i class="ti ti-message-star"></i> <span data-i18n="myReviews">Reseñas</span></strong>
       <div style="display:flex;gap:4px">
-        <select id="myreviews-sort" onchange="_myReviewsSortChange()" style="font-size:12px;padding:4px 6px;border-radius:6px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text)">
+        <select class="u-fs12" id="myreviews-sort" onchange="_myReviewsSortChange()" style="padding:4px 6px;border-radius:6px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text)">
           <option value="date" data-i18n="reviewsSortDate">Fecha</option>
           <option value="rating" data-i18n="reviewsSortRating">Calificación</option>
           <option value="votes" data-i18n="reviewsSortVotes">Popularidad</option>
         </select>
-        <button id="myreviews-sort-dir-btn" onclick="_myReviewsSortDirToggle()" style="padding:4px 8px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:6px;cursor:pointer;font-size:13px;color:var(--text)">↓</button>
+        <button class="u-fs13 u-pointer" id="myreviews-sort-dir-btn" onclick="_myReviewsSortDirToggle()" style="padding:4px 8px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:6px;color:var(--text)">↓</button>
       </div>
     </div>
-    <div style="display:flex;gap:6px;padding:0 2px 8px;max-width:340px">
+    <div class="u-gap6 u-mw340" style="display:flex;padding:0 2px 8px">
       <button id="reviews-tab-all" class="subtab-pill active" onclick="switchReviewsTab('all')">
         <span data-i18n="allReviewsTab">Todas</span>
       </button>
@@ -2480,20 +2551,20 @@
       </button>
     </div>
     <div id="myreviews-addbtn-wrap" style="display:none;padding:0 2px 10px">
-      <button onclick="openReviewGamePicker()" class="add-btn" style="width:100%;justify-content:center">
+      <button onclick="openReviewGamePicker()" class="add-btn u-center" style="width:100%">
         <i class="ti ti-plus"></i> <span data-i18n="addReview">Agregar reseña</span>
       </button>
     </div>
     <div id="myreviews-content" style="min-height:0">
-      <div style="text-align:center;padding:24px;color:var(--text2)"><div class="spinner" style="margin:0 auto 12px"></div><span data-i18n="loading">Cargando...</span></div>
+      <div class="state-msg-sm" style="text-align:center"><div class="spinner spinner-block"></div><span data-i18n="loading">Cargando...</span></div>
     </div>
   </div>
 </div>
 
 <!-- Novedades: agregar juego desde un lanzamiento -->
 <div class="modal-overlay" id="novedades-add-overlay">
-  <div class="modal" style="max-width:380px">
-    <div class="modal-title"><i class="ti ti-plus" style="color:var(--green)"></i> <span id="novedades-add-name">-</span></div>
+  <div class="modal u-mw380">
+    <div class="modal-title"><i class="ti ti-plus u-accent"></i> <span id="novedades-add-name">-</span></div>
     <div class="modal-grid">
       <div class="modal-group full">
         <label data-i18n="choosePlatform">Elegí la plataforma</label>
@@ -2529,12 +2600,12 @@
           <option value="iOS">iOS</option>
         </select>
       </div>
-      <div class="modal-group full" style="display:flex;gap:8px">
-        <button id="novedades-add-lib-btn" onclick="setNovedadesAddTarget(false)" style="flex:1;padding:8px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px">
-          <i class="ti ti-books" style="font-size:14px"></i> <span data-i18n="library">Biblioteca</span>
+      <div class="modal-group full u-gap8" style="display:flex">
+        <button class="u-flex1 u-fs12 u-gap6 u-center u-items-center u-pointer" id="novedades-add-lib-btn" onclick="setNovedadesAddTarget(false)" style="padding:8px;border-radius:6px;font-weight:600;display:flex">
+          <i class="ti ti-books u-fs14"></i> <span data-i18n="library">Biblioteca</span>
         </button>
-        <button id="novedades-add-wish-btn" onclick="setNovedadesAddTarget(true)" style="flex:1;padding:8px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px">
-          <i class="ti ti-bookmark" style="font-size:14px"></i> <span data-i18n="wishlist">Deseados</span>
+        <button class="u-flex1 u-fs12 u-gap6 u-center u-items-center u-pointer" id="novedades-add-wish-btn" onclick="setNovedadesAddTarget(true)" style="padding:8px;border-radius:6px;font-weight:600;display:flex">
+          <i class="ti ti-bookmark u-fs14"></i> <span data-i18n="wishlist">Deseados</span>
         </button>
       </div>
     </div>
@@ -2547,55 +2618,55 @@
 
 <!-- Friend Profile Modal (read-only) -->
 <div class="modal-overlay" id="friend-profile-overlay">
-  <div class="modal" style="width:640px;max-width:92vw;max-height:85vh;display:flex;flex-direction:column">
+  <div class="modal u-col" style="width:640px;max-width:92vw;max-height:85vh;display:flex">
     <div class="modal-title" id="friend-profile-title"><i class="ti ti-user"></i> Perfil</div>
-    <div style="display:flex;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:0.5px solid var(--border)">
-      <button id="ftab-library" onclick="switchFriendTab('library')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--green);background:var(--bg2);color:var(--green);cursor:pointer;border-radius:20px;margin-right:6px;font-weight:600" data-i18n="library">Biblioteca</button>
-      <button id="ftab-wishlist" onclick="switchFriendTab('wishlist')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px" data-i18n="wishlist">Deseados</button>
-      <button id="ftab-stats" onclick="switchFriendTab('stats')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px" data-i18n="stats">Estadísticas</button>
-      <button id="ftab-common" onclick="switchFriendTab('common')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px;margin-right:6px" data-i18n="commonGames">En común</button>
-      <button id="ftab-reviews" onclick="switchFriendTab('reviews')"
-        style="padding:6px 18px;font-size:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;border-radius:20px" data-i18n="reviewsTitle">Reseñas</button>
+    <div class="field u-items-center" style="display:flex;padding-bottom:10px;border-bottom:0.5px solid var(--border)">
+      <button class="u-fs12 u-accent u-pointer" id="ftab-library" onclick="switchFriendTab('library')"
+        style="padding:6px 18px;border:0.5px solid var(--green);background:var(--bg2);border-radius:20px;margin-right:6px;font-weight:600" data-i18n="library">Biblioteca</button>
+      <button class="seg-tab" id="ftab-wishlist" onclick="switchFriendTab('wishlist')"
+        style="margin-right:6px" data-i18n="wishlist">Deseados</button>
+      <button class="seg-tab" id="ftab-stats" onclick="switchFriendTab('stats')"
+        style="margin-right:6px" data-i18n="stats">Estadísticas</button>
+      <button class="seg-tab" id="ftab-common" onclick="switchFriendTab('common')"
+        style="margin-right:6px" data-i18n="commonGames">En común</button>
+      <button class="seg-tab" id="ftab-reviews" onclick="switchFriendTab('reviews')"
+        data-i18n="reviewsTitle">Reseñas</button>
     </div>
 
     <div id="friend-tab-library">
-      <div style="display:flex;gap:8px;margin-bottom:10px">
-        <input type="text" id="friend-search-library" placeholder="Buscar..." data-i18n-placeholder="search"
-          style="flex:1;padding:6px 8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:12px"
+      <div class="u-mb10 u-gap8" style="display:flex">
+        <input class="mini-input u-flex1" type="text" id="friend-search-library" placeholder="Buscar..." data-i18n-placeholder="search"
+          style="background:var(--bg3)"
           onkeydown="if(event.key==='Enter') loadFriendLibrary()" />
-        <select id="friend-sort-library" onchange="loadFriendLibrary()"
-          style="padding:6px 8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:12px">
+        <select class="mini-input" id="friend-sort-library" onchange="loadFriendLibrary()"
+          style="background:var(--bg3)">
           <option value="name" data-i18n="name">Nombre</option>
           <option value="hours" data-i18n="hours">Horas</option>
           <option value="rating" data-i18n="rating">Calificación</option>
           <option value="platform" data-i18n="platform">Plataforma</option>
         </select>
-        <button id="friend-sort-dir-library" onclick="toggleFriendSortDir('library')"
-          style="padding:6px 8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">↑</button>
+        <button class="u-fs13 u-pointer" id="friend-sort-dir-library" onclick="toggleFriendSortDir('library')"
+          style="padding:6px 8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px">↑</button>
       </div>
-      <div id="friend-library-list" style="overflow-y:auto;max-height:50vh;display:flex;flex-direction:column;gap:8px"></div>
+      <div class="u-gap8 u-col" id="friend-library-list" style="overflow-y:auto;max-height:50vh;display:flex"></div>
     </div>
 
     <div id="friend-tab-wishlist" style="display:none">
-      <div style="display:flex;gap:8px;margin-bottom:10px">
-        <input type="text" id="friend-search-wishlist" placeholder="Buscar..." data-i18n-placeholder="search"
-          style="flex:1;padding:6px 8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:12px"
+      <div class="u-mb10 u-gap8" style="display:flex">
+        <input class="mini-input u-flex1" type="text" id="friend-search-wishlist" placeholder="Buscar..." data-i18n-placeholder="search"
+          style="background:var(--bg3)"
           onkeydown="if(event.key==='Enter') loadFriendWishlist()" />
-        <select id="friend-sort-wishlist" onchange="loadFriendWishlist()"
-          style="padding:6px 8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:12px">
+        <select class="mini-input" id="friend-sort-wishlist" onchange="loadFriendWishlist()"
+          style="background:var(--bg3)">
           <option value="name" data-i18n="name">Nombre</option>
           <option value="hours" data-i18n="hours">Horas</option>
           <option value="rating" data-i18n="rating">Calificación</option>
           <option value="platform" data-i18n="platform">Plataforma</option>
         </select>
-        <button id="friend-sort-dir-wishlist" onclick="toggleFriendSortDir('wishlist')"
-          style="padding:6px 8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">↑</button>
+        <button class="u-fs13 u-pointer" id="friend-sort-dir-wishlist" onclick="toggleFriendSortDir('wishlist')"
+          style="padding:6px 8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px">↑</button>
       </div>
-      <div id="friend-wishlist-list" style="overflow-y:auto;max-height:50vh;display:flex;flex-direction:column;gap:8px"></div>
+      <div class="u-gap8 u-col" id="friend-wishlist-list" style="overflow-y:auto;max-height:50vh;display:flex"></div>
     </div>
 
     <div id="friend-tab-stats" style="display:none;overflow-y:auto;max-height:55vh">
@@ -2603,11 +2674,11 @@
     </div>
 
     <div id="friend-tab-common" style="display:none">
-      <div id="friend-common-list" style="overflow-y:auto;max-height:55vh;display:flex;flex-direction:column;gap:8px"></div>
+      <div class="u-gap8 u-col" id="friend-common-list" style="overflow-y:auto;max-height:55vh;display:flex"></div>
     </div>
 
     <div id="friend-tab-reviews" style="display:none">
-      <div id="friend-reviews-list" style="overflow-y:auto;max-height:55vh;display:flex;flex-direction:column;gap:8px"></div>
+      <div class="u-gap8 u-col" id="friend-reviews-list" style="overflow-y:auto;max-height:55vh;display:flex"></div>
     </div>
 
     <div class="modal-actions">
@@ -2617,15 +2688,15 @@
 </div>
 
 <!-- Set Username Modal (mandatory, no close) -->
-<div class="modal-overlay" id="set-username-overlay" style="z-index:1000">
-  <div class="modal" style="max-width:380px">
+<div class="modal-overlay u-z1000" id="set-username-overlay">
+  <div class="modal u-mw380">
     <div class="modal-title"><i class="ti ti-user-plus"></i> <span data-i18n="chooseUsername">Elegí tu nombre de usuario</span></div>
-    <p style="font-size:12px;color:var(--text2);margin:0 0 12px" data-i18n="usernameHint">Solo letras y números, sin espacios ni tildes. Lo van a ver tus amigos.</p>
-    <input type="text" id="set-username-input" placeholder="Nombre de usuario" maxlength="20"
-      style="width:100%;padding:10px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:14px"
+    <p class="u-fs12 u-muted" style="margin:0 0 12px" data-i18n="usernameHint">Solo letras y números, sin espacios ni tildes. Lo van a ver tus amigos.</p>
+    <input class="u-fs14" type="text" id="set-username-input" placeholder="Nombre de usuario" maxlength="20"
+      style="width:100%;padding:10px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text)"
       oninput="this.value=this.value.replace(/[^A-Za-z0-9]/g,'')"
       onkeydown="if(event.key==='Enter') saveSetUsername()" />
-    <div id="set-username-err" style="font-size:12px;color:var(--red);margin-top:8px;display:none"></div>
+    <div class="u-fs12 u-mt8" id="set-username-err" style="color:var(--red);display:none"></div>
     <div class="modal-actions">
       <button class="btn-save" onclick="saveSetUsername()" data-i18n="continueBtn">Continuar</button>
     </div>
@@ -2634,13 +2705,13 @@
 
 <!-- Conectar Steam/PSN: modal de confirmacion de perfil (Buscar -> muestra
      nombre+foto -> Confirmar recien ahi sincroniza) -->
-<div class="modal-overlay" id="connect-profile-overlay" style="z-index:1000">
-  <div class="modal" style="max-width:360px;text-align:center">
-    <div class="modal-title" id="connect-profile-title" style="justify-content:center"><i class="ti ti-user-search"></i> <span data-i18n="isThisYourAccount">¿Es esta tu cuenta?</span></div>
+<div class="modal-overlay u-z1000" id="connect-profile-overlay">
+  <div class="modal u-mw360" style="text-align:center">
+    <div class="modal-title u-center" id="connect-profile-title"><i class="ti ti-user-search"></i> <span data-i18n="isThisYourAccount">¿Es esta tu cuenta?</span></div>
     <img id="connect-profile-avatar" src="" alt=""
       style="width:88px;height:88px;border-radius:50%;object-fit:cover;margin:8px auto;display:block;border:2px solid var(--border2);background:var(--bg3)" />
-    <div id="connect-profile-username" style="font-size:16px;font-weight:600;margin-top:4px"></div>
-    <div class="modal-actions" style="justify-content:center;margin-top:18px">
+    <div class="u-fs16 u-mt4" id="connect-profile-username" style="font-weight:600"></div>
+    <div class="modal-actions u-center" style="margin-top:18px">
       <button class="btn-cancel" onclick="closeConnectProfileModal()" data-i18n="cancel">Cancelar</button>
       <button class="btn-save" id="connect-profile-confirm-btn" data-i18n="confirm">Confirmar</button>
     </div>
@@ -2648,15 +2719,15 @@
 </div>
 
 <!-- Listas — vista propia (mismo criterio que Rankings), no modal. -->
-<div id="lists-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
-  <div style="padding:16px;max-width:960px;width:100%;margin:0 auto;box-sizing:border-box">
+<div class="view-page" id="lists-view" style="display:none">
+  <div class="page-col u-mw960">
     <div id="lists-modal-body"></div>
   </div>
 </div>
 
 <!-- Evolucioná a Premium — vista propia (mismo criterio que Rankings/Listas). -->
-<div id="premium-view" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
-  <div style="padding:16px;max-width:640px;width:100%;margin:0 auto;box-sizing:border-box">
+<div class="view-page" id="premium-view" style="display:none">
+  <div class="page-col u-mw640">
     <div id="premium-view-body"></div>
   </div>
 </div>
@@ -2664,9 +2735,9 @@
 <!-- Create Folder Modal -->
 <!-- Visor de solo lectura de una lista publica de otro usuario -->
 <div class="modal-overlay" id="public-folder-viewer-overlay">
-  <div class="modal" style="max-width:420px;max-height:80vh;display:flex;flex-direction:column">
+  <div class="modal u-mw420 u-col" style="max-height:80vh;display:flex">
     <div class="modal-title"><i class="ti ti-folder"></i> <span id="public-folder-viewer-title">Lista</span></div>
-    <div id="public-folder-viewer-body" style="overflow-y:auto;flex:1;min-height:0"></div>
+    <div class="u-flex1" id="public-folder-viewer-body" style="overflow-y:auto;min-height:0"></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closePublicFolderViewer()" data-i18n="close">Cerrar</button>
     </div>
@@ -2674,7 +2745,7 @@
 </div>
 
 <div class="modal-overlay" id="folder-create-overlay">
-  <div class="modal" style="max-width:340px">
+  <div class="modal u-mw340">
     <div class="modal-title"><i class="ti ti-folder-plus"></i> <span data-i18n="newFolder">Nueva lista</span></div>
     <div class="modal-grid">
       <div class="modal-group full">
@@ -2682,7 +2753,7 @@
         <input type="text" id="folder-name-input" placeholder="Ej: RPGs 2024" maxlength="100"
           onkeydown="if(event.key==='Enter') saveFolderCreate()" />
       </div>
-      <div class="modal-group full" style="flex-direction:row;align-items:center;gap:6px">
+      <div class="modal-group full u-gap6 u-items-center" style="flex-direction:row">
         <input type="checkbox" id="folder-private-input" style="accent-color:var(--green)">
         <label for="folder-private-input" style="font-size:12px;color:var(--text2)">Privada (no aparece en Listas globales)</label>
       </div>
@@ -2696,7 +2767,7 @@
 
 <!-- Create Ranking Modal -->
 <div class="modal-overlay" id="ranking-create-overlay">
-  <div class="modal" style="max-width:340px">
+  <div class="modal u-mw340">
     <div class="modal-title"><i class="ti ti-medal"></i> <span data-i18n="newRanking">Nuevo ranking</span></div>
     <div class="modal-grid">
       <div class="modal-group full">
@@ -2704,7 +2775,7 @@
         <input type="text" id="ranking-name-input" placeholder="Ej: Mejores RPGs" maxlength="100"
           onkeydown="if(event.key==='Enter') saveRankingCreate()" />
       </div>
-      <div class="modal-group full" style="flex-direction:row;align-items:center;gap:6px">
+      <div class="modal-group full u-gap6 u-items-center" style="flex-direction:row">
         <input type="checkbox" id="ranking-private-input" style="accent-color:var(--green)">
         <label for="ranking-private-input" style="font-size:12px;color:var(--text2)">Privado (no aparece en Rankings globales)</label>
       </div>
@@ -2718,9 +2789,9 @@
 
 <!-- Visor de solo lectura de un ranking publico de otro usuario -->
 <div class="modal-overlay" id="public-ranking-viewer-overlay">
-  <div class="modal" style="max-width:420px;max-height:80vh;display:flex;flex-direction:column">
+  <div class="modal u-mw420 u-col" style="max-height:80vh;display:flex">
     <div class="modal-title"><i class="ti ti-medal"></i> <span id="public-ranking-viewer-title">Ranking</span></div>
-    <div id="public-ranking-viewer-body" style="overflow-y:auto;flex:1;min-height:0"></div>
+    <div class="u-flex1" id="public-ranking-viewer-body" style="overflow-y:auto;min-height:0"></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closePublicRankingViewer()" data-i18n="close">Cerrar</button>
     </div>
@@ -2729,12 +2800,12 @@
 
 <!-- Add game to Ranking Modal -->
 <div class="modal-overlay" id="ranking-add-game-overlay">
-  <div class="modal" style="max-width:520px;width:90vw;display:flex;flex-direction:column;max-height:80vh">
+  <div class="modal u-col" style="max-width:520px;width:90vw;display:flex;max-height:80vh">
     <div class="modal-title"><i class="ti ti-medal"></i> <span data-i18n="addToRanking">Agregar a ranking</span></div>
-    <input type="text" id="ranking-picker-search" placeholder="Buscar juego..." data-i18n-placeholder="searchGame"
+    <input class="u-fs12" type="text" id="ranking-picker-search" placeholder="Buscar juego..." data-i18n-placeholder="searchGame"
       oninput="_rankingPickerSearch=this.value;renderRankingGamePicker()"
-      style="margin-bottom:8px;padding:6px 10px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text)" />
-    <div id="ranking-picker-list" style="overflow-y:auto;flex:1"></div>
+      style="margin-bottom:8px;padding:6px 10px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text)" />
+    <div class="u-flex1" id="ranking-picker-list" style="overflow-y:auto"></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeRankingAddGame()" data-i18n="cancel">Cancelar</button>
       <button class="btn-save" onclick="confirmRankingAddGame()" data-i18n="add">Agregar</button>
@@ -2744,7 +2815,7 @@
 
 <!-- Add to Folder Modal -->
 <div class="modal-overlay" id="folder-add-game-overlay">
-  <div class="modal" style="max-width:720px;width:90vw;display:flex;flex-direction:column;max-height:85vh">
+  <div class="modal u-mw720 u-col" style="width:90vw;display:flex;max-height:85vh">
     <div class="modal-title"><i class="ti ti-folder-plus"></i> <span data-i18n="addToFolder">Agregar a lista</span></div>
     <div id="folder-add-game-list"></div>
     <div class="modal-actions">
@@ -2756,13 +2827,13 @@
 
 <!-- Hours Modal -->
 <div class="modal-overlay" id="hours-overlay">
-  <div class="modal" style="max-width:320px">
-    <div class="modal-title"><i class="ti ti-clock" style="color:var(--green)"></i> <span data-i18n="hoursPlayed">Horas jugadas</span></div>
-    <div class="modal-group full" style="margin-top:12px">
+  <div class="modal u-mw320">
+    <div class="modal-title"><i class="ti ti-clock u-accent"></i> <span data-i18n="hoursPlayed">Horas jugadas</span></div>
+    <div class="modal-group full u-mt12">
       <label id="hours-modal-label">Juego</label>
       <input type="number" id="hours-input" min="0" step="0.1" placeholder="0.0" style="font-size:24px;text-align:center;padding:12px" />
     </div>
-    <div class="modal-actions" style="margin-top:16px">
+    <div class="modal-actions u-mt16">
       <button class="btn-cancel" onclick="closeHoursModal()" data-i18n="cancel">Cancelar</button>
       <button class="btn-save" onclick="saveHoursModal()" data-i18n="save">Guardar</button>
     </div>
@@ -2771,14 +2842,14 @@
 
 <!-- Last Played Modal -->
 <div class="modal-overlay" id="lastplayed-overlay">
-  <div class="modal" style="max-width:320px">
-    <div class="modal-title"><i class="ti ti-calendar-event" style="color:var(--green)"></i> <span data-i18n="lastPlayed">Última vez jugado</span></div>
-    <div class="modal-group full" style="margin-top:12px">
+  <div class="modal u-mw320">
+    <div class="modal-title"><i class="ti ti-calendar-event u-accent"></i> <span data-i18n="lastPlayed">Última vez jugado</span></div>
+    <div class="modal-group full u-mt12">
       <label id="lastplayed-modal-label">Juego</label>
       <input type="date" id="lastplayed-input" style="font-size:16px;padding:10px" />
     </div>
-    <div class="modal-actions" style="margin-top:16px">
-      <a onclick="clearLastPlayedModal()" style="font-size:11px;color:var(--text2);cursor:pointer;align-self:center;margin-right:auto" data-i18n="clearDate">Borrar fecha</a>
+    <div class="modal-actions u-mt16">
+      <a class="u-fs11 u-muted u-pointer" onclick="clearLastPlayedModal()" style="align-self:center;margin-right:auto" data-i18n="clearDate">Borrar fecha</a>
       <button class="btn-cancel" onclick="closeLastPlayedModal()" data-i18n="cancel">Cancelar</button>
       <button class="btn-save" onclick="saveLastPlayedModal()" data-i18n="save">Guardar</button>
     </div>
@@ -2787,9 +2858,9 @@
 
 <!-- Selector de carpeta (popup, no dropdown) -->
 <div class="modal-overlay" id="folder-dropdown">
-  <div class="modal" style="max-width:320px;padding:0">
-    <div class="modal-title" style="padding:16px 16px 0"><i class="ti ti-folder" style="color:var(--green)"></i> <span data-i18n="folders">Listas</span></div>
-    <div id="folder-list-items" style="margin-top:8px;max-height:60vh;overflow-y:auto"></div>
+  <div class="modal u-mw320" style="padding:0">
+    <div class="modal-title" style="padding:16px 16px 0"><i class="ti ti-folder u-accent"></i> <span data-i18n="folders">Listas</span></div>
+    <div class="u-mt8" id="folder-list-items" style="max-height:60vh;overflow-y:auto"></div>
     <div style="padding:10px 16px;text-align:right">
       <button class="btn-cancel" onclick="toggleFolderDropdown()" data-i18n="close">Cerrar</button>
     </div>
@@ -2798,47 +2869,47 @@
 
 <!-- Rating detail modal (calificacion por criterio) -->
 <div class="modal-overlay" id="accessible-edit-overlay">
-  <div class="modal" style="max-width:420px">
-    <div class="modal-title" style="font-size:18px"><i class="ti ti-zoom-in" style="color:var(--green)"></i> <span id="accessible-edit-title"></span></div>
-    <div id="accessible-edit-body" style="font-size:16px"></div>
-    <div style="text-align:right;margin-top:16px">
+  <div class="modal u-mw420">
+    <div class="modal-title" style="font-size:18px"><i class="ti ti-zoom-in u-accent"></i> <span id="accessible-edit-title"></span></div>
+    <div class="u-fs16" id="accessible-edit-body"></div>
+    <div class="u-mt16" style="text-align:right">
       <button class="btn-cancel" onclick="closeAccessibleEditModal()" style="font-size:15px;padding:8px 18px" data-i18n="close">Cerrar</button>
     </div>
   </div>
 </div>
 
 <div class="modal-overlay" id="rating-detail-overlay">
-  <div class="modal" style="max-width:400px">
+  <div class="modal u-mw400">
     <div id="rating-detail-body"></div>
-    <div style="text-align:right;margin-top:12px">
+    <div class="u-mt12" style="text-align:right">
       <button class="btn-cancel" onclick="closeRatingDetailModal()" data-i18n="close">Cerrar</button>
     </div>
   </div>
 </div>
 
 <!-- Verify Email Modal -->
-<div class="modal-overlay" id="verify-email-overlay" style="z-index:1000">
+<div class="modal-overlay u-z1000" id="verify-email-overlay">
   <div class="modal">
-    <div class="modal-title"><i class="ti ti-mail-check" style="color:var(--green)"></i> <span data-i18n="verifyEmailTitle">Confirmá tu cuenta</span></div>
-    <div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6" id="verify-email-hint" data-i18n="verifyEmailHint">
+    <div class="modal-title"><i class="ti ti-mail-check u-accent"></i> <span data-i18n="verifyEmailTitle">Confirmá tu cuenta</span></div>
+    <div class="u-fs13 u-muted" style="margin-bottom:16px;line-height:1.6" id="verify-email-hint" data-i18n="verifyEmailHint">
       Te enviamos un código de 6 dígitos a tu email. Ingresalo para activar tu cuenta.
     </div>
     <div class="modal-group full">
       <label data-i18n="verifyCodeLabel">Código de verificación</label>
       <input type="text" id="v-code" placeholder="123456" maxlength="6" style="font-size:20px;text-align:center;letter-spacing:6px" onkeydown="if(event.key==='Enter')submitVerifyEmail()" />
     </div>
-    <div id="verify-email-msg" style="font-size:12px;margin-top:10px;display:none"></div>
-    <div class="modal-actions" style="margin-top:16px">
-      <a onclick="resendVerification()" style="font-size:11px;color:var(--text2);cursor:pointer;align-self:center;margin-right:auto" data-i18n="resendCode">Reenviar código</a>
+    <div class="form-msg" id="verify-email-msg" style="display:none"></div>
+    <div class="modal-actions u-mt16">
+      <a class="u-fs11 u-muted u-pointer" onclick="resendVerification()" style="align-self:center;margin-right:auto" data-i18n="resendCode">Reenviar código</a>
       <button class="btn-save" onclick="submitVerifyEmail()" data-i18n="verifyAndContinue">Verificar</button>
     </div>
   </div>
 </div>
 
 <!-- Reset Password Modal -->
-<div class="modal-overlay" id="reset-overlay" style="z-index:1000">
+<div class="modal-overlay u-z1000" id="reset-overlay">
   <div class="modal">
-    <div class="modal-title"><i class="ti ti-lock-open" style="color:var(--green)"></i> <span data-i18n="resetPassword">Recuperar contraseña</span></div>
+    <div class="modal-title"><i class="ti ti-lock-open u-accent"></i> <span data-i18n="resetPassword">Recuperar contraseña</span></div>
     <div class="modal-grid">
       <div class="modal-group full">
         <label data-i18n="email">Email</label>
@@ -2846,10 +2917,10 @@
       </div>
       <div class="modal-group full">
         <label data-i18n="recoveryCodeDigits">Código de recuperación (6 dígitos)</label>
-        <div style="display:flex;gap:8px">
-          <input type="text" id="r-code" placeholder="123456" maxlength="6" style="flex:1" />
-          <button type="button" onclick="sendResetCode()" id="send-code-btn"
-            style="padding:0 12px;font-size:11px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;white-space:nowrap"
+        <div class="u-gap8" style="display:flex">
+          <input class="u-flex1" type="text" id="r-code" placeholder="123456" maxlength="6" />
+          <button class="u-fs11 u-muted u-pointer" type="button" onclick="sendResetCode()" id="send-code-btn"
+            style="padding:0 12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);white-space:nowrap"
             data-i18n="sendCode">Enviar código</button>
         </div>
       </div>
@@ -2858,7 +2929,7 @@
         <input type="password" id="r-newpass" placeholder="••••••••" />
       </div>
     </div>
-    <div id="reset-msg" style="font-size:12px;margin-top:10px;display:none"></div>
+    <div class="form-msg" id="reset-msg" style="display:none"></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeReset()" data-i18n="cancel">Cancelar</button>
       <button class="btn-save" onclick="submitReset()" data-i18n="changePassword">Cambiar contraseña</button>
@@ -2869,10 +2940,10 @@
 <!-- Settings Modal -->
 <div class="modal-overlay" id="settings-overlay">
   <div class="modal">
-    <div class="modal-title"><i class="ti ti-settings" style="color:var(--green)"></i> <span data-i18n="steamSettings">Ajustes de Steam</span></div>
-    <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.6" data-i18n-html="steamSettingsHint">
+    <div class="modal-title"><i class="ti ti-settings u-accent"></i> <span data-i18n="steamSettings">Ajustes de Steam</span></div>
+    <div class="field u-fs12 u-muted" style="line-height:1.6" data-i18n-html="steamSettingsHint">
       Ingresá tu Steam ID para sincronizar tu biblioteca.<br>
-      Lo encontrás en <a href="https://www.steamidfinder.com" target="_blank" style="color:var(--green)">steamidfinder.com</a> — es un número como <code style="background:var(--bg2);padding:1px 5px;border-radius:4px">76561198012345678</code>
+      Lo encontrás en <a class="u-accent" href="https://www.steamidfinder.com" target="_blank">steamidfinder.com</a> — es un número como <code style="background:var(--bg2);padding:1px 5px;border-radius:4px">76561198012345678</code>
     </div>
     <div class="modal-grid">
       <div class="modal-group full">
@@ -2880,7 +2951,7 @@
         <input type="text" id="s-userid" placeholder="Ej: 76561198012345678" />
       </div>
     </div>
-    <div id="settings-msg" style="font-size:12px;margin-top:10px;display:none"></div>
+    <div class="form-msg" id="settings-msg" style="display:none"></div>
 
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeSettings()" data-i18n="cancel">Cancelar</button>
@@ -2891,9 +2962,9 @@
 
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
-    <div class="modal-title"><i class="ti ti-plus" style="color:var(--green)"></i> <span data-i18n="addGame">Agregar juego</span></div>
+    <div class="modal-title"><i class="ti ti-plus u-accent"></i> <span data-i18n="addGame">Agregar juego</span></div>
     <div class="modal-grid">
-      <div class="modal-group full" style="position:relative">
+      <div class="modal-group full u-rel">
         <label data-i18n="gameName">Nombre del juego</label>
         <input type="text" id="m-name" placeholder="Buscá tu juego..." data-i18n-placeholder="searchYourGame" autocomplete="off" oninput="searchSteamCatalog(this.value)" />
         <div id="steam-search-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius-md);z-index:100;max-height:200px;overflow-y:auto"></div>
@@ -2950,8 +3021,8 @@
       </div>
       <div class="modal-group full">
         <label data-i18n="yourRating">Tu calificación</label>
-        <div id="modal-stars" style="display:flex;gap:3px;margin-top:4px"></div>
-        <span id="modal-star-val" style="font-size:12px;color:var(--text2);margin-top:4px;display:block" data-i18n="unrated">Sin calificar</span>
+        <div class="u-mt4" id="modal-stars" style="display:flex;gap:3px"></div>
+        <span class="u-fs12 u-muted u-mt4" id="modal-star-val" style="display:block" data-i18n="unrated">Sin calificar</span>
       </div>
       <div class="modal-group full">
         <label data-i18n="coverUrlOptional">URL de portada (opcional)</label>
@@ -2966,9 +3037,9 @@
 </div>
 
 <div class="modal-overlay" id="announcement-overlay">
-  <div class="modal" style="max-width:400px">
-    <div class="modal-title"><i class="ti ti-speakerphone" style="color:var(--green)"></i> <span id="announcement-title-text">Aviso</span></div>
-    <div id="announcement-message-text" style="font-size:14px;line-height:1.5;margin:12px 0;white-space:pre-wrap;max-height:50vh;overflow-y:auto"></div>
+  <div class="modal u-mw400">
+    <div class="modal-title"><i class="ti ti-speakerphone u-accent"></i> <span id="announcement-title-text">Aviso</span></div>
+    <div class="u-fs14" id="announcement-message-text" style="line-height:1.5;margin:12px 0;white-space:pre-wrap;max-height:50vh;overflow-y:auto"></div>
     <div class="modal-actions">
       <button class="btn-save" onclick="closeAnnouncementPopup()" data-i18n="ok">Entendido</button>
     </div>
@@ -2976,12 +3047,12 @@
 </div>
 
 <div class="modal-overlay" id="onboarding-overlay">
-  <div class="modal" style="max-width:420px;padding:0;overflow:hidden">
-    <button id="onboarding-skip" onclick="dismissOnboarding()" style="position:absolute;top:10px;right:14px;background:none;border:none;color:var(--text2);font-size:12px;cursor:pointer;z-index:2"></button>
+  <div class="modal u-mw420" style="padding:0;overflow:hidden">
+    <button class="u-fs12 u-muted u-pointer" id="onboarding-skip" onclick="dismissOnboarding()" style="position:absolute;top:10px;right:14px;background:none;border:none;z-index:2"></button>
     <div id="onboarding-slides" style="display:flex;overflow:hidden"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 20px">
-      <div id="onboarding-dots" style="display:flex;gap:6px"></div>
-      <div style="display:flex;gap:8px">
+    <div class="u-items-center" style="display:flex;justify-content:space-between;padding:16px 20px 20px">
+      <div class="u-gap6" id="onboarding-dots" style="display:flex"></div>
+      <div class="u-gap8" style="display:flex">
         <button class="btn-cancel" id="onboarding-back" onclick="onboardingStep(-1)" style="display:none"></button>
         <button class="btn-save" id="onboarding-next" onclick="onboardingStep(1)"></button>
       </div>
@@ -15552,10 +15623,10 @@ if (document.readyState === 'loading') {
 
 <!-- ═══════════════ COOKIE BANNER ═══════════════ -->
 <div id="cookie-banner" style="display:none;position:fixed;bottom:16px;left:16px;right:16px;max-width:480px;margin:0 auto;background:var(--bg2);border:0.5px solid var(--border2);border-radius:14px;padding:18px 20px;box-shadow:0 12px 40px rgba(0,0,0,0.5);z-index:999">
-  <p style="font-size:12.5px;color:var(--text2);margin-bottom:12px;line-height:1.5"><span id="cookie-banner-text" data-i18n="cookieBannerText">Usamos cookies para entender cómo se usa Playloggr (Google Analytics). Podés aceptar o rechazar el análisis — la app funciona igual en ambos casos. Más info en nuestra</span> <a href="/privacy.html" style="color:var(--green)" data-i18n="privacyPolicyLink">Política de Privacidad</a>.</p>
-  <div style="display:flex;gap:8px;justify-content:flex-end">
-    <button onclick="setCookieConsent(false)" style="background:transparent;color:var(--text2);border:0.5px solid var(--border2);padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer" data-i18n="reject">Rechazar</button>
-    <button onclick="setCookieConsent(true)" style="background:var(--green);color:var(--on-accent);border:none;padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer" data-i18n="accept">Aceptar</button>
+  <p class="u-muted u-mb12" style="font-size:12.5px;line-height:1.5"><span id="cookie-banner-text" data-i18n="cookieBannerText">Usamos cookies para entender cómo se usa Playloggr (Google Analytics). Podés aceptar o rechazar el análisis — la app funciona igual en ambos casos. Más info en nuestra</span> <a class="u-accent" href="/privacy.html" data-i18n="privacyPolicyLink">Política de Privacidad</a>.</p>
+  <div class="u-gap8" style="display:flex;justify-content:flex-end">
+    <button class="u-muted u-pointer" onclick="setCookieConsent(false)" style="background:transparent;border:0.5px solid var(--border2);padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600" data-i18n="reject">Rechazar</button>
+    <button class="u-pointer" onclick="setCookieConsent(true)" style="background:var(--green);color:var(--on-accent);border:none;padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600" data-i18n="accept">Aceptar</button>
   </div>
 </div>
 </body>
