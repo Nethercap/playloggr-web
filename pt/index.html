@@ -18,14 +18,16 @@
 <meta property="og:url" content="https://playloggr.com/pt/" />
 <meta property="og:title" content="Playloggr — Seu backlog de jogos, organizado" />
 <meta property="og:description" content="Registre o que você está jogando, o que completou e o que ainda falta. Sincronize Steam, PlayStation, GOG, Xbox e Epic Games, desbloqueie conquistas e compita com amigos." />
-<meta property="og:image" content="https://playloggr.com/assets/og-cover.png" />
+<meta property="og:image" content="https://playloggr.com/assets/og-cover-pt.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
 <meta property="og:locale" content="pt_BR" />
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Playloggr — Seu backlog de jogos, organizado" />
 <meta name="twitter:description" content="Registre o que você está jogando, o que completou e o que ainda falta. Sincronize Steam, PlayStation, GOG, Xbox e Epic Games, desbloqueie conquistas e compita com amigos." />
-<meta name="twitter:image" content="https://playloggr.com/assets/og-cover.png" />
+<meta name="twitter:image" content="https://playloggr.com/assets/og-cover-pt.jpg" />
 
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -157,6 +159,29 @@
   .preview-shot {
     width: 100%; display: block; border-radius: 16px; border: 1px solid var(--border);
     box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+  }
+
+  /* ── Galeria de capturas ── Todas a la misma altura (340px) con flex-wrap:
+     en desktop quedan dos filas (biblioteca + estadisticas, logros + avatar)
+     a un tamano legible. En 4 columnas las capturas de escritorio quedaban
+     chicas e ilegibles. En mobile pasa a carrusel horizontal con scroll-snap. */
+  .shots { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; }
+  .shot { margin: 0; min-width: 0; max-width: 100%; }
+  .shot a { display: block; }
+  .shot img {
+    height: 340px; width: auto; max-width: 100%; object-fit: contain;
+    border-radius: 12px; border: 1px solid var(--border);
+    box-shadow: 0 14px 40px rgba(0,0,0,0.45);
+  }
+  .shot figcaption { font-size: 12.5px; color: var(--text2); margin-top: 10px; text-align: center; }
+  @media (max-width: 720px) {
+    .shots {
+      flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px;
+      margin: 0 -24px; padding: 0 24px 8px; scrollbar-width: none;
+    }
+    .shots::-webkit-scrollbar { display: none; }
+    .shot { flex: 0 0 auto; max-width: none; scroll-snap-align: center; }
+    .shot img { height: 300px; max-width: none; }
   }
 
   /* ── Section headers ── */
@@ -297,6 +322,14 @@
     .feature-grid { grid-template-columns: 1fr 1fr; }
     .plans { grid-template-columns: 1fr; }
   }
+  /* El nav completo (6 links + idioma + boton) necesita ~930px: entre 720 y
+     ese ancho el boton de Login quedaba cortado fuera de pantalla y habia
+     scroll horizontal. Se colapsa al menu hamburguesa desde 980px. */
+  @media (max-width: 980px) {
+    .nav-links { position: fixed; top: 64px; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--border); flex-direction: column; align-items: flex-start; padding: 16px 24px; gap: 16px; display: none; }
+    .nav-links.open { display: flex; }
+    .nav-toggle { display: block; }
+  }
   @media (max-width: 720px) {
     .nav-links { position: fixed; top: 64px; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--border); flex-direction: column; align-items: flex-start; padding: 16px 24px; gap: 16px; display: none; }
     .nav-links.open { display: flex; }
@@ -344,13 +377,13 @@
 <header class="hero" id="que-es">
   <div class="wrap">
     <div class="eyebrow"><i class="ti ti-device-gamepad-2"></i> Seu backlog de jogos, finalmente sob controle</div>
-    <h1>Seu espaço gamer, <span class="accent">em um só lugar</span>.</h1>
-    <p class="hero-sub">
-      Sincronize sua biblioteca, suba de nível e compartilhe seu perfil.
+    <h1 id="hero-title">Todos os seus jogos, <span class="accent">em uma só lista</span>.</h1>
+    <p class="hero-sub" id="hero-sub">
+      Steam, PlayStation, Xbox, GOG e Epic sincronizam sozinhos. Saiba o que você está jogando, o que zerou e quantas horas jogou. Grátis.
     </p>
     <div class="hero-ctas">
-      <a href="/app/?register=1" class="btn-primary">Criar conta grátis</a>
-      <a href="https://play.google.com/store/apps/details?id=com.playloggr.app" target="_blank" rel="noopener" class="btn-gray">Baixar no Google Play</a>
+      <a id="cta-register" href="/app/?register=1" class="btn-primary">Criar conta grátis</a>
+      <a id="cta-play" href="https://play.google.com/store/apps/details?id=com.playloggr.app" target="_blank" rel="noopener" class="btn-gray">Baixar no Google Play</a>
     </div>
 
     <div class="pill-row">
@@ -371,6 +404,35 @@
     </div>
   </div>
 </header>
+
+
+<!-- ═══════════════ CAPTURAS ═══════════════ -->
+<section class="section" id="capturas">
+  <div class="wrap">
+    <div class="section-header">
+      <div class="section-eyebrow">Veja como é</div>
+      <h2>Sua biblioteca inteira, num relance</h2>
+    </div>
+    <div class="shots">
+      <figure class="shot">
+        <a href="/assets/screenshots/biblioteca.png" target="_blank" rel="noopener"><img src="/assets/screenshots/biblioteca.png" width="993" height="810" alt="Biblioteca de jogos no Playloggr" loading="lazy" /></a>
+        <figcaption>Biblioteca com status, horas e nota</figcaption>
+      </figure>
+      <figure class="shot">
+        <a href="/assets/screenshots/estadisticas.png" target="_blank" rel="noopener"><img src="/assets/screenshots/estadisticas.png" width="850" height="510" alt="Estatísticas de jogo no Playloggr" loading="lazy" /></a>
+        <figcaption>Estatísticas por status, plataforma e nota</figcaption>
+      </figure>
+      <figure class="shot">
+        <a href="/assets/screenshots/logros.png" target="_blank" rel="noopener"><img src="/assets/screenshots/logros.png" width="463" height="688" alt="Conquistas e níveis no Playloggr" loading="lazy" /></a>
+        <figcaption>Conquistas e níveis por jogar</figcaption>
+      </figure>
+      <figure class="shot">
+        <a href="/assets/screenshots/avatar.png" target="_blank" rel="noopener"><img src="/assets/screenshots/avatar.png" width="442" height="706" alt="Editor de avatar pixel-art no Playloggr" loading="lazy" /></a>
+        <figcaption>Avatar pixel-art personalizável</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
 
 
 <!-- ═══════════════ ACTIVIDAD DE LA COMUNIDAD ═══════════════ -->
@@ -710,6 +772,67 @@
       sec.classList.add('on');
     })
     .catch(function () {});
+})();
+</script>
+<script>
+/* Hero por anuncio + CTA de Google Play.
+   1) Titular segun el anuncio: ?v=<clave> o utm_content=<clave> cambia el h1
+      y el subtitulo, para que la landing repita la promesa del anuncio que
+      trajo a la persona. Claves desconocidas = titular por defecto.
+   2) En Android el boton principal pasa a ser Google Play (casi todo el
+      trafico de Meta es mobile y la app es la mejor experiencia ahi).
+   3) Los links a Play llevan los UTM en &referrer= (Play Console los muestra
+      en Adquisicion de usuarios) y el click se registra como Lead en Meta y
+      como evento en GA4. Si el usuario no acepto cookies, fbq/gtag no
+      existen y no se manda nada. */
+(function () {
+  var VARIANTS = {"stats": ["Quantas horas você já jogou <span class=\"accent\">nos seus jogos</span>?", "Conecte Steam, PlayStation, Xbox, GOG e Epic e veja suas horas, seus jogos zerados e sua atividade dia a dia. Grátis."], "achievements": ["Jogue seu backlog <span class=\"accent\">e suba de nível</span>.", "Cada jogo que você zera, avalia ou joga dá XP. Desbloqueie conquistas, molduras e avatares. Grátis."], "social": ["Veja o que <span class=\"accent\">seus amigos</span> estão jogando.", "Siga outros jogadores, compartilhe seu perfil com seus jogos, rankings e resenhas, e vote no jogo do mês. Grátis."], "backlog": ["Quantos jogos você tem <span class=\"accent\">sem jogar</span>?", "Junte suas bibliotecas de Steam, PlayStation, Xbox, GOG e Epic, organize o backlog e escolha o que jogar depois. Grátis."]};
+  var p = new URLSearchParams(location.search);
+  var key = (p.get('v') || p.get('utm_content') || '').toLowerCase().trim();
+  var v = VARIANTS[key];
+  if (v) {
+    var h1 = document.getElementById('hero-title');
+    var sub = document.getElementById('hero-sub');
+    if (h1) h1.innerHTML = v[0];
+    if (sub) sub.textContent = v[1];
+  }
+
+  var isAndroid = /Android/i.test(navigator.userAgent);
+  if (isAndroid) {
+    var reg = document.getElementById('cta-register');
+    var play = document.getElementById('cta-play');
+    if (reg && play) {
+      play.className = 'btn-primary';
+      reg.className = 'btn-gray';
+      play.parentNode.insertBefore(play, reg);
+    }
+  }
+
+  var attr = null;
+  try { attr = JSON.parse(localStorage.getItem('pl_attr') || 'null'); } catch (e) {}
+  attr = attr || {};
+  var refHost = '';
+  try { if (attr.referrer) refHost = new URL(attr.referrer).host.replace(/^www\./, ''); } catch (e) {}
+  var ref = [
+    ['utm_source', attr.source || refHost || 'playloggr.com'],
+    ['utm_medium', attr.medium || (attr.source ? '' : (refHost ? 'referral' : 'landing'))],
+    ['utm_campaign', attr.campaign || ''],
+    ['utm_content', attr.content || ''],
+  ].filter(function (kv) { return kv[1]; })
+   .map(function (kv) { return kv[0] + '=' + encodeURIComponent(kv[1]); }).join('&');
+
+  Array.prototype.forEach.call(
+    document.querySelectorAll('a[href*="play.google.com/store/apps/details"]'),
+    function (a) {
+      if (a.href.indexOf('referrer=') < 0) a.href += '&referrer=' + encodeURIComponent(ref);
+      var where = a.id === 'cta-play' ? 'hero' : (a.closest('nav') ? 'nav' : 'other');
+      a.addEventListener('click', function () {
+        try {
+          if (typeof window.fbq === 'function') window.fbq('track', 'Lead', { content_name: 'google_play', content_category: where });
+          if (typeof window.gtag === 'function') window.gtag('event', 'play_store_click', { link_location: where, android: isAndroid, transport_type: 'beacon' });
+        } catch (e) {}
+      });
+    });
 })();
 </script>
 </body>
