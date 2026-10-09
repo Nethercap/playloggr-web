@@ -13455,9 +13455,12 @@ async function openWrapped(year) {
   body.innerHTML = `<div class="spinner" style="margin:18px auto"></div>`;
   document.getElementById('wrapped-user').textContent = authUser || '';
   document.getElementById('wrapped-title').innerHTML = titleHtml(userTitle, 8.5);
-  const av = document.getElementById('wrapped-avatar');
-  const shift = currentAvatarConfig.streakAvatarId ? '0' : '-11.7%';
-  av.innerHTML = `<div style="width:40px;height:40px;position:relative;transform:translateY(${shift})">${pixelAvatarHtml(currentAvatarConfig, 40)}</div>`;
+  // Con /app/#wrapped se abre apenas arranca la app, antes de que cargue el
+  // avatar: se espera a que este (la promesa es la misma que usa el resto).
+  avatarConfigReady().then(() => {
+    const shift = currentAvatarConfig.streakAvatarId ? '0' : '-11.7%';
+    document.getElementById('wrapped-avatar').innerHTML = `<div style="width:40px;height:40px;position:relative;transform:translateY(${shift})">${pixelAvatarHtml(currentAvatarConfig, 40)}</div>`;
+  });
   document.getElementById('wrapped-url').textContent = authUser ? `playloggr.com/u/${authUser}` : 'playloggr.com';
   overlay.classList.add('open');
   try {
