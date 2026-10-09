@@ -7338,7 +7338,7 @@ function setView(view) {
     return;
   }
   if (isConfig) {
-    openConfigPanel._init();
+    openConfigPanel._ready = openConfigPanel._init();
     return;
   }
 
@@ -8252,8 +8252,12 @@ document.addEventListener('DOMContentLoaded', () => {});
 
 // ── User Configuration ───────────────────────────────────────────────────────
 
+// Devuelve la promesa de la carga del panel (_init termina mostrando la
+// pestana Perfil), asi quien quiera abrir otra pestana lo hace despues:
+// openConfigPanel().then(() => switchConfigTab('avatar')).
 function openConfigPanel() {
   setView('config');
+  return openConfigPanel._ready || Promise.resolve();
 }
 // Preferencias de notificacion por tipo. Se guardan al toggle, sin boton.
 async function loadPushPrefs() {
@@ -12787,9 +12791,9 @@ function showPremiumThanksPopup() {
       <div style="padding:18px 20px 14px">
         <div style="font-size:19px;font-weight:800">${esc(t('premiumThanksTitle'))}</div>
         <p style="font-size:13px;color:var(--text2);margin:6px 0 16px">${esc(t('premiumThanksBody'))}</p>
-        <button class="pl-premium-btn" onclick="this.closest('.modal-overlay').remove();openConfigPanel();setTimeout(()=>switchConfigTab('appearance'),50)">
+        <button class="pl-premium-btn" onclick="this.closest('.modal-overlay').remove();openConfigPanel().then(()=>switchConfigTab('appearance'))">
           <i class="ti ti-palette"></i> ${esc(t('pickThemeCta'))}</button>
-        <button class="btn-cancel" style="width:100%;margin-top:8px" onclick="this.closest('.modal-overlay').remove();openConfigPanel();setTimeout(()=>switchConfigTab('avatar'),50)">
+        <button class="btn-cancel" style="width:100%;margin-top:8px" onclick="this.closest('.modal-overlay').remove();openConfigPanel().then(()=>switchConfigTab('avatar'))">
           ${esc(t('customizeAvatarCta'))}</button>
         <button class="pl-link-btn" style="margin-top:6px" onclick="this.closest('.modal-overlay').remove()">${esc(t('premiumThanksBtn'))}</button>
       </div>
