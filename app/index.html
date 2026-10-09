@@ -2077,6 +2077,7 @@
           style="padding:5px 14px;border-radius:16px;border:0.5px solid var(--green);background:var(--bg2);font-weight:600" data-i18n="periodWeek">Semana</button>
         <button class="seg-tab-sm" id="ptab-month" onclick="switchPeriodType('month')"
           data-i18n="periodMonth">Mes</button>
+        <button class="seg-tab-sm" onclick="openWrapped()"><i class="ti ti-gift"></i> <span data-i18n="wrappedBtn">Mi año</span></button>
         <button class="u-fs12 u-pointer" id="period-share-btn" onclick="openPeriodShareCard()" style="display:none;margin-left:auto;padding:5px 14px;border-radius:16px;border:none;background:var(--green);color:var(--on-accent);font-weight:600">
           <i class="ti ti-share"></i> <span data-i18n="shareLibraryShort">Compartir</span>
         </button>
@@ -2366,6 +2367,30 @@
     <div class="u-gap8" style="display:flex;padding:14px 18px 18px">
       <button class="btn-cancel u-flex1" onclick="document.getElementById('period-share-overlay').classList.remove('open')" data-i18n="close">Cerrar</button>
       <button class="btn-save u-flex1" onclick="exportCardAsImage('period-share-card', 'playloggr-resumen.png')"><i class="ti ti-download"></i> <span data-i18n="wowShare">Compartir</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- "Tu año en Playloggr" (estilo Wrapped). Datos de GET /wrapped; se abre
+     desde Estadisticas > Semana/Mes ("Mi año"), el aviso de diciembre/enero
+     en la biblioteca o el link /app/#wrapped. -->
+<div class="modal-overlay" id="wrapped-overlay">
+  <div class="modal u-mw380" style="padding:0;overflow:hidden">
+    <div id="wrapped-card" style="padding:28px 22px 22px;background:linear-gradient(165deg,#221a3a 0%,#16231d 55%,#111111 100%);text-align:center">
+      <div class="u-fs11" id="wrapped-eyebrow" style="letter-spacing:.08em;text-transform:uppercase;font-weight:800;margin-bottom:12px;color:#b9a8ff"></div>
+      <div class="u-center u-items-center" style="display:flex;gap:10px;margin-bottom:16px">
+        <div class="u-rel" id="wrapped-avatar" style="width:40px;height:40px;border-radius:50%;overflow:hidden;background:var(--bg3);flex-shrink:0"></div>
+        <div style="text-align:left">
+          <div class="u-fs14" id="wrapped-user" style="font-weight:700;line-height:1.2"></div>
+          <div id="wrapped-title" style="line-height:1.2"></div>
+        </div>
+      </div>
+      <div id="wrapped-body"></div>
+      <div id="wrapped-url" style="margin-top:18px;font-size:10.5px;color:#777;letter-spacing:.04em">playloggr.com</div>
+    </div>
+    <div class="u-gap8" style="display:flex;padding:14px 18px 18px">
+      <button class="btn-cancel u-flex1" onclick="document.getElementById('wrapped-overlay').classList.remove('open')" data-i18n="close">Cerrar</button>
+      <button class="btn-save u-flex1" id="wrapped-share-btn" onclick="exportCardAsImage('wrapped-card', `playloggr-${_wrappedYear || ''}.png`)"><i class="ti ti-download"></i> <span data-i18n="wowShare">Compartir</span></button>
     </div>
   </div>
 </div>
@@ -3436,6 +3461,15 @@ const I18N = {
     titleUse: 'Usar como título', titleCurrent: 'Tu título', titleClear: 'Quitar título',
     profileBanner: 'Banner de perfil', profileBannerHint: 'Se ve en tu perfil público y cuando compartís el link.',
     periodShareWeek: 'Tu semana', periodShareMonth: 'Tu mes', periodShareHoursWeek: 'horas jugadas esta semana', periodShareHoursMonth: 'horas jugadas este mes',
+    wrappedBtn: 'Mi año', wrappedEyebrow: 'Tu {y} en Playloggr', wrappedHoursLbl: 'horas jugadas', wrappedSince: 'desde el {d}, cuando empezaste a registrar',
+    wrappedCompleted: 'completados', wrappedDays: 'días jugando', wrappedAchievements: 'logros', wrappedTopPlatform: 'Plataforma favorita', wrappedTopMonth: 'Tu mes más gamer',
+    wrappedEmpty: 'Todavía no hay suficiente actividad registrada este año. ¡Seguí jugando!', wrappedBanner: 'Tu {y} en Playloggr ya está listo', wrappedSee: 'Verlo',
+    wrappedArch_marathoner: '🏃 Maratonista', wrappedArchD_marathoner: 'Más de 500 horas jugadas este año.',
+    wrappedArch_completionist: '🏆 Completista', wrappedArchD_completionist: 'Diez juegos o más terminados.',
+    wrappedArch_loyal: '💍 Fiel', wrappedArchD_loyal: 'Un solo juego se llevó la mitad de tus horas.',
+    wrappedArch_multiplatform: '🎮 Multiplataforma', wrappedArchD_multiplatform: 'Jugaste en 3 plataformas o más.',
+    wrappedArch_explorer: '🧭 Explorador', wrappedArchD_explorer: 'Probaste 15 juegos o más.',
+    wrappedArch_steady: '🌱 Constante', wrappedArchD_steady: 'Tu backlog avanza a tu ritmo.',
     periodShareCompleted1: 'completado', periodShareCompletedN: 'completados', periodShareStarted1: 'empezado', periodShareStartedN: 'empezados',
     titleSet: 'Título actualizado', titleCleared: 'Título quitado',
     leaderboardEmpty: 'Todavía no hay nadie con XP en la tabla.',
@@ -3769,6 +3803,15 @@ const I18N = {
     titleUse: 'Use as title', titleCurrent: 'Your title', titleClear: 'Remove title',
     profileBanner: 'Profile banner', profileBannerHint: 'Shown on your public profile and when you share the link.',
     periodShareWeek: 'Your week', periodShareMonth: 'Your month', periodShareHoursWeek: 'hours played this week', periodShareHoursMonth: 'hours played this month',
+    wrappedBtn: 'My year', wrappedEyebrow: 'Your {y} on Playloggr', wrappedHoursLbl: 'hours played', wrappedSince: 'since {d}, when you started tracking',
+    wrappedCompleted: 'completed', wrappedDays: 'days playing', wrappedAchievements: 'achievements', wrappedTopPlatform: 'Favorite platform', wrappedTopMonth: 'Your top month',
+    wrappedEmpty: 'Not enough activity tracked this year yet. Keep playing!', wrappedBanner: 'Your {y} on Playloggr is ready', wrappedSee: 'See it',
+    wrappedArch_marathoner: '🏃 Marathoner', wrappedArchD_marathoner: 'Over 500 hours played this year.',
+    wrappedArch_completionist: '🏆 Completionist', wrappedArchD_completionist: 'Ten or more games finished.',
+    wrappedArch_loyal: '💍 Loyal', wrappedArchD_loyal: 'A single game took half your hours.',
+    wrappedArch_multiplatform: '🎮 Multiplatform', wrappedArchD_multiplatform: 'You played on 3 or more platforms.',
+    wrappedArch_explorer: '🧭 Explorer', wrappedArchD_explorer: 'You tried 15 or more games.',
+    wrappedArch_steady: '🌱 Steady', wrappedArchD_steady: 'Your backlog moves at your pace.',
     periodShareCompleted1: 'completed', periodShareCompletedN: 'completed', periodShareStarted1: 'started', periodShareStartedN: 'started',
     titleSet: 'Title updated', titleCleared: 'Title removed',
     leaderboardEmpty: 'No one has XP on the board yet.',
@@ -4102,6 +4145,15 @@ const I18N = {
     titleUse: 'Usar como título', titleCurrent: 'Seu título', titleClear: 'Remover título',
     profileBanner: 'Banner do perfil', profileBannerHint: 'Aparece no seu perfil público e quando você compartilha o link.',
     periodShareWeek: 'Sua semana', periodShareMonth: 'Seu mês', periodShareHoursWeek: 'horas jogadas esta semana', periodShareHoursMonth: 'horas jogadas este mês',
+    wrappedBtn: 'Meu ano', wrappedEyebrow: 'Seu {y} no Playloggr', wrappedHoursLbl: 'horas jogadas', wrappedSince: 'desde {d}, quando você começou a registrar',
+    wrappedCompleted: 'concluídos', wrappedDays: 'dias jogando', wrappedAchievements: 'conquistas', wrappedTopPlatform: 'Plataforma favorita', wrappedTopMonth: 'Seu mês mais gamer',
+    wrappedEmpty: 'Ainda não há atividade suficiente registrada este ano. Continue jogando!', wrappedBanner: 'Seu {y} no Playloggr está pronto', wrappedSee: 'Ver',
+    wrappedArch_marathoner: '🏃 Maratonista', wrappedArchD_marathoner: 'Mais de 500 horas jogadas este ano.',
+    wrappedArch_completionist: '🏆 Completista', wrappedArchD_completionist: 'Dez jogos ou mais zerados.',
+    wrappedArch_loyal: '💍 Fiel', wrappedArchD_loyal: 'Um só jogo levou metade das suas horas.',
+    wrappedArch_multiplatform: '🎮 Multiplataforma', wrappedArchD_multiplatform: 'Você jogou em 3 plataformas ou mais.',
+    wrappedArch_explorer: '🧭 Explorador', wrappedArchD_explorer: 'Você testou 15 jogos ou mais.',
+    wrappedArch_steady: '🌱 Constante', wrappedArchD_steady: 'Seu backlog avança no seu ritmo.',
     periodShareCompleted1: 'concluído', periodShareCompletedN: 'concluídos', periodShareStarted1: 'iniciado', periodShareStartedN: 'iniciados',
     titleSet: 'Título atualizado', titleCleared: 'Título removido',
     leaderboardEmpty: 'Ainda não há ninguém com XP na tabela.',
@@ -13392,6 +13444,100 @@ function openPeriodShareCard() {
   document.getElementById('period-share-overlay').classList.add('open');
 }
 
+// ── "Tu año en Playloggr" (Wrapped) ──────────────────────────────────────
+// GET /wrapped arma todo del lado del backend; aca solo se pinta la tarjeta
+// (mismo estilo y exportacion que la del resumen de periodo).
+let _wrappedYear = null;
+
+async function openWrapped(year) {
+  const overlay = document.getElementById('wrapped-overlay');
+  const body = document.getElementById('wrapped-body');
+  body.innerHTML = `<div class="spinner" style="margin:18px auto"></div>`;
+  document.getElementById('wrapped-user').textContent = authUser || '';
+  document.getElementById('wrapped-title').innerHTML = titleHtml(userTitle, 8.5);
+  const av = document.getElementById('wrapped-avatar');
+  const shift = currentAvatarConfig.streakAvatarId ? '0' : '-11.7%';
+  av.innerHTML = `<div style="width:40px;height:40px;position:relative;transform:translateY(${shift})">${pixelAvatarHtml(currentAvatarConfig, 40)}</div>`;
+  document.getElementById('wrapped-url').textContent = authUser ? `playloggr.com/u/${authUser}` : 'playloggr.com';
+  overlay.classList.add('open');
+  try {
+    const q = year ? `?year=${encodeURIComponent(year)}` : '';
+    const res = await fetch(`${apiBase()}/api/v1/wrapped${q}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    if (!res.ok) throw new Error(res.status);
+    renderWrapped(await res.json());
+  } catch (e) {
+    body.innerHTML = `<div class="u-fs12 u-muted" style="padding:12px 0">${esc(t('wrappedEmpty'))}</div>`;
+  }
+}
+
+function renderWrapped(w) {
+  _wrappedYear = w.year;
+  document.getElementById('wrapped-eyebrow').textContent = t('wrappedEyebrow').replace('{y}', w.year);
+  document.getElementById('wrapped-share-btn').style.display = w.has_data ? '' : 'none';
+  const body = document.getElementById('wrapped-body');
+  if (!w.has_data) {
+    body.innerHTML = `<div class="u-fs12 u-muted" style="padding:12px 0">${esc(t('wrappedEmpty'))}</div>`;
+    return;
+  }
+  const fmtDate = iso => { const [y, m, d] = iso.split('-'); return new Date(+y, +m - 1, +d).toLocaleDateString(currentLang, { day: 'numeric', month: 'long' }); };
+  const monthName = ym => { const [y, m] = ym.split('-'); const n = new Date(+y, +m - 1, 1).toLocaleDateString(currentLang, { month: 'long' }); return n.charAt(0).toUpperCase() + n.slice(1); };
+  // Si se empezo a registrar despues del 1 de enero, se aclara: las horas
+  // son desde ahi, no del año entero.
+  const since = w.since && !w.since.endsWith('-01-01')
+    ? `<div style="font-size:10.5px;color:var(--text2);margin-top:2px">${esc(t('wrappedSince').replace('{d}', fmtDate(w.since)))}</div>` : '';
+  const tile = (n, label) => `<div style="flex:1;background:#ffffff0d;border-radius:10px;padding:8px 4px">
+      <div style="font-size:20px;font-weight:800">${Number(n).toLocaleString()}</div>
+      <div style="font-size:10px;color:var(--text2)">${esc(label)}</div></div>`;
+  const medal = ['#E0B84C', '#B0B0B8', '#CD7F32', '#777', '#777'];
+  const games = (w.top_games || []).map((g, i) => `
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+      <span style="width:18px;height:18px;border-radius:${i === 0 ? '50%' : '4px'};border:1.5px solid ${medal[i]};color:${medal[i]};font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">${i + 1}</span>
+      <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600">${esc(g.name)}</span>
+      <span style="color:var(--text2);flex-shrink:0">${g.hours} hs</span>
+    </div>`).join('');
+  const facts = [
+    w.top_platform ? `<div><div style="font-size:10px;color:var(--text2)">${esc(t('wrappedTopPlatform'))}</div><div style="font-weight:700;font-size:13px">${esc(w.top_platform.name)}</div></div>` : '',
+    w.top_month ? `<div><div style="font-size:10px;color:var(--text2)">${esc(t('wrappedTopMonth'))}</div><div style="font-weight:700;font-size:13px">${esc(monthName(w.top_month.month))}</div></div>` : '',
+  ].filter(Boolean).join('');
+  body.innerHTML = `
+    <div style="font-size:46px;font-weight:800;line-height:1;color:var(--green)">${Math.round(w.total_hours).toLocaleString()}</div>
+    <div class="u-fs11 u-muted" style="margin-top:4px">${esc(t('wrappedHoursLbl'))}</div>${since}
+    <div style="display:flex;gap:8px;margin:16px 0">
+      ${tile(w.completed, t('wrappedCompleted'))}${tile(w.days_played, t('wrappedDays'))}${tile((w.achievements || 0) + (w.platform_achievements || 0), t('wrappedAchievements'))}
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;text-align:left">${games}</div>
+    ${facts ? `<div style="display:flex;justify-content:space-around;gap:10px;margin-top:16px">${facts}</div>` : ''}
+    <div style="margin-top:16px;padding:10px;border-radius:10px;background:#b9a8ff1f;border:1px solid #b9a8ff55">
+      <div style="font-weight:800;font-size:15px">${esc(t('wrappedArch_' + w.archetype))}</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:2px">${esc(t('wrappedArchD_' + w.archetype))}</div>
+    </div>`;
+}
+
+// Aviso en la biblioteca en diciembre y enero (enero = el año que termino),
+// una vez por año: al cerrarlo o abrirlo no vuelve a salir.
+function maybeShowWrappedBanner() {
+  const now = new Date();
+  const m = now.getMonth();
+  if (m !== 11 && m !== 0) return;
+  const year = m === 0 ? now.getFullYear() - 1 : now.getFullYear();
+  const key = `pl_wrapped_seen_${year}`;
+  try { if (localStorage.getItem(key)) return; } catch (e) { return; }
+  const list = document.getElementById('game-list');
+  if (!list || document.getElementById('wrapped-banner')) return;
+  const done = () => { try { localStorage.setItem(key, '1'); } catch (e) {} document.getElementById('wrapped-banner')?.remove(); };
+  const div = document.createElement('div');
+  div.id = 'wrapped-banner';
+  div.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:12px 14px;border-radius:12px;background:linear-gradient(120deg,#221a3a,#16231d);border:1px solid #b9a8ff55';
+  div.innerHTML = `<span style="font-size:20px">🎁</span>
+    <span style="flex:1;font-weight:700;font-size:13px">${esc(t('wrappedBanner').replace('{y}', year))}</span>
+    <button class="btn-save" style="padding:6px 14px">${esc(t('wrappedSee'))}</button>
+    <button class="btn-cancel" style="padding:6px 10px" aria-label="${esc(t('close'))}"><i class="ti ti-x"></i></button>`;
+  const [see, close] = div.querySelectorAll('button');
+  see.onclick = () => { done(); openWrapped(year); };
+  close.onclick = done;
+  list.before(div);
+}
+
 // ── Activacion (conectar una plataforma) ──────────────────────────────────
 // Es EL paso que decide si el usuario vuelve o no: los que conectan una
 // plataforma vuelven 65% de las veces y duran ~21 dias; los que no, 8% y
@@ -15465,6 +15611,8 @@ async function onLoginSuccess() {
     loadNotificationsSummary(),
   ]);
   checkActiveAnnouncement();
+  maybeShowWrappedBanner();
+  if (location.hash === '#wrapped') openWrapped();
 
   // Then load secondary data in background
   loadFolders();
