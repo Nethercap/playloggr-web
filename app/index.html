@@ -6614,6 +6614,12 @@ async function _runExportGrid() {
   clone.querySelectorAll('[draggable]').forEach(el => el.removeAttribute('draggable'));
   clone.querySelectorAll('[onclick]').forEach(el => el.removeAttribute('onclick'));
   wrap.appendChild(clone);
+  // Marca al pie, igual que las tarjetas de perfil: cada ranking o carpeta
+  // que se comparte lleva de vuelta a Playloggr.
+  const brand = document.createElement('div');
+  brand.textContent = authUser ? `playloggr.com/u/${authUser}` : 'playloggr.com';
+  brand.style.cssText = 'margin-top:14px;text-align:right;font-size:12px;letter-spacing:.3px;color:var(--text2)';
+  wrap.appendChild(brand);
   document.body.appendChild(wrap);
   try {
     const canvas = await html2canvas(wrap, {
@@ -15453,7 +15459,7 @@ async function onLoginSuccess() {
   // Load games first (most important). syncAll ya pide /stats/global y
   // /backlog/filters al terminar: pedirlos tambien aca los duplicaba.
   await Promise.all([
-    syncAll(1),
+    syncAll(1, false, false),
     premiumStatusReady(),
     loadNotificationsSummary(),
   ]);
@@ -15633,7 +15639,10 @@ if (authToken) {
 }
 
 
-async function syncAll(page = 1, silent = false) {
+// checkHealth: pegarle a /health antes de pedir la biblioteca. Sirve para
+// el boton "Sincronizar"; al arrancar la app se saltea (era ~0,5 s mas
+// antes de ver los juegos) y si el backend no responde lo avisa el catch.
+async function syncAll(page = 1, silent = false, checkHealth = !silent) {
   hideError();
   currentPage = page;
   const btn = document.getElementById('sync-btn');
@@ -15651,7 +15660,7 @@ async function syncAll(page = 1, silent = false) {
   // "Sincronizar"); en resyncs silenciosos (filtros, paginacion) ya
   // sabemos que el backend responde porque la pagina esta cargada, asi
   // que nos ahorramos ese round-trip extra.
-  if (!silent) {
+  if (checkHealth) {
     let ok = false;
     try { const r = await fetch(`${apiBase()}/api/v1/health`); ok = r.ok; } catch(e) {}
 
@@ -15729,6 +15738,10 @@ async function syncAll(page = 1, silent = false) {
 
   } catch(e) {
     showError(t('errorLoadingGames') + ': ' + e.message);
+    // Sin esto la lista quedaba en "Sincronizando..." para siempre.
+    if (!silent && page === 1) {
+      document.getElementById('game-list').innerHTML = `<div class="empty"><i class="ti ti-wifi-off"></i>${t('backendUnavailable')}</div>`;
+    }
   }
 
   if (!silent) {
