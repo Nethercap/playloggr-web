@@ -7509,14 +7509,20 @@ async function submitVerifyEmail() {
   const msgEl = document.getElementById('verify-email-msg');
   msgEl.style.display = 'none';
   if (!code) return;
+  // Si este navegador hizo el registro, se reenvia su atribucion (mismo
+  // event_id) para que el backend avise a Meta recien ahora.
+  const signupEventId = pendingSignupEventId(_pendingVerifyEmail);
+  const body = { email: _pendingVerifyEmail, code };
+  if (signupEventId) body.attribution = getSignupAttribution(signupEventId);
   try {
     const res = await fetch(`${apiBase()}/api/v1/auth/verify-email`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: _pendingVerifyEmail, code }),
+      body: JSON.stringify(body),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || t('codeIncorrect'));
+    if (signupEventId) { trackSignupPixel(signupEventId); clearPendingSignup(); }
     authToken = data.access_token;
     authUser  = data.username;
     localStorage.setItem('gb_token', authToken);
@@ -13807,7 +13813,12 @@ async function submitAuth() {
       window.gtag('event', 'sign_up', { method: 'email' });
       window.gtag('event', 'conversion', { send_to: ADS_SIGNUP_CONVERSION_LABEL });
     }
-    if (isRegister) trackSignupPixel(signupAttr.event_id);
+    // Meta no: el pixel y la Conversions API esperan a que se verifique el
+    // mail (submitVerifyEmail), asi no cuentan registros que nunca confirman.
+    if (isRegister) {
+      if (data.verification_required) savePendingSignup(data.email || email, signupAttr.event_id);
+      else trackSignupPixel(signupAttr.event_id);
+    }
 
     if (data.verification_required) {
       openVerifyEmail(data.email || email);
@@ -15755,18 +15766,36 @@ function getAttribution() {
   return Object.assign({}, a || {}, { client: 'web' });
 }
 // Datos para la Conversions API de Meta (el backend manda CompleteRegistration
-// aunque el usuario no haya aceptado cookies): un event_id nuevo por registro,
-// el mismo que usa trackSignupPixel() para que Meta deduplique, y las cookies
-// _fbp/_fbc si existen (si no hay _fbc pero se entro con fbclid, se arma).
-function getSignupAttribution() {
+// solo si consent es true, o sea si se acepto el banner de cookies): un
+// event_id por registro, el mismo que usa trackSignupPixel() para que Meta
+// deduplique, y las cookies _fbp/_fbc si existen (si no hay _fbc pero se entro
+// con fbclid, se arma). eventId: para reusar el del registro al verificar.
+function getSignupAttribution(eventId) {
   const a = getAttribution();
-  let id = '';
-  try { id = crypto.randomUUID(); } catch (e) {}
+  let id = eventId || '';
+  if (!id) { try { id = crypto.randomUUID(); } catch (e) {} }
   if (!id) id = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12);
   const cookie = (n) => { try { const m = document.cookie.match(new RegExp('(?:^|; )' + n + '=([^;]*)')); return m ? decodeURIComponent(m[1]) : ''; } catch (e) { return ''; } };
   let fbc = cookie('_fbc');
   if (!fbc && a.fbclid) fbc = 'fb.1.' + (a.fbclid_ts || Date.now()) + '.' + a.fbclid;
-  return Object.assign(a, { event_id: id, fbp: cookie('_fbp'), fbc, source_url: location.origin + location.pathname });
+  let consent = false;
+  try { consent = localStorage.getItem('pl_cookie_consent') === 'accepted'; } catch (e) {}
+  return Object.assign(a, { event_id: id, fbp: cookie('_fbp'), fbc, source_url: location.origin + location.pathname, consent });
+}
+// Registro por email: para Meta (pixel + Conversions API) el registro recien
+// cuenta cuando se verifica el mail. Hasta entonces se guarda su event_id en
+// localStorage, por si verifica en otra visita (login -> email_not_verified).
+function savePendingSignup(email, eventId) {
+  try { localStorage.setItem('pl_signup_evt', JSON.stringify({ email: String(email || '').toLowerCase(), event_id: eventId })); } catch (e) {}
+}
+function pendingSignupEventId(email) {
+  try {
+    const p = JSON.parse(localStorage.getItem('pl_signup_evt') || 'null');
+    return p && p.email === String(email || '').toLowerCase() ? (p.event_id || '') : '';
+  } catch (e) { return ''; }
+}
+function clearPendingSignup() {
+  try { localStorage.removeItem('pl_signup_evt'); } catch (e) {}
 }
 captureAttribution();
 
