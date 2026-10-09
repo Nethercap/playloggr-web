@@ -362,6 +362,36 @@
       <div class="pagination" id="users-pagination"></div>
     </div>
   </div>
+
+  <div class="card" id="card-empty-users">
+    <div class="card-header" onclick="toggleCard('card-empty-users')">
+      <span class="card-header-title"><span class="card-chevron">▸</span><strong>Cuentas vacías sin nombre</strong></span>
+    </div>
+    <div class="card-body">
+      <p style="font-size:12px; color:var(--text2); line-height:1.5">
+        Cuentas de Google que nunca eligieron nombre (<code>user</code> + 10 caracteres) y no tienen nada:
+        ni juegos, ni plataformas conectadas, ni Premium, ni sesiones, carpetas, rankings, reseñas, votos o amigos,
+        y no abrieron la app en los últimos días indicados. Buscar no borra nada.
+      </p>
+      <div class="row" style="margin-top:10px">
+        <div>
+          <label>Sin abrir la app hace al menos (días)</label>
+          <input type="number" id="empty-users-days" value="7" min="1" />
+        </div>
+        <button class="btn-secondary" onclick="loadEmptyUsers()">Buscar</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Usuario</th><th>Email</th><th>Creado</th><th>Última vez</th></tr></thead>
+          <tbody id="empty-users-tbody"></tbody>
+        </table>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn-danger" id="empty-users-delete" style="display:none" onclick="deleteEmptyUsers()"></button>
+      </div>
+      <div class="msg" id="empty-users-msg"></div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -902,6 +932,73 @@ async function adminDeleteUser(email) {
     loadMetrics();
   } catch (e) {
     alert(e.message || 'Error al eliminar usuario');
+  }
+}
+
+// Cuentas vacias: primero se listan (GET, no borra) y el boton manda
+// exactamente esos ids; el backend vuelve a chequear cada uno antes de borrar.
+let emptyUsers = { ids: [], days: 7 };
+
+function escHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+async function loadEmptyUsers() {
+  const tbody = document.getElementById('empty-users-tbody');
+  const btn = document.getElementById('empty-users-delete');
+  const msg = document.getElementById('empty-users-msg');
+  const days = Math.max(1, parseInt(document.getElementById('empty-users-days').value, 10) || 7);
+  btn.style.display = 'none';
+  msg.style.display = 'none';
+  emptyUsers = { ids: [], days };
+  tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text2)"><div class="spinner"></div> Buscando...</td></tr>';
+  try {
+    const res = await fetch(`${API}/admin/empty-placeholder-users?min_days=${days}`, { headers: headers() });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    if (!d.users.length) {
+      tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text2)">No hay cuentas vacías con esos criterios</td></tr>';
+      return;
+    }
+    emptyUsers.ids = d.users.map(u => u.id);
+    tbody.innerHTML = d.users.map(u => `
+      <tr>
+        <td>${escHtml(u.username)}</td>
+        <td>${escHtml(u.email)}</td>
+        <td>${u.created_at ? new Date(u.created_at).toLocaleDateString('es-AR') : '—'}</td>
+        <td>${formatLastSeen(u.last_seen_at)}</td>
+      </tr>`).join('');
+    btn.textContent = `Borrar ${d.count} cuenta${d.count === 1 ? '' : 's'}`;
+    btn.style.display = '';
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="4" style="color:var(--red)">${escHtml(e.message || 'Error al buscar')}</td></tr>`;
+  }
+}
+
+async function deleteEmptyUsers() {
+  const n = emptyUsers.ids.length;
+  if (!n) return;
+  if (!confirm(`¿Eliminar PERMANENTEMENTE ${n} cuenta${n === 1 ? '' : 's'} vacía${n === 1 ? '' : 's'}? No se puede deshacer.`)) return;
+  if (!confirm(`Confirmá de nuevo: borrar ${n} cuenta${n === 1 ? '' : 's'}`)) return;
+  const msg = document.getElementById('empty-users-msg');
+  try {
+    const res = await fetch(`${API}/admin/empty-placeholder-users/delete`, {
+      method: 'POST', headers: headers(), body: JSON.stringify({ ids: emptyUsers.ids, min_days: emptyUsers.days }),
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    msg.style.color = 'var(--green)';
+    msg.textContent = `Borradas: ${d.deleted.length}.` + (d.skipped.length ? ` Salteadas (ya no estaban vacías): ${d.skipped.length}.` : '');
+    msg.style.display = 'block';
+    document.getElementById('empty-users-delete').style.display = 'none';
+    document.getElementById('empty-users-tbody').innerHTML = '';
+    emptyUsers.ids = [];
+    loadUsers();
+    loadMetrics();
+  } catch (e) {
+    msg.style.color = 'var(--red)';
+    msg.textContent = e.message || 'Error al borrar';
+    msg.style.display = 'block';
   }
 }
 
