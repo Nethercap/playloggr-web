@@ -1,0 +1,27 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=block"><style>
+*{margin:0;box-sizing:border-box}
+body{width:1200px;height:630px;overflow:hidden;font-family:Inter;color:#f0f0f0;background:#111;position:relative}
+.bg{position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,8,14,.96) 0%,rgba(10,8,14,.9) 45%,rgba(10,8,14,.55) 100%),url(../../assets/hero-bg.jpg) center/cover}
+.left{position:absolute;left:64px;top:0;bottom:0;width:560px;display:flex;flex-direction:column;justify-content:center}
+.logo{display:flex;align-items:center;gap:14px;font-weight:800;font-size:30px;margin-bottom:34px}
+.logo img{width:52px;height:52px;border-radius:12px}
+h1{font-size:62px;font-weight:800;line-height:1.04;letter-spacing:-.03em;margin-bottom:24px}
+h1 span{color:#1D9E75}
+.sub{font-size:24px;color:#b5b5b5;line-height:1.4;margin-bottom:34px}
+.pl{display:flex;flex-wrap:wrap;gap:10px}
+.pl b{font-weight:600;font-size:18px;padding:8px 16px;border-radius:30px;background:rgba(29,158,117,.16);color:#3fd3a0;border:1px solid rgba(29,158,117,.35)}
+.shot{position:absolute;right:-70px;top:70px;width:600px;border-radius:18px;border:1px solid #333;box-shadow:0 30px 80px rgba(0,0,0,.7);transform:rotate(-3deg)}
+.shot2{position:absolute;right:300px;top:330px;width:230px;border-radius:14px;border:1px solid #333;box-shadow:0 20px 60px rgba(0,0,0,.8);transform:rotate(4deg)}
+</style></head><body><div class="bg"></div>
+<img class="shot" src="../../assets/screenshots/biblioteca.png">
+<div class="left">
+<div class="logo"><img src="../../favicon.svg">Playloggr</div>
+<h1 id="t"></h1><div class="sub" id="s"></div>
+<div class="pl"><b>Steam</b><b>PlayStation</b><b>Xbox</b><b>GOG</b><b>Epic</b></div>
+</div>
+<script>
+const L={es:['Todos tus juegos,<br><span>en una sola lista</span>','Qué jugás, qué terminaste y cuántas horas le metiste. Gratis.'],
+en:['All your games,<br><span>in one list</span>','What you play, what you finished and how many hours you put in. Free.'],
+pt:['Todos os seus jogos,<br><span>em uma só lista</span>','O que você joga, o que zerou e quantas horas jogou. Grátis.']};
+const l=L[location.hash.slice(1)];document.getElementById('t').innerHTML=l[0];document.getElementById('s').textContent=l[1];
+</script></body></html>
