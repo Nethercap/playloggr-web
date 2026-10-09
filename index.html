@@ -645,13 +645,20 @@
       let ref = document.referrer || '';
       try { if (ref && new URL(ref).host === location.host) ref = ''; } catch (e) {}
       const utm = p.get('utm_source') || '';
+      // fbclid (click de anuncio de Meta) aparte, para armar _fbc en la
+      // Conversions API del backend — mismo criterio que /app/.
+      const fb = p.get('fbclid') ? { fbclid: p.get('fbclid').slice(0, 255), fbclid_ts: Date.now() } : {};
       const prev = JSON.parse(localStorage.getItem('pl_attr') || 'null');
-      if (!utm && !ref && prev) return;
-      localStorage.setItem('pl_attr', JSON.stringify({
+      if (!utm && !ref && prev) {
+        if (fb.fbclid) localStorage.setItem('pl_attr', JSON.stringify(Object.assign(prev, fb)));
+        return;
+      }
+      const keepFb = fb.fbclid ? fb : (prev && prev.fbclid ? { fbclid: prev.fbclid, fbclid_ts: prev.fbclid_ts } : {});
+      localStorage.setItem('pl_attr', JSON.stringify(Object.assign({
         source: utm, medium: p.get('utm_medium') || '', campaign: p.get('utm_campaign') || '',
         content: p.get('utm_content') || '', referrer: ref.slice(0, 255),
         landing: (location.pathname + location.search).slice(0, 120), ts: Date.now(),
-      }));
+      }, keepFb)));
     } catch (e) {}
   })();
 

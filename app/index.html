@@ -534,6 +534,149 @@
       color: var(--green) !important;
     }
 
+    /* ── Temas nuevos (oct 2026): Hallownest, Pelican Town, Phantom, Sheikah.
+       Mismo esquema que los de arriba (variables + fuente + firma en
+       .game-card/.lib-grid-tile + borde del drawer), todo junto en un bloque
+       para que sea facil portarlos a game_theme.dart (paletas en
+       docs/temas-nuevos-flutter.md). Pelican Town es el primer tema CLARO:
+       --bg/--bg2 claros y texto oscuro, --border en marron en vez de blanco. */
+    :root[data-game-theme="hallownest"] {
+      --bg:#141A28; --bg2:#1D2537; --bg3:#080B12; --text:#E4E8F0; --text2:#8C9AB5;
+      --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.16); --ring:rgba(206,224,255,0.55);
+      --green:#BFD9FF; --green-dark:#8FB3E6; --on-accent:#0B0F1A;
+      --accent-sidebar:#E4E8F0; --accent-play:#BFD9FF; --accent-meta:#8C9AB5; --accent-unselected:#5A6683;
+    }
+    :root[data-game-theme="pelican"] {
+      --bg:#FFF6DF; --bg2:#F7E6BC; --bg3:#EED9A8; --text:#4B2D16; --text2:#8A6236;
+      --border:rgba(75,45,22,0.18); --border2:rgba(75,45,22,0.32); --ring:#B5703A;
+      --green:#3F8A2A; --green-dark:#2E6B1E; --on-accent:#FFFFFF;
+      --accent-sidebar:#9A5A26; --accent-play:#3F8A2A; --accent-meta:#8A6236; --accent-unselected:#B08A5A;
+    }
+    :root[data-game-theme="phantom"] {
+      --bg:#161616; --bg2:#222222; --bg3:#0A0A0A; --text:#FFFFFF; --text2:#BDBDBD;
+      --border:rgba(255,255,255,0.10); --border2:rgba(255,255,255,0.20); --ring:#E60012;
+      --green:#E60012; --green-dark:#A3000D; --on-accent:#FFFFFF;
+      --accent-sidebar:#FFFFFF; --accent-play:#FF3341; --accent-meta:#FF6B75; --accent-unselected:#777777;
+    }
+    :root[data-game-theme="sheikah"] {
+      --bg:#13222A; --bg2:#1B2F38; --bg3:#0A1216; --text:#E2EEF0; --text2:#7FA7B0;
+      --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.16); --ring:rgba(64,214,242,0.75);
+      --green:#40D6F2; --green-dark:#1FA5BF; --on-accent:#05222A;
+      --accent-sidebar:#40D6F2; --accent-play:#F5A524; --accent-meta:#7FA7B0; --accent-unselected:#5C7880;
+    }
+    :root[data-game-theme="hallownest"] body { font-family:'Alegreya Sans', -apple-system, sans-serif; }
+    :root[data-game-theme="pelican"] body    { font-family:'Nunito', -apple-system, sans-serif; }
+    :root[data-game-theme="phantom"] body    { font-family:'Barlow', -apple-system, sans-serif; }
+    :root[data-game-theme="sheikah"] body    { font-family:'Exo 2', -apple-system, sans-serif; }
+    /* Fuente de caracter solo en titulos, igual que Halloween/Doom/Guaca-Guaca. */
+    :root[data-game-theme="hallownest"] .header-title,
+    :root[data-game-theme="hallownest"] .modal-title { font-family:'Cinzel', serif; font-weight:700; letter-spacing:.06em; color:var(--text); }
+    :root[data-game-theme="pelican"] .header-title,
+    :root[data-game-theme="pelican"] .modal-title    { font-family:'Pixelify Sans', monospace; font-weight:600; color:#7A4520; }
+    :root[data-game-theme="phantom"] .header-title,
+    :root[data-game-theme="phantom"] .modal-title    { font-family:'Anton', sans-serif; font-weight:400; font-style:italic; text-transform:uppercase; letter-spacing:.03em; color:var(--text); }
+    :root[data-game-theme="sheikah"] .header-title,
+    :root[data-game-theme="sheikah"] .modal-title    { font-family:'Marcellus SC', serif; font-weight:400; letter-spacing:.08em; color:var(--green); }
+
+    /* Hallownest (Hollow Knight) — negro azulado de caverna, luz palida de
+       farol arriba de la pagina, borde fino palido con un filo de luz arriba
+       de cada card (la filigrana de los menus del juego). */
+    :root[data-game-theme="hallownest"] body {
+      background-image: radial-gradient(ellipse 60% 40% at 50% -6%, rgba(191,217,255,0.12), rgba(191,217,255,0.03) 50%, transparent 72%);
+      background-attachment: fixed;
+    }
+    :root[data-game-theme="hallownest"] .game-card,
+    :root[data-game-theme="hallownest"] .lib-grid-tile {
+      position: relative;
+      border: 1px solid var(--ring);
+      border-radius: 3px;
+      box-shadow: 0 0 10px rgba(191,217,255,0.10), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    :root[data-game-theme="hallownest"] .game-card::before,
+    :root[data-game-theme="hallownest"] .lib-grid-tile::before {
+      content: '';
+      position: absolute; top: 0; left: 18%; right: 18%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
+      pointer-events: none;
+      z-index: 1;
+    }
+    :root[data-game-theme="hallownest"] .mobile-sidebar { border-left: 1px solid var(--ring); }
+
+    /* Pelican Town (Stardew Valley) — tema claro: pergamino de fondo, cards
+       con el marco de madera de los menus del juego (borde marron + filete
+       interior dorado + sombra dura abajo). */
+    :root[data-game-theme="pelican"] .game-card,
+    :root[data-game-theme="pelican"] .lib-grid-tile {
+      border: 3px solid var(--ring);
+      border-radius: 6px;
+      box-shadow: inset 0 0 0 2px #F2B866, 0 2px 0 #7A4520;
+    }
+    :root[data-game-theme="pelican"] .play-btn {
+      border-width: 2px !important; border-radius: 6px !important;
+      box-shadow: 0 2px 0 #2E6B1E;
+    }
+    :root[data-game-theme="pelican"] .mobile-sidebar {
+      border-left: 3px solid var(--ring);
+      box-shadow: -3px 0 0 #F2B866;
+    }
+
+    /* Phantom (Persona 5) — negro, blanco y rojo: borde blanco duro con
+       sombra roja desplazada (sin blur), rayas diagonales tenues de fondo y
+       titulos en mayuscula inclinada. */
+    :root[data-game-theme="phantom"] body {
+      background-image: repeating-linear-gradient(-45deg, rgba(230,0,18,0.06) 0 14px, transparent 14px 28px);
+      background-attachment: fixed;
+    }
+    :root[data-game-theme="phantom"] .game-card,
+    :root[data-game-theme="phantom"] .lib-grid-tile {
+      border: 2px solid #F2F2F2;
+      box-shadow: 4px 4px 0 var(--ring);
+    }
+    :root[data-game-theme="phantom"] .mobile-sidebar {
+      border-left: 3px solid var(--ring);
+    }
+
+    /* Sheikah (Zelda: Breath of the Wild) — pizarra oscura con la luz cian
+       de la tecnologia sheikah: doble filete (linea + linea tenue separada
+       por el fondo de pagina), ambar en el play como los paneles activados. */
+    :root[data-game-theme="sheikah"] body {
+      background-image: radial-gradient(ellipse 70% 45% at 50% 108%, rgba(64,214,242,0.14), rgba(64,214,242,0.03) 50%, transparent 72%);
+      background-attachment: fixed;
+    }
+    :root[data-game-theme="sheikah"] .game-card,
+    :root[data-game-theme="sheikah"] .lib-grid-tile {
+      border: 1px solid var(--ring);
+      border-radius: 2px;
+      box-shadow: 0 0 0 2px var(--bg3), 0 0 0 3px rgba(64,214,242,0.3), 0 0 12px rgba(64,214,242,0.14);
+    }
+    :root[data-game-theme="sheikah"] .mobile-sidebar {
+      border-left: 1.4px solid var(--ring);
+      box-shadow: -6px 0 12px rgba(64,214,242,0.35);
+    }
+
+    /* Acento claro (Hallownest, Sheikah): texto oscuro encima, igual que
+       Halloween. Subtabs subrayadas en los cuatro. */
+    :root[data-game-theme="hallownest"] .nav-pill.active,
+    :root[data-game-theme="hallownest"] .view-mode-btn.active,
+    :root[data-game-theme="hallownest"] .fbtn.active,
+    :root[data-game-theme="hallownest"] .btn-save,
+    :root[data-game-theme="sheikah"] .nav-pill.active,
+    :root[data-game-theme="sheikah"] .view-mode-btn.active,
+    :root[data-game-theme="sheikah"] .fbtn.active,
+    :root[data-game-theme="sheikah"] .btn-save {
+      color: var(--on-accent) !important;
+    }
+    :root[data-game-theme="hallownest"] .subtab-pill.active,
+    :root[data-game-theme="pelican"] .subtab-pill.active,
+    :root[data-game-theme="phantom"] .subtab-pill.active,
+    :root[data-game-theme="sheikah"] .subtab-pill.active {
+      background: transparent !important;
+      border-radius: 0 !important;
+      border-bottom: 3px solid var(--green);
+      color: var(--green) !important;
+    }
+    :root[data-game-theme="phantom"] .subtab-pill.active { color: var(--text) !important; }
+
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; padding: 20px; }
     /* Los form controls (select/input/button) no heredan font-family del
        body por default en la mayoria de los browsers (usan la fuente nativa
@@ -1207,6 +1350,12 @@
       color:#8E7CE8; border:1px solid rgba(142,124,232,.6); flex-shrink:0; }
     .pl-seasonal-chip { margin-left:auto; display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:8px; font-size:11px; font-weight:700;
       color:#FF7518; background:rgba(255,117,24,.13); border:1px solid rgba(255,117,24,.7); flex-shrink:0; white-space:nowrap; }
+    /* Chip "Nuevo" de temas recien agregados (isNewGameTheme). Con margin-left
+       auto empuja a la derecha; si despues viene el chip de "Probar", ese
+       queda pegado a este. */
+    .pl-new-chip { margin-left:auto; display:inline-flex; align-items:center; padding:2px 8px; border-radius:8px; font-size:11px; font-weight:700;
+      color:#8E7CE8; background:rgba(142,124,232,.13); border:1px solid rgba(142,124,232,.7); flex-shrink:0; white-space:nowrap; }
+    .pl-new-chip + .pl-try-chip { margin-left:6px; }
     .pl-limit-counter { padding:2px 7px; border-radius:10px; font-size:11px; font-weight:700; border:1px solid rgba(136,135,128,.7); color:var(--text2); cursor:pointer; }
     .pl-limit-counter.full { border-color:#E0B84C; color:#E0B84C; }
     .pl-preview-bar { position:fixed; left:50%; transform:translateX(-50%); bottom:20px; z-index:99; width:min(520px, calc(100% - 32px));
@@ -3150,7 +3299,7 @@ const I18N = {
     themePreviewExit: 'Salir',
     themePreviewTry: 'Probar',
     themePreviewHint: 'Los temas son Premium, pero podés probar cualquiera durante 45 segundos.',
-    seasonalThemeFree: 'Gratis en octubre',
+    seasonalThemeFree: 'Gratis en octubre', newThemeTag: 'Nuevo',
     navGames: 'Juegos', navProfile: 'Perfil', filtersLabel: 'Filtros', seeAllActivity: 'Ver toda la actividad', activityEmpty: 'Todavía no hay actividad para mostrar',
     seeDetail: 'Ver detalle',
     cosmeticsReadyTitle: 'Tu nivel {level} ya desbloqueó',
@@ -3162,7 +3311,7 @@ const I18N = {
     pbAchievementsTitle: 'Marcos, banners y fuentes por nivel',
     pbAchievementsDetail: 'Los logros, el XP y los niveles son gratis para todos. Premium te da los marcos de avatar, banners de perfil y fuentes de nombre que desbloquea cada nivel.',
     pbThemesTitle: 'Temas de videojuego',
-    pbThemesDetail: 'Temas inspirados en Cyberpunk 2077, Portal, Undertale, Fallout, Elden Ring, Counter-Strike, StarCraft II, Doom y más, con detalles propios de cada uno.',
+    pbThemesDetail: 'Temas inspirados en Hollow Knight, Stardew Valley, Persona 5, Zelda, Cyberpunk 2077, Portal, Undertale, Fallout, Elden Ring, Doom y más, con detalles propios de cada uno.',
     pbAvatarTitle: 'Personalización de avatar',
     pbAvatarDetail: 'Todas las prendas y estilos del editor de avatar, sin restricciones.',
     pbGamePlanTitle: 'Plan de juego',
@@ -3483,7 +3632,7 @@ const I18N = {
     themePreviewExit: 'Exit',
     themePreviewTry: 'Try it',
     themePreviewHint: 'Themes are Premium, but you can try any of them for 45 seconds.',
-    seasonalThemeFree: 'Free in October',
+    seasonalThemeFree: 'Free in October', newThemeTag: 'New',
     navGames: 'Games', navProfile: 'Profile', filtersLabel: 'Filters', seeAllActivity: 'See all activity', activityEmpty: 'No activity to show yet',
     seeDetail: 'Details',
     cosmeticsReadyTitle: 'Your level {level} already unlocked',
@@ -3495,7 +3644,7 @@ const I18N = {
     pbAchievementsTitle: 'Frames, banners and fonts by level',
     pbAchievementsDetail: 'Achievements, XP and levels are free for everyone. Premium gives you the avatar frames, profile banners and username fonts each level unlocks.',
     pbThemesTitle: 'Video game themes',
-    pbThemesDetail: 'Themes inspired by Cyberpunk 2077, Portal, Undertale, Fallout, Elden Ring, Counter-Strike, StarCraft II, Doom and more, each with its own details.',
+    pbThemesDetail: 'Themes inspired by Hollow Knight, Stardew Valley, Persona 5, Zelda, Cyberpunk 2077, Portal, Undertale, Fallout, Elden Ring, Doom and more, each with its own details.',
     pbAvatarTitle: 'Avatar customization',
     pbAvatarDetail: 'All outfits and styles in the avatar editor, no restrictions.',
     pbGamePlanTitle: 'Game plan',
@@ -3816,7 +3965,7 @@ const I18N = {
     themePreviewExit: 'Sair',
     themePreviewTry: 'Testar',
     themePreviewHint: 'Os temas são Premium, mas você pode testar qualquer um por 45 segundos.',
-    seasonalThemeFree: 'Grátis em outubro',
+    seasonalThemeFree: 'Grátis em outubro', newThemeTag: 'Novo',
     navGames: 'Jogos', navProfile: 'Perfil', filtersLabel: 'Filtros', seeAllActivity: 'Ver toda a atividade', activityEmpty: 'Ainda não há atividade para mostrar',
     seeDetail: 'Ver detalhes',
     cosmeticsReadyTitle: 'Seu nível {level} já desbloqueou',
@@ -3828,7 +3977,7 @@ const I18N = {
     pbAchievementsTitle: 'Molduras, banners e fontes por nível',
     pbAchievementsDetail: 'Conquistas, XP e níveis são grátis para todos. O Premium te dá as molduras de avatar, banners de perfil e fontes de nome que cada nível desbloqueia.',
     pbThemesTitle: 'Temas de videogame',
-    pbThemesDetail: 'Temas inspirados em Cyberpunk 2077, Portal, Undertale, Fallout, Elden Ring, Counter-Strike, StarCraft II, Doom e mais, cada um com seus próprios detalhes.',
+    pbThemesDetail: 'Temas inspirados em Hollow Knight, Stardew Valley, Persona 5, Zelda, Cyberpunk 2077, Portal, Undertale, Fallout, Elden Ring, Doom e mais, cada um com seus próprios detalhes.',
     pbAvatarTitle: 'Personalização de avatar',
     pbAvatarDetail: 'Todas as roupas e estilos do editor de avatar, sem restrições.',
     pbGamePlanTitle: 'Plano de jogo',
@@ -4174,7 +4323,15 @@ const GAME_THEME_DEFS = [
   ['portal',      'Aperture', 'Portal'],
   ['starcraft2',  'Koprulu', 'StarCraft II'],
   ['doom',        'Knee-Deep', 'Doom'],
+  ['hallownest',  'Hallownest', 'Hollow Knight'],
+  ['pelican',     'Pelican Town', 'Stardew Valley'],
+  ['phantom',     'Phantom', 'Persona 5'],
+  ['sheikah',     'Sheikah', 'The Legend of Zelda: Breath of the Wild'],
 ];
+// Temas recien agregados: chip "Nuevo" en la lista hasta esta fecha.
+const NEW_GAME_THEMES = ['hallownest', 'pelican', 'phantom', 'sheikah'];
+const NEW_GAME_THEMES_UNTIL = new Date(2026, 11, 1);
+function isNewGameTheme(key) { return NEW_GAME_THEMES.includes(key) && new Date() < NEW_GAME_THEMES_UNTIL; }
 // Temas de temporada (Halloween): gratis para todos, no Premium, y solo
 // existen durante su mes — fuera de octubre no aparece en la lista y, si
 // habia quedado elegido, vuelve al de por defecto. Mismo criterio que
@@ -4197,7 +4354,7 @@ function ensureGameThemeFontsLoaded() {
   const link = document.createElement('link');
   link.id = 'game-theme-fonts';
   link.rel = 'stylesheet';
-  link.href = 'https://fonts.googleapis.com/css2?family=Play:wght@400;700&family=VT323&family=Share+Tech+Mono&family=Cinzel:wght@600;700&family=EB+Garamond&family=Mulish:wght@400;500;600;700&family=PT+Sans&family=Press+Start+2P&family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;600;700&family=Titillium+Web:wght@400;600;700&family=Rajdhani:wght@500;600;700&family=Metal+Mania&family=Oswald:wght@400;500;600&family=Rubik:wght@400;500;600;700&family=Creepster&display=swap';
+  link.href = 'https://fonts.googleapis.com/css2?family=Play:wght@400;700&family=VT323&family=Share+Tech+Mono&family=Cinzel:wght@600;700&family=EB+Garamond&family=Mulish:wght@400;500;600;700&family=PT+Sans&family=Press+Start+2P&family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;600;700&family=Titillium+Web:wght@400;600;700&family=Rajdhani:wght@500;600;700&family=Metal+Mania&family=Oswald:wght@400;500;600&family=Rubik:wght@400;500;600;700&family=Creepster&family=Alegreya+Sans:wght@400;500;700&family=Nunito:wght@400;600;700&family=Barlow:wght@400;500;600;700&family=Anton&family=Exo+2:wght@400;500;600;700&family=Marcellus+SC&display=swap';
   document.head.appendChild(link);
 }
 
@@ -4559,6 +4716,14 @@ const RATING_ART = {
   },
   doom: { art: '<path fill="#E3D9C6" fill-rule="evenodd" d="M5 1h6v1h2v1h1v5h-1v1h-1v1h-1v3h-6v-3h-1v-1h-1v-1h-1v-5h1v-1h2zM4 4v3h3v-3zM9 4v3h3v-3zM7 8v2h2v-2zM6 11v2h1v-2zM9 11v2h1v-2z"/>' },
   erdtree: { art: '<path fill="none" stroke="#F0B23A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M8 1.5v13M8 7.5L3.5 3M8 7.5L12.5 3M5.5 14.5h5"/>' },
+  // Geo (moneda de Hollow Knight): disco palido con la gema hexagonal.
+  hallownest: { art: '<circle cx="8" cy="8" r="6.5" fill="#D8DEE9"/><path fill="#6E7FA0" d="M8 3.6l3.4 2.1v4.6L8 12.4l-3.4-2.1V5.7z"/>' },
+  // Corazon de amistad pixelado de Stardew Valley.
+  pelican: { art: '<path fill="#7A2E2A" d="M3 3h4v1h2V3h4v1h1v4h-1v1h-1v1h-1v1h-1v1H9v1H7v-1H6v-1H5v-1H4V9H3V8H2V4h1z"/><path fill="#E8483B" d="M4 4h2v1h4V4h2v4h-1v1h-1v1H9v1H7v-1H6V9H5V8H4z"/><path fill="#FFB3A8" d="M4 5h1v1H4z"/>' },
+  // Estrella roja con filo blanco (tarjeta de aviso de los Phantom Thieves).
+  phantom: { art: '<path fill="#E60012" stroke="#FFFFFF" stroke-width="1" stroke-linejoin="round" d="M8 1.3l1.9 4.2 4.5.4-3.4 3 1 4.5L8 11.1l-4 2.3 1-4.5-3.4-3 4.5-.4z"/>' },
+  // Trifuerza.
+  sheikah: { art: '<path fill="#E8C547" d="M8 1.5l3.2 5.5H4.8zM4.6 7.4l3.2 5.6H1.4zM11.4 7.4l3.2 5.6H8.2z"/>' },
 };
 function _ratingArtSvg({ art, empty }, fill) {
   if (fill === 'full') return art;
@@ -8259,6 +8424,8 @@ function renderAppearanceTab() {
         <button type="button" class="cfg-choice-btn ${active ? 'active' : ''}" style="justify-content:flex-start;text-align:left;${previewing ? 'border-color:#8E7CE8;' : ''}"
           onclick="${onclick}">${label}${isSeasonalGameTheme(key)
             ? `<span class="pl-seasonal-chip">🎃 ${esc(t('seasonalThemeFree'))}</span>`
+            : ''}${isNewGameTheme(key)
+            ? `<span class="pl-new-chip">${esc(t('newThemeTag'))}</span>`
             : ''}${locked && !previewing
             ? `<span class="pl-try-chip"><i class="ti ti-player-play"></i> ${esc(t('themePreviewTry'))}</span>`
             : ''}${previewing ? '<i class="ti ti-eye" style="margin-left:auto;color:#8E7CE8"></i>' : ''}</button>
@@ -11837,11 +12004,12 @@ function loginWithGoogle() {
         window.gtag('event', 'sign_up', { method: 'google' });
         window.gtag('event', 'conversion', { send_to: ADS_SIGNUP_CONVERSION_LABEL });
       }
-      trackSignupPixel();
+      const signupAttr = getSignupAttribution();
+      trackSignupPixel(signupAttr.event_id);
       fetch(`${apiBase()}/api/v1/user/attribution`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(getAttribution()),
+        body: JSON.stringify(signupAttr),
       }).catch(() => {});
       localStorage.setItem('gb_needs_username', 'true');
       document.getElementById('set-username-input').value = '';
@@ -13608,7 +13776,8 @@ async function submitAuth() {
   }
 
   const endpoint = isRegister ? '/api/v1/auth/register' : '/api/v1/auth/login';
-  const body     = isRegister ? { email, password, username, turnstile_token: turnstileToken, attribution: getAttribution() } : { email, password };
+  const signupAttr = isRegister ? getSignupAttribution() : null;
+  const body     = isRegister ? { email, password, username, turnstile_token: turnstileToken, attribution: signupAttr } : { email, password };
 
   document.getElementById('login-btn').textContent = 'Cargando...';
   try {
@@ -13638,7 +13807,7 @@ async function submitAuth() {
       window.gtag('event', 'sign_up', { method: 'email' });
       window.gtag('event', 'conversion', { send_to: ADS_SIGNUP_CONVERSION_LABEL });
     }
-    if (isRegister) trackSignupPixel();
+    if (isRegister) trackSignupPixel(signupAttr.event_id);
 
     if (data.verification_required) {
       openVerifyEmail(data.email || email);
@@ -15563,19 +15732,41 @@ function captureAttribution() {
     let ref = document.referrer || '';
     try { if (ref && new URL(ref).host === location.host) ref = ''; } catch (e) {}
     const utm = p.get('utm_source') || '';
+    // fbclid (click de anuncio de Meta) se guarda aparte, para armar _fbc en
+    // la Conversions API, sin pisar el origen ya guardado ni perderse cuando
+    // una visita posterior lo pisa.
+    const fb = p.get('fbclid') ? { fbclid: p.get('fbclid').slice(0, 255), fbclid_ts: Date.now() } : {};
     const prev = JSON.parse(localStorage.getItem('pl_attr') || 'null');
-    if (!utm && !ref && prev) return;
-    localStorage.setItem('pl_attr', JSON.stringify({
+    if (!utm && !ref && prev) {
+      if (fb.fbclid) localStorage.setItem('pl_attr', JSON.stringify(Object.assign(prev, fb)));
+      return;
+    }
+    const keepFb = fb.fbclid ? fb : (prev && prev.fbclid ? { fbclid: prev.fbclid, fbclid_ts: prev.fbclid_ts } : {});
+    localStorage.setItem('pl_attr', JSON.stringify(Object.assign({
       source: utm, medium: p.get('utm_medium') || '', campaign: p.get('utm_campaign') || '',
       content: p.get('utm_content') || '', referrer: ref.slice(0, 255),
       landing: (location.pathname + location.search).slice(0, 120), ts: Date.now(),
-    }));
+    }, keepFb)));
   } catch (e) {}
 }
 function getAttribution() {
   let a = null;
   try { a = JSON.parse(localStorage.getItem('pl_attr') || 'null'); } catch (e) {}
   return Object.assign({}, a || {}, { client: 'web' });
+}
+// Datos para la Conversions API de Meta (el backend manda CompleteRegistration
+// aunque el usuario no haya aceptado cookies): un event_id nuevo por registro,
+// el mismo que usa trackSignupPixel() para que Meta deduplique, y las cookies
+// _fbp/_fbc si existen (si no hay _fbc pero se entro con fbclid, se arma).
+function getSignupAttribution() {
+  const a = getAttribution();
+  let id = '';
+  try { id = crypto.randomUUID(); } catch (e) {}
+  if (!id) id = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12);
+  const cookie = (n) => { try { const m = document.cookie.match(new RegExp('(?:^|; )' + n + '=([^;]*)')); return m ? decodeURIComponent(m[1]) : ''; } catch (e) { return ''; } };
+  let fbc = cookie('_fbc');
+  if (!fbc && a.fbclid) fbc = 'fb.1.' + (a.fbclid_ts || Date.now()) + '.' + a.fbclid;
+  return Object.assign(a, { event_id: id, fbp: cookie('_fbp'), fbc, source_url: location.origin + location.pathname });
 }
 captureAttribution();
 
@@ -15591,8 +15782,8 @@ function loadMetaPixel() {
   window.fbq('init', META_PIXEL_ID);
   window.fbq('track', 'PageView');
 }
-function trackSignupPixel() {
-  if (typeof window.fbq === 'function') window.fbq('track', 'CompleteRegistration');
+function trackSignupPixel(eventId) {
+  if (typeof window.fbq === 'function') window.fbq('track', 'CompleteRegistration', {}, eventId ? { eventID: eventId } : undefined);
 }
 
 // ── Google Analytics (GA4) + Google Ads — misma property/cuenta que la
