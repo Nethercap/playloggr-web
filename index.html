@@ -38,6 +38,62 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "¿Es seguro conectar mis cuentas?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Nunca te pedimos la contraseña. Steam y PlayStation funcionan con tu ID público, y GOG, Xbox y Epic con el login oficial de cada plataforma: solo recibimos permiso para leer tu biblioteca."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Es una suscripción?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Playloggr es gratis y Premium es un pago único de USD 6.99, sin renovación automática."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Qué incluye el plan gratis?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Biblioteca y deseados ilimitados, sincronización con las 5 plataformas, los 145 logros, XP y todos los niveles, estadísticas, reseñas y tu perfil público."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Hay app para iPhone?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Por ahora la app es para Android. Desde el iPhone podés usar la versión web en playloggr.com/app, con la misma cuenta y las mismas funciones."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Funciona con Nintendo Switch?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Nintendo no ofrece una forma de leer tu biblioteca, así que los juegos de Switch se agregan a mano (con portada) y las horas las podés llevar con el cronómetro de sesión."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Puedo usarlo en la compu y en el celular?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sí. La web y la app de Android usan la misma cuenta y todo se sincroniza solo."
+      }
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "Playloggr",
   "applicationCategory": "GameApplication",
@@ -101,7 +157,7 @@
     content: ""; position: absolute; inset: 0;
     background-image:
       linear-gradient(180deg, rgba(10,8,14,0.62) 0%, rgba(10,8,14,0.80) 38%, rgba(10,8,14,0.88) 62%, var(--bg) 100%),
-      url('/assets/hero-bg.jpg');
+      image-set(url('/assets/hero-bg.webp') type('image/webp'), url('/assets/hero-bg.jpg') type('image/jpeg'));
     background-size: cover; background-position: center 30%;
     z-index: 0;
   }
@@ -351,10 +407,23 @@
     .hero::before {
       background-image:
         linear-gradient(180deg, rgba(10,8,14,0.62) 0%, rgba(10,8,14,0.80) 38%, rgba(10,8,14,0.88) 62%, var(--bg) 100%),
-        url('/assets/hero-bg-mobile.jpg');
+        image-set(url('/assets/hero-bg-mobile.webp') type('image/webp'), url('/assets/hero-bg-mobile.jpg') type('image/jpeg'));
       background-position: center top; background-size: cover;
     }
   }
+  /* ── FAQ ── */
+  .faq-list { max-width: 760px; margin: 0 auto; display: grid; gap: 10px; }
+  .faq-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; }
+  .faq-item summary {
+    cursor: pointer; list-style: none; padding: 16px 18px; font-weight: 700; font-size: 15px;
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary::after { content: "+"; color: var(--green); font-size: 20px; font-weight: 400; line-height: 1; }
+  .faq-item[open] summary::after { content: "\2212"; }
+  .faq-item summary:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; border-radius: 12px; }
+  .faq-item p { padding: 0 18px 16px; color: var(--text2); font-size: 14px; }
+  .plan-compare { text-align: center; font-size: 13px; font-weight: 600; color: var(--green); margin-top: 14px; }
 </style>
 </head>
 <body>
@@ -468,7 +537,7 @@
           <li>Estados: <strong>jugando, completado, backlog, abandonado, intermitente</strong> y lista de deseados separada</li>
           <li>Filtros por estado, plataforma, horas y calificación</li>
           <li>Vista lista o cuadrícula, con <strong>modo compacto</strong></li>
-          <li>Carpetas personalizadas por saga, plataforma o prioridad</li>
+          <li>Listas personalizadas por saga, plataforma o prioridad</li>
           <li>Sesión de juego en vivo con cronómetro</li>
         </ul>
       </div>
@@ -490,7 +559,7 @@
       <div class="feature-card">
         <div class="f-icon"><i class="ti ti-trophy"></i></div>
         <h3>Logros y niveles</h3>
-        <p><span class="ach-n">139</span> logros para desbloquear, con XP y niveles a medida que avanzás. Todo gratis: premium desbloquea los cosméticos.</p>
+        <p><span class="ach-n">145</span> logros para desbloquear, con XP y niveles a medida que avanzás. Todo gratis: premium desbloquea los cosméticos.</p>
       </div>
       <div class="feature-card">
         <div class="f-icon"><i class="ti ti-chart-bar"></i></div>
@@ -545,12 +614,12 @@
         <ul class="plan-features">
           <li><span class="check"><i class="ti ti-check"></i></span> Biblioteca y deseados <strong>ilimitados</strong></li>
           <li><span class="check"><i class="ti ti-check"></i></span> <strong>Sincronización con Steam, PlayStation, GOG, Xbox y Epic</strong></li>
-          <li><span class="check"><i class="ti ti-check"></i></span> Hasta <strong>10 carpetas</strong> y <strong>3 rankings</strong></li>
+          <li><span class="check"><i class="ti ti-check"></i></span> Hasta <strong>10 listas</strong> y <strong>3 rankings</strong></li>
           <li><span class="check"><i class="ti ti-check"></i></span> Seguidores <strong>ilimitados</strong> y perfil público</li>
           <li><span class="check"><i class="ti ti-check"></i></span> Escribir y ver <strong>reseñas de juegos</strong></li>
           <li><span class="check"><i class="ti ti-check"></i></span> Estadísticas propias (globales)</li>
           <li><span class="check"><i class="ti ti-check"></i></span> Votar en <strong>Juego del mes</strong></li>
-          <li><span class="check"><i class="ti ti-check"></i></span> Los <strong><span class="ach-n">139</span> logros</strong>, XP y todos los niveles</li>
+          <li><span class="check"><i class="ti ti-check"></i></span> Los <strong><span class="ach-n">145</span> logros</strong>, XP y todos los niveles</li>
           <li><span class="cross"><i class="ti ti-x"></i></span> Personalización de avatar</li>
           <li><span class="cross"><i class="ti ti-x"></i></span> Estadísticas recientes y juegos en común</li>
         </ul>
@@ -560,7 +629,7 @@
         <div class="plan-name">Premium</div>
         <div class="plan-price">USD $6.99 <span>pago único</span></div>
         <ul class="plan-features">
-          <li><span class="check"><i class="ti ti-check"></i></span> Carpetas y rankings <strong>ilimitados</strong></li>
+          <li><span class="check"><i class="ti ti-check"></i></span> Listas y rankings <strong>ilimitados</strong></li>
           <li><span class="check"><i class="ti ti-check"></i></span> <strong>Marcos, fuentes y avatares</strong> exclusivos por nivel</li>
           <li><span class="check"><i class="ti ti-check"></i></span> Personalización completa de avatar, marcos y fuentes</li>
           <li><span class="check"><i class="ti ti-check"></i></span> Estadísticas de las últimas 2 semanas</li>
@@ -569,6 +638,7 @@
         </ul>
       </div>
     </div>
+    <p class="plan-compare">Sin suscripción: pagás una vez y es tuyo para siempre.</p>
     <p style="text-align:center;font-size:12px;color:var(--text2);margin-top:20px">
       Precio único de USD $6.99, sin renovación automática. Los impuestos pueden aplicarse y se calculan en el checkout.
     </p>
@@ -576,6 +646,42 @@
 </section>
 
 <!-- ═══════════════ CONTACTO ═══════════════ -->
+<!-- ═══════════════ FAQ ═══════════════ -->
+<section class="section section-alt" id="faq">
+  <div class="wrap">
+    <div class="section-header" style="margin-bottom:28px">
+      <div class="section-eyebrow">Preguntas frecuentes</div>
+      <h2>Lo que todos preguntan antes de empezar</h2>
+    </div>
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary>¿Es seguro conectar mis cuentas?</summary>
+        <p>Nunca te pedimos la contraseña. Steam y PlayStation funcionan con tu ID público, y GOG, Xbox y Epic con el login oficial de cada plataforma: solo recibimos permiso para leer tu biblioteca.</p>
+      </details>
+      <details class="faq-item">
+        <summary>¿Es una suscripción?</summary>
+        <p>No. Playloggr es gratis y Premium es un pago único de USD 6.99, sin renovación automática.</p>
+      </details>
+      <details class="faq-item">
+        <summary>¿Qué incluye el plan gratis?</summary>
+        <p>Biblioteca y deseados ilimitados, sincronización con las 5 plataformas, los 145 logros, XP y todos los niveles, estadísticas, reseñas y tu perfil público.</p>
+      </details>
+      <details class="faq-item">
+        <summary>¿Hay app para iPhone?</summary>
+        <p>Por ahora la app es para Android. Desde el iPhone podés usar la versión web en playloggr.com/app, con la misma cuenta y las mismas funciones.</p>
+      </details>
+      <details class="faq-item">
+        <summary>¿Funciona con Nintendo Switch?</summary>
+        <p>Nintendo no ofrece una forma de leer tu biblioteca, así que los juegos de Switch se agregan a mano (con portada) y las horas las podés llevar con el cronómetro de sesión.</p>
+      </details>
+      <details class="faq-item">
+        <summary>¿Puedo usarlo en la compu y en el celular?</summary>
+        <p>Sí. La web y la app de Android usan la misma cuenta y todo se sincroniza solo.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
 <section class="section" id="contacto">
   <div class="wrap">
     <div class="contact-box">
