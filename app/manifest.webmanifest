@@ -1,0 +1,23 @@
+{
+  "name": "Playloggr",
+  "short_name": "Playloggr",
+  "description": "Tu backlog de videojuegos: Steam, PlayStation, Xbox, GOG y Epic en una sola lista.",
+  "id": "/app/",
+  "start_url": "/app/",
+  "scope": "/app/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1a1a1a",
+  "theme_color": "#132420",
+  "lang": "es",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    { "src": "/app/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/app/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/app/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "related_applications": [
+    { "platform": "play", "url": "https://play.google.com/store/apps/details?id=com.playloggr.app", "id": "com.playloggr.app" }
+  ],
+  "prefer_related_applications": true
+}

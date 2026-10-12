@@ -931,6 +931,21 @@
     }
   }
 
+  // En iPhone no hay app nativa: el boton de Google Play no sirve. Se
+  // esconde y se explica como instalar la web (que es una PWA).
+  var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+  if (isIOS) {
+    var playIos = document.getElementById('cta-play');
+    if (playIos) {
+      var note = document.createElement('p');
+      note.className = 'hero-note';
+      note.textContent = 'En iPhone se usa desde el navegador: creá tu cuenta y después tocá Compartir → "Agregar a inicio" para tenerla como app.';
+      playIos.parentNode.parentNode.insertBefore(note, playIos.parentNode.nextSibling);
+      playIos.remove();
+    }
+  }
+
   var attr = null;
   try { attr = JSON.parse(localStorage.getItem('pl_attr') || 'null'); } catch (e) {}
   attr = attr || {};

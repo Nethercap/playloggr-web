@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Playloggr</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <!-- Instalable como app (PWA): en iPhone y PC. En Android el manifest
+       prefiere la app de Play (prefer_related_applications). -->
+  <link rel="manifest" href="/app/manifest.webmanifest" />
+  <meta name="theme-color" content="#132420" />
+  <link rel="apple-touch-icon" href="/app/icons/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Playloggr" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
@@ -1539,6 +1548,11 @@
       <span><b data-i18n="appBannerTitle">¿Estás en Android?</b><br><span data-i18n="appBannerBody">Bajate la app: cronómetro en segundo plano y notificaciones.</span></span>
       <span class="login-app-banner-cta" data-i18n="appBannerCta">Instalar</span>
     </a>
+    <div id="login-ios-banner" class="login-app-banner" style="display:none">
+      <i class="ti ti-brand-apple"></i>
+      <span><b data-i18n="appBannerIosTitle">¿Estás en iPhone?</b><br><span data-i18n="appBannerIosBody">Instalala como app: tocá Compartir y después "Agregar a inicio".</span></span>
+      <i class="ti ti-share-2" style="margin-left:auto;font-size:20px;color:var(--green)"></i>
+    </div>
 
     <div id="login-form">
       <!-- Google login (default) -->
@@ -3374,6 +3388,7 @@ const I18N = {
     mon: 'Lun', tue: 'Mar', wed: 'Mié', thu: 'Jue', fri: 'Vie', sat: 'Sáb', sun: 'Dom',
     downloadApp: 'Descargar la app', joinDiscord: 'Unite a Discord', followInstagram: 'Seguinos en Instagram',
     appBannerTitle: '¿Estás en Android?', appBannerBody: 'Bajate la app: cronómetro en segundo plano y notificaciones.', appBannerCta: 'Instalar',
+    appBannerIosTitle: '¿Estás en iPhone?', appBannerIosBody: 'Instalala como app: tocá Compartir y después "Agregar a inicio".',
     gamePlan: 'Plan de juego', newPlan: 'Nuevo plan', backToPlans: '← Volver a Plan de juego',
     noPlans: 'No tenés planes todavía. Creá uno para estimar cuándo vas a terminar tus juegos.',
     planStatusActive: 'Activo', planStatusCompleted: 'Completado', planStatusAbandoned: 'Abandonado',
@@ -3716,6 +3731,7 @@ const I18N = {
     mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat', sun: 'Sun',
     downloadApp: 'Download the app', joinDiscord: 'Join Discord', followInstagram: 'Follow us on Instagram',
     appBannerTitle: 'On Android?', appBannerBody: 'Get the app: background session timer and notifications.', appBannerCta: 'Install',
+    appBannerIosTitle: 'On iPhone?', appBannerIosBody: 'Install it as an app: tap Share, then "Add to Home Screen".',
     gamePlan: 'Game plan', newPlan: 'New plan', backToPlans: '← Back to Game plan',
     noPlans: "You don't have any plans yet. Create one to estimate when you'll finish your games.",
     planStatusActive: 'Active', planStatusCompleted: 'Completed', planStatusAbandoned: 'Abandoned',
@@ -4058,6 +4074,7 @@ const I18N = {
     mon: 'Seg', tue: 'Ter', wed: 'Qua', thu: 'Qui', fri: 'Sex', sat: 'Sáb', sun: 'Dom',
     downloadApp: 'Baixar o aplicativo', joinDiscord: 'Entrar no Discord', followInstagram: 'Siga no Instagram',
     appBannerTitle: 'Está no Android?', appBannerBody: 'Baixe o app: cronômetro em segundo plano e notificações.', appBannerCta: 'Instalar',
+    appBannerIosTitle: 'Está no iPhone?', appBannerIosBody: 'Instale como app: toque em Compartilhar e depois em "Adicionar à Tela de Início".',
     gamePlan: 'Plano de jogo', newPlan: 'Novo plano', backToPlans: '← Voltar ao Plano de jogo',
     noPlans: 'Você ainda não tem planos. Crie um para estimar quando vai terminar seus jogos.',
     planStatusActive: 'Ativo', planStatusCompleted: 'Concluído', planStatusAbandoned: 'Abandonado',
@@ -16052,6 +16069,20 @@ if (document.readyState === 'loading') {
     var isAndroid = /Android/i.test(navigator.userAgent);
     var banner = document.getElementById('login-app-banner');
     if (banner && isAndroid) banner.style.display = 'flex';
+
+    // iPhone/iPad (los iPad nuevos dicen "Macintosh" pero tienen pantalla
+    // tactil). No hay app de iOS: se ofrece instalar la web, salvo que ya
+    // este abierta como app instalada.
+    var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+      (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+    var standalone = window.navigator.standalone === true ||
+      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+    var iosBanner = document.getElementById('login-ios-banner');
+    if (iosBanner && isIOS && !standalone) iosBanner.style.display = 'flex';
+
+    if ('serviceWorker' in navigator && location.pathname.indexOf('/app') === 0) {
+      navigator.serviceWorker.register('/app/sw.js', { scope: '/app/' }).catch(function () {});
+    }
 
     var attr = null;
     try { attr = JSON.parse(localStorage.getItem('pl_attr') || 'null'); } catch (e) {}
