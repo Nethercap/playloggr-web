@@ -43,15 +43,15 @@
        verde de la marca siguen tal cual en puntos, bordes, barras y tintes,
        pero como TEXTO van con la variante --*-text, ajustada por tema: mas
        clara en el oscuro, mas oscura en el claro y en Pelican Town (calculo
-       y muestras en docs/paleta_*.png del repo de la app; la app Flutter
-       todavia no tiene estos valores).
+       y muestras en docs/paleta_*.png del repo de la app; los mismos
+       valores estan en lib/theme/contrast.dart de la app).
        --teal-text es "Completado" (siempre #1D9E75); --green-text es el
        acento del tema como texto (en los temas de videojuego, su --green).
        --green-fill es el fondo de botones con texto blanco: #1D9E75 da
        3.4:1 con blanco. --on-amber, texto sobre fondo ambar (Deseados). */
     :root {
-      --blue-text:#1F6BB8; --teal-text:#16795A; --red-text:#D02221; --purple-text:#6258D5; --gray-text:#6B6A65; --amber-text:#965E0B;
-      --green-text:#16795A; --green-fill:#188462; --red-fill:#DD2F2D; --on-amber:#1a1a1a;
+      --blue-text:#1D65AD; --teal-text:#157153; --red-text:#BC1F1E; --purple-text:#594ED3; --gray-text:#65645E; --amber-text:#915B0B;
+      --green-text:#157153; --green-fill:#188462; --red-fill:#DD2F2D; --on-amber:#1a1a1a;
       --tier-bronce:#965D24; --tier-plata:#696975; --tier-oro:#846617; --tier-prisma:#6951E0;
     }
     @media (prefers-color-scheme: dark) {
@@ -62,8 +62,8 @@
       }
     }
     :root[data-theme="light"] {
-      --blue-text:#1F6BB8; --teal-text:#16795A; --red-text:#D02221; --purple-text:#6258D5; --gray-text:#6B6A65; --amber-text:#965E0B;
-      --green-text:#16795A;
+      --blue-text:#1D65AD; --teal-text:#157153; --red-text:#BC1F1E; --purple-text:#594ED3; --gray-text:#65645E; --amber-text:#915B0B;
+      --green-text:#157153;
       --tier-bronce:#965D24; --tier-plata:#696975; --tier-oro:#846617; --tier-prisma:#6951E0;
     }
     :root[data-theme="dark"], :root[data-game-theme] {
@@ -6542,7 +6542,7 @@ function canEditLastPlayedWeb(g) {
 // que tocar cada elemento suelto.
 // Colores de estado como texto para las cards en blanco/negro fijo (los
 // del tema no sirven: en el tema oscuro son claros y sobre blanco no se leen).
-const _STATUS_TEXT_LIGHT = '--blue-text:#1F6BB8;--teal-text:#16795A;--red-text:#D02221;--purple-text:#6258D5;--gray-text:#6B6A65;--amber-text:#965E0B;';
+const _STATUS_TEXT_LIGHT = '--blue-text:#1D65AD;--teal-text:#157153;--red-text:#BC1F1E;--purple-text:#594ED3;--gray-text:#65645E;--amber-text:#915B0B;';
 const _STATUS_TEXT_DARK  = '--blue-text:#539BE2;--teal-text:#1FAB7F;--red-text:#E97574;--purple-text:#948DE3;--gray-text:#989791;--amber-text:#EF9F27;';
 function cardColorStyle(status) {
   if (!cardColorMode || cardColorMode === 'theme') return '';
