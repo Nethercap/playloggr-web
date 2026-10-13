@@ -898,6 +898,29 @@
     .game-list { display:flex; flex-direction:column; gap:7px; }
     .game-list.grid-view { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; align-items:start; }
     .lib-grid-tile { background:var(--bg2); border:0.5px solid var(--border); border-radius:10px; overflow:hidden; }
+    /* Tarjetas de una misma fila con el mismo alto y la fila de horas/botones
+       siempre abajo: antes cada una medía lo que su contenido (horas en 1, 2
+       o 3 renglones, segun el tema) y las filas quedaban desparejas. En 3
+       columnas de celular (~100px) las 5 estrellas se achican para entrar. */
+    .game-list.grid-view:not(.compact-grid) { align-items:stretch; }
+    .lib-grid-tile:not(.compact) { display:flex; flex-direction:column; }
+    .gt-body { flex:1; display:flex; flex-direction:column; padding:8px; container-type:inline-size; }
+    .gt-stars svg { width:min(18px, calc((100cqw - 8px) / 5)); height:min(18px, calc((100cqw - 8px) / 5)); }
+    .gt-foot { margin-top:auto; display:flex; align-items:center; justify-content:space-between; gap:4px; }
+    .gt-hours { font-size:11px; color:var(--text2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+    .gt-btns { display:flex; gap:4px; flex-shrink:0; }
+    .gt-btn { width:24px; height:24px; border-radius:50%; border:0.5px solid var(--border2); background:transparent; color:var(--text2); cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; }
+    .gt-btn.danger { border-color:#E24B4A; color:#E24B4A; }
+    @media (max-width: 480px) {
+      .gt-btns { gap:3px; }
+      .gt-btn { width:20px; height:20px; }
+      .gt-btn i { font-size:11px !important; }
+      .gt-hours { font-size:10px; }
+      .gt-body .status-sel { font-size:11px; padding:4px 5px; }
+    }
+    /* Temas con borde grueso o letra ancha (Pelican Town): sin el reloj, las
+       horas entran enteras en vez de cortarse en "41…". */
+    @container (max-width: 84px) { .gt-hours i { display:none; } }
     .view-mode-btn { padding:4px 8px; font-size:12px; border:none; background:var(--bg2); color:var(--text2); cursor:pointer; }
     .view-mode-btn.active { background:var(--green); color:#fff; }
     .nav-pill.active { color:#fff; }
@@ -6570,7 +6593,8 @@ function updateLibraryViewToggle() {
 
 function gridTileHtml(g, opts) {
   const collapseAttr = opts && opts.collapsible ? ` onclick="handleExpandedCardClick('${g.id}', true, event)"` : '';
-  const hours = g.hours_played != null ? `${parseFloat(g.hours_played).toFixed(1)} hs` : '— hs';
+  // "41.5h", igual que la grilla de la app: con " hs" no entraba en un renglon.
+  const hours = g.hours_played != null ? `${parseFloat(g.hours_played).toFixed(1)}h` : '—h';
   const cover = steamCoverHtml(g, 'width:100%;height:100%;object-fit:cover');
   return `<div class="lib-grid-tile" id="gridcard-${g.id}" style="${cardColorStyle(g.status)}" ondblclick="handleCardDoubleTap('${g.id}', event)"${collapseAttr}>
       <div style="position:relative">
@@ -6583,19 +6607,17 @@ function gridTileHtml(g, opts) {
           style="position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,0.6);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ti-dots" style="font-size:14px"></i></button>
         ${bulkCheckHtml(g.id, true)}
       </div>
-      <div style="padding:8px">
+      <div class="gt-body">
         <div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(g.name)}">${esc(g.name)}</div>
-        ${g.status !== 'Deseados' ? `<div id="stars-${g.id}" style="margin:4px 0">${starPickerHtml(g.id, g.user_rating || 0)}</div>` : '<div style="height:8px"></div>'}
+        ${g.status !== 'Deseados' ? `<div id="stars-${g.id}" class="gt-stars" style="margin:4px 0">${starPickerHtml(g.id, g.user_rating || 0)}</div>` : '<div style="height:8px"></div>'}
         <select class="status-sel status-select" onchange="changeStatus('${g.id}',this.value)" style="width:100%;margin-bottom:6px;color:${STATUS_DOT_COLORS[g.status]||''}">
           ${statusOptionsHtml(g.status)}
         </select>
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          ${g.status !== 'Deseados' ? (canEditHoursWeb(g) ? `<span style="font-size:11px;color:var(--text2);cursor:pointer;text-decoration:underline dotted" data-gameid="${g.id}" data-hours="${g.hours_played}" onclick="editHoursById(this, event)" title="Editar horas"><i class="ti ti-clock" style="font-size:11px"></i> ${hours}</span>` : `<span style="font-size:11px;color:var(--text2)"><i class="ti ti-clock" style="font-size:11px"></i> ${hours}</span>`) : '<span></span>'}
-          <div style="display:flex;gap:4px">
-            <button onclick="toggleHideGame('${g.id}', ${g.hidden})" title="${g.hidden ? t('showGame') : t('hideGame')}"
-              style="width:24px;height:24px;border-radius:50%;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ${g.hidden ? 'ti-eye' : 'ti-eye-off'}" style="font-size:12px"></i></button>
-            <button onclick="deleteGame('${g.id}')" title="${t('delete')}"
-              style="width:24px;height:24px;border-radius:50%;border:0.5px solid #E24B4A;background:transparent;color:#E24B4A;cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ti-trash" style="font-size:12px"></i></button>
+        <div class="gt-foot">
+          ${g.status !== 'Deseados' ? (canEditHoursWeb(g) ? `<span class="gt-hours" style="cursor:pointer;text-decoration:underline dotted" data-gameid="${g.id}" data-hours="${g.hours_played}" onclick="editHoursById(this, event)" title="Editar horas"><i class="ti ti-clock" style="font-size:11px"></i> ${hours}</span>` : `<span class="gt-hours"><i class="ti ti-clock" style="font-size:11px"></i> ${hours}</span>`) : '<span></span>'}
+          <div class="gt-btns">
+            <button class="gt-btn" onclick="toggleHideGame('${g.id}', ${g.hidden})" title="${g.hidden ? t('showGame') : t('hideGame')}"><i class="ti ${g.hidden ? 'ti-eye' : 'ti-eye-off'}" style="font-size:12px"></i></button>
+            <button class="gt-btn danger" onclick="deleteGame('${g.id}')" title="${t('delete')}"><i class="ti ti-trash" style="font-size:12px"></i></button>
           </div>
         </div>
       </div>
