@@ -2675,6 +2675,22 @@
 <div class="modal-overlay" id="friends-overlay">
   <div class="modal u-col" style="width:680px;max-width:92vw;max-height:82vh;display:flex">
     <div class="modal-title"><i class="ti ti-users"></i> <span data-i18n="friends">Amigos</span></div>
+    <div id="invite-box" style="display:none;margin-bottom:12px;padding:10px 12px;border:1px solid #FF4FA355;border-radius:10px;background:var(--bg3)">
+      <div class="u-items-center" style="display:flex;gap:10px">
+        <div style="width:30px;height:30px;border-radius:8px;border:2px solid #FF4FA3;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-gift" style="color:#FF4FA3;font-size:15px"></i></div>
+        <div class="u-flex1" style="min-width:0">
+          <div class="u-fs13" style="font-weight:700" data-i18n="inviteTitle">Invitá a un amigo</div>
+          <div class="u-fs12 u-muted" data-i18n="inviteBody">Si se crea la cuenta con tu link, los dos se llevan el marco Aliado y quedan siguiéndose.</div>
+        </div>
+      </div>
+      <div class="u-mt8 u-gap8" style="display:flex;flex-wrap:wrap">
+        <input id="invite-link" readonly class="u-flex1 u-fs12" onclick="this.select()"
+          style="min-width:180px;padding:7px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text)" />
+        <button class="btn-save" style="white-space:nowrap" onclick="copyInviteLink()" data-i18n="inviteCopy">Copiar link</button>
+        <button class="btn-cancel" id="invite-share-btn" style="display:none;white-space:nowrap" onclick="shareInviteLink()" data-i18n="inviteShare">Compartir</button>
+      </div>
+      <div class="u-fs11 u-muted u-mt6" id="invite-count" style="display:none"></div>
+    </div>
     <div class="u-mb10 u-gap8" style="display:flex">
       <input class="u-flex1 u-fs13" type="text" id="friend-username-input" placeholder="Nombre de usuario..." data-i18n-placeholder="username"
         style="padding:8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text)"
@@ -3345,6 +3361,17 @@ const I18N = {
     cosmeticsReadyTitle: 'Tu nivel {level} ya desbloqueó',
     cosmeticsReadyCta: 'Activalos con Premium',
     cosmeticsNextTier: 'Tu primer marco y banner se desbloquean en nivel {level}. Con Premium los vas a poder lucir.',
+    inviteTitle: "Invitá a un amigo",
+    inviteBody: "Si se crea la cuenta con tu link, los dos se llevan el marco Aliado y quedan siguiéndose.",
+    inviteCopy: "Copiar link",
+    inviteShare: "Compartir",
+    inviteCopied: "Link copiado",
+    inviteCount: "{n} amigos se sumaron con tu link",
+    inviteCountOne: "Un amigo se sumó con tu link",
+    inviteShareText: "Sumate a Playloggr para organizar tu backlog de juegos. Si entrás con mi link, los dos nos llevamos un marco exclusivo:",
+    frameAlly: "Aliado",
+    inviteCta: "Invitar",
+    frameAllyLocked: "Marco Aliado: invitá a un amigo y los dos se lo llevan, con o sin Premium.",
     pickThemeCta: 'Elegir un tema',
     customizeAvatarCta: 'Personalizar avatar',
     checkoutLoadError: 'No se pudo cargar el checkout de pago. Recargá la página e intentá de nuevo.',
@@ -3688,6 +3715,17 @@ const I18N = {
     cosmeticsReadyTitle: 'Your level {level} already unlocked',
     cosmeticsReadyCta: 'Activate them with Premium',
     cosmeticsNextTier: 'Your first frame and banner unlock at level {level}. With Premium you\'ll be able to show them off.',
+    inviteTitle: "Invite a friend",
+    inviteBody: "If they sign up with your link, you both get the Ally frame and follow each other.",
+    inviteCopy: "Copy link",
+    inviteShare: "Share",
+    inviteCopied: "Link copied",
+    inviteCount: "{n} friends joined with your link",
+    inviteCountOne: "A friend joined with your link",
+    inviteShareText: "Join me on Playloggr to organize your game backlog. Sign up with my link and we both get an exclusive frame:",
+    frameAlly: "Ally",
+    inviteCta: "Invite",
+    frameAllyLocked: "Ally frame: invite a friend and you both get it, with or without Premium.",
     pickThemeCta: 'Pick a theme',
     customizeAvatarCta: 'Customize avatar',
     checkoutLoadError: 'Could not load the payment checkout. Reload the page and try again.',
@@ -4031,6 +4069,17 @@ const I18N = {
     cosmeticsReadyTitle: 'Seu nível {level} já desbloqueou',
     cosmeticsReadyCta: 'Ative-os com o Premium',
     cosmeticsNextTier: 'Sua primeira moldura e banner desbloqueiam no nível {level}. Com o Premium você vai poder exibi-los.',
+    inviteTitle: "Convide um amigo",
+    inviteBody: "Se a pessoa criar a conta com o seu link, vocês dois ganham a moldura Aliado e passam a se seguir.",
+    inviteCopy: "Copiar link",
+    inviteShare: "Compartilhar",
+    inviteCopied: "Link copiado",
+    inviteCount: "{n} amigos entraram com seu link",
+    inviteCountOne: "Um amigo entrou com seu link",
+    inviteShareText: "Entre no Playloggr para organizar seu backlog de jogos. Se criar a conta com meu link, nós dois ganhamos uma moldura exclusiva:",
+    frameAlly: "Aliado",
+    inviteCta: "Convidar",
+    frameAllyLocked: "Moldura Aliado: convide um amigo e vocês dois ganham, com ou sem Premium.",
     pickThemeCta: 'Escolher um tema',
     customizeAvatarCta: 'Personalizar avatar',
     checkoutLoadError: 'Não foi possível carregar o checkout de pagamento. Recarregue a página e tente novamente.',
@@ -10523,7 +10572,49 @@ async function openFriendsPanel() {
   document.getElementById('friend-username-input').value = '';
   document.getElementById('friend-add-preview').style.display = 'none';
   document.getElementById('friends-overlay').classList.add('open');
+  loadInviteBox();
   await loadFriendsList();
+}
+
+// ── Invitaciones: cada usuario tiene su link (playloggr.com/u/<usuario>/invite).
+// Quien entra con el y quien invito ganan el marco Aliado (ver GET /user/invites).
+let _inviteLink = '';
+async function loadInviteBox() {
+  try {
+    const res = await fetch(`${apiBase()}/api/v1/user/invites`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    if (!res.ok) return;
+    const d = await res.json();
+    _inviteLink = d.link;
+    document.getElementById('invite-link').value = _inviteLink;
+    document.getElementById('invite-share-btn').style.display = navigator.share ? '' : 'none';
+    const c = document.getElementById('invite-count');
+    c.textContent = d.count === 1 ? t('inviteCountOne') : t('inviteCount').replace('{n}', d.count);
+    c.style.display = d.count > 0 ? '' : 'none';
+    document.getElementById('invite-box').style.display = '';
+  } catch (e) {}
+}
+
+async function copyInviteLink() {
+  if (!_inviteLink) return;
+  try {
+    await navigator.clipboard.writeText(_inviteLink);
+  } catch (e) {
+    const input = document.getElementById('invite-link');
+    input.select();
+    document.execCommand('copy');
+  }
+  showToast(t('inviteCopied'));
+}
+
+async function shareInviteLink() {
+  if (!_inviteLink || !navigator.share) return;
+  try { await navigator.share({ title: 'Playloggr', text: t('inviteShareText'), url: _inviteLink }); } catch (e) {}
+}
+
+// Desde el selector de marcos (Configuracion > Avatar): abre Amigos con el link.
+function openInviteFromFrames() {
+  closeConfigPanel();
+  openFriendsPanel();
 }
 
 function closeFriendsPanel() {
@@ -10605,6 +10696,8 @@ const kFontTiers = [
 const _frameColors = {
   acero: '#9AA0A6', bronce: '#CD7F32', esmeralda: '#2ECC71', zafiro: '#3B82F6',
   neon: '#00E5FF', fuego: '#FF5722', amatista: '#9C27B0', dorado: '#FFC107', prisma: '#8E7CE8',
+  // Marco de las invitaciones: no va por nivel ni es de Premium.
+  aliado: '#FF4FA3',
 };
 
 /** Wraps innerHtml (an avatar chip) with a border matching the frame id. */
@@ -13865,7 +13958,7 @@ function renderCosmeticPickers() {
       </div>
       <span style="font-size:9px;color:var(--text2)">Nv.${level}</span>
     </div>`;
-  }).join('');
+  }).join('') + allyFrameTileHtml();
 
   fontEl.innerHTML = kFontTiers.map(([id, level, name]) => {
     // Gratis: las fuentes por nivel son de Premium (el nivel en si es
@@ -13882,6 +13975,28 @@ function renderCosmeticPickers() {
       <span style="font-size:9px;color:var(--text2)">Nv.${level}</span>
     </div>`;
   }).join('');
+}
+
+// Marco Aliado al final del selector: se gana invitando a un amigo, no por nivel.
+function allyFrameTileHtml() {
+  const unlocked = userUnlockedFrames.includes('aliado');
+  const selected = userFrame === 'aliado';
+  const selectedBadge = selected
+    ? `<div style="position:absolute;top:-4px;left:-4px;width:14px;height:14px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2">
+         <i class="ti ti-check" style="font-size:9px;color:#fff"></i>
+       </div>`
+    : '';
+  const tile = `<div onclick="${unlocked ? "selectCosmetic('frame','aliado')" : 'openInviteFromFrames()'}" title="${esc(t('frameAllyLocked'))}"
+      style="display:inline-flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;margin:0 8px 8px 0">
+    <div style="width:36px;height:36px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;${frameWrapStyle('aliado')}">
+      ${unlocked ? '' : '<i class="ti ti-gift" style="font-size:13px;color:#FF4FA3"></i>'}
+      ${selectedBadge}
+    </div>
+    <span style="font-size:9px;color:#FF4FA3">${esc(t('frameAlly'))}</span>
+  </div>`;
+  const hint = unlocked ? '' : `<div class="u-fs11 u-muted" style="margin:-2px 0 4px">${esc(t('frameAllyLocked'))}
+      <a href="#" onclick="openInviteFromFrames();return false" style="color:#FF4FA3">${esc(t('inviteCta'))}</a></div>`;
+  return tile + hint;
 }
 
 async function selectCosmetic(kind, id) {
