@@ -706,6 +706,11 @@
       overflow-y:auto; padding-bottom:12px;
     }
     .mobile-sidebar.open { transform:translateX(0); }
+    /* Cerrado queda fuera de pantalla, pero seguia visible para el navegador:
+       Tab entraba en sus botones (W6). visibility lo saca del foco y de los
+       lectores; el retardo deja terminar la animacion de cierre. */
+    .mobile-sidebar { visibility:hidden; transition:transform .25s ease, visibility 0s linear .25s; }
+    .mobile-sidebar.open, body.mprofile-page .mobile-sidebar { visibility:visible; transition:transform .25s ease, visibility 0s; }
     .mobile-sidebar-header { padding:20px 18px 14px; font-size:19px; font-weight:700; display:flex; align-items:center; gap:8px; border-bottom:0.5px solid var(--border); margin-bottom:6px; }
     .mobile-sidebar-item { display:flex; align-items:center; gap:14px; width:100%; padding:12px 18px; font-size:14px; border:none; background:transparent; color:var(--text); cursor:pointer; text-align:left; text-decoration:none; }
     .mobile-sidebar-item:active { background:var(--bg2); }
@@ -1493,6 +1498,10 @@
     .page-col { padding:16px; width:100%; margin:0 auto; box-sizing:border-box; }
     .seg-tab { padding:6px 18px; font-size:12px; border:0.5px solid var(--border); background:var(--bg2); color:var(--text2); cursor:pointer; border-radius:20px; }
     .seg-tab-sm { padding:5px 14px; font-size:12px; border-radius:16px; border:0.5px solid var(--border); background:var(--bg2); color:var(--text2); cursor:pointer; }
+    /* Foco visible al navegar con teclado (W6). El de los dialogos (tabindex=-1,
+       foco puesto por codigo al abrirlos) no se dibuja. */
+    :focus-visible { outline:2px solid var(--green); outline-offset:2px; }
+    [tabindex="-1"]:focus { outline:none; }
     .view-pill { padding:6px 16px; border-radius:20px; border:none; cursor:pointer; font-size:13px; font-weight:600; align-items:center; gap:5px; }
     /* ¿Que juego sigo? (A10). En celular, solo el dado: asi entra al lado de
        Biblioteca y Deseados sin quedar cortado en la fila que se desliza. */
@@ -2276,7 +2285,7 @@
         <input type="hidden" id="wm-appid" />
       </div>
       <div class="modal-group">
-        <label data-i18n="platform">Plataforma</label>
+        <label data-i18n="platform" for="wm-platform">Plataforma</label>
         <select id="wm-platform">
           <option value="Steam">Steam</option>
           <option value="Epic">Epic</option>
@@ -2480,7 +2489,7 @@
     <div class="modal-title"><i class="ti ti-photo"></i> <span data-i18n="changeCover">Cambiar portada</span></div>
     <div class="modal-grid">
       <div class="modal-group full">
-        <label data-i18n="imageUrl">URL de la imagen</label>
+        <label data-i18n="imageUrl" for="cover-url-input">URL de la imagen</label>
         <input type="text" id="cover-url-input" placeholder="https://..." />
       </div>
       <div class="modal-group full" id="cover-preview-wrap" style="display:none">
@@ -2517,7 +2526,7 @@
     <div id="config-profile">
       <div class="modal-grid">
         <div class="modal-group full">
-          <label data-i18n="username">Nombre de usuario</label>
+          <label data-i18n="username" for="cfg-username">Nombre de usuario</label>
           <input type="text" id="cfg-username" placeholder="Tu nombre de usuario" maxlength="50" />
         </div>
 
@@ -2528,7 +2537,7 @@
         </div>
 
         <div class="modal-group">
-          <label data-i18n="language">Idioma</label>
+          <label data-i18n="language" for="cfg-language">Idioma</label>
           <select id="cfg-language" style="width:100%;padding:8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);font-size:13px">
             <option value="es">Español</option>
             <option value="en">English</option>
@@ -2869,7 +2878,7 @@
     <div class="modal-title"><i class="ti ti-plus u-accent"></i> <span id="novedades-add-name">-</span></div>
     <div class="modal-grid">
       <div class="modal-group full">
-        <label data-i18n="choosePlatform">Elegí la plataforma</label>
+        <label data-i18n="choosePlatform" for="novedades-add-platform">Elegí la plataforma</label>
         <select id="novedades-add-platform">
           <option value="Steam">Steam</option>
           <option value="Epic">Epic</option>
@@ -3051,7 +3060,7 @@
     <div class="modal-title"><i class="ti ti-folder-plus"></i> <span data-i18n="newFolder">Nueva lista</span></div>
     <div class="modal-grid">
       <div class="modal-group full">
-        <label data-i18n="name">Nombre</label>
+        <label data-i18n="name" for="folder-name-input">Nombre</label>
         <input type="text" id="folder-name-input" placeholder="Ej: RPGs 2024" maxlength="100"
           onkeydown="if(event.key==='Enter') saveFolderCreate()" />
       </div>
@@ -3073,7 +3082,7 @@
     <div class="modal-title"><i class="ti ti-medal"></i> <span data-i18n="newRanking">Nuevo ranking</span></div>
     <div class="modal-grid">
       <div class="modal-group full">
-        <label data-i18n="name">Nombre</label>
+        <label data-i18n="name" for="ranking-name-input">Nombre</label>
         <input type="text" id="ranking-name-input" placeholder="Ej: Mejores RPGs" maxlength="100"
           onkeydown="if(event.key==='Enter') saveRankingCreate()" />
       </div>
@@ -3133,7 +3142,7 @@
     <div class="modal-title"><i class="ti ti-clock u-accent"></i> <span data-i18n="hoursPlayed">Horas jugadas</span></div>
     <div class="modal-group full u-mt12">
       <label id="hours-modal-label">Juego</label>
-      <input type="number" id="hours-input" min="0" step="0.1" placeholder="0.0" style="font-size:24px;text-align:center;padding:12px" />
+      <input type="number" id="hours-input" min="0" step="0.1" placeholder="0.0" data-i18n-aria="hours" style="font-size:24px;text-align:center;padding:12px" />
     </div>
     <div class="modal-actions u-mt16">
       <button class="btn-cancel" onclick="closeHoursModal()" data-i18n="cancel">Cancelar</button>
@@ -3148,7 +3157,7 @@
     <div class="modal-title"><i class="ti ti-calendar-event u-accent"></i> <span data-i18n="lastPlayed">Última vez jugado</span></div>
     <div class="modal-group full u-mt12">
       <label id="lastplayed-modal-label">Juego</label>
-      <input type="date" id="lastplayed-input" style="font-size:16px;padding:10px" />
+      <input type="date" id="lastplayed-input" data-i18n-aria="lastPlayed" style="font-size:16px;padding:10px" />
     </div>
     <div class="modal-actions u-mt16">
       <a class="u-fs11 u-muted u-pointer" onclick="clearLastPlayedModal()" style="align-self:center;margin-right:auto" data-i18n="clearDate">Borrar fecha</a>
@@ -3197,7 +3206,7 @@
       Te enviamos un código de 6 dígitos a tu email. Ingresalo para activar tu cuenta.
     </div>
     <div class="modal-group full">
-      <label data-i18n="verifyCodeLabel">Código de verificación</label>
+      <label data-i18n="verifyCodeLabel" for="v-code">Código de verificación</label>
       <input type="text" id="v-code" placeholder="123456" maxlength="6" style="font-size:20px;text-align:center;letter-spacing:6px" onkeydown="if(event.key==='Enter')submitVerifyEmail()" />
     </div>
     <div class="form-msg" id="verify-email-msg" style="display:none"></div>
@@ -3214,11 +3223,11 @@
     <div class="modal-title"><i class="ti ti-lock-open u-accent"></i> <span data-i18n="resetPassword">Recuperar contraseña</span></div>
     <div class="modal-grid">
       <div class="modal-group full">
-        <label data-i18n="email">Email</label>
+        <label data-i18n="email" for="r-email">Email</label>
         <input type="email" id="r-email" placeholder="tu@email.com" />
       </div>
       <div class="modal-group full">
-        <label data-i18n="recoveryCodeDigits">Código de recuperación (6 dígitos)</label>
+        <label data-i18n="recoveryCodeDigits" for="r-code">Código de recuperación (6 dígitos)</label>
         <div class="u-gap8" style="display:flex">
           <input class="u-flex1" type="text" id="r-code" placeholder="123456" maxlength="6" />
           <button class="u-fs11 u-muted u-pointer" type="button" onclick="sendResetCode()" id="send-code-btn"
@@ -3227,7 +3236,7 @@
         </div>
       </div>
       <div class="modal-group full">
-        <label data-i18n="newPassword">Nueva contraseña</label>
+        <label data-i18n="newPassword" for="r-newpass">Nueva contraseña</label>
         <input type="password" id="r-newpass" placeholder="••••••••" />
       </div>
     </div>
@@ -3249,7 +3258,7 @@
     </div>
     <div class="modal-grid">
       <div class="modal-group full">
-        <label>Steam ID (SteamID64)</label>
+        <label for="s-userid">Steam ID (SteamID64)</label>
         <input type="text" id="s-userid" placeholder="Ej: 76561198012345678" />
       </div>
     </div>
@@ -3273,7 +3282,7 @@
         <input type="hidden" id="m-appid" />
       </div>
       <div class="modal-group">
-        <label data-i18n="platform">Plataforma</label>
+        <label data-i18n="platform" for="m-platform">Plataforma</label>
         <select id="m-platform">
           <option value="Steam">Steam</option>
           <option value="Epic">Epic</option>
@@ -3307,7 +3316,7 @@
         </select>
       </div>
       <div class="modal-group">
-        <label data-i18n="status">Estado</label>
+        <label data-i18n="status" for="m-status">Estado</label>
         <select id="m-status" class="status-select">
           <option value="Backlog">Backlog</option>
           <option value="Jugando">Jugando</option>
@@ -3318,7 +3327,7 @@
       </div>
 
       <div class="modal-group">
-        <label data-i18n="hoursPlayedLabel">Horas jugadas</label>
+        <label data-i18n="hoursPlayedLabel" for="m-hours">Horas jugadas</label>
         <input type="number" id="m-hours" value="0" min="0" step="0.5" />
       </div>
       <div class="modal-group full">
@@ -3327,7 +3336,7 @@
         <span class="u-fs12 u-muted u-mt4" id="modal-star-val" style="display:block" data-i18n="unrated">Sin calificar</span>
       </div>
       <div class="modal-group full">
-        <label data-i18n="coverUrlOptional">URL de portada (opcional)</label>
+        <label data-i18n="coverUrlOptional" for="m-cover">URL de portada (opcional)</label>
         <input type="url" id="m-cover" placeholder="https://..." />
       </div>
     </div>
@@ -3450,6 +3459,15 @@ const I18N = {
     inviteShareText: "Sumate a Playloggr para organizar tu backlog de juegos. Si entrás con mi link, los dos nos llevamos un marco exclusivo:",
     frameAlly: "Aliado",
     inviteCta: "Invitar",
+    a11yPrev: "Anterior",
+    a11yNext: "Siguiente",
+    a11yBack: "Volver",
+    a11yMenu: "Menú",
+    a11yDownload: "Descargar",
+    a11yShare: "Compartir",
+    a11yFilters: "Filtros",
+    a11yRefresh: "Actualizar",
+    sortBy: "Ordenar por",
     csvExport: "Exportar a CSV",
     csvExportSubtitle: "Toda tu biblioteca y tus deseados en una planilla (Excel, Google Sheets).",
     csvImport: "Importar desde CSV",
@@ -3848,6 +3866,15 @@ const I18N = {
     inviteShareText: "Join me on Playloggr to organize your game backlog. Sign up with my link and we both get an exclusive frame:",
     frameAlly: "Ally",
     inviteCta: "Invite",
+    a11yPrev: "Previous",
+    a11yNext: "Next",
+    a11yBack: "Back",
+    a11yMenu: "Menu",
+    a11yDownload: "Download",
+    a11yShare: "Share",
+    a11yFilters: "Filters",
+    a11yRefresh: "Refresh",
+    sortBy: "Sort by",
     csvExport: "Export to CSV",
     csvExportSubtitle: "Your whole library and wishlist in a spreadsheet (Excel, Google Sheets).",
     csvImport: "Import from CSV",
@@ -4246,6 +4273,15 @@ const I18N = {
     inviteShareText: "Entre no Playloggr para organizar seu backlog de jogos. Se criar a conta com meu link, nós dois ganhamos uma moldura exclusiva:",
     frameAlly: "Aliado",
     inviteCta: "Convidar",
+    a11yPrev: "Anterior",
+    a11yNext: "Próximo",
+    a11yBack: "Voltar",
+    a11yMenu: "Menu",
+    a11yDownload: "Baixar",
+    a11yShare: "Compartilhar",
+    a11yFilters: "Filtros",
+    a11yRefresh: "Atualizar",
+    sortBy: "Ordenar por",
     csvExport: "Exportar para CSV",
     csvExportSubtitle: "Toda a sua biblioteca e desejados numa planilha (Excel, Google Sheets).",
     csvImport: "Importar de CSV",
@@ -4570,9 +4606,12 @@ function applyI18n() {
   document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
   document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.getAttribute('data-i18n-html')); });
   document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.getAttribute('data-i18n-title')); });
-  if (typeof _syncAriaLabels === 'function') _syncAriaLabels();
+  // try: al cargar puede correr antes de que existan las constantes de la capa
+  // (mas abajo en el archivo); el observer la vuelve a correr enseguida.
+  if (typeof _a11yEnhance === 'function') { try { _a11yEnhance(); } catch (e) {} }
   if (document.body.dataset.mnav && typeof _syncMobileNav === 'function') _syncMobileNav(currentView);
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.getAttribute('data-i18n-placeholder')); });
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria'))); });
   document.querySelectorAll('.status-select option[value]').forEach(opt => {
     opt.textContent = typeof statusLabel === 'function' ? statusLabel(opt.value) : opt.value;
   });
@@ -11738,13 +11777,171 @@ function _syncAriaLabels() {
     el.dataset.ariaAuto = '1';
   });
 }
-(function _initAriaLabels() {
+// ── Accesibilidad general (W6) ───────────────────────────────────────────
+// Casi toda la interfaz se arma con plantillas, asi que en vez de arreglar
+// cada elemento a mano esta capa se aplica a todo lo que aparece (con el
+// mismo observer, con debounce):
+// - div/span/a sin href con onclick: role=button y tabindex, y Enter/Espacio
+//   los activan (antes no se podian usar con teclado). Quedan afuera los
+//   fondos de los modales y los que solo cortan la propagacion del click.
+// - Iconos de Tabler: aria-hidden. Botones de solo icono sin title: nombre
+//   segun el icono (_A11Y_ICON_NAMES), re-traducido al cambiar de idioma.
+// - <img> sin alt: alt="" (decorativas; el nombre del juego ya esta al lado).
+// - Campos sin label: aria-label con su placeholder.
+// - Modales: role=dialog con su titulo como nombre; el foco entra al abrir
+//   (al dialogo, no a un campo: en el celular abriria el teclado), Tab no se
+//   escapa, Escape cierra el de arriba y el foco vuelve a donde estaba.
+const _A11Y_ICON_NAMES = {
+  'ti-x': 'close', 'ti-chevron-left': 'a11yPrev', 'ti-chevron-right': 'a11yNext', 'ti-arrow-left': 'a11yBack',
+  'ti-dots': 'more', 'ti-dots-vertical': 'more', 'ti-trash': 'delete', 'ti-eye-off': 'hideGame', 'ti-eye': 'showGame',
+  'ti-download': 'a11yDownload', 'ti-share': 'a11yShare', 'ti-refresh': 'a11yRefresh', 'ti-pencil': 'edit',
+  'ti-edit': 'edit', 'ti-plus': 'add', 'ti-search': 'searchAction', 'ti-filter': 'a11yFilters', 'ti-bell': 'notifications',
+  'ti-settings': 'settings', 'ti-menu-2': 'a11yMenu', 'ti-menu': 'a11yMenu', 'ti-users': 'friends', 'ti-folder': 'folders',
+};
+let _a11yTitleSeq = 0;
+function _a11yEnhance() {
+  _syncAriaLabels();
+  const root = document.body;
+  root.querySelectorAll('[onclick]').forEach(el => {
+    if (el.dataset.a11yClick) return;
+    el.dataset.a11yClick = '1';
+    const tag = el.tagName;
+    if (/^(BUTTON|INPUT|SELECT|TEXTAREA|OPTION|LABEL)$/.test(tag) || (tag === 'A' && el.hasAttribute('href'))) return;
+    const oc = el.getAttribute('onclick') || '';
+    if (el.classList.contains('modal-overlay') || /event\.target\s*===?\s*this/.test(oc)
+        || /^\s*event\.stopPropagation\(\)\s*;?\s*$/.test(oc)) return;
+    if (!el.hasAttribute('role')) el.setAttribute('role', 'button');
+    if (!el.hasAttribute('tabindex')) el.tabIndex = 0;
+  });
+  root.querySelectorAll('i.ti:not([aria-hidden])').forEach(i => {
+    if (!i.hasAttribute('onclick') && !i.hasAttribute('role')) i.setAttribute('aria-hidden', 'true');
+  });
+  root.querySelectorAll('button, [role="button"]').forEach(el => {
+    if (el.hasAttribute('aria-label') && !el.dataset.ariaIcon) return;
+    if (el.title || el.hasAttribute('aria-labelledby') || /[\p{L}\p{N}]/u.test(el.textContent)) {
+      if (el.dataset.ariaIcon) { el.removeAttribute('aria-label'); delete el.dataset.ariaIcon; }
+      return;
+    }
+    const icon = el.matches('i.ti') ? el : el.querySelector('i.ti');
+    const cls = icon && [...icon.classList].find(c => _A11Y_ICON_NAMES[c]);
+    if (!cls) return;
+    el.setAttribute('aria-label', t(_A11Y_ICON_NAMES[cls]));
+    el.dataset.ariaIcon = '1';
+  });
+  root.querySelectorAll('img:not([alt])').forEach(img => img.setAttribute('alt', ''));
+  root.querySelectorAll('input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=file]), textarea').forEach(el => {
+    if ((el.labels && el.labels.length) || el.hasAttribute('aria-labelledby')) return;
+    if (el.hasAttribute('aria-label') && !el.dataset.ariaPh) return;
+    if (el.placeholder && el.getAttribute('aria-label') !== el.placeholder) {
+      el.setAttribute('aria-label', el.placeholder);
+      el.dataset.ariaPh = '1';
+    }
+  });
+  // Selectores sin nombre: el de estado de cada tarjeta (el nombre del juego
+  // lo da la tarjeta) y el de orden.
+  root.querySelectorAll('select').forEach(s => {
+    if ((s.labels && s.labels.length) || (s.hasAttribute('aria-label') && !s.dataset.ariaSel) || s.hasAttribute('aria-labelledby')) return;
+    const key = s.classList.contains('status-sel') || s.classList.contains('status-select') ? 'status'
+      : s.id === 'sort-sel' ? 'sortBy' : null;
+    const name = s.title || (key ? t(key) : '');
+    if (name) { s.setAttribute('aria-label', name); s.dataset.ariaSel = '1'; }
+  });
+  root.querySelectorAll('.modal-overlay > .modal').forEach(_a11yDialog);
+}
+
+function _a11yDialog(m) {
+  if (m.dataset.a11yDialog) return;
+  m.dataset.a11yDialog = '1';
+  if (!m.hasAttribute('role')) m.setAttribute('role', 'dialog');
+  m.setAttribute('aria-modal', 'true');
+  if (!m.hasAttribute('tabindex')) m.tabIndex = -1;
+  const title = m.querySelector('.modal-title');
+  if (title && !m.hasAttribute('aria-labelledby') && !m.hasAttribute('aria-label')) {
+    if (!title.id) title.id = 'a11y-title-' + (++_a11yTitleSeq);
+    m.setAttribute('aria-labelledby', title.id);
+  }
+}
+
+function _a11yTopOverlay() {
+  const open = [...document.querySelectorAll('.modal-overlay.open')].filter(o => getComputedStyle(o).display !== 'none');
+  return open[open.length - 1] || null;
+}
+
+// Escape: solo un boton que no hace otra cosa que cerrar (en el aviso de
+// Premium, "Comprar" tambien llama a closePaywall()), o la cruz, o un
+// Cancelar/Cerrar; si no hay, se oculta el modal.
+function _a11yCloseOverlay(ov) {
+  const btns = [...ov.querySelectorAll('button, [role="button"]')].filter(b => b.offsetParent !== null);
+  const only = /^\s*(close\w*\([^)]*\)|this\.closest\(['"]\.modal-overlay['"]\)\.remove\(\))\s*;?\s*$/;
+  const btn = btns.find(b => only.test(b.getAttribute('onclick') || ''))
+    || btns.find(b => b.querySelector('.ti-x'))
+    || btns.find(b => b.classList.contains('btn-cancel') && /^(close|cancel)$/.test(b.dataset.i18n || b.querySelector('[data-i18n]')?.dataset.i18n || ''));
+  if (btn) btn.click(); else ov.classList.remove('open');
+}
+
+const _A11Y_FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([type=hidden]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+function _a11yTrapTab(e, ov) {
+  const modal = ov.querySelector('.modal') || ov;
+  const items = [...modal.querySelectorAll(_A11Y_FOCUSABLE)].filter(el => el.offsetParent !== null);
+  if (!items.length) { e.preventDefault(); modal.focus(); return; }
+  const first = items[0], last = items[items.length - 1], active = document.activeElement;
+  if (!modal.contains(active)) { e.preventDefault(); (e.shiftKey ? last : first).focus(); }
+  else if (e.shiftKey && (active === first || active === modal)) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && active === last) { e.preventDefault(); first.focus(); }
+}
+
+document.addEventListener('keydown', e => {
+  const el = e.target;
+  if ((e.key === 'Enter' || e.key === ' ') && el instanceof Element && el.getAttribute('role') === 'button'
+      && !/^(BUTTON|INPUT|SELECT|TEXTAREA)$/.test(el.tagName) && !(el.tagName === 'A' && el.hasAttribute('href'))) {
+    e.preventDefault();
+    el.click();
+    return;
+  }
+  const ov = (e.key === 'Escape' || e.key === 'Tab') ? _a11yTopOverlay() : null;
+  if (!ov) return;
+  if (e.key === 'Escape') { e.preventDefault(); _a11yCloseOverlay(ov); }
+  else _a11yTrapTab(e, ov);
+});
+
+const _a11yFocusStack = [];
+function _a11yOnOpen(ov) {
+  if (_a11yFocusStack.some(x => x.ov === ov)) return;
+  _a11yFocusStack.push({ ov, prev: document.activeElement });
+  requestAnimationFrame(() => {
+    const modal = ov.querySelector('.modal');
+    if (!modal) return;
+    _a11yDialog(modal);
+    if (!modal.contains(document.activeElement)) modal.focus({ preventScroll: true });
+  });
+}
+function _a11yOnClose(ov) {
+  const i = _a11yFocusStack.findIndex(x => x.ov === ov);
+  if (i < 0) return;
+  const { prev } = _a11yFocusStack.splice(i, 1)[0];
+  if (prev && prev.isConnected && prev !== document.body && !_a11yTopOverlay()) prev.focus({ preventScroll: true });
+}
+
+(function _initA11y() {
   let timer = null;
-  const schedule = () => { clearTimeout(timer); timer = setTimeout(_syncAriaLabels, 400); };
+  const schedule = () => { clearTimeout(timer); timer = setTimeout(_a11yEnhance, 400); };
   new MutationObserver(muts => {
-    // Ignorar los cambios que hace la propia funcion (aria-label).
-    if (muts.some(m => m.type === 'childList')) schedule();
-  }).observe(document.body, { childList: true, subtree: true });
+    let added = false;
+    for (const m of muts) {
+      if (m.type === 'attributes') {
+        const el = m.target;
+        if (!el.classList || !el.classList.contains('modal-overlay')) continue;
+        const was = (m.oldValue || '').split(/\s+/).includes('open'), is = el.classList.contains('open');
+        if (is && !was) _a11yOnOpen(el); else if (was && !is) _a11yOnClose(el);
+        continue;
+      }
+      added = true;
+      m.addedNodes.forEach(n => { if (n.nodeType === 1 && n.matches('.modal-overlay.open')) _a11yOnOpen(n); });
+      m.removedNodes.forEach(n => { if (n.nodeType === 1 && n.classList.contains('modal-overlay')) _a11yOnClose(n); });
+    }
+    // Los cambios que hace la propia capa son de atributos, no de nodos.
+    if (added) schedule();
+  }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'], attributeOldValue: true });
   schedule();
 })();
 
