@@ -4522,7 +4522,12 @@ function toggleLanguage() { setLanguage({ es: 'en', en: 'pt', pt: 'es' }[current
 
 let allGames = [];
 let statusFilter = '', platformFilter = '', searchQ = '', sortMode = 'name', ratingFilter = '', sortDir = 'asc';
-let currentPage = 1, totalPages = 1, totalGames = 0;
+let totalGames = 0;
+// Scroll infinito (A5): tandas de 40 que se suman al llegar al final de la
+// lista (loadMoreGames). KEEP_LOADED: recargar despues de una accion sin
+// volver a los primeros 40 (si no, la lista se achicaba y el scroll saltaba).
+const LIB_PAGE = 40, KEEP_LOADED = 'keep';
+let _libSeq = 0, _libLoadingMore = false, _libLoadMoreFailed = false;
 let showHidden = false;
 let modalStarVal = 0;
 // Apariencia — sincronizada con /settings (mismo valor en la app y la web).
@@ -5251,7 +5256,7 @@ function switchReviewsTab(tab) {
 }
 
 // Swipe horizontal entre las tabs "Todas"/"Mis reseñas" en mobile — mismo
-// criterio/threshold que _initGameListSwipe (linea ~9884).
+// criterio/threshold que tenia el swipe de paginas de la biblioteca.
 function _initReviewsSwipe() {
   const el = document.getElementById('myreviews-content');
   if (!el || el.dataset.swipeInit) return;
@@ -6450,7 +6455,8 @@ function gameCardHtml(g, opts) {
 async function renderGames() {
   const list  = document.getElementById('game-list');
   const items = sortedFiltered();
-  document.getElementById('count-label').textContent = `${items.length} ${t('of')} ${allGames.length} ${gamesLabel(allGames.length)}`;
+  const _ofN = Math.max(allGames.length, totalGames);
+  document.getElementById('count-label').textContent = `${items.length} ${t('of')} ${_ofN} ${gamesLabel(_ofN)}`;
 
   if (!items.length) {
     if (!allGames.length) {
@@ -6977,7 +6983,7 @@ document.addEventListener('click', (e) => {
 
 async function _bulkFinish() {
   clearBulkSelection();
-  await Promise.all([syncAll(currentPage, true), loadGlobalStats(), loadFolders()]);
+  await Promise.all([syncAll(KEEP_LOADED, true), loadGlobalStats(), loadFolders()]);
   checkAchievements();
 }
 
@@ -7118,7 +7124,7 @@ async function deleteGame(gameId) {
         card.remove();
         allGames = allGames.filter(g => g.id !== gameId);
         await Promise.all([
-          syncAll(currentPage, true),
+          syncAll(KEEP_LOADED, true),
           loadGlobalStats(),
         ]);
       }, 220);
@@ -7197,7 +7203,7 @@ async function saveCoverEdit() {
       body: JSON.stringify({ cover_url: url || null }),
     });
     closeCoverEdit();
-    syncAll(currentPage, true);
+    syncAll(KEEP_LOADED, true);
   } catch(e) { alert(t('errorUpdatingCover')); }
 }
 
@@ -10621,7 +10627,7 @@ async function submitNovedadesAdd() {
     closeNovedadesAddModal();
     _renderNovedades();
     queueToast(_novedadesAddToWishlist ? t('gameAddedToWishlist') : t('gameAddedToLibrary'));
-    syncAll(currentPage);
+    syncAll(KEEP_LOADED);
     loadGlobalStats();
   } catch (e) {
     alert(t('errorAddingGame'));
@@ -11805,7 +11811,7 @@ async function syncSteamWishlist() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Error');
     showToast(`✓ Deseados sincronizados: ${data.message || ''}`);
-    syncAll(currentPage);
+    syncAll(KEEP_LOADED);
     loadGlobalStats();
     checkAchievements();
   } catch(e) {
@@ -12362,7 +12368,7 @@ async function syncWishlist() {
     if (!res.ok) { alert(data.detail || 'Error'); }
     else {
       alert(data.message);
-      syncAll(currentPage);
+      syncAll(KEEP_LOADED);
       loadGlobalStats();
     }
   } catch(e) {
@@ -12518,7 +12524,7 @@ async function saveWishlistGame() {
     });
     if (!res.ok) { const d = await res.json(); alert(d.detail || 'Error'); return; }
     closeWishlistModal();
-    syncAll(currentPage);
+    syncAll(KEEP_LOADED);
     loadGlobalStats();
     checkAchievements();
   } catch(e) { alert(t('errorAdding')); }
@@ -12652,7 +12658,7 @@ async function submitGame() {
     });
     if (!res.ok) { const d = await res.json(); alert(d.detail || 'Error'); return; }
     closeModal();
-    syncAll(currentPage);
+    syncAll(KEEP_LOADED);
     loadGlobalStats();
     checkAchievements();
   } catch(e) { alert(t('errorAddingGame')); }
@@ -12805,79 +12811,75 @@ async function toggleHideGame(gameId, isHidden) {
         setTimeout(async () => {
           card.remove();
           allGames = allGames.filter(g => g.id !== gameId);
-          await Promise.all([syncAll(currentPage, true), loadGlobalStats()]);
+          await Promise.all([syncAll(KEEP_LOADED, true), loadGlobalStats()]);
         }, 220);
         return;
       }
     }
-    await Promise.all([syncAll(currentPage), loadGlobalStats()]);
+    await Promise.all([syncAll(KEEP_LOADED), loadGlobalStats()]);
   } catch(e) {
     alert(isHidden ? t('errorShowingGame') : t('errorHidingGame'));
   }
 }
 
-function renderPagination() {
-  // Remove existing pagination
-  const existing = document.getElementById('pagination-bar');
-  if (existing) existing.remove();
-  if (totalPages <= 1) return;
-
-  const bar = document.createElement('div');
-  bar.id = 'pagination-bar';
-  bar.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:8px;padding:16px 0;';
-
-  const prev = document.createElement('button');
-  prev.textContent = '←';
-  prev.className = 'filter-btn';
-  prev.disabled = currentPage <= 1;
-  prev.onclick = () => syncAll(currentPage - 1, true);
-
-  const label = document.createElement('span');
-  label.style.cssText = 'font-size:13px;color:var(--color-text-secondary)';
-  label.textContent = `${currentPage} / ${totalPages}`;
-
-  const next = document.createElement('button');
-  next.textContent = '→';
-  next.className = 'filter-btn';
-  next.disabled = currentPage >= totalPages;
-  next.onclick = () => syncAll(currentPage + 1, true);
-
-  bar.appendChild(prev);
-  bar.appendChild(label);
-  bar.appendChild(next);
-
-  document.getElementById('game-list').after(bar);
-  // Si un refresh en segundo plano recrea la barra mientras el usuario esta
-  // en Estadisticas/Rankings/Novedades (no en Biblioteca/Deseados), el
-  // elemento nuevo nace visible y no hereda el display:none que setView()
-  // le habia puesto al anterior — quedaba flotando arriba de esas vistas.
-  if (currentView === 'stats' || currentView === 'rankings' || currentView === 'novedades') {
-    bar.style.display = 'none';
+// Pie de la lista (mismo id que la barra de paginas de antes, asi lo siguen
+// ocultando setView y el detalle de juego): un circulo mientras llega la
+// tanda siguiente o "Reintentar" si fallo. Un IntersectionObserver lo mira
+// y pide mas cuando queda a menos de 600px.
+let _loadMoreObserver = null;
+function renderLoadMore() {
+  let bar = document.getElementById('pagination-bar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'pagination-bar';
+    bar.style.cssText = 'text-align:center;padding:16px 0;min-height:1px';
+    document.getElementById('game-list').after(bar);
+    if ('IntersectionObserver' in window) {
+      _loadMoreObserver = new IntersectionObserver(es => {
+        if (es.some(x => x.isIntersecting)) loadMoreGames();
+      }, { rootMargin: '600px 0px' });
+      _loadMoreObserver.observe(bar);
+    }
+  }
+  if (currentView === 'stats' || currentView === 'rankings' || currentView === 'novedades') bar.style.display = 'none';
+  bar.innerHTML = _libLoadingMore
+    ? '<div class="spinner" style="margin:0 auto"></div>'
+    : _libLoadMoreFailed
+      ? `<button class="filter-btn" onclick="loadMoreGames()"><i class="ti ti-refresh"></i> ${esc(t('retry'))}</button>`
+      : '';
+  // Si la tanda entera entra en pantalla (o quedo cerca), el observer no
+  // vuelve a avisar: se pide la siguiente directamente.
+  if (!_libLoadingMore && !_libLoadMoreFailed && allGames.length < totalGames
+      && bar.offsetParent !== null && bar.getBoundingClientRect().top < window.innerHeight + 600) {
+    setTimeout(loadMoreGames, 0);
   }
 }
 
-// ── Swipe horizontal en biblioteca/deseados = cambiar de pagina (mobile) ──
-let _swipeStartX = null, _swipeStartY = null;
-function _initGameListSwipe() {
-  const el = document.getElementById('game-list');
-  if (!el || el.dataset.swipeInit) return;
-  el.dataset.swipeInit = '1';
-  el.addEventListener('touchstart', e => {
-    _swipeStartX = e.touches[0].clientX;
-    _swipeStartY = e.touches[0].clientY;
-  }, { passive: true });
-  el.addEventListener('touchend', e => {
-    if (_swipeStartX === null) return;
-    const dx = e.changedTouches[0].clientX - _swipeStartX;
-    const dy = e.changedTouches[0].clientY - _swipeStartY;
-    // Solo si el gesto fue mayormente horizontal — evita robarle el swipe
-    // al scroll vertical normal de la lista.
-    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-      if (dx < 0 && currentPage < totalPages) syncAll(currentPage + 1, true);
-      else if (dx > 0 && currentPage > 1) syncAll(currentPage - 1, true);
-    }
-    _swipeStartX = null; _swipeStartY = null;
-  }, { passive: true });
+async function loadMoreGames() {
+  const inLibrary = currentView === 'library' || currentView === 'wishlist';
+  if (_libLoadingMore || !inLibrary || activeFolderId === -1 || allGames.length >= totalGames) return;
+  const tok = authToken || localStorage.getItem('gb_token') || '';
+  if (!tok) return;
+  const seq = _libSeq;
+  _libLoadingMore = true; _libLoadMoreFailed = false;
+  renderLoadMore();
+  try {
+    // offset = lo que ya hay: ocultar o borrar juegos no hace que se salteen otros.
+    const d = await _fetchBacklogChunk(_backlogParams(), allGames.length, LIB_PAGE, tok);
+    if (seq !== _libSeq) return; // cambio un filtro mientras tanto: se descarta
+    const known = new Set(allGames.map(g => g.id));
+    const fresh = (d.games || []).filter(g => !known.has(g.id));
+    allGames = allGames.concat(fresh);
+    // Sin juegos nuevos no hay mas, diga lo que diga el total (si no, se
+    // quedaba pidiendo la misma tanda).
+    totalGames = fresh.length ? (d.total || 0) : allGames.length;
+    _libLoadingMore = false;
+    renderGames(); updatePlayButtons();
+  } catch (e) {
+    if (seq === _libSeq) _libLoadMoreFailed = true;
+  } finally {
+    if (seq === _libSeq) { _libLoadingMore = false; renderLoadMore(); }
+  }
 }
 
 const _statusBtnsEl = document.getElementById('status-btns');
@@ -14922,7 +14924,7 @@ async function confirmCardFolderPicker() {
   ]);
   closeFolderAddGame();
   await loadFolders();
-  if (activeFolderId > 0) syncAll(currentPage, true);
+  if (activeFolderId > 0) syncAll(KEEP_LOADED, true);
 }
 
 function closeFolderAddGame() {
@@ -15846,7 +15848,7 @@ async function finishPlaySession() {
     if (data.counted) {
       const g = allGames.find(x => x.id === playSession.gameId);
       if (g) g.hours_played = (g.hours_played || 0) + data.hours_added;
-      syncAll(currentPage, true);
+      syncAll(KEEP_LOADED, true);
       loadGlobalStats();
     }
   } catch(e) {}
@@ -15892,7 +15894,6 @@ async function onLoginSuccess() {
   _syncMobileNav(currentView || 'library');
   _initMobileNavBadges();
   resetActiveFilters();
-  _initGameListSwipe();
 
   const profilePanel = document.getElementById('profile-panel');
   // El panel es una columna: la fila de siempre (avatar, nombre, nivel,
@@ -16135,16 +16136,53 @@ if (authToken) {
 // checkHealth: pegarle a /health antes de pedir la biblioteca. Sirve para
 // el boton "Sincronizar"; al arrancar la app se saltea (era ~0,5 s mas
 // antes de ver los juegos) y si el backend no responde lo avisa el catch.
+// Filtros, orden y vista de la biblioteca como query de /backlog (sin
+// offset ni per_page: los pone cada pedido).
+function _backlogParams() {
+  const params = new URLSearchParams({
+    sort: document.getElementById('sort-sel')?.value || 'name',
+    order: sortDir,
+  });
+  if (statusFilter)   params.set('status',   statusFilter);
+  if (platformFilter) params.set('platform', platformFilter);
+  if (searchQ)        params.set('search',   searchQ);
+  if (showingHidden)   params.set('show_hidden', 'true');
+  if (activeFolderId && activeFolderId !== -1) params.set('folder_id', activeFolderId);
+  // View mode
+  if (currentView === 'wishlist') {
+    params.set('status', 'Deseados');
+  }
+
+  // Multi-value filters
+  const af = activeFilters || {};
+  if (af.statuses?.size)  params.set('statuses',   [...af.statuses].join(','));
+  if (af.platforms?.size) params.set('platforms',  [...af.platforms].join(','));
+  if (af.hours?.size)     params.set('hours_range',[...af.hours].join(','));
+  if (af.ratings?.size)   params.set('ratings',    [...af.ratings].join(','));
+
+  // Sort direction
+  params.set('order', sortDir || 'asc');
+  return params;
+}
+
+async function _fetchBacklogChunk(params, offset, limit, tok) {
+  const q = new URLSearchParams(params);
+  q.set('offset', offset);
+  q.set('per_page', limit);
+  const res = await fetch(`${apiBase()}/api/v1/backlog?${q}`, { headers: { 'Authorization': `Bearer ${tok}` } });
+  if (!res.ok) throw new Error('Error ' + res.status);
+  return res.json();
+}
+
 async function syncAll(page = 1, silent = false, checkHealth = !silent) {
   hideError();
-  currentPage = page;
   const btn = document.getElementById('sync-btn');
   if (!silent) {
     if (btn) {
       btn.disabled = true;
       btn.innerHTML = `<i class="ti ti-refresh" style="animation:spin 1s linear infinite"></i> ${t('syncing')}`;
     }
-    if (page === 1) {
+    if (page !== KEEP_LOADED) {
       document.getElementById('game-list').innerHTML = `<div class="empty"><div class="spinner" style="margin:0 auto 12px"></div>${t('syncing')}</div>`;
     }
   }
@@ -16172,42 +16210,25 @@ async function syncAll(page = 1, silent = false, checkHealth = !silent) {
     return;
   }
 
-  // Construir params de filtro y ordenamiento
-  const params = new URLSearchParams({
-    page: currentPage,
-    per_page: 20,
-    sort: document.getElementById('sort-sel')?.value || 'name',
-    order: sortDir,
-  });
-  if (statusFilter)   params.set('status',   statusFilter);
-  if (platformFilter) params.set('platform', platformFilter);
-  if (searchQ)        params.set('search',   searchQ);
-  if (showingHidden)   params.set('show_hidden', 'true');
-  if (activeFolderId && activeFolderId !== -1) params.set('folder_id', activeFolderId);
-  // View mode
-  if (currentView === 'wishlist') {
-    params.set('status', 'Deseados');
-  }
+  const params = _backlogParams();
 
-  // Multi-value filters
-  const af = activeFilters || {};
-  if (af.statuses?.size)  params.set('statuses',   [...af.statuses].join(','));
-  if (af.platforms?.size) params.set('platforms',  [...af.platforms].join(','));
-  if (af.hours?.size)     params.set('hours_range',[...af.hours].join(','));
-  if (af.ratings?.size)   params.set('ratings',    [...af.ratings].join(','));
-
-  // Sort direction
-  params.set('order', sortDir || 'asc');
-
+  const seq = ++_libSeq;
+  _libLoadingMore = false; _libLoadMoreFailed = false;
   try {
-    const res = await fetch(`${apiBase()}/api/v1/backlog?${params}`, {
-      headers: { 'Authorization': `Bearer ${tok}` }
-    });
-    if (!res.ok) throw new Error('Error ' + res.status);
-    const data = await res.json();
+    // KEEP_LOADED vuelve a pedir lo que ya estaba cargado (en tandas de hasta
+    // 100, el maximo de /backlog); si no, los primeros LIB_PAGE.
+    const want = page === KEEP_LOADED ? Math.max(LIB_PAGE, allGames.length) : LIB_PAGE;
+    let data = null, games = [];
+    while (games.length < want) {
+      const d = await _fetchBacklogChunk(params, games.length, Math.min(100, want - games.length), tok);
+      if (!data) data = d;
+      games = games.concat(d.games || []);
+      data.total = d.total;
+      if (!(d.games || []).length || games.length >= (d.total || 0)) break;
+    }
+    if (seq !== _libSeq) return; // un filtro o recarga mas nuevo ya esta en vuelo
 
-    allGames    = data.games || [];
-    totalPages  = data.total_pages || 1;
+    allGames    = games;
     totalGames  = data.total || 0;
 
     // Actualizar indicadores de plataforma
@@ -16223,7 +16244,14 @@ async function syncAll(page = 1, silent = false, checkHealth = !silent) {
       const _fb = document.getElementById('filter-bar');
       if (_fb) _fb.style.removeProperty('display');
 
-      renderGames(); updatePlayButtons(); renderPagination();
+      // Reinicio (filtro, busqueda, vista, sincronizar): si se habia bajado,
+      // volver al principio de la lista; si no, el pie quedaba a la vista y
+      // se volvia a cargar todo.
+      if (page !== KEEP_LOADED) {
+        const top = document.getElementById('game-list').getBoundingClientRect().top;
+        if (top < 0) window.scrollBy(0, top - 80);
+      }
+      renderGames(); updatePlayButtons(); renderLoadMore();
     }
     loadGlobalStats();
     // Refresh available filter options (in background)
@@ -16232,7 +16260,7 @@ async function syncAll(page = 1, silent = false, checkHealth = !silent) {
   } catch(e) {
     showError(t('errorLoadingGames') + ': ' + e.message);
     // Sin esto la lista quedaba en "Sincronizando..." para siempre.
-    if (!silent && page === 1) {
+    if (!silent && page !== KEEP_LOADED) {
       document.getElementById('game-list').innerHTML = `<div class="empty"><i class="ti ti-wifi-off"></i>${t('backendUnavailable')}</div>`;
     }
   }
