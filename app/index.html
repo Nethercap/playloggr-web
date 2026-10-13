@@ -15,8 +15,6 @@
   <meta name="apple-mobile-web-app-title" content="Playloggr" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -1411,7 +1409,6 @@
       if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
     })();
   </script>
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
 
@@ -6929,16 +6926,46 @@ function _updateExportColsButtons() {
   });
 }
 
+// Scripts de terceros que solo hacen falta para una accion (exportar una
+// imagen, pagar, registrarse): antes se cargaban en cada visita (html2canvas y
+// Paddle bloqueando el <head>); ahora la primera vez que se usan.
+const HTML2CANVAS_SRC = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+const PADDLE_SRC      = 'https://cdn.paddle.com/paddle/v2/paddle.js';
+const TURNSTILE_SRC   = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+const _scriptLoads = {};
+function loadScriptOnce(src) {
+  if (!_scriptLoads[src]) {
+    _scriptLoads[src] = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = src;
+      s.async = true;
+      s.onload = () => resolve();
+      // Si falla (sin conexion, bloqueador), se puede volver a intentar.
+      s.onerror = () => { delete _scriptLoads[src]; s.remove(); reject(new Error('No se pudo cargar ' + src)); };
+      document.head.appendChild(s);
+    });
+  }
+  return _scriptLoads[src];
+}
+
 async function _runExportGrid() {
   const src = document.getElementById(_exportGridSourceId);
   const btn = document.getElementById('export-grid-confirm');
-  if (!src || typeof html2canvas === 'undefined') {
+  if (!src) {
     alert('No se pudo generar la imagen.');
     return;
   }
   const origHtml = btn.innerHTML;
   btn.disabled = true;
   btn.innerHTML = '<i class="ti ti-loader-2"></i>…';
+  try {
+    await loadScriptOnce(HTML2CANVAS_SRC);
+  } catch (e) {
+    btn.disabled = false;
+    btn.innerHTML = origHtml;
+    alert('No se pudo generar la imagen.');
+    return;
+  }
   const wrap = document.createElement('div');
   const wrapWidth = _exportGridIsCompact ? 420 : _exportGridCols * 190;
   wrap.style.cssText = `position:fixed;left:-99999px;top:0;padding:20px;width:${wrapWidth}px;background:${getComputedStyle(document.body).backgroundColor || '#111111'}`;
@@ -13457,6 +13484,7 @@ function isPremiumError(res, data) {
 
 function openPaywall(feature = 'general') {
   if (isPremium) return;
+  loadScriptOnce(PADDLE_SRC).catch(() => {}); // listo para cuando toque "Comprar"
   _premiumHighlight = feature;
   closePaywall();
   const f = PAYWALL_FEATURES[feature] || PAYWALL_FEATURES.general;
@@ -13615,6 +13643,7 @@ function _benefitKeyFor(feature) {
 }
 
 function renderPremiumView() {
+  loadScriptOnce(PADDLE_SRC).catch(() => {});
   const body = document.getElementById('premium-view-body');
   if (!body) return;
   const hl = _benefitKeyFor(_premiumHighlight);
@@ -13663,7 +13692,8 @@ function renderPremiumView() {
   `;
 }
 
-function startPaddleCheckout() {
+async function startPaddleCheckout() {
+  try { await loadScriptOnce(PADDLE_SRC); } catch (e) {}
   _ensurePaddleReady();
   if (typeof Paddle === 'undefined') {
     showToast(t('checkoutLoadError'), true);
@@ -13904,8 +13934,9 @@ function closeWelcomeStats() {
 // periodo comparten esto; antes estaba pegado a welcome-stats-card.
 async function exportCardAsImage(cardId, filename) {
   const card = document.getElementById(cardId);
-  if (!card || typeof html2canvas === 'undefined') return;
+  if (!card) return;
   try {
+    await loadScriptOnce(HTML2CANVAS_SRC);
     const canvas = await html2canvas(card, { backgroundColor: '#111111', useCORS: true, scale: 2 });
     const a = document.createElement('a');
     a.href = canvas.toDataURL('image/png');
@@ -14435,14 +14466,14 @@ async function selectCosmetic(kind, id) {
 const TURNSTILE_SITE_KEY = '0x4AAAAAAD13tL4Za45jML0a';
 let _turnstileWidgetId = null;
 
-function _renderTurnstileWidget() {
+async function _renderTurnstileWidget() {
   const wrap = document.getElementById('turnstile-widget-wrap');
   if (!wrap) return;
   wrap.style.display = 'block';
   if (typeof turnstile === 'undefined') {
-    // El script todavia no cargo — reintentar en un momento.
-    setTimeout(_renderTurnstileWidget, 300);
-    return;
+    // Se carga recien al pasar a "Registrarse" (iniciar sesion no lo usa).
+    // Si no carga, submitAuth avisa que falta la verificacion.
+    try { await loadScriptOnce(TURNSTILE_SRC); } catch (e) { return; }
   }
   if (_turnstileWidgetId !== null) {
     turnstile.reset(_turnstileWidgetId);
