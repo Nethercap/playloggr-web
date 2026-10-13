@@ -13530,6 +13530,10 @@ const NOTIF_TYPE_META = {
   sync_reminder:           { icon: 'ti-refresh',        color: '#66C0F4', go: () => setView('library') },
   streak_reminder:         { icon: 'ti-flame',          color: '#EF9F27', go: async () => { await refreshStreakStatus(); renderStreakModal(); } },
   custom:                  { icon: 'ti-bell',           color: 'var(--text2)', go: () => setView('novedades') },
+  // Invitaciones: el push del admin "Invitá a un amigo" y el aviso de que
+  // alguien entro con tu link. Abren Seguidores, con el link arriba.
+  invite_promo:            { icon: 'ti-gift',           color: '#FF4FA3', go: () => openFriendsPanel() },
+  invite_joined:           { icon: 'ti-gift',           color: '#FF4FA3', go: () => openFriendsPanel() },
 };
 
 function _notifTimeAgo(iso) {

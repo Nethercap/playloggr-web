@@ -319,6 +319,15 @@
       </div>
 
       <div class="row" style="margin-top:12px">
+        <div>
+          <label>Al tocar</label>
+          <select id="custom-push-action" style="font-size:13px; padding:8px 10px; border-radius:8px; border:0.5px solid var(--border2); background:var(--bg3); color:var(--text)">
+            <option value="">Abre la app</option>
+            <option value="invite">Invitar a un amigo (abre Seguidores, donde está el link)</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px">
         <button class="btn-primary" onclick="sendCustomPush()">Enviar a todos</button>
       </div>
       <div class="msg" id="custom-push-msg"></div>
@@ -685,8 +694,11 @@ async function sendCustomPush() {
   const bodyEn  = document.getElementById('custom-push-body-en').value.trim();
   const titlePt = document.getElementById('custom-push-title-pt').value.trim();
   const bodyPt  = document.getElementById('custom-push-body-pt').value.trim();
+  const action  = document.getElementById('custom-push-action').value;
   const msg   = document.getElementById('custom-push-msg');
   if (!title || !body) { alert('Completá título y texto'); return; }
+  // Un push a todos no se puede deshacer.
+  if (!confirm(`¿Mandar "${title}" a todos los usuarios con la app?` + (action === 'invite' ? ' Al tocarlo se abre la invitación.' : ''))) return;
   msg.style.display = 'block';
   msg.style.color = 'var(--text2)';
   msg.textContent = 'Enviando...';
@@ -696,12 +708,14 @@ async function sendCustomPush() {
         title, body,
         title_en: titleEn || null, body_en: bodyEn || null,
         title_pt: titlePt || null, body_pt: bodyPt || null,
+        action: action || null,
       }),
     });
     const d = await res.json();
     if (!res.ok) throw new Error(d.detail || 'Error');
     msg.style.color = 'var(--green)';
     msg.textContent = `Enviado a ${d.users_notified} usuarios.`;
+    document.getElementById('custom-push-action').value = '';
     document.getElementById('custom-push-title').value = '';
     document.getElementById('custom-push-body').value = '';
     document.getElementById('custom-push-title-en').value = '';
