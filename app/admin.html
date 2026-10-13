@@ -51,6 +51,22 @@
   .login-card h2 { font-size: 16px; margin-bottom: 14px; }
   .spinner { display:inline-block; width:14px; height:14px; border:2px solid var(--border2); border-top-color:var(--text); border-radius:50%; animation:spin .7s linear infinite; }
   @keyframes spin { to { transform:rotate(360deg); } }
+  .sub { font-size: 12px; font-weight: 600; margin: 18px 0 4px; }
+  .hint { font-size: 11px; color: var(--text2); line-height: 1.5; }
+  .bars { display: flex; align-items: flex-end; gap: 2px; height: 120px; margin-top: 10px; padding-bottom: 2px; border-bottom: 0.5px solid var(--border); }
+  .bars > div { flex: 1; display: flex; flex-direction: column-reverse; min-width: 3px; }
+  .bars span { display: block; }
+  .bar-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--text2); margin-top: 4px; }
+  .legend { display: flex; gap: 12px; font-size: 11px; color: var(--text2); margin-top: 6px; flex-wrap: wrap; }
+  .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+  .pct { display: inline-block; height: 6px; border-radius: 3px; background: var(--green); vertical-align: middle; margin-right: 6px; }
+  #stale-banner { display: none; align-items: center; gap: 10px; background: rgba(239,159,39,0.12); border: 0.5px solid var(--amber); color: var(--amber); border-radius: 10px; padding: 10px 12px; font-size: 13px; margin-bottom: 16px; }
+  #ann-preview { position: fixed; inset: 0; background: rgba(0,0,0,.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 16px; overflow: auto; }
+  #ann-preview .pv-wrap { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; max-width: 900px; width: 100%; }
+  #ann-preview .pv { background: #1f1f1f; border: 0.5px solid var(--border2); border-radius: 14px; padding: 18px; }
+  #ann-preview .pv h4 { font-size: 15px; margin-bottom: 10px; }
+  #ann-preview .pv p { font-size: 13px; line-height: 1.5; white-space: pre-wrap; color: #e8e8e8; }
+  #ann-preview .pv .acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
 </style>
 </head>
 <body>
@@ -70,6 +86,11 @@
     <button class="btn-secondary" style="margin-left:auto; padding:4px 10px; font-size:11px" onclick="logout()">Salir</button>
   </h1>
 
+  <div id="stale-banner">
+    <span style="flex:1">Hay una versión nueva del panel. Recargá antes de publicar o mandar algo: esta pestaña tiene el código viejo.</span>
+    <button class="btn-secondary" onclick="location.reload()">Recargar</button>
+  </div>
+
   <div class="card" id="card-metrics">
     <div class="card-header" onclick="toggleCard('card-metrics')">
       <span class="card-header-title"><span class="card-chevron">▸</span><strong>Métricas generales</strong></span>
@@ -80,6 +101,39 @@
       <div class="metrics-grid" id="metrics-grid">
         <div style="color:var(--text2); font-size:13px"><div class="spinner"></div> Cargando...</div>
       </div>
+    </div>
+  </div>
+
+
+  <div class="card" id="card-growth">
+    <div class="card-header" onclick="toggleCard('card-growth'); if (!growthLoaded) loadGrowth();">
+      <span class="card-header-title"><span class="card-chevron">▸</span><strong>Crecimiento</strong></span>
+      <button class="btn-secondary" style="padding:4px 10px; font-size:11px" onclick="event.stopPropagation(); loadGrowth()">↻ Actualizar</button>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div style="max-width:180px">
+          <label>Período</label>
+          <select id="growth-days" onchange="loadGrowth()">
+            <option value="14">Últimos 14 días</option>
+            <option value="30" selected>Últimos 30 días</option>
+            <option value="60">Últimos 60 días</option>
+            <option value="90">Últimos 90 días</option>
+          </select>
+        </div>
+      </div>
+      <div id="growth-body" style="margin-top:12px"><div style="color:var(--text2); font-size:13px"><div class="spinner"></div> Cargando...</div></div>
+    </div>
+  </div>
+
+  <div class="card" id="card-features">
+    <div class="card-header" onclick="toggleCard('card-features'); if (!featuresLoaded) loadFeatures();">
+      <span class="card-header-title"><span class="card-chevron">▸</span><strong>Uso de funciones</strong></span>
+      <button class="btn-secondary" style="padding:4px 10px; font-size:11px" onclick="event.stopPropagation(); loadFeatures()">↻ Actualizar</button>
+    </div>
+    <div class="card-body">
+      <p class="hint">Usuarios distintos que usaron cada función alguna vez (no cantidad de usos). Sirve para decidir dónde invertir y qué no vale la pena mantener.</p>
+      <div id="features-body"><div style="color:var(--text2); font-size:13px"><div class="spinner"></div> Cargando...</div></div>
     </div>
   </div>
 
@@ -95,6 +149,9 @@
       <div id="services-health-list">
         <div style="color:var(--text2); font-size:13px"><div class="spinner"></div> Cargando...</div>
       </div>
+      <div class="sub">Crons</div>
+      <p class="hint">Cuándo escribió por última vez cada tarea automática (GitHub Actions). "Atrasado" = pasó más tiempo del que debería entre corridas.</p>
+      <div id="cron-health-list" style="margin-top:8px"></div>
     </div>
   </div>
 
@@ -187,6 +244,7 @@
         </div>
       </div>
       <div class="row" style="margin-top:12px">
+        <button class="btn-secondary" onclick="previewAnnouncement()">Vista previa</button>
         <button class="btn-primary" onclick="publishAnnouncement()">Publicar</button>
       </div>
       <div class="msg" id="announcement-msg"></div>
@@ -265,6 +323,29 @@
     </div>
   </div>
 
+  <div class="card" id="card-review-reports">
+    <div class="card-header" onclick="toggleCard('card-review-reports')">
+      <span class="card-header-title"><span class="card-chevron">▸</span><strong>Reportes de reseñas</strong> <span class="badge badge-premium" id="reports-pending-badge" style="display:none"></span></span>
+      <button class="btn-secondary" style="padding:4px 10px; font-size:11px" onclick="event.stopPropagation(); reportsPage=1; loadReviewReports();">↻ Actualizar</button>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div style="max-width:200px">
+          <label>Mostrar</label>
+          <select id="reports-status" onchange="reportsPage=1; loadReviewReports();">
+            <option value="pending">Pendientes</option>
+            <option value="actioned">Reseña ocultada</option>
+            <option value="dismissed">Descartados</option>
+            <option value="all">Todos</option>
+          </select>
+        </div>
+      </div>
+      <div id="reports-list" style="margin-top:12px"></div>
+      <div class="msg" id="reports-msg"></div>
+      <div class="pagination" id="reports-pagination"></div>
+    </div>
+  </div>
+
   <div class="card" id="card-custom-push">
     <div class="card-header" onclick="toggleCard('card-custom-push')">
       <span class="card-header-title"><span class="card-chevron">▸</span><strong>Push personalizado</strong></span>
@@ -327,6 +408,14 @@
           </select>
         </div>
       </div>
+      <div class="row" style="margin-top:12px">
+        <div>
+          <label>Tu email (para las pruebas; queda guardado en este navegador)</label>
+          <input type="email" id="admin-test-email" placeholder="tu@email.com" onchange="saveTestEmail(this.value)" />
+        </div>
+        <button class="btn-secondary" onclick="sendCustomPush(true)">Probar conmigo</button>
+      </div>
+      <p class="hint" style="margin-top:6px">"Probar conmigo" la manda solo a tu cuenta, en el idioma de tu perfil, para ver el texto y a dónde lleva al tocarla.</p>
       <div class="row" style="margin-top:12px">
         <button class="btn-primary" onclick="sendCustomPush()">Enviar a todos</button>
       </div>
@@ -443,16 +532,7 @@ async function tryLogin() {
   const res = await fetch(`${API}/admin/metrics`, { headers: headers() });
   if (res.ok) {
     sessionStorage.setItem('admin_key', adminKey);
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    renderMetrics(await res.json());
-    loadUsers();
-    loadPsnStatus();
-    loadAnnouncements();
-    loadPushStatus();
-    loadGomLive();
-    loadServicesHealth();
-    loadAdminReviews();
+    startPanel(await res.json());
   } else {
     document.getElementById('login-err').style.display = 'block';
   }
@@ -483,6 +563,7 @@ const SERVICE_STATUS_STYLE = {
 };
 
 async function loadServicesHealth() {
+  loadCronHealth();
   const box = document.getElementById('services-health-list');
   box.innerHTML = '<div style="color:var(--text2); font-size:13px"><div class="spinner"></div> Verificando...</div>';
   try {
@@ -687,7 +768,7 @@ async function triggerPush(pushType) {
   }
 }
 
-async function sendCustomPush() {
+async function sendCustomPush(test = false) {
   const title = document.getElementById('custom-push-title').value.trim();
   const body  = document.getElementById('custom-push-body').value.trim();
   const titleEn = document.getElementById('custom-push-title-en').value.trim();
@@ -697,8 +778,10 @@ async function sendCustomPush() {
   const action  = document.getElementById('custom-push-action').value;
   const msg   = document.getElementById('custom-push-msg');
   if (!title || !body) { alert('Completá título y texto'); return; }
+  const testEmail = document.getElementById('admin-test-email').value.trim();
+  if (test && !testEmail) { alert('Escribí tu email para la prueba'); return; }
   // Un push a todos no se puede deshacer.
-  if (!confirm(`¿Mandar "${title}" a todos los usuarios con la app?` + (action === 'invite' ? ' Al tocarlo se abre la invitación.' : ''))) return;
+  if (!test && !confirm(`¿Mandar "${title}" a todos los usuarios con la app?` + (action === 'invite' ? ' Al tocarlo se abre la invitación.' : ''))) return;
   msg.style.display = 'block';
   msg.style.color = 'var(--text2)';
   msg.textContent = 'Enviando...';
@@ -709,11 +792,13 @@ async function sendCustomPush() {
         title_en: titleEn || null, body_en: bodyEn || null,
         title_pt: titlePt || null, body_pt: bodyPt || null,
         action: action || null,
+        test_email: test ? testEmail : null,
       }),
     });
     const d = await res.json();
     if (!res.ok) throw new Error(d.detail || 'Error');
     msg.style.color = 'var(--green)';
+    if (test) { msg.textContent = '✓ Prueba enviada a tu cuenta. Revisá el teléfono y tocala.'; return; }
     msg.textContent = `Enviado a ${d.users_notified} usuarios.`;
     document.getElementById('custom-push-action').value = '';
     document.getElementById('custom-push-title').value = '';
@@ -899,8 +984,8 @@ async function loadUsers() {
     } else {
       tbody.innerHTML = d.users.map(u => `
         <tr>
-          <td>${u.username}</td>
-          <td>${u.email}</td>
+          <td>${escHtml(u.username)}</td>
+          <td>${escHtml(u.email)}</td>
           <td>${u.level} · <span class="badge ${u.is_premium ? 'badge-premium' : 'badge-free'}">${u.is_premium ? 'Premium' : 'Gratis'}</span></td>
           <td>${u.library_count}</td>
           <td>${(u.synced_platforms && u.synced_platforms.length) ? u.synced_platforms.join(', ') : '<span style="color:var(--text2)">—</span>'}</td>
@@ -908,9 +993,9 @@ async function loadUsers() {
           <td>${formatWebAppUsage(u.last_seen_web_at, u.last_seen_app_at)}</td>
           <td>${formatLastSeen(u.last_seen_at)}</td>
           <td>${u.last_push_at ? `${formatLastSeen(u.last_push_at)} <span style="color:var(--text2);font-size:11px">(${u.last_push_type})</span>` : '<span style="color:var(--text2)">Nunca</span>'}</td>
-          <td><button class="btn-secondary" style="padding:4px 8px; font-size:11px" onclick="adminTogglePremium('${u.email}', ${!u.is_premium})">${u.is_premium ? 'Marcar Gratis' : 'Marcar Premium'}</button></td>
-          <td><button class="icon-btn" title="Restablecer contraseña" onclick="adminResetPassword('${u.email}')">🔑</button></td>
-          <td><button class="icon-btn" title="Eliminar usuario" onclick="adminDeleteUser('${u.email}')">🗑️</button></td>
+          <td><button class="btn-secondary" style="padding:4px 8px; font-size:11px" onclick="adminTogglePremium(${escHtml(JSON.stringify(u.email))}, ${!u.is_premium})">${u.is_premium ? 'Marcar Gratis' : 'Marcar Premium'}</button></td>
+          <td><button class="icon-btn" title="Restablecer contraseña" onclick="adminResetPassword(${escHtml(JSON.stringify(u.email))})">🔑</button></td>
+          <td><button class="icon-btn" title="Eliminar usuario" onclick="adminDeleteUser(${escHtml(JSON.stringify(u.email))})">🗑️</button></td>
         </tr>
       `).join('');
     }
@@ -1053,22 +1138,302 @@ async function deleteEmptyUsers() {
   }
 }
 
+
+// ── Arranque del panel (login y auto-login) ──
+function startPanel(metrics) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  renderMetrics(metrics);
+  loadUsers();
+  loadPsnStatus();
+  loadAnnouncements();
+  loadPushStatus();
+  loadGomLive();
+  loadServicesHealth();
+  loadAdminReviews();
+  loadReviewReports();
+  document.getElementById('admin-test-email').value = loadTestEmail();
+}
+
+// ── Panel desactualizado ── Se publica con la web: si la pestaña queda
+// abierta durante un deploy, sigue con el JS viejo (el 13/10 un push salio
+// sin la accion nueva por eso). Compara el ETag/Last-Modified de admin.html.
+let _panelVersion = null;
+async function checkPanelVersion() {
+  try {
+    const r = await fetch(location.pathname + '?v=' + Date.now(), { method: 'HEAD', cache: 'no-store' });
+    const v = r.headers.get('etag') || r.headers.get('last-modified');
+    if (!v) return;
+    if (_panelVersion === null) _panelVersion = v;
+    else if (v !== _panelVersion) document.getElementById('stale-banner').style.display = 'flex';
+  } catch (e) {}
+}
+checkPanelVersion();
+setInterval(checkPanelVersion, 5 * 60 * 1000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checkPanelVersion(); });
+
+// ── Email para las pruebas (solo en este navegador) ──
+function saveTestEmail(v) { try { localStorage.setItem('pl_admin_test_email', v.trim()); } catch (e) {} }
+function loadTestEmail() { try { return localStorage.getItem('pl_admin_test_email') || ''; } catch (e) { return ''; } }
+
+// ── Vista previa del aviso ──
+function previewAnnouncement() {
+  const v = id => document.getElementById(id).value.trim();
+  const action = document.getElementById('announcement-action').value;
+  const langs = [
+    ['Castellano', v('announcement-title'), v('announcement-message'), 'Entendido', 'Invitar'],
+    ['English', v('announcement-title-en'), v('announcement-message-en'), 'Got it', 'Invite'],
+    ['Português', v('announcement-title-pt'), v('announcement-message-pt'), 'Entendi', 'Convidar'],
+  ];
+  if (!langs[0][2]) { alert('Escribí al menos el mensaje en castellano'); return; }
+  document.getElementById('ann-preview-body').innerHTML = langs.map(([name, title, msg, ok, cta]) => {
+    const fallback = !msg;
+    const t = title || (fallback ? langs[0][1] : '') || 'Aviso';
+    const m = msg || langs[0][2];
+    return `<div>
+      <div class="hint" style="margin-bottom:6px">${name}${fallback ? ' · <span style="color:var(--amber)">sin traducción: ve el castellano</span>' : ''}</div>
+      <div class="pv">
+        <h4>📣 ${escHtml(t)}</h4>
+        <p>${escHtml(m)}</p>
+        <div class="acts">
+          <button class="${action ? 'btn-secondary' : 'btn-primary'}">${fallback ? 'Entendido' : ok}</button>
+          ${action === 'invite' ? `<button class="btn-primary">${fallback ? 'Invitar' : cta}</button>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('ann-preview').style.display = 'flex';
+}
+
+// ── Crecimiento ── /admin/metrics/trend (por dia) + /admin/metrics/funnel.
+let growthLoaded = false;
+const ORIGIN_LABELS = { invite: 'Invitación', sin_dato: 'Sin dato', instagram: 'Instagram', google: 'Google', reddit: 'Reddit', play: 'Google Play', direct: 'Directo' };
+const pctOf = (a, b) => b ? Math.round(100 * a / b) : 0;
+async function loadGrowth() {
+  growthLoaded = true;
+  const box = document.getElementById('growth-body');
+  box.innerHTML = '<div style="color:var(--text2); font-size:13px"><div class="spinner"></div> Cargando...</div>';
+  const days = document.getElementById('growth-days').value;
+  try {
+    const [tr, fr] = await Promise.all([
+      fetchTimeout(`${API}/admin/metrics/trend?days=${days}`, { headers: headers() }, 30000),
+      fetchTimeout(`${API}/admin/metrics/funnel`, { headers: headers() }, 30000),
+    ]);
+    if (!tr.ok || !fr.ok) throw new Error();
+    renderGrowth(await tr.json(), await fr.json(), +days);
+  } catch (e) {
+    box.innerHTML = `<span style="color:var(--red)">${e.name === 'AbortError' ? 'Tardó demasiado (timeout) — probá de nuevo' : 'Error al cargar'}</span>`;
+  }
+}
+
+function renderGrowth(t, f, days) {
+  // Dias completos del periodo (los que no tuvieron registros van en 0).
+  const byDay = Object.fromEntries(t.por_dia.map(d => [d.dia, d]));
+  const origins = {};
+  t.por_dia_origen.forEach(o => { (origins[o.dia] = origins[o.dia] || []).push(o); });
+  const list = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 86400000);
+    const key = d.toISOString().slice(0, 10);
+    list.push(byDay[key] ? { ...byDay[key] } : { dia: key, registros: 0, desde_app: 0, desde_web: 0, sin_dato: 0, conectaron: 0 });
+  }
+  const total = list.reduce((a, d) => a + d.registros, 0);
+  const max = Math.max(1, ...list.map(d => d.registros));
+  const invites = (f.por_origen || []).filter(o => o.origen === 'invite').reduce((a, o) => a + o.usuarios, 0);
+  const fu = f.funnel || {};
+  const metric = (label, value, sub) => `<div class="metric"><div class="metric-label">${label}</div><div class="metric-value">${value}</div>${sub ? `<div class="hint">${sub}</div>` : ''}</div>`;
+  const bars = list.map(d => {
+    const h = n => `${Math.round(100 * n / max)}%`;
+    const ori = (origins[d.dia] || []).map(o => `${ORIGIN_LABELS[o.origen] || o.origen}: ${o.registros}`).join(', ');
+    return `<div title="${d.dia}: ${d.registros} registros (app ${d.desde_app}, web ${d.desde_web}) · conectaron ${d.conectaron}${ori ? ' · ' + escHtml(ori) : ''}" style="height:100%">
+      <span style="height:${h(d.desde_app)}; background:var(--green)"></span>
+      <span style="height:${h(d.desde_web)}; background:#378ADD"></span>
+      <span style="height:${h(d.sin_dato)}; background:#666"></span>
+    </div>`;
+  }).join('');
+  const rowsDia = list.slice().reverse().filter(d => d.registros).map(d => `<tr>
+      <td>${d.dia}</td><td>${d.registros}</td><td>${d.desde_app}</td><td>${d.desde_web}</td><td>${d.conectaron}</td>
+      <td>${escHtml((origins[d.dia] || []).map(o => `${ORIGIN_LABELS[o.origen] || o.origen} ${o.registros}`).join(' · '))}</td></tr>`).join('');
+  const rowsOrigen = (f.por_origen || []).slice(0, 12).map(o => `<tr>
+      <td>${escHtml(ORIGIN_LABELS[o.origen] || o.origen)}${o.medio ? ` <span class="hint">${escHtml(o.medio)}</span>` : ''}${o.campania ? ` <span class="hint">· ${escHtml(o.campania)}</span>` : ''}</td>
+      <td>${escHtml(o.cliente || '—')}</td><td>${o.usuarios}</td><td>${o.pct_conectaron ?? 0}%</td><td>${o.volvieron}</td></tr>`).join('');
+  const rowsCohorte = (f.cohortes_semanales || []).map(c => `<tr>
+      <td>${c.semana}</td><td>${c.registros}</td><td>${c.conectaron} (${pctOf(c.conectaron, c.registros)}%)</td>
+      <td>${c.con_juegos} (${pctOf(c.con_juegos, c.registros)}%)</td><td>${c.siguen_activos} (${pctOf(c.siguen_activos, c.registros)}%)</td></tr>`).join('');
+  const ret = (f.retencion_por_activacion || []).map(r => `<tr>
+      <td>${r.grupo === 'conecto_plataforma' ? 'Conectó una plataforma' : 'No conectó'}</td><td>${r.usuarios}</td>
+      <td>${r.pct_volvio ?? 0}%</td><td>${r.pct_activo_30d ?? 0}%</td><td>${r.juegos_promedio ?? 0}</td></tr>`).join('');
+  const cl = f.cliente || {};
+  const pl = f.plataformas_conectadas || {};
+  const idiomas = (f.por_idioma || []).map(i => `${escHtml(i.idioma)} ${i.usuarios}`).join(' · ');
+  document.getElementById('growth-body').innerHTML = `
+    <div class="metrics-grid">
+      ${metric(`Registros (${days} días)`, total)}
+      ${metric('Por invitación', invites, 'desde que existen')}
+      ${metric('Activos 7 días', fu.activos_7d ?? '—')}
+      ${metric('Activos 30 días', fu.activos_30d ?? '—')}
+    </div>
+    <div class="sub">Registros por día</div>
+    <div class="bars">${bars}</div>
+    <div class="bar-labels"><span>${list[0].dia.slice(5)}</span><span>${list[list.length - 1].dia.slice(5)}</span></div>
+    <div class="legend"><span><i style="background:var(--green)"></i>App</span><span><i style="background:#378ADD"></i>Web</span><span><i style="background:#666"></i>Sin dato</span><span>Pasá el mouse por una barra para ver el detalle.</span></div>
+    ${rowsDia ? `<details style="margin-top:8px"><summary class="hint" style="cursor:pointer">Ver por día</summary><div class="table-wrap"><table><thead><tr><th>Día</th><th>Registros</th><th>App</th><th>Web</th><th>Conectaron</th><th>Origen</th></tr></thead><tbody>${rowsDia}</tbody></table></div></details>` : '<p class="hint" style="margin-top:8px">Sin registros en el período.</p>'}
+
+    <div class="sub">Embudo (todos los usuarios)</div>
+    <div class="metrics-grid">
+      ${metric('Registrados', fu.registrados ?? '—')}
+      ${metric('Conectaron plataforma', `${pctOf(fu.conecto_plataforma, fu.registrados)}%`, `${fu.conecto_plataforma ?? 0} usuarios`)}
+      ${metric('Tienen juegos', `${pctOf(fu.tiene_juegos, fu.registrados)}%`, `${fu.tiene_juegos ?? 0} usuarios`)}
+      ${metric('Volvieron otro día', `${pctOf(fu.volvio_despues_del_dia_1, fu.registrados)}%`, `${fu.volvio_despues_del_dia_1 ?? 0} usuarios`)}
+      ${metric('Siguen después de 7 días', `${pctOf(fu.sigue_despues_de_7_dias, fu.registrados)}%`, `${fu.sigue_despues_de_7_dias ?? 0} usuarios`)}
+      ${metric('No hicieron nada', `${pctOf(fu.fantasmas, fu.registrados)}%`, `${fu.fantasmas ?? 0} usuarios`)}
+    </div>
+
+    <div class="sub">De dónde vienen</div>
+    <p class="hint">Desde ${f.atribucion_desde ? new Date(f.atribucion_desde).toLocaleDateString('es-AR') : '—'} (antes no se guardaba el origen).</p>
+    <div class="table-wrap"><table><thead><tr><th>Origen</th><th>Cliente</th><th>Usuarios</th><th>Conectaron</th><th>Volvieron</th></tr></thead><tbody>${rowsOrigen}</tbody></table></div>
+
+    <div class="sub">Cohortes por semana de registro</div>
+    <div class="table-wrap"><table><thead><tr><th>Semana</th><th>Registros</th><th>Conectaron</th><th>Con juegos</th><th>Activos 30 d</th></tr></thead><tbody>${rowsCohorte}</tbody></table></div>
+
+    <div class="sub">¿Conectar una plataforma hace que vuelvan?</div>
+    <div class="table-wrap"><table><thead><tr><th>Grupo</th><th>Usuarios</th><th>Volvieron</th><th>Activos 30 d</th><th>Juegos (prom.)</th></tr></thead><tbody>${ret}</tbody></table></div>
+
+    <div class="sub">Otros</div>
+    <p class="hint">Usan solo la app ${cl.solo_app ?? 0} · solo la web ${cl.solo_web ?? 0} · las dos ${cl.ambos ?? 0} · con push ${cl.con_push_habilitado ?? 0}<br>
+      Plataformas conectadas: Steam ${pl.steam ?? 0} · PSN ${pl.psn ?? 0} · Xbox ${pl.xbox ?? 0} · GOG ${pl.gog ?? 0} · Epic ${pl.epic ?? 0}<br>
+      Idiomas: ${idiomas}</p>`;
+}
+
+// ── Uso de funciones ── /admin/metrics/features
+let featuresLoaded = false;
+const FEATURE_LABELS = {
+  carpetas: 'Listas', rankings: 'Rankings', resenias: 'Reseñas', sesion_en_vivo: 'Sesión en vivo',
+  juego_del_mes: 'Votó en el Juego del mes', plan_de_juego: 'Plan de juego', racha_activa: 'Racha activa',
+  algun_logro: 'Algún logro', avatar_editado: 'Editó el avatar', sigue_a_alguien: 'Sigue a alguien',
+  voto_contenido: 'Votó contenido', premium: 'Premium', push_habilitado: 'Push activado',
+};
+async function loadFeatures() {
+  featuresLoaded = true;
+  const box = document.getElementById('features-body');
+  box.innerHTML = '<div style="color:var(--text2); font-size:13px"><div class="spinner"></div> Cargando...</div>';
+  try {
+    const res = await fetchTimeout(`${API}/admin/metrics/features`, { headers: headers() }, 30000);
+    if (!res.ok) throw new Error();
+    const d = await res.json();
+    const total = d.usuarios_totales || 0;
+    const rows = Object.entries(d.usuarios_que_usaron || {}).sort((a, b) => (b[1] || 0) - (a[1] || 0)).map(([k, n]) => {
+      const p = pctOf(n || 0, total);
+      return `<tr><td>${FEATURE_LABELS[k] || escHtml(k)}</td><td>${n ?? '—'}</td><td><span class="pct" style="width:${Math.max(2, p)}px"></span>${p}%</td></tr>`;
+    }).join('');
+    const pushes = (d.pushes_por_tipo || []).map(p => `<tr><td>${escHtml(p.push_type)}</td><td>${p.enviadas}</td><td>${p.usuarios}</td></tr>`).join('');
+    box.innerHTML = `
+      <div class="table-wrap"><table><thead><tr><th>Función</th><th>Usuarios</th><th>Del total (${total})</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="sub">Push enviadas por tipo</div>
+      <div class="table-wrap"><table><thead><tr><th>Tipo</th><th>Enviadas</th><th>Usuarios</th></tr></thead><tbody>${pushes}</tbody></table></div>`;
+  } catch (e) {
+    box.innerHTML = `<span style="color:var(--red)">${e.name === 'AbortError' ? 'Tardó demasiado (timeout) — probá de nuevo' : 'Error al cargar'}</span>`;
+  }
+}
+
+// ── Crons ── /admin/debug/cron-health
+async function loadCronHealth() {
+  const box = document.getElementById('cron-health-list');
+  box.innerHTML = '<div style="color:var(--text2); font-size:13px"><div class="spinner"></div> Cargando...</div>';
+  try {
+    const res = await fetchTimeout(`${API}/admin/debug/cron-health`, { headers: headers() }, 20000);
+    if (!res.ok) throw new Error();
+    const d = await res.json();
+    const head = d.atrasados.length
+      ? `<div style="color:var(--amber); font-size:12px; margin-bottom:6px">⚠ Atrasados: ${escHtml(d.atrasados.join(', '))}</div>`
+      : '<div style="color:var(--green); font-size:12px; margin-bottom:6px">✓ Todos al día</div>';
+    const rows = d.checks.map(c => `<tr>
+        <td>${escHtml(c.job)} <span class="hint">${escHtml(c.tabla)}</span></td>
+        <td>${c.error ? `<span style="color:var(--red)">${escHtml(c.error)}</span>` : c.hace_horas == null ? '—' : c.hace_horas < 48 ? `hace ${c.hace_horas} h` : `hace ${Math.round(c.hace_horas / 24)} días`}</td>
+        <td>${c.error ? '' : c.atrasado ? '<span style="color:var(--amber)">atrasado</span>' : '<span style="color:var(--green)">ok</span>'}</td></tr>`).join('');
+    box.innerHTML = head + `<div class="table-wrap"><table style="margin-top:0"><thead><tr><th>Tarea</th><th>Último dato</th><th>Estado</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  } catch (e) {
+    box.innerHTML = '<span style="color:var(--red); font-size:12px">Error al cargar los crons</span>';
+  }
+}
+
+// ── Reportes de resenas ── /admin/review-reports
+let reportsPage = 1;
+const REPORT_STATUS = { pending: 'Pendiente', dismissed: 'Descartado', actioned: 'Reseña ocultada' };
+async function loadReviewReports() {
+  const box = document.getElementById('reports-list');
+  const status = document.getElementById('reports-status').value;
+  box.innerHTML = '<div style="color:var(--text2); font-size:13px"><div class="spinner"></div> Cargando...</div>';
+  try {
+    const res = await fetch(`${API}/admin/review-reports?page=${reportsPage}&status=${status}`, { headers: headers() });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    if (status === 'pending') {
+      const badge = document.getElementById('reports-pending-badge');
+      badge.textContent = `${d.total_count} pendiente${d.total_count === 1 ? '' : 's'}`;
+      badge.style.display = d.total_count ? '' : 'none';
+    }
+    box.innerHTML = d.reports.length ? d.reports.map(r => `
+      <div style="background:var(--bg3); border-radius:8px; padding:10px 12px; margin-bottom:8px">
+        <div style="font-size:12px; color:var(--text2)">
+          <strong style="color:var(--text)">${escHtml(r.game_name)}</strong> · reseña de ${escHtml(r.review_username)}
+          ${r.hidden ? ' · <span style="color:var(--amber)">oculta</span>' : ''} · ${REPORT_STATUS[r.status] || escHtml(r.status)}
+        </div>
+        <div style="font-size:13px; margin:6px 0; white-space:pre-wrap">${escHtml(r.text)}</div>
+        <div style="font-size:11px; color:var(--text2)">Reportada por ${escHtml(r.reporter_username)} el ${new Date(r.reported_at).toLocaleString('es-AR')}${r.reason ? ` · motivo: ${escHtml(r.reason)}` : ''}</div>
+        ${r.status === 'pending' ? `<div class="row" style="margin-top:8px">
+          <button class="btn-danger" style="padding:5px 12px; font-size:12px" onclick="resolveReport(${r.report_id}, 'hide')">Ocultar reseña</button>
+          <button class="btn-secondary" style="padding:5px 12px; font-size:12px" onclick="resolveReport(${r.report_id}, 'dismiss')">Descartar reporte</button>
+        </div>` : ''}
+      </div>`).join('') : `<p class="hint">${status === 'pending' ? 'No hay reportes pendientes.' : 'No hay reportes.'}</p>`;
+    document.getElementById('reports-pagination').innerHTML = d.total_pages > 1 ? `
+      <button class="btn-secondary" style="padding:4px 10px" ${d.page <= 1 ? 'disabled' : ''} onclick="reportsPage=${d.page - 1}; loadReviewReports();">←</button>
+      <span>Página ${d.page} de ${d.total_pages} (${d.total_count})</span>
+      <button class="btn-secondary" style="padding:4px 10px" ${d.page >= d.total_pages ? 'disabled' : ''} onclick="reportsPage=${d.page + 1}; loadReviewReports();">→</button>` : '';
+  } catch (e) {
+    box.innerHTML = `<span style="color:var(--red)">${escHtml(e.message || 'Error al cargar')}</span>`;
+  }
+}
+
+async function resolveReport(id, action) {
+  if (action === 'hide' && !confirm('¿Ocultar esta reseña? Deja de verse para todos (no se borra).')) return;
+  const msg = document.getElementById('reports-msg');
+  try {
+    const res = await fetch(`${API}/admin/review-reports/${id}/resolve`, {
+      method: 'POST', headers: headers(), body: JSON.stringify({ action }),
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    msg.style.display = 'block';
+    msg.style.color = 'var(--green)';
+    msg.textContent = action === 'hide' ? '✓ Reseña ocultada' : '✓ Reporte descartado';
+  } catch (e) {
+    msg.style.display = 'block';
+    msg.style.color = 'var(--red)';
+    msg.textContent = e.message || 'Error';
+  }
+  loadReviewReports();
+}
+
 // Auto-login if key already saved
 if (adminKey) {
   fetch(`${API}/admin/metrics`, { headers: headers() }).then(res => {
     if (res.ok) {
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-      loadUsers();
-      loadPsnStatus();
-      loadAnnouncements();
-      loadAdminReviews();
-      return res.json().then(renderMetrics);
+      return res.json().then(startPanel);
     } else {
       sessionStorage.removeItem('admin_key');
     }
   }).catch(() => {});
 }
 </script>
+<div id="ann-preview" onclick="if (event.target === this) this.style.display='none'">
+  <div style="width:100%; max-width:900px">
+    <div style="display:flex; align-items:center; margin-bottom:10px">
+      <strong style="font-size:14px">Vista previa del aviso (como lo ve cada idioma)</strong>
+      <button class="btn-secondary" style="margin-left:auto" onclick="document.getElementById('ann-preview').style.display='none'">Cerrar</button>
+    </div>
+    <div class="pv-wrap" id="ann-preview-body"></div>
+  </div>
+</div>
 </body>
 </html>
