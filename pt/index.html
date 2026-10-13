@@ -230,6 +230,17 @@
     box-shadow: 0 14px 40px rgba(0,0,0,0.45);
   }
   .shot figcaption { font-size: 12.5px; color: var(--text2); margin-top: 10px; text-align: center; }
+  /* Temas (video en loop dentro de un telefono) */
+  .themes-row { display: flex; align-items: center; justify-content: center; gap: 56px; flex-wrap: wrap; }
+  .themes-copy { flex: 1 1 320px; max-width: 470px; }
+  .themes-copy h2 { font-family: var(--font-retro); font-size: 19px; font-weight: 400; line-height: 1.6; margin-bottom: 14px; }
+  .themes-copy p { color: var(--text2); font-size: 15px; line-height: 1.6; }
+  .theme-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+  .theme-chip { font-size: 12.5px; padding: 5px 11px; border-radius: 999px; background: var(--bg2); border: 1px solid var(--border); color: var(--text2); }
+  .theme-chip b { color: var(--text); font-weight: 600; margin-right: 4px; }
+  .phone { width: min(280px, 78vw); aspect-ratio: 9 / 16; border-radius: 30px; padding: 9px; background: #0b0b0d; box-shadow: 0 0 0 1px #2a2a2a, 0 24px 60px rgba(0,0,0,.45); flex-shrink: 0; }
+  .phone video { width: 100%; height: 100%; border-radius: 22px; display: block; object-fit: cover; background: #151515; }
+  @media (max-width: 720px) { .themes-row { gap: 32px; } .themes-copy { text-align: center; } .theme-chips { justify-content: center; } }
   @media (max-width: 720px) {
     .shots {
       flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px;
@@ -507,6 +518,40 @@
 </section>
 
 
+<!-- ═══════════════ TEMAS ═══════════════ -->
+<section class="section section-alt" id="temas">
+  <div class="wrap">
+    <div class="themes-row">
+      <div class="themes-copy">
+        <div class="section-eyebrow">Temas</div>
+        <h2>Sua biblioteca com a cara do seu jogo favorito</h2>
+        <p>14 temas inspirados em videogames mudam as cores, as fontes e os detalhes de todo o app, e ainda há temas de temporada como o Halloween, que são grátis. Qualquer outro pode ser testado por 45 segundos sem Premium.</p>
+        <div class="theme-chips"><span class="theme-chip"><b>Halloween</b></span><span class="theme-chip"><b>Cyberpunk</b></span><span class="theme-chip"><b>Atomic Green</b>Fallout 3</span><span class="theme-chip"><b>Erdtree</b>Elden Ring</span><span class="theme-chip"><b>Knee-Deep</b>Doom</span><span class="theme-chip"><b>Hallownest</b>Hollow Knight</span><span class="theme-chip"><b>Pelican Town</b>Stardew Valley</span><span class="theme-chip"><b>Phantom</b>Persona 5</span><span class="theme-chip"><b>Sheikah</b>Zelda</span><span class="theme-chip"><b>Guaca-Guaca</b>Pac-Man</span><span class="theme-chip">e mais</span></div>
+      </div>
+      <div class="phone">
+        <video id="themes-video" muted loop playsinline preload="none" width="540" height="960"
+          poster="/assets/temas/temas_pt.jpg" aria-label="Vídeo: a biblioteca do Playloggr mudando de tema">
+          <source src="/assets/temas/temas_pt.mp4" type="video/mp4" />
+        </video>
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+/* Video de temas: se reproduce solo mientras se ve; con "reducir movimiento"
+   queda quieto (poster) y con controles. */
+(function () {
+  var v = document.getElementById('themes-video');
+  if (!v) return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { v.controls = true; return; }
+  if (!('IntersectionObserver' in window)) { v.play().catch(function () {}); return; }
+  new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { if (e.isIntersecting) v.play().catch(function () {}); else v.pause(); });
+  }, { threshold: 0.25 }).observe(v);
+})();
+</script>
+
+
 <!-- ═══════════════ ACTIVIDAD DE LA COMUNIDAD ═══════════════ -->
 <section class="section" id="activity-section">
   <div class="wrap">
@@ -590,7 +635,7 @@
       <div class="feature-card">
         <div class="f-icon"><i class="ti ti-color-swatch"></i></div>
         <h3>Temas premium <span class="badge-premium">Premium</span></h3>
-        <p>Temas e interface inspirados em videogames icônicos.</p>
+        <p>Temas e interface inspirados em videogames icônicos. <a href="#temas" style="color:var(--green)">Veja como ficam</a>.</p>
       </div>
     </div>
 
