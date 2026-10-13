@@ -178,6 +178,15 @@
       </div>
 
       <div class="row" style="margin-top:12px">
+        <div>
+          <label>Botón (opcional)</label>
+          <select id="announcement-action" style="font-size:13px; padding:8px 10px; border-radius:8px; border:0.5px solid var(--border2); background:var(--bg3); color:var(--text)">
+            <option value="">Sin botón</option>
+            <option value="invite">Invitar a un amigo (abre la invitación)</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px">
         <button class="btn-primary" onclick="publishAnnouncement()">Publicar</button>
       </div>
       <div class="msg" id="announcement-msg"></div>
@@ -719,7 +728,7 @@ async function loadAnnouncements() {
     tbody.innerHTML = d.announcements.length ? d.announcements.map(a => `
       <tr>
         <td>${a.title || '—'}</td>
-        <td style="max-width:260px; white-space:normal">${a.message}</td>
+        <td style="max-width:260px; white-space:normal">${a.message}${a.action === 'invite' ? ' <span class="badge badge-premium">botón Invitar</span>' : ''}</td>
         <td>${a.active ? '<span class="badge badge-premium">Activo</span>' : '<span class="badge badge-free">Inactivo</span>'}</td>
         <td>${new Date(a.created_at).toLocaleString('es-AR')}</td>
         <td>${a.active ? `<button class="icon-btn" title="Desactivar" onclick="deactivateAnnouncement(${a.id})">✖</button>` : ''}</td>
@@ -738,6 +747,7 @@ async function publishAnnouncement() {
   const messageEn = document.getElementById('announcement-message-en').value.trim();
   const titlePt = document.getElementById('announcement-title-pt').value.trim();
   const messagePt = document.getElementById('announcement-message-pt').value.trim();
+  const action = document.getElementById('announcement-action').value;
   const msg = document.getElementById('announcement-msg');
   if (!message) { alert('Escribí un mensaje'); return; }
   msg.style.display = 'block';
@@ -749,6 +759,7 @@ async function publishAnnouncement() {
         title: title || null, message,
         title_en: titleEn || null, message_en: messageEn || null,
         title_pt: titlePt || null, message_pt: messagePt || null,
+        action: action || null,
       }),
     });
     const d = await res.json();
@@ -761,6 +772,7 @@ async function publishAnnouncement() {
     document.getElementById('announcement-message-en').value = '';
     document.getElementById('announcement-title-pt').value = '';
     document.getElementById('announcement-message-pt').value = '';
+    document.getElementById('announcement-action').value = '';
     loadAnnouncements();
   } catch (e) {
     msg.style.color = 'var(--red)';

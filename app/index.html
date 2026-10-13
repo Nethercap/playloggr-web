@@ -1256,6 +1256,15 @@
     }
     .mcomm-tile i { font-size:26px; color:var(--accent-sidebar, var(--green)); }
     .mcomm-tile .mnav-dot { top:8px; right:10px; }
+    /* Invitaciones (A13): el rosa es el del marco Aliado */
+    .mcomm-invite {
+      display:flex; align-items:center; gap:12px; width:100%; text-align:left; padding:10px 12px; margin:0 0 6px;
+      background:var(--bg); border:1px solid #FF4FA355; border-radius:var(--radius-lg); color:var(--text); cursor:pointer;
+    }
+    .mcomm-invite > i:first-child { font-size:22px; color:#FF4FA3; }
+    .mcomm-invite > i:last-child { color:var(--text2); }
+    .mcomm-invite b { display:block; font-size:13px; }
+    .mcomm-invite small { display:block; font-size:12px; color:var(--text2); }
     .mcomm-row { display:flex; gap:10px; align-items:center; padding:10px 2px; border-bottom:0.5px solid var(--border); }
     .mcomm-row img, .mcomm-ph { width:34px; height:46px; border-radius:4px; object-fit:cover; flex-shrink:0; background:var(--bg2); display:flex; align-items:center; justify-content:center; }
     .mcomm-line { font-size:13px; line-height:1.35; }
@@ -1719,6 +1728,7 @@
 
   <div class="mobile-sidebar-group mside-community" data-i18n="menuCommunity">Comunidad</div>
   <button onclick="openFriendsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item mside-community"><i class="ti ti-users" data-cp-icon="amigos"></i> <span data-i18n="friends">Seguidores</span></button>
+  <button onclick="openFriendsPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item mside-community"><i class="ti ti-gift" style="color:#FF4FA3"></i> <span data-i18n="inviteTitle">Invitá a un amigo</span></button>
   <button onclick="openGomPanel();toggleHeaderMoreMenu()" class="mobile-sidebar-item mside-community"><i class="ti ti-stars" data-cp-icon="juego_del_mes"></i> <span data-i18n="gameOfMonth">Juego del mes</span></button>
   <button onclick="setView('novedades');toggleHeaderMoreMenu()" class="mobile-sidebar-item mside-community"><i class="ti ti-sparkles" data-cp-icon="novedades"></i> <span data-i18n="novedades">Descubrir</span></button>
   <a href="https://playloggr.com/actividad" target="_blank" rel="noopener" class="mobile-sidebar-item mside-community u-no-underline"><i class="ti ti-activity"></i> <span data-i18n="communityActivity">Actividad de la comunidad</span></a>
@@ -2142,6 +2152,11 @@
       <button class="mcomm-tile" onclick="openGomPanel()"><i class="ti ti-stars"></i><span data-i18n="gameOfMonth">Juego del mes</span></button>
       <button class="mcomm-tile" id="mcomm-novedades" onclick="setView('novedades')"><i class="ti ti-sparkles"></i><span data-i18n="novedades">Descubrir</span><span class="mnav-dot"></span></button>
     </div>
+    <button class="mcomm-invite" onclick="openFriendsPanel()">
+      <i class="ti ti-gift"></i>
+      <span class="u-flex1"><b data-i18n="inviteTitle">Invitá a un amigo</b><small data-i18n="inviteShort">Si entra con tu link, los dos se llevan el marco Aliado</small></span>
+      <i class="ti ti-chevron-right"></i>
+    </button>
     <div class="mobile-sidebar-group" style="padding-left:2px" data-i18n="communityActivity">Actividad de la comunidad</div>
     <div id="mcomm-activity"></div>
     <a class="mcomm-all" href="https://playloggr.com/actividad" target="_blank" rel="noopener" data-i18n="seeAllActivity">Ver toda la actividad</a>
@@ -3392,7 +3407,8 @@
     <div class="modal-title"><i class="ti ti-speakerphone u-accent"></i> <span id="announcement-title-text">Aviso</span></div>
     <div class="u-fs14" id="announcement-message-text" style="line-height:1.5;margin:12px 0;white-space:pre-wrap;max-height:50vh;overflow-y:auto"></div>
     <div class="modal-actions">
-      <button class="btn-save" onclick="closeAnnouncementPopup()" data-i18n="ok">Entendido</button>
+      <button class="btn-cancel" id="announcement-ok" onclick="closeAnnouncementPopup()" data-i18n="ok">Entendido</button>
+      <button class="btn-save" id="announcement-cta" style="display:none" onclick="announcementAction()"></button>
     </div>
   </div>
 </div>
@@ -3499,6 +3515,7 @@ const I18N = {
     inviteShareText: "Sumate a Playloggr para organizar tu backlog de juegos. Si entrás con mi link, los dos nos llevamos un marco exclusivo:",
     frameAlly: "Aliado",
     inviteCta: "Invitar",
+    inviteShort: "Si entra con tu link, los dos se llevan el marco Aliado",
     a11yPrev: "Anterior",
     a11yNext: "Siguiente",
     a11yBack: "Volver",
@@ -3906,6 +3923,7 @@ const I18N = {
     inviteShareText: "Join me on Playloggr to organize your game backlog. Sign up with my link and we both get an exclusive frame:",
     frameAlly: "Ally",
     inviteCta: "Invite",
+    inviteShort: "If they join with your link, you both get the Ally frame",
     a11yPrev: "Previous",
     a11yNext: "Next",
     a11yBack: "Back",
@@ -4313,6 +4331,7 @@ const I18N = {
     inviteShareText: "Entre no Playloggr para organizar seu backlog de jogos. Se criar a conta com meu link, nós dois ganhamos uma moldura exclusiva:",
     frameAlly: "Aliado",
     inviteCta: "Convidar",
+    inviteShort: "Se a pessoa entrar com seu link, vocês dois ganham a moldura Aliado",
     a11yPrev: "Anterior",
     a11yNext: "Próximo",
     a11yBack: "Voltar",
@@ -13414,6 +13433,18 @@ let userTitle = null;   // { id, name } del logro elegido como titulo, o null
 let userEmail  = '';
 
 let _currentAnnouncementId = null;
+// Boton opcional del aviso (POST /admin/announcements con action). Las que
+// no estan aca se ignoran y el aviso se ve como siempre.
+const ANNOUNCEMENT_ACTIONS = {
+  invite: { label: 'inviteCta', run: () => openFriendsPanel() },
+};
+let _currentAnnouncementAction = null;
+
+async function announcementAction() {
+  const action = _currentAnnouncementAction;
+  await closeAnnouncementPopup();
+  if (action) ANNOUNCEMENT_ACTIONS[action].run();
+}
 
 async function checkActiveAnnouncement() {
   // Si el onboarding (o el modal de elegir username, que lo precede) todavia
@@ -13434,8 +13465,14 @@ async function checkActiveAnnouncement() {
     const d = await res.json();
     if (!d.has_announcement) return;
     _currentAnnouncementId = d.id;
+    _currentAnnouncementAction = ANNOUNCEMENT_ACTIONS[d.action] ? d.action : null;
     document.getElementById('announcement-title-text').textContent = d.title || t('announcementDefaultTitle');
     document.getElementById('announcement-message-text').textContent = d.message;
+    const cta = document.getElementById('announcement-cta');
+    cta.style.display = _currentAnnouncementAction ? '' : 'none';
+    // Con boton, "Entendido" pasa a secundario; sin boton es el unico y va como siempre.
+    document.getElementById('announcement-ok').className = _currentAnnouncementAction ? 'btn-cancel' : 'btn-save';
+    if (_currentAnnouncementAction) cta.textContent = t(ANNOUNCEMENT_ACTIONS[_currentAnnouncementAction].label);
     document.getElementById('announcement-overlay').classList.add('open');
   } catch (e) {}
 }
