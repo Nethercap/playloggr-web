@@ -27,7 +27,7 @@
       /* Color de texto/icono sobre fondo --green — casi siempre blanco, pero
          --green es amarillo brillante en Guaca-Guaca y Determination
          (Undertale), donde blanco da mal contraste (WCAG fail). Todo botón
-         con background:var(--green) debe usar color:var(--on-accent) en vez
+         con background:var(--green-fill) debe usar color:var(--on-accent) en vez
          de un color:#fff hardcodeado para heredar el ajuste por tema. */
       --on-accent: #ffffff;
     }
@@ -39,6 +39,44 @@
        cargar segun la preferencia guardada en el backend. */
     :root[data-theme="light"] { --bg:#ffffff; --bg2:#f5f5f5; --bg3:#eeeeee; --text:#1a1a1a; --text2:#666666; --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22); }
     :root[data-theme="dark"]  { --bg:#1a1a1a; --bg2:#242424; --bg3:#2e2e2e; --text:#f0f0f0; --text2:#999; --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.2); }
+    /* ── Contraste (WCAG AA, 4.5:1 para texto) ── Los colores de estado y el
+       verde de la marca siguen tal cual en puntos, bordes, barras y tintes,
+       pero como TEXTO van con la variante --*-text, ajustada por tema: mas
+       clara en el oscuro, mas oscura en el claro y en Pelican Town (calculo
+       y muestras en docs/paleta_*.png del repo de la app; la app Flutter
+       todavia no tiene estos valores).
+       --teal-text es "Completado" (siempre #1D9E75); --green-text es el
+       acento del tema como texto (en los temas de videojuego, su --green).
+       --green-fill es el fondo de botones con texto blanco: #1D9E75 da
+       3.4:1 con blanco. --on-amber, texto sobre fondo ambar (Deseados). */
+    :root {
+      --blue-text:#1F6BB8; --teal-text:#16795A; --red-text:#D02221; --purple-text:#6258D5; --gray-text:#6B6A65; --amber-text:#965E0B;
+      --green-text:#16795A; --green-fill:#188462; --red-fill:#DD2F2D; --on-amber:#1a1a1a;
+      --tier-bronce:#965D24; --tier-plata:#696975; --tier-oro:#846617; --tier-prisma:#6951E0;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --blue-text:#539BE2; --teal-text:#1FAB7F; --red-text:#E97574; --purple-text:#948DE3; --gray-text:#989791; --amber-text:#EF9F27;
+        --green-text:#1FAB7F;
+        --tier-bronce:#CD7F32; --tier-plata:#B0B0B8; --tier-oro:#E0B84C; --tier-prisma:#8E7CE8;
+      }
+    }
+    :root[data-theme="light"] {
+      --blue-text:#1F6BB8; --teal-text:#16795A; --red-text:#D02221; --purple-text:#6258D5; --gray-text:#6B6A65; --amber-text:#965E0B;
+      --green-text:#16795A;
+      --tier-bronce:#965D24; --tier-plata:#696975; --tier-oro:#846617; --tier-prisma:#6951E0;
+    }
+    :root[data-theme="dark"], :root[data-game-theme] {
+      --blue-text:#539BE2; --teal-text:#1FAB7F; --red-text:#E97574; --purple-text:#948DE3; --gray-text:#989791; --amber-text:#EF9F27;
+      --green-text:#1FAB7F;
+      --tier-bronce:#CD7F32; --tier-plata:#B0B0B8; --tier-oro:#E0B84C; --tier-prisma:#8E7CE8;
+    }
+    :root[data-game-theme] { --green-text:var(--green); --green-fill:var(--green); }
+    :root[data-game-theme="pelican"] {
+      --blue-text:#1C60A4; --teal-text:#146A4F; --red-text:#B81E1D; --purple-text:#5348D1; --gray-text:#5F5F59; --amber-text:#85540A;
+      --green-text:#337122; --green-fill:#3C8428;
+      --tier-bronce:#855320; --tier-plata:#5E5E69; --tier-oro:#755B14; --tier-prisma:#5B41DE;
+    }
 
     /* ── Temas de videojuego (Apariencia > Tema de videojuego) — portados de
        la app Flutter (ver lib/theme/game_theme.dart). Feature Premium (ver
@@ -170,15 +208,15 @@
        en titulos — en todo el texto, menus y botones chicos se leian mal
        (mismo criterio que Halloween con Creepster). */
     :root[data-game-theme="pacman"] .header-title,
-    :root[data-game-theme="pacman"] .modal-title    { font-family:'Press Start 2P', monospace; font-size:12px; line-height:1.5; color:var(--green); }
+    :root[data-game-theme="pacman"] .modal-title    { font-family:'Press Start 2P', monospace; font-size:12px; line-height:1.5; color:var(--green-text); }
     :root[data-game-theme="doom"] .header-title,
-    :root[data-game-theme="doom"] .modal-title      { font-family:'Metal Mania', cursive; font-weight:400; letter-spacing:.03em; color:var(--green); }
+    :root[data-game-theme="doom"] .modal-title      { font-family:'Metal Mania', cursive; font-weight:400; letter-spacing:.03em; color:var(--green-text); }
     /* Creepster (letras chorreadas) solo en titulos — ilegible en texto chico.
        El resto en Mulish: una gotica (Grenze) quedaba apretada y rara en
        menus, pills y botones chicos. */
     :root[data-game-theme="halloween"] body        { font-family:'Mulish', -apple-system, sans-serif; }
     :root[data-game-theme="halloween"] .header-title,
-    :root[data-game-theme="halloween"] .modal-title { font-family:'Creepster', cursive; font-weight:400; letter-spacing:.04em; color:var(--green); }
+    :root[data-game-theme="halloween"] .modal-title { font-family:'Creepster', cursive; font-weight:400; letter-spacing:.04em; color:var(--green-text); }
 
     /* Roles que en el resto de la UI no leen --green (sidebar/drawer, boton
        de play, horas/fecha de la card) — solo se pisan cuando hay un tema de
@@ -398,10 +436,10 @@
       border-radius: 0 !important;
       border-bottom: 3px solid;
     }
-    :root[data-game-theme="pacman"] .subtab-pill.active     { color: var(--green) !important; border-bottom-color: var(--ring); }
-    :root[data-game-theme="undertale"] .subtab-pill.active  { color: var(--green) !important; border-bottom-color: var(--text2); }
+    :root[data-game-theme="pacman"] .subtab-pill.active     { color: var(--green-text) !important; border-bottom-color: var(--ring); }
+    :root[data-game-theme="undertale"] .subtab-pill.active  { color: var(--green-text) !important; border-bottom-color: var(--text2); }
     :root[data-game-theme="portal"] .subtab-pill.active     { color: var(--accent-play) !important; border-bottom-color: var(--green); }
-    :root[data-game-theme="starcraft2"] .subtab-pill.active { color: var(--green) !important; border-bottom-color: var(--text2); }
+    :root[data-game-theme="starcraft2"] .subtab-pill.active { color: var(--green-text) !important; border-bottom-color: var(--text2); }
     :root[data-game-theme="doom"] .subtab-pill.active       { color: var(--text2) !important; border-bottom-color: var(--green); }
     /* Borde blanco solido — Determination (Undertale). */
     :root[data-game-theme="undertale"] .game-card,
@@ -538,7 +576,7 @@
       background: transparent !important;
       border-radius: 0 !important;
       border-bottom: 3px solid var(--green);
-      color: var(--green) !important;
+      color: var(--green-text) !important;
     }
 
     /* ── Temas nuevos (oct 2026): Hallownest, Pelican Town, Phantom, Sheikah.
@@ -554,10 +592,10 @@
       --accent-sidebar:#E4E8F0; --accent-play:#BFD9FF; --accent-meta:#8C9AB5; --accent-unselected:#5A6683;
     }
     :root[data-game-theme="pelican"] {
-      --bg:#FFF6DF; --bg2:#F7E6BC; --bg3:#EED9A8; --text:#4B2D16; --text2:#8A6236;
+      --bg:#FFF6DF; --bg2:#F7E6BC; --bg3:#EED9A8; --text:#4B2D16; --text2:#7B5830;
       --border:rgba(75,45,22,0.18); --border2:rgba(75,45,22,0.32); --ring:#B5703A;
       --green:#3F8A2A; --green-dark:#2E6B1E; --on-accent:#FFFFFF;
-      --accent-sidebar:#9A5A26; --accent-play:#3F8A2A; --accent-meta:#8A6236; --accent-unselected:#B08A5A;
+      --accent-sidebar:#8A5022; --accent-play:#3F8A2A; --accent-meta:#7B5830; --accent-unselected:#B08A5A;
     }
     :root[data-game-theme="phantom"] {
       --bg:#161616; --bg2:#222222; --bg3:#0A0A0A; --text:#FFFFFF; --text2:#BDBDBD;
@@ -583,7 +621,7 @@
     :root[data-game-theme="phantom"] .header-title,
     :root[data-game-theme="phantom"] .modal-title    { font-family:'Anton', sans-serif; font-weight:400; font-style:italic; text-transform:uppercase; letter-spacing:.03em; color:var(--text); }
     :root[data-game-theme="sheikah"] .header-title,
-    :root[data-game-theme="sheikah"] .modal-title    { font-family:'Marcellus SC', serif; font-weight:400; letter-spacing:.08em; color:var(--green); }
+    :root[data-game-theme="sheikah"] .modal-title    { font-family:'Marcellus SC', serif; font-weight:400; letter-spacing:.08em; color:var(--green-text); }
 
     /* Hallownest (Hollow Knight) — negro azulado de caverna, luz palida de
        farol arriba de la pagina, borde fino palido con un filo de luz arriba
@@ -680,7 +718,7 @@
       background: transparent !important;
       border-radius: 0 !important;
       border-bottom: 3px solid var(--green);
-      color: var(--green) !important;
+      color: var(--green-text) !important;
     }
     :root[data-game-theme="phantom"] .subtab-pill.active { color: var(--text) !important; }
 
@@ -881,7 +919,7 @@
     .sync-btn:disabled { opacity:.5; pointer-events:none; }
     .plat-chip { display:flex; align-items:center; gap:3px; font-size:11px; color:var(--text2); padding:3px 7px; border-radius:20px; border:0.5px solid var(--border); background:var(--bg2); }
     .cfg-choice-btn { flex:1; padding:8px; font-size:12px; border-radius:8px; border:0.5px solid var(--border); background:var(--bg3); color:var(--text2); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; }
-    .cfg-choice-btn.active { border-color:var(--green); color:var(--green); background:color-mix(in srgb, var(--green) 10%, transparent); font-weight:600; }
+    .cfg-choice-btn.active { border-color:var(--green); color:var(--green-text); background:color-mix(in srgb, var(--green) 10%, transparent); font-weight:600; }
     .dot { width:6px; height:6px; border-radius:50%; background:var(--gray); }
     .dot.ok { background:var(--green); } .dot.err { background:var(--red); }
 
@@ -896,7 +934,7 @@
     .controls { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:11px 14px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
     .controls select { font-size:12px; padding:6px 9px; border-radius:var(--radius-md); border:0.5px solid var(--border2); background:var(--bg2); color:var(--text); }
     .fbtn { font-size:12px; padding:4px 10px; border-radius:20px; border:0.5px solid var(--border2); background:transparent; color:var(--text2); cursor:pointer; }
-    .fbtn.active { background:var(--green); border-color:var(--green); color:#fff; font-weight:500; }
+    .fbtn.active { background:var(--green-fill); border-color:var(--green); color:var(--on-accent); font-weight:500; }
 
     .game-list { display:flex; flex-direction:column; gap:7px; }
     .game-list.grid-view { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; align-items:start; }
@@ -913,7 +951,7 @@
     .gt-hours { font-size:11px; color:var(--text2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
     .gt-btns { display:flex; gap:4px; flex-shrink:0; }
     .gt-btn { width:24px; height:24px; border-radius:50%; border:0.5px solid var(--border2); background:transparent; color:var(--text2); cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; }
-    .gt-btn.danger { border-color:#E24B4A; color:#E24B4A; }
+    .gt-btn.danger { border-color:#E24B4A; color:var(--red-text); }
     @media (max-width: 480px) {
       .gt-btns { gap:3px; }
       .gt-btn { width:20px; height:20px; }
@@ -925,8 +963,10 @@
        horas entran enteras en vez de cortarse en "41…". */
     @container (max-width: 84px) { .gt-hours i { display:none; } }
     .view-mode-btn { padding:4px 8px; font-size:12px; border:none; background:var(--bg2); color:var(--text2); cursor:pointer; }
-    .view-mode-btn.active { background:var(--green); color:#fff; }
-    .nav-pill.active { color:#fff; }
+    .view-mode-btn.active { background:var(--green-fill); color:var(--on-accent); }
+    .nav-pill.active { color:var(--on-accent); }
+    /* Deseados: fondo ambar, el blanco encima da 2.2:1 */
+    #view-wishlist.active, #add-wishlist-btn { color:var(--on-amber); }
     .nav-pill:not(.active) { color:var(--text2); }
 
     /* Sub-tabs tipo "Mis rankings/Global", "Todas/Mis reseñas",
@@ -934,7 +974,7 @@
        .fbtn/.view-mode-btn de arriba. Los temas sin caja (ver mas abajo,
        misma lista que el TabBar de la app) la pisan con subrayado. */
     .subtab-pill { flex:1; padding:6px; border-radius:8px; border:none; cursor:pointer; font-size:12px; font-weight:600; background:var(--bg2); color:var(--text2); }
-    .subtab-pill.active { background:var(--green); color:var(--on-accent); }
+    .subtab-pill.active { background:var(--green-fill); color:var(--on-accent); }
     @media (max-width: 900px) {
       .game-list.grid-view { grid-template-columns:repeat(3,1fr); }
       .stats-row { grid-template-columns:repeat(3,1fr); }
@@ -985,7 +1025,7 @@
       transition:color .1s; user-select:none;
     }
     .star-rating .stars-interactive label:hover,
-    .star-rating .stars-interactive label.active { color:var(--amber); }
+    .star-rating .stars-interactive label.active { color:var(--amber-text); }
     .star-val { font-size:12px; color:var(--text2); min-width:24px; }
 
     .status-sel { font-size:12px; padding:4px 7px; border-radius:var(--radius-md); border:0.5px solid var(--border2); background:var(--bg2); color:var(--text); cursor:pointer; width:auto; max-width:140px; }
@@ -1006,7 +1046,7 @@
     .footer-note { font-size:12px; color:var(--text2); }
     .add-btn { font-size:13px; padding:6px 14px; border-radius:var(--radius-md); border:0.5px solid var(--border2); background:transparent; color:var(--text); cursor:pointer; display:flex; align-items:center; gap:5px; }
     .add-btn:hover { background:var(--bg2); }
-    .steam-menu-item { display:flex; align-items:center; gap:8px; width:100%; padding:8px 14px; font-size:12px; border:none; background:transparent; color:var(--green); cursor:pointer; text-align:left; }
+    .steam-menu-item { display:flex; align-items:center; gap:8px; width:100%; padding:8px 14px; font-size:12px; border:none; background:transparent; color:var(--green-text); cursor:pointer; text-align:left; }
     .steam-menu-item:hover { background:rgba(29,158,117,0.1); }
 
     /* ── Onboarding ── */
@@ -1035,7 +1075,7 @@
     .ranking-position.rank-bronze { border-color:#CD7F32; }
     .ranking-position.rank-other  { border-radius:5px; }
     .ranking-remove { position:absolute; top:6px; right:6px; width:22px; height:22px; border-radius:50%; background:rgba(0,0,0,0.6); border:none; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px; z-index:2; }
-    .ranking-remove:hover { background:#E24B4A; }
+    .ranking-remove:hover { background:var(--red-fill); }
 
     /* ── Modal ── */
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:100; align-items:center; justify-content:center; }
@@ -1053,10 +1093,10 @@
     .modal-group input, .modal-group select { font-size:13px; padding:6px 9px; border-radius:var(--radius-md); border:0.5px solid var(--border2); background:var(--bg2); color:var(--text); width:100%; }
     .modal-stars { display:flex; align-items:center; gap:4px; margin-top:2px; }
     .modal-stars label { font-size:22px; color:#d4d4d4; cursor:pointer; line-height:1; transition:color .1s; }
-    .modal-stars label.active { color:var(--amber); }
+    .modal-stars label.active { color:var(--amber-text); }
     .modal-actions { display:flex; justify-content:flex-end; gap:9px; margin-top:14px; }
     .btn-cancel { font-size:13px; padding:6px 14px; border-radius:var(--radius-md); border:0.5px solid var(--border2); background:transparent; color:var(--text2); cursor:pointer; }
-    .btn-save { font-size:13px; padding:6px 18px; border-radius:var(--radius-md); border:none; background:var(--green); color:#fff; cursor:pointer; font-weight:500; }
+    .btn-save { font-size:13px; padding:6px 18px; border-radius:var(--radius-md); border:none; background:var(--green-fill); color:var(--on-accent); cursor:pointer; font-weight:500; }
     .btn-save:hover { background:var(--green-dark); }
 
     @media (max-width:600px) {
@@ -1153,7 +1193,7 @@
 
     .fab-add-btn {
       display:none; position:fixed; bottom:20px; right:20px; width:56px; height:56px; border-radius:50%;
-      background:var(--green); color:var(--on-accent); border:none; align-items:center; justify-content:center;
+      background:var(--green-fill); color:var(--on-accent); border:none; align-items:center; justify-content:center;
       font-size:26px; box-shadow:0 4px 14px rgba(0,0,0,0.35); cursor:pointer; z-index:150;
     }
     .fab-add-btn:active { transform:scale(0.94); }
@@ -1182,11 +1222,11 @@
     }
     .mnav-ic { position:relative; width:56px; height:30px; border-radius:15px; display:flex; align-items:center; justify-content:center; font-size:21px; transition:background .15s; }
     .mnav-btn.active { color:var(--text); }
-    .mnav-btn.active .mnav-ic { background:color-mix(in srgb, var(--green) 22%, transparent); color:var(--green); }
+    .mnav-btn.active .mnav-ic { background:color-mix(in srgb, var(--green) 22%, transparent); color:var(--green-text); }
     .mnav-dot { display:none; position:absolute; top:4px; right:15px; width:8px; height:8px; border-radius:50%; background:#E24B4A; }
     .has-dot > .mnav-ic > .mnav-dot, .mcomm-tile.has-dot > .mnav-dot, .dnav-btn.has-dot > .mnav-dot { display:block; }
     .mnav-hbtn { position:relative; margin-left:4px; padding:5px 10px; font-size:14px; border-radius:6px; border:0.5px solid var(--border); background:var(--bg2); color:var(--text2); cursor:pointer; align-items:center; }
-    .mnav-hbtn.on { border-color:var(--green); color:var(--green); }
+    .mnav-hbtn.on { border-color:var(--green); color:var(--green-text); }
     .mnav-hbtn[hidden] { display:none !important; }
 
     /* El cajon no se abre nunca con la navegacion por secciones (ver
@@ -1221,8 +1261,8 @@
     .mcomm-line { font-size:13px; line-height:1.35; }
     .mcomm-line a { color:var(--text); font-weight:700; text-decoration:none; }
     .mcomm-time { font-size:11px; color:var(--text2); margin-top:2px; }
-    .mcomm-stars { color:var(--amber); margin-left:4px; }
-    .mcomm-all { display:block; text-align:center; padding:14px; font-size:13px; color:var(--green); text-decoration:none; font-weight:600; }
+    .mcomm-stars { color:var(--amber-text); margin-left:4px; }
+    .mcomm-all { display:block; text-align:center; padding:14px; font-size:13px; color:var(--green-text); text-decoration:none; font-weight:600; }
 
     /* ── Mobile (<=640px): barra inferior ── */
     @media (max-width:640px) {
@@ -1269,7 +1309,7 @@
       }
       .dnav-btn i { font-size:16px; }
       .dnav-btn:hover { background:var(--bg2); color:var(--text); }
-      .dnav-btn.active { background:color-mix(in srgb, var(--green) 16%, transparent); color:var(--green); }
+      .dnav-btn.active { background:color-mix(in srgb, var(--green) 16%, transparent); color:var(--green-text); }
       .dnav-btn .mnav-dot { top:5px; right:6px; }
 
       /* Fuera de Juegos no hay columna de filtros: el contenido usa ese ancho. */
@@ -1458,14 +1498,14 @@
     border-radius:10px;border:0.5px solid var(--green);background:color-mix(in srgb, var(--green) 10%, transparent);
     color:var(--text);text-decoration:none;font-size:12px;line-height:1.35;
   }
-  .login-app-banner > i { font-size:22px;color:var(--green);flex-shrink:0; }
+  .login-app-banner > i { font-size:22px;color:var(--green-text);flex-shrink:0; }
   .login-app-banner-cta {
-    margin-left:auto;flex-shrink:0;background:var(--green);color:var(--on-accent, #fff);
+    margin-left:auto;flex-shrink:0;background:var(--green-fill);color:var(--on-accent, #fff);
     font-weight:700;padding:6px 12px;border-radius:8px;font-size:12px;
   }
   .login-perks { list-style:none;margin:18px 0 0;padding:0;display:flex;flex-direction:column;gap:7px; }
   .login-perks li { font-size:11.5px;color:var(--text2);display:flex;align-items:flex-start;gap:7px;line-height:1.35; }
-  .login-perks i { color:var(--green);font-size:13px;flex-shrink:0;margin-top:1px; }
+  .login-perks i { color:var(--green-text);font-size:13px;flex-shrink:0;margin-top:1px; }
   @media (max-width:600px) {
     #login-screen::before {
       background-image:
@@ -1479,11 +1519,11 @@
   .login-group { display:flex;flex-direction:column;gap:5px;margin-bottom:14px; }
   .login-group label { font-size:12px;color:var(--text2);font-weight:500; }
   .login-group input { font-size:13px;padding:8px 10px;border-radius:var(--radius-md);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);width:100%; }
-  .login-btn { width:100%;font-size:13px;padding:9px;border-radius:var(--radius-md);border:none;background:var(--green);color:var(--on-accent);font-weight:500;cursor:pointer;margin-top:4px; }
+  .login-btn { width:100%;font-size:13px;padding:9px;border-radius:var(--radius-md);border:none;background:var(--green-fill);color:var(--on-accent);font-weight:500;cursor:pointer;margin-top:4px; }
   .login-btn:hover { background:var(--green-dark); }
-  .login-err { font-size:12px;color:#E24B4A;margin-top:8px;display:none; }
+  .login-err { font-size:12px;color:var(--red-text);margin-top:8px;display:none; }
   .login-toggle { font-size:12px;color:var(--text2);text-align:center;margin-top:16px; }
-  .login-toggle a { color:var(--green);cursor:pointer;text-decoration:none; }
+  .login-toggle a { color:var(--green-text);cursor:pointer;text-decoration:none; }
   .user-chip { display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2); }
   .logout-btn { font-size:11px;padding:3px 9px;border-radius:var(--radius-md);border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer; }
   .logout-btn:hover { background:var(--bg2); }
@@ -1505,18 +1545,18 @@
     .view-pill { padding:6px 16px; border-radius:20px; border:none; cursor:pointer; font-size:13px; font-weight:600; align-items:center; gap:5px; }
     /* ¿Que juego sigo? (A10). En celular, solo el dado: asi entra al lado de
        Biblioteca y Deseados sin quedar cortado en la fila que se desliza. */
-    .wn-pill { padding:6px 16px; border-radius:20px; border:1px solid var(--green); background:transparent; color:var(--green); cursor:pointer; font-size:13px; font-weight:600; align-items:center; gap:5px; display:inline-flex; flex-shrink:0; }
+    .wn-pill { padding:6px 16px; border-radius:20px; border:1px solid var(--green); background:transparent; color:var(--green-text); cursor:pointer; font-size:13px; font-weight:600; align-items:center; gap:5px; display:inline-flex; flex-shrink:0; }
     .wn-pill:hover { background:var(--bg2); }
     @media (max-width: 640px) { .wn-pill { padding:6px 12px; } .wn-pill .wn-label { display:none; } }
     .wn-seg { display:flex; border:0.5px solid var(--border); border-radius:8px; overflow:hidden; margin:8px 0 14px; }
     .wn-seg button { flex:1; padding:8px 6px; border:none; background:var(--bg2); color:var(--text2); cursor:pointer; font-size:13px; font-weight:600; }
-    .wn-seg button[aria-checked="true"] { background:var(--green); color:#fff; }
+    .wn-seg button[aria-checked="true"] { background:var(--green-fill); color:var(--on-accent); }
     .wn-game { display:flex; gap:12px; align-items:flex-start; margin-bottom:12px; }
     .wn-game img, .wn-game .wn-ph { width:52px; height:70px; border-radius:6px; object-fit:cover; background:var(--bg3); flex-shrink:0; }
     .wn-game b { display:block; font-size:14px; }
     .wn-meta { font-size:12px; color:var(--text2); }
     .wn-reason { font-size:13px; margin-top:3px; }
-    .wn-reason.fits { color:var(--green); }
+    .wn-reason.fits { color:var(--green-text); }
     .field { margin-bottom:14px; }
     .field-label { font-size:12px; color:var(--text2); margin-bottom:6px; }
     .field-hint { font-size:10px; color:var(--text2); margin-top:4px; }
@@ -1525,11 +1565,11 @@
     .menu-section { padding:10px 14px; border-bottom:0.5px solid var(--border); }
     .menu-heading { font-size:11px; color:var(--text2); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; }
     .menu-input { flex:1; padding:5px 8px; font-size:12px; background:var(--bg3); border:0.5px solid var(--border); border-radius:6px; color:var(--text); min-width:0; }
-    .menu-action { padding:5px 10px; font-size:12px; border-radius:6px; border:none; background:var(--green); color:var(--on-accent); cursor:pointer; white-space:nowrap; }
+    .menu-action { padding:5px 10px; font-size:12px; border-radius:6px; border:none; background:var(--green-fill); color:var(--on-accent); cursor:pointer; white-space:nowrap; }
     .menu-sep { height:0.5px; background:var(--border); margin:4px 0; }
     .menu-note { padding:8px 14px; font-size:10px; color:var(--text2); }
     .btn-sm { padding:6px 12px; font-size:12px; border-radius:6px; border:0.5px solid var(--border); background:var(--bg2); color:var(--text2); cursor:pointer; }
-    .btn-sm-primary { padding:6px 14px; font-size:12px; border-radius:6px; border:none; background:var(--green); color:var(--on-accent); cursor:pointer; }
+    .btn-sm-primary { padding:6px 14px; font-size:12px; border-radius:6px; border:none; background:var(--green-fill); color:var(--on-accent); cursor:pointer; }
     .spinner-block { margin:0 auto 12px; }
     .state-msg { padding:40px; color:var(--text2); }
     .state-msg-sm { padding:24px; color:var(--text2); }
@@ -1543,12 +1583,12 @@
     .u-fs14 { font-size:14px; }
     .u-fs16 { font-size:16px; }
     .u-fs18 { font-size:18px; }
-    .u-accent { color:var(--green); }
+    .u-accent { color:var(--green-text); }
     .u-muted { color:var(--text2); }
-    .u-amber { color:var(--amber); }
-    .u-blue { color:var(--blue); }
-    .u-gray { color:var(--gray); }
-    .u-wish { color:#EF9F27; }
+    .u-amber { color:var(--amber-text); }
+    .u-blue { color:var(--blue-text); }
+    .u-gray { color:var(--gray-text); }
+    .u-wish { color:var(--amber-text); }
     .u-mt2 { margin-top:2px; }
     .u-mt4 { margin-top:4px; }
     .u-mt6 { margin-top:6px; }
@@ -1594,7 +1634,7 @@
     <div id="login-ios-banner" class="login-app-banner" style="display:none">
       <i class="ti ti-brand-apple"></i>
       <span><b data-i18n="appBannerIosTitle">¿Estás en iPhone?</b><br><span data-i18n="appBannerIosBody">Instalala como app: tocá Compartir y después "Agregar a inicio".</span></span>
-      <i class="ti ti-share-2" style="margin-left:auto;font-size:20px;color:var(--green)"></i>
+      <i class="ti ti-share-2" style="margin-left:auto;font-size:20px;color:var(--green-text)"></i>
     </div>
 
     <div id="login-form">
@@ -1871,7 +1911,7 @@
               <i class="ti ti-restore"></i> <span data-i18n="restoreWishlist">Restablecer deseados borrados</span>
             </button>
             <div class="menu-sep"></div>
-            <button onclick="deletePlatformLibrary('steam','Steam')" class="steam-menu-item" style="color:#e24b4a">
+            <button onclick="deletePlatformLibrary('steam','Steam')" class="steam-menu-item" style="color:var(--red-text)">
               <i class="ti ti-trash"></i> Borrar biblioteca
             </button>
           </div>
@@ -1898,7 +1938,7 @@
               <i class="ti ti-restore"></i> <span data-i18n="restoreLibrary">Restablecer biblioteca borrada</span>
             </button>
             <div class="menu-sep"></div>
-            <button onclick="deletePlatformLibrary('psn','PSN')" class="steam-menu-item" style="color:#e24b4a">
+            <button onclick="deletePlatformLibrary('psn','PSN')" class="steam-menu-item" style="color:var(--red-text)">
               <i class="ti ti-trash"></i> Borrar biblioteca
             </button>
           </div>
@@ -1964,7 +2004,7 @@
     <!-- Add button — en desktop va primero (ver #library-toolbar en la
          media query, order:-1); en mobile no se ve (es el FAB en su lugar). -->
     <div class="u-gap6 u-items-center" id="add-game-btn-wrap" style="margin-left:auto;display:flex">
-      <button id="add-game-btn" class="nav-pill active u-fs12 u-pointer" onclick="openModal()" style="display:none;padding:4px 12px;border-radius:6px;border:none;background:var(--green)">
+      <button id="add-game-btn" class="nav-pill active u-fs12 u-pointer" onclick="openModal()" style="display:none;padding:4px 12px;border-radius:6px;border:none;background:var(--green-fill)">
         <i class="ti ti-plus"></i> <span data-i18n="addGame">Agregar juego</span>
       </button>
       <button id="add-wishlist-btn" class="nav-pill active u-fs12 u-pointer" onclick="openWishlistModal()" style="display:none;padding:4px 12px;border-radius:6px;border:none;background:#EF9F27">
@@ -1974,7 +2014,7 @@
     <!-- Main selector: Biblioteca / Deseados / Estadisticas / Listas / Rankings -->
     <div id="view-selector-row" style="display:flex;flex-wrap:wrap;padding:8px 0;gap:8px;align-items:center">
       <button id="view-library" class="nav-pill active view-pill" onclick="setView('library')"
-        style="background:var(--green);display:inline-flex">
+        style="background:var(--green-fill);display:inline-flex">
         <i class="ti ti-books u-fs14"></i> <span data-i18n="library">Biblioteca</span>
       </button>
       <button id="view-wishlist" class="nav-pill view-pill" onclick="setView('wishlist')"
@@ -2121,7 +2161,7 @@
       <button class="seg-tab" id="stab-leaderboard" onclick="switchStatsTab('leaderboard')"
         data-i18n="leaderboardTab">Tabla global</button>
       <button class="u-fs12 u-pointer" onclick="openShareCard()" data-i18n-title="shareLibrary" title="Compartir mi biblioteca"
-        style="margin-left:auto;padding:6px 14px;border:none;background:var(--green);color:var(--on-accent);border-radius:20px;font-weight:600">
+        style="margin-left:auto;padding:6px 14px;border:none;background:var(--green-fill);color:var(--on-accent);border-radius:20px;font-weight:600">
         <i class="ti ti-share"></i> <span data-i18n="shareLibraryShort">Compartir</span>
       </button>
     </div>
@@ -2138,7 +2178,7 @@
         <button class="seg-tab-sm" id="ptab-month" onclick="switchPeriodType('month')"
           data-i18n="periodMonth">Mes</button>
         <button class="seg-tab-sm" onclick="openWrapped()"><i class="ti ti-gift"></i> <span data-i18n="wrappedBtn">Mi año</span></button>
-        <button class="u-fs12 u-pointer" id="period-share-btn" onclick="openPeriodShareCard()" style="display:none;margin-left:auto;padding:5px 14px;border-radius:16px;border:none;background:var(--green);color:var(--on-accent);font-weight:600">
+        <button class="u-fs12 u-pointer" id="period-share-btn" onclick="openPeriodShareCard()" style="display:none;margin-left:auto;padding:5px 14px;border-radius:16px;border:none;background:var(--green-fill);color:var(--on-accent);font-weight:600">
           <i class="ti ti-share"></i> <span data-i18n="shareLibraryShort">Compartir</span>
         </button>
       </div>
@@ -2238,7 +2278,7 @@
           <button class="btn-sm" onclick="openRankingRename()">
             <i class="ti ti-pencil"></i>
           </button>
-          <button class="u-fs12 u-pointer" onclick="confirmDeleteRanking()" style="padding:6px 12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:#E24B4A">
+          <button class="u-fs12 u-pointer" onclick="confirmDeleteRanking()" style="padding:6px 12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--red-text)">
             <i class="ti ti-trash"></i>
           </button>
           <button class="btn-sm-primary" id="ranking-add-game-btn" onclick="openRankingAddGame()">
@@ -2647,7 +2687,7 @@
             <span class="u-fs10" id="cfg-premium-badge" style="font-weight:600;padding:2px 8px;border-radius:6px"></span>
           </div>
         </div>
-        <button class="u-fs13 u-pointer" id="cfg-upgrade-btn" onclick="setView('premium')" style="display:none;padding:12px;border-radius:8px;border:none;background:var(--green);color:var(--on-accent);font-weight:600;text-align:left">
+        <button class="u-fs13 u-pointer" id="cfg-upgrade-btn" onclick="setView('premium')" style="display:none;padding:12px;border-radius:8px;border:none;background:var(--green-fill);color:var(--on-accent);font-weight:600;text-align:left">
           <i class="ti ti-crown"></i> <span data-i18n="upgradeToPremiumBtn">Actualizar a Premium — USD $6.99 (pago único, impuestos según checkout)</span>
           <div class="u-fs11 u-mt2" style="color:rgba(255,255,255,0.85);font-weight:400" data-i18n="premiumBenefitsShort">Marcos, banners y fuentes por nivel, avatar completo, temas, carpetas y rankings ilimitados, plan de juego y más.</div>
         </button>
@@ -2663,12 +2703,12 @@
         </button>
         <input type="file" id="csv-import-file" accept=".csv,.tsv,.txt,text/csv" style="display:none" onchange="csvImportPick(this)" />
         <button class="u-fs13 u-pointer" onclick="confirmDeleteLibrary()"
-          style="padding:10px;border-radius:8px;border:0.5px solid var(--red);background:transparent;color:var(--red);text-align:left">
+          style="padding:10px;border-radius:8px;border:0.5px solid var(--red);background:transparent;color:var(--red-text);text-align:left">
           <i class="ti ti-trash"></i> <span data-i18n="deleteLibrary">Eliminar biblioteca</span>
           <div class="u-fs11 u-muted u-mt2" data-i18n="deleteLibrarySubtitle">Borra todos los juegos de tu biblioteca y deseados.</div>
         </button>
         <button class="u-fs13 u-pointer" onclick="confirmDeleteAccount()"
-          style="padding:10px;border-radius:8px;border:0.5px solid var(--red);background:rgba(226,75,74,0.1);color:var(--red);text-align:left">
+          style="padding:10px;border-radius:8px;border:0.5px solid var(--red);background:rgba(226,75,74,0.1);color:var(--red-text);text-align:left">
           <i class="ti ti-user-x"></i> <span data-i18n="deleteAccount">Eliminar cuenta</span>
           <div class="u-fs11 u-muted u-mt2" data-i18n="deleteAccountSubtitle">Elimina permanentemente tu cuenta y todos tus datos.</div>
         </button>
@@ -3007,7 +3047,7 @@
       style="width:100%;padding:10px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text)"
       oninput="this.value=this.value.replace(/[^A-Za-z0-9]/g,'')"
       onkeydown="if(event.key==='Enter') saveSetUsername()" />
-    <div class="u-fs12 u-mt8" id="set-username-err" style="color:var(--red);display:none"></div>
+    <div class="u-fs12 u-mt8" id="set-username-err" style="color:var(--red-text);display:none"></div>
     <div class="modal-actions">
       <button class="btn-save" onclick="saveSetUsername()" data-i18n="continueBtn">Continuar</button>
     </div>
@@ -3602,7 +3642,7 @@ const I18N = {
     resetPassword: 'Recuperar contraseña', recoveryCodeDigits: 'Código de recuperación (6 dígitos)',
     newPassword: 'Nueva contraseña', changePassword: 'Cambiar contraseña',
     steamSettings: 'Ajustes de Steam',
-    steamSettingsHint: 'Ingresá tu Steam ID para sincronizar tu biblioteca.<br>Lo encontrás en <a href="https://www.steamidfinder.com" target="_blank" style="color:var(--green)">steamidfinder.com</a> — es un número como <code style="background:var(--bg2);padding:1px 5px;border-radius:4px">76561198012345678</code>',
+    steamSettingsHint: 'Ingresá tu Steam ID para sincronizar tu biblioteca.<br>Lo encontrás en <a href="https://www.steamidfinder.com" target="_blank" style="color:var(--green-text)">steamidfinder.com</a> — es un número como <code style="background:var(--bg2);padding:1px 5px;border-radius:4px">76561198012345678</code>',
     rated: 'Calificados', byStatus: 'Por estado', byPlatform: 'Por plataforma', byRating: 'Por calificación',
     errorLoadingStats: 'Error al cargar estadísticas', usersSuffix: 'usuarios', noData: 'Sin datos',
     historical: 'Histórico', mostInLibrary: 'En más bibliotecas', mostPlayed: 'Más jugados',
@@ -4009,7 +4049,7 @@ const I18N = {
     resetPassword: 'Reset password', recoveryCodeDigits: 'Recovery code (6 digits)',
     newPassword: 'New password', changePassword: 'Change password',
     steamSettings: 'Steam settings',
-    steamSettingsHint: 'Enter your Steam ID to sync your library.<br>Find it at <a href="https://www.steamidfinder.com" target="_blank" style="color:var(--green)">steamidfinder.com</a> — it\'s a number like <code style="background:var(--bg2);padding:1px 5px;border-radius:4px">76561198012345678</code>',
+    steamSettingsHint: 'Enter your Steam ID to sync your library.<br>Find it at <a href="https://www.steamidfinder.com" target="_blank" style="color:var(--green-text)">steamidfinder.com</a> — it\'s a number like <code style="background:var(--bg2);padding:1px 5px;border-radius:4px">76561198012345678</code>',
     rated: 'Rated', byStatus: 'By status', byPlatform: 'By platform', byRating: 'By rating',
     errorLoadingStats: 'Error loading stats', usersSuffix: 'users', noData: 'No data',
     historical: 'All time', mostInLibrary: 'In most libraries', mostPlayed: 'Most played',
@@ -4416,7 +4456,7 @@ const I18N = {
     resetPassword: 'Recuperar senha', recoveryCodeDigits: 'Código de recuperação (6 dígitos)',
     newPassword: 'Nova senha', changePassword: 'Alterar senha',
     steamSettings: 'Configurações da Steam',
-    steamSettingsHint: 'Digite seu Steam ID para sincronizar sua biblioteca.<br>Encontre em <a href="https://www.steamidfinder.com" target="_blank" style="color:var(--green)">steamidfinder.com</a> — é um número como <code style="background:var(--bg2);padding:1px 5px;border-radius:4px">76561198012345678</code>',
+    steamSettingsHint: 'Digite seu Steam ID para sincronizar sua biblioteca.<br>Encontre em <a href="https://www.steamidfinder.com" target="_blank" style="color:var(--green-text)">steamidfinder.com</a> — é um número como <code style="background:var(--bg2);padding:1px 5px;border-radius:4px">76561198012345678</code>',
     rated: 'Avaliados', byStatus: 'Por status', byPlatform: 'Por plataforma', byRating: 'Por avaliação',
     errorLoadingStats: 'Erro ao carregar estatísticas', usersSuffix: 'usuários', noData: 'Sem dados',
     historical: 'Histórico', mostInLibrary: 'Em mais bibliotecas', mostPlayed: 'Mais jogados',
@@ -5028,7 +5068,7 @@ function toggleGameActionsMenu(gameId, hidden, event, hideLupa) {
 
   const deleteItem = document.createElement('button');
   deleteItem.className = 'steam-menu-item';
-  deleteItem.style.color = '#E24B4A';
+  deleteItem.style.color = 'var(--red-text)';
   deleteItem.innerHTML = '<i class="ti ti-trash" style="font-size:14px"></i> Borrar';
   deleteItem.onclick = () => { deleteGame(gameId); popup.remove(); };
   popup.appendChild(deleteItem);
@@ -5053,8 +5093,8 @@ function starsHtml(rating) {
   const half = (rating - full) >= 0.5;
   let s = '';
   for (let i = 1; i <= 5; i++) {
-    if (i <= full) s += '<span style="color:var(--amber)">★</span>';
-    else if (i === full + 1 && half) s += '<span style="color:var(--amber);opacity:.6">★</span>';
+    if (i <= full) s += '<span style="color:var(--amber-text)">★</span>';
+    else if (i === full + 1 && half) s += '<span style="color:var(--amber-text);opacity:.6">★</span>';
     else s += '<span style="color:#d4d4d4">★</span>';
   }
   return s;
@@ -5187,9 +5227,9 @@ async function openReviewEditor(gameId) {
       <label style="display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:12px;cursor:pointer">
         <input type="checkbox" id="review-editor-anon"> ${t('reviewPostAnonymous')}
       </label>
-      <div id="review-editor-error" style="color:var(--red);font-size:12px;margin-bottom:8px;display:none"></div>
+      <div id="review-editor-error" style="color:var(--red-text);font-size:12px;margin-bottom:8px;display:none"></div>
       <div class="modal-actions" style="justify-content:space-between">
-        <button id="review-editor-delete" class="btn-cancel" style="color:var(--red);display:none" onclick="_deleteReviewFromEditor('${gameId}')">${t('reviewDelete')}</button>
+        <button id="review-editor-delete" class="btn-cancel" style="color:var(--red-text);display:none" onclick="_deleteReviewFromEditor('${gameId}')">${t('reviewDelete')}</button>
         <div style="flex:1"></div>
         <button class="btn-cancel" onclick="this.closest('.modal-overlay').remove()">${t('cancel')}</button>
         <button class="btn-save" onclick="_saveReview('${gameId}')">${t('reviewSave')}</button>
@@ -5224,10 +5264,10 @@ function _setReviewVisibility(vis) {
   const pub = document.getElementById('review-vis-public');
   const priv = document.getElementById('review-vis-private');
   if (!pub || !priv) return;
-  pub.style.background = vis === 'public' ? 'var(--green)' : 'transparent';
-  pub.style.color = vis === 'public' ? '#fff' : 'var(--text)';
-  priv.style.background = vis === 'private' ? 'var(--green)' : 'transparent';
-  priv.style.color = vis === 'private' ? '#fff' : 'var(--text)';
+  pub.style.background = vis === 'public' ? 'var(--green-fill)' : 'transparent';
+  pub.style.color = vis === 'public' ? 'var(--on-accent)' : 'var(--text)';
+  priv.style.background = vis === 'private' ? 'var(--green-fill)' : 'transparent';
+  priv.style.color = vis === 'private' ? 'var(--on-accent)' : 'var(--text)';
 }
 
 async function _saveReview(gameId) {
@@ -5320,7 +5360,7 @@ async function _loadReviewsList(gameId) {
     }
     el.innerHTML = reviews.map(r => {
       const name = authorLinkHtml(r.username, r.is_anonymous);
-      const rating = r.rating > 0 ? `<span style="color:var(--amber)">★</span> ${r.rating.toFixed(1)}` : '';
+      const rating = r.rating > 0 ? `<span style="color:var(--amber-text)">★</span> ${r.rating.toFixed(1)}` : '';
       const reportBtn = r.is_mine ? '' : `<button onclick="_reportReview(${r.id})" title="${esc(t('reviewReport'))}" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:14px"><i class="ti ti-flag"></i></button>`;
       return `
         <div style="padding:10px 4px;border-bottom:0.5px solid var(--border)">
@@ -5336,7 +5376,7 @@ async function _loadReviewsList(gameId) {
         </div>`;
     }).join('');
   } catch (e) {
-    el.innerHTML = `<div style="color:var(--red);padding:16px">${e.message || 'Error'}</div>`;
+    el.innerHTML = `<div style="color:var(--red-text);padding:16px">${e.message || 'Error'}</div>`;
   }
 }
 
@@ -5439,7 +5479,7 @@ async function _allReviewsRefresh() {
       ${reviews.length === _ALL_REVIEWS_PAGE ? `<button onclick="_loadMoreAllReviews()" class="btn-cancel" style="font-size:12px">${t('loadMore') || 'Cargar más'}</button>` : ''}
     </div>`;
   } catch (e) {
-    el.innerHTML = `<div style="color:var(--red);padding:16px">${e.message || 'Error'}</div>`;
+    el.innerHTML = `<div style="color:var(--red-text);padding:16px">${e.message || 'Error'}</div>`;
   }
 }
 
@@ -5460,7 +5500,7 @@ async function _toggleVote(targetType, targetId, btnEl) {
 }
 function _voteBtnHtml(targetType, targetId, count, votedByMe) {
   return `<button id="vote-${targetType}-${targetId}" onclick="_toggleVote('${targetType}','${targetId}',this)"
-      style="background:none;border:none;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:4px;color:${votedByMe ? 'var(--green)' : 'var(--text2)'}">
+      style="background:none;border:none;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:4px;color:${votedByMe ? 'var(--green-text)' : 'var(--text2)'}">
       <i class="ti ${votedByMe ? 'ti-thumb-up-filled' : 'ti-thumb-up'}"></i> ${count || 0}
     </button>`;
 }
@@ -5468,7 +5508,7 @@ function _voteBtnHtml(targetType, targetId, count, votedByMe) {
 function _renderAllReviewsItems(reviews) {
   return reviews.map(r => {
     const name = authorLinkHtml(r.username, r.is_anonymous);
-    const rating = r.rating > 0 ? `<span style="color:var(--amber)">★</span> ${r.rating.toFixed(1)}` : '';
+    const rating = r.rating > 0 ? `<span style="color:var(--amber-text)">★</span> ${r.rating.toFixed(1)}` : '';
     return `
       <div style="padding:10px 4px;border-bottom:0.5px solid var(--border)">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
@@ -5516,7 +5556,7 @@ async function _myReviewsRefresh() {
       return;
     }
     el.innerHTML = reviews.map(r => {
-      const rating = r.rating > 0 ? `<span style="color:var(--amber)">★</span> ${r.rating.toFixed(1)}` : '';
+      const rating = r.rating > 0 ? `<span style="color:var(--amber-text)">★</span> ${r.rating.toFixed(1)}` : '';
       const isPublic = r.visibility === 'public';
       return `
         <div style="padding:10px 4px;border-bottom:0.5px solid var(--border)">
@@ -5531,13 +5571,13 @@ async function _myReviewsRefresh() {
               <span style="font-size:12px;color:var(--text2);display:flex;align-items:center;gap:4px"><i class="ti ti-thumb-up"></i> ${r.vote_count || 0}</span>
               <button onclick="_toggleMyReviewVisibility('${r.game_id}', '${r.visibility}')" title="${esc(isPublic ? t('reviewVisibilityPublic') : t('reviewVisibilityPrivate'))}" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:15px"><i class="ti ${isPublic ? 'ti-world' : 'ti-lock'}"></i></button>
               <button onclick="openReviewEditor('${r.game_id}')" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:15px"><i class="ti ti-pencil"></i></button>
-              <button onclick="_deleteMyReview('${r.game_id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:15px"><i class="ti ti-trash"></i></button>
+              <button onclick="_deleteMyReview('${r.game_id}')" style="background:none;border:none;color:var(--red-text);cursor:pointer;font-size:15px"><i class="ti ti-trash"></i></button>
             </div>
           </div>
         </div>`;
     }).join('');
   } catch (e) {
-    el.innerHTML = `<div style="color:var(--red);padding:16px">${e.message || 'Error'}</div>`;
+    el.innerHTML = `<div style="color:var(--red-text);padding:16px">${e.message || 'Error'}</div>`;
   }
 }
 
@@ -5742,7 +5782,7 @@ function ratingDetailModalBody(gameId) {
     <div style="font-size:12px;color:var(--text2);margin-bottom:8px">${t('rateByCriteria') || 'Calificar por criterios'}</div>
     ${rowsHtml}
     <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0 4px;margin-top:4px">
-      <span style="font-size:14px;font-weight:700;color:var(--green)">${t('ratingGlobal') || 'Global'}</span>
+      <span style="font-size:14px;font-weight:700;color:var(--green-text)">${t('ratingGlobal') || 'Global'}</span>
       <div id="detail-stars-global-${gameId}" style="text-align:right">${bigStarPickerHtml(gameId, 'global', g.user_rating || 0)}</div>
     </div>
     <div style="font-size:11px;color:var(--text2)">${t('ratingGlobalHint') || 'Esta es la única que se ve en la card — la fijás vos, no es un promedio automático.'}</div>
@@ -5845,8 +5885,8 @@ function renderGameDetailContent(d) {
     .map(s => `<option value="${s}" ${d.status === s ? 'selected' : ''}>${statusLabel(s)}</option>`).join('');
 
   const scoreHtml = d.score.steam
-    ? `<span class="steam-score" style="background:rgba(29,158,117,0.15);color:var(--green)">${d.score.steam.total_reviews > 0 ? Math.round(100 * d.score.steam.total_positive / d.score.steam.total_reviews) : '—'}% · ${esc(d.score.steam.review_score_desc)}</span>`
-    : (d.score.igdb != null ? `<span class="steam-score" style="background:rgba(29,158,117,0.15);color:var(--green)">${d.score.igdb}% IGDB</span>` : '');
+    ? `<span class="steam-score" style="background:rgba(29,158,117,0.15);color:var(--green-text)">${d.score.steam.total_reviews > 0 ? Math.round(100 * d.score.steam.total_positive / d.score.steam.total_reviews) : '—'}% · ${esc(d.score.steam.review_score_desc)}</span>`
+    : (d.score.igdb != null ? `<span class="steam-score" style="background:rgba(29,158,117,0.15);color:var(--green-text)">${d.score.igdb}% IGDB</span>` : '');
 
   const hoursHtml = d.hours_synced
     ? `<span>${(d.hours_played || 0).toFixed(1)} hs</span>`
@@ -5924,7 +5964,7 @@ function renderGameDetailContent(d) {
       <button onclick="openReviewsList('${gameId}')" class="btn-cancel" style="font-size:12px"><i class="ti ti-message-2"></i> ${t('viewReviews') || 'Ver reseñas'}</button>
       <button onclick="openReviewEditor('${gameId}')" class="btn-cancel" style="font-size:12px"><i class="ti ti-edit"></i> ${t('writeReview') || 'Escribir reseña'}</button>
       <button onclick="toggleHideGame('${gameId}', ${d.hidden}).then(refreshGameDetail)" class="btn-cancel" style="font-size:12px"><i class="ti ti-eye-off"></i> ${d.hidden ? (t('unhide') || 'Mostrar') : (t('hidden') || 'Ocultar')}</button>
-      <button onclick="deleteGame('${gameId}').then(() => closeGameDetailView())" class="btn-cancel" style="font-size:12px;color:var(--red);border-color:var(--red)"><i class="ti ti-trash"></i> ${t('delete') || 'Eliminar'}</button>
+      <button onclick="deleteGame('${gameId}').then(() => closeGameDetailView())" class="btn-cancel" style="font-size:12px;color:var(--red-text);border-color:var(--red)"><i class="ti ti-trash"></i> ${t('delete') || 'Eliminar'}</button>
     </div>
   `;
 }
@@ -6049,7 +6089,7 @@ function accessibleEditModalBody(gameId) {
     </div>
     <div style="margin-bottom:16px">
       <label style="${labelStyle}">${t('status') || 'Estado'}</label>
-      <select id="ae-status" style="${fieldStyle};color:${STATUS_DOT_COLORS[g.status]||''}">${statusOptionsHtml(g.status)}</select>
+      <select id="ae-status" style="${fieldStyle};color:${STATUS_TEXT_COLORS[g.status]||''}">${statusOptionsHtml(g.status)}</select>
     </div>
     <button onclick="closeAccessibleEditModal();openCardFolderPicker('${gameId}')"
       style="width:100%;padding:11px;font-size:15px;border-radius:8px;border:0.5px solid var(--border2);background:transparent;color:var(--text);cursor:pointer;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:6px">
@@ -6071,7 +6111,7 @@ function accessibleEditModalBody(gameId) {
         <i class="ti ${g.hidden ? 'ti-eye' : 'ti-eye-off'}"></i> ${g.hidden ? (t('showGame')||'Mostrar') : (t('hideGame')||'Ocultar')}
       </button>
       <button onclick="closeAccessibleEditModal();deleteGame('${gameId}')"
-        style="flex:1;padding:11px;font-size:15px;border-radius:8px;border:0.5px solid #E24B4A;background:transparent;color:#E24B4A;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+        style="flex:1;padding:11px;font-size:15px;border-radius:8px;border:0.5px solid #E24B4A;background:transparent;color:var(--red-text);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
         <i class="ti ti-trash"></i> ${t('delete') || 'Borrar'}
       </button>
     </div>
@@ -6081,7 +6121,7 @@ function accessibleEditModalBody(gameId) {
         ${t('cancel') || 'Cancelar'}
       </button>
       <button onclick="aeSaveAll('${gameId}')"
-        style="flex:1;padding:11px;font-size:15px;border-radius:8px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;font-weight:600">
+        style="flex:1;padding:11px;font-size:15px;border-radius:8px;border:none;background:var(--green-fill);color:var(--on-accent);cursor:pointer;font-weight:600">
         ${t('save') || 'Guardar'}
       </button>
     </div>`;
@@ -6500,6 +6540,10 @@ function canEditLastPlayedWeb(g) {
 // negro tambien pisan --text/--text2 (las custom properties SI cascadean a
 // los hijos via var(--text)), asi el texto de adentro se ve bien sin tener
 // que tocar cada elemento suelto.
+// Colores de estado como texto para las cards en blanco/negro fijo (los
+// del tema no sirven: en el tema oscuro son claros y sobre blanco no se leen).
+const _STATUS_TEXT_LIGHT = '--blue-text:#1F6BB8;--teal-text:#16795A;--red-text:#D02221;--purple-text:#6258D5;--gray-text:#6B6A65;--amber-text:#965E0B;';
+const _STATUS_TEXT_DARK  = '--blue-text:#539BE2;--teal-text:#1FAB7F;--red-text:#E97574;--purple-text:#948DE3;--gray-text:#989791;--amber-text:#EF9F27;';
 function cardColorStyle(status) {
   if (!cardColorMode || cardColorMode === 'theme') return '';
   // Ojo: setear solo --text/--text2 (custom properties) NO alcanza — nada
@@ -6513,8 +6557,8 @@ function cardColorStyle(status) {
   // estado y el tilde de seleccion masiva usan var(--bg2)/var(--border2)
   // de forma explicita, asi que sin esto quedaban con su chip oscuro de
   // siempre encima de una card blanca (o viceversa en negro), ilegible.
-  if (cardColorMode === 'white') return 'background:#ffffff;color:#111111;--text:#111111;--text2:#444444;--bg2:#f0f0f0;--bg3:#e6e6e6;--border:rgba(0,0,0,0.15);--border2:rgba(0,0,0,0.25);';
-  if (cardColorMode === 'black') return 'background:#000000;color:#f0f0f0;--text:#f0f0f0;--text2:#aaaaaa;--bg2:#2a2a2a;--bg3:#333333;--border:rgba(255,255,255,0.15);--border2:rgba(255,255,255,0.25);';
+  if (cardColorMode === 'white') return 'background:#ffffff;color:#111111;--text:#111111;--text2:#444444;--bg2:#f0f0f0;--bg3:#e6e6e6;--border:rgba(0,0,0,0.15);--border2:rgba(0,0,0,0.25);' + _STATUS_TEXT_LIGHT;
+  if (cardColorMode === 'black') return 'background:#000000;color:#f0f0f0;--text:#f0f0f0;--text2:#aaaaaa;--bg2:#2a2a2a;--bg3:#333333;--border:rgba(255,255,255,0.15);--border2:rgba(255,255,255,0.25);' + _STATUS_TEXT_DARK;
   const tint = cardColorMode === 'status' ? STATUS_DOT_COLORS[status] : STATUS_DOT_COLORS[cardColorMode];
   if (!tint) return '';
   return `background: color-mix(in srgb, ${tint} 18%, var(--bg));`;
@@ -6568,12 +6612,12 @@ function gameCardHtml(g, opts) {
         <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
           <div style="display:flex;align-items:center;gap:6px">
             <div class="sdot s-${g.status}"></div>
-            <select class="status-sel status-select" onchange="changeStatus('${g.id}',this.value)" style="color:${STATUS_DOT_COLORS[g.status]||''}">
+            <select class="status-sel status-select" onchange="changeStatus('${g.id}',this.value)" style="color:${STATUS_TEXT_COLORS[g.status]||''}">
               ${statusOptionsHtml(g.status)}
             </select>
           </div>
           <button class="play-btn" data-gid="${g.id}" onclick="togglePlaySession('${g.id}')" title="Registrar sesión de juego"
-            style="width:34px;height:34px;min-width:34px;border-radius:50%;border:1.5px solid var(--green);background:transparent;color:var(--green);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;padding:0">▶</button>
+            style="width:34px;height:34px;min-width:34px;border-radius:50%;border:1.5px solid var(--green);background:transparent;color:var(--green-text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;padding:0">▶</button>
         </div>
       </div>
       <div style="display:flex;justify-content:flex-end;margin-top:4px">
@@ -6600,7 +6644,7 @@ async function renderGames() {
       if (currentView === 'wishlist') {
         list.innerHTML = `
           <div class="empty">
-            <i class="ti ti-bookmark" style="font-size:32px;display:block;margin-bottom:10px;color:var(--amber)"></i>
+            <i class="ti ti-bookmark" style="font-size:32px;display:block;margin-bottom:10px;color:var(--amber-text)"></i>
             <div style="margin-bottom:14px">${t('addGameOrSyncHint')}</div>
             <button onclick="${addFn}" class="add-btn"><i class="ti ti-plus"></i> ${t('addWishlistGame')}</button>
           </div>`;
@@ -6780,7 +6824,7 @@ function handleExpandedCardClick(gameId, isGrid, event) {
 }
 
 function compactRowHtml(g) {
-  const statusColor = STATUS_DOT_COLORS[g.status] || '';
+  const statusColor = STATUS_TEXT_COLORS[g.status] || '';
   const hours = g.status !== 'Deseados' && g.hours_played != null
     ? `<span class="compact-hours">${parseFloat(g.hours_played).toFixed(1)}h</span>` : '';
   return `<div class="game-card compact" id="card-${g.id}" style="${cardColorStyle(g.status)}"
@@ -6793,7 +6837,7 @@ function compactRowHtml(g) {
 }
 
 function compactGridTileHtml(g) {
-  const statusColor = STATUS_DOT_COLORS[g.status] || '';
+  const statusColor = STATUS_TEXT_COLORS[g.status] || '';
   const hours = g.status !== 'Deseados' && g.hours_played != null
     ? `<span class="compact-hours">${parseFloat(g.hours_played).toFixed(1)}h</span>` : '';
   return `<div class="lib-grid-tile compact" id="gridcard-${g.id}" style="${cardColorStyle(g.status)}"
@@ -6843,7 +6887,7 @@ function gridTileHtml(g, opts) {
       <div class="gt-body">
         <div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(g.name)}">${esc(g.name)}</div>
         ${g.status !== 'Deseados' ? `<div id="stars-${g.id}" class="gt-stars" style="margin:4px 0">${starPickerHtml(g.id, g.user_rating || 0)}</div>` : '<div style="height:8px"></div>'}
-        <select class="status-sel status-select" onchange="changeStatus('${g.id}',this.value)" style="width:100%;margin-bottom:6px;color:${STATUS_DOT_COLORS[g.status]||''}">
+        <select class="status-sel status-select" onchange="changeStatus('${g.id}',this.value)" style="width:100%;margin-bottom:6px;color:${STATUS_TEXT_COLORS[g.status]||''}">
           ${statusOptionsHtml(g.status)}
         </select>
         <div class="gt-foot">
@@ -6886,7 +6930,7 @@ function renderFolderContentGrid(items) {
   const header = `
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
       <a onclick="exitFolder()" style="font-size:12px;color:var(--text2);cursor:pointer">← Volver a listas</a>
-      <i class="ti ti-folder" style="color:var(--green)"></i>
+      <i class="ti ti-folder" style="color:var(--green-text)"></i>
       <strong style="font-size:14px">${esc(folder ? folder.name : '')}</strong>
       <button onclick="toggleFolderCompactView()" style="margin-left:auto;padding:6px 12px;font-size:12px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer" title="Vista compacta">
         <i class="ti ${folderCompactView ? 'ti-layout-grid' : 'ti-list'}"></i>
@@ -6959,8 +7003,8 @@ function _updateExportColsButtons() {
     const btn = document.getElementById(`export-cols-${n}`);
     if (!btn) return;
     const active = _exportGridCols === n;
-    btn.style.background = active ? 'var(--green)' : '';
-    btn.style.color = active ? '#fff' : '';
+    btn.style.background = active ? 'var(--green-fill)' : '';
+    btn.style.color = active ? 'var(--on-accent)' : '';
     btn.style.borderColor = active ? 'var(--green)' : '';
   });
 }
@@ -7126,7 +7170,7 @@ function updateBulkBar() {
         <button class="steam-menu-item" onclick="openBulkRatingPicker()"><i class="ti ti-star" style="font-size:14px"></i> ${t('rating')}</button>
         <button class="steam-menu-item" onclick="bulkToggleHidden()"><i class="ti ti-eye-off" style="font-size:14px"></i> ${t('hideGame')}</button>
         <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
-        <button class="steam-menu-item" style="color:var(--red)" onclick="bulkDelete()"><i class="ti ti-trash" style="font-size:14px"></i> ${t('delete')}</button>
+        <button class="steam-menu-item" style="color:var(--red-text)" onclick="bulkDelete()"><i class="ti ti-trash" style="font-size:14px"></i> ${t('delete')}</button>
       </div>
     </div>
   `;
@@ -7214,7 +7258,7 @@ function openBulkRatingPicker() {
 function _renderBulkStars() {
   const el = document.getElementById('bulk-stars');
   if (!el) return;
-  el.innerHTML = [1,2,3,4,5].map(i => `<span onclick="_bulkRatingVal=${i};_renderBulkStars()" style="cursor:pointer;color:${i <= _bulkRatingVal ? 'var(--amber)' : '#d4d4d4'}">${i <= _bulkRatingVal ? '★' : '☆'}</span>`).join('');
+  el.innerHTML = [1,2,3,4,5].map(i => `<span onclick="_bulkRatingVal=${i};_renderBulkStars()" style="cursor:pointer;color:${i <= _bulkRatingVal ? 'var(--amber-text)' : '#d4d4d4'}">${i <= _bulkRatingVal ? '★' : '☆'}</span>`).join('');
 }
 
 // -- Ocultar --
@@ -7465,8 +7509,8 @@ function renderFilterDropdowns() {
     const hasActive = active.size > 0;
     const btn = document.createElement('button');
     btn.id = `filter-btn-${key}`;
-    btn.innerHTML = `${label}${hasActive ? ` <span style="background:var(--green);color:var(--on-accent);border-radius:10px;padding:1px 6px;font-size:10px">${active.size}</span>` : ' ▾'}`;
-    btn.style.cssText = `padding:4px 10px;font-size:12px;border-radius:6px;border:0.5px solid ${hasActive ? 'var(--green)' : 'var(--border)'};background:var(--bg2);color:${hasActive ? 'var(--green)' : 'var(--text2)'};cursor:pointer`;
+    btn.innerHTML = `${label}${hasActive ? ` <span style="background:var(--green-fill);color:var(--on-accent);border-radius:10px;padding:1px 6px;font-size:10px">${active.size}</span>` : ' ▾'}`;
+    btn.style.cssText = `padding:4px 10px;font-size:12px;border-radius:6px;border:0.5px solid ${hasActive ? 'var(--green)' : 'var(--border)'};background:var(--bg2);color:${hasActive ? 'var(--green-text)' : 'var(--text2)'};cursor:pointer`;
     btn.onclick = (e) => { e.stopPropagation(); toggleFilterDropdown(key, options, wrap, btn); };
 
     wrap.appendChild(btn);
@@ -7568,7 +7612,7 @@ function toggleFilterDropdown(key, options, wrap, btn) {
         const count = activeFilters[key].size;
         const filterLabel = key === 'statuses' ? t('status') : key === 'platforms' ? t('platform') : key === 'hours' ? t('hours') : t('rating');
         filterBtn.innerHTML = count > 0
-          ? `${filterLabel} <span style="background:var(--green);color:var(--on-accent);border-radius:10px;padding:1px 6px;font-size:10px">${count}</span>`
+          ? `${filterLabel} <span style="background:var(--green-fill);color:var(--on-accent);border-radius:10px;padding:1px 6px;font-size:10px">${count}</span>`
           : `${filterLabel} ▾`;
       }
     };
@@ -7600,7 +7644,7 @@ function toggleFilterDropdown(key, options, wrap, btn) {
   };
   const okBtn = document.createElement('button');
   okBtn.textContent = 'OK';
-  okBtn.style.cssText = 'font-size:12px;padding:3px 14px;border-radius:5px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer';
+  okBtn.style.cssText = 'font-size:12px;padding:3px 14px;border-radius:5px;border:none;background:var(--green-fill);color:var(--on-accent);cursor:pointer';
   okBtn.onmousedown = (e) => {
     e.preventDefault();
     if (hasChanged()) applyFilters();
@@ -7710,11 +7754,11 @@ function setView(view) {
   const statsBtn     = document.getElementById('view-stats');
   const rankingsBtn  = document.getElementById('view-rankings');
   const listsBtn     = document.getElementById('view-lists');
-  if (libBtn)      { libBtn.style.background      = view === 'library'  ? 'var(--green)' : 'var(--bg2)';  libBtn.classList.toggle('active', view === 'library'); }
+  if (libBtn)      { libBtn.style.background      = view === 'library'  ? 'var(--green-fill)' : 'var(--bg2)';  libBtn.classList.toggle('active', view === 'library'); }
   if (wishBtn)     { wishBtn.style.background     = view === 'wishlist' ? '#EF9F27'      : 'var(--bg2)';  wishBtn.classList.toggle('active', view === 'wishlist'); }
-  if (statsBtn)    { statsBtn.style.background    = isStats             ? 'var(--green)' : 'var(--bg2)';  statsBtn.classList.toggle('active', isStats); }
-  if (rankingsBtn) { rankingsBtn.style.background = isRankings          ? 'var(--green)' : 'var(--bg2)';  rankingsBtn.classList.toggle('active', isRankings); }
-  if (listsBtn)    { listsBtn.style.background    = isLists             ? 'var(--green)' : 'var(--bg2)';  listsBtn.classList.toggle('active', isLists); }
+  if (statsBtn)    { statsBtn.style.background    = isStats             ? 'var(--green-fill)' : 'var(--bg2)';  statsBtn.classList.toggle('active', isStats); }
+  if (rankingsBtn) { rankingsBtn.style.background = isRankings          ? 'var(--green-fill)' : 'var(--bg2)';  rankingsBtn.classList.toggle('active', isRankings); }
+  if (listsBtn)    { listsBtn.style.background    = isLists             ? 'var(--green-fill)' : 'var(--bg2)';  listsBtn.classList.toggle('active', isLists); }
 
   if (isCommunity) {
     loadCommunityActivity();
@@ -7814,13 +7858,23 @@ const STATUS_DOT_COLORS = {
   'Backlog':      '#888780',
   'Deseados':     '#EF9F27',
 };
+// El mismo estado como TEXTO: variante con contraste suficiente segun el tema
+// (--*-text en el CSS). STATUS_DOT_COLORS queda para puntos, bordes y tintes.
+const STATUS_TEXT_COLORS = {
+  'Jugando':      'var(--blue-text)',
+  'Completado':   'var(--teal-text)',
+  'Abandonado':   'var(--red-text)',
+  'Intermitente': 'var(--purple-text)',
+  'Backlog':      'var(--gray-text)',
+  'Deseados':     'var(--amber-text)',
+};
 
 // Cada <option> con su propio color (no el del status seleccionado, que
 // es lo que hereda el <select> — sin esto todas las opciones del
 // desplegable se veian con el mismo color que el estado actual).
 function statusOptionsHtml(current) {
   const order = ['Jugando', 'Completado', 'Backlog', 'Abandonado', 'Intermitente', 'Deseados'];
-  return order.map(s => `<option value="${s}" ${current === s ? 'selected' : ''} style="color:${STATUS_DOT_COLORS[s]};background:var(--bg2)">${statusLabel(s)}</option>`).join('');
+  return order.map(s => `<option value="${s}" ${current === s ? 'selected' : ''} style="color:${STATUS_TEXT_COLORS[s]};background:var(--bg2)">${statusLabel(s)}</option>`).join('');
 }
 
 async function changeStatus(gameId, newStatus) {
@@ -7838,7 +7892,7 @@ async function changeStatus(gameId, newStatus) {
       dot.style.background = STATUS_DOT_COLORS[newStatus] || '#888';
     }
     const sel = card.querySelector('.status-select');
-    if (sel) sel.style.color = STATUS_DOT_COLORS[newStatus] || '';
+    if (sel) sel.style.color = STATUS_TEXT_COLORS[newStatus] || '';
     // Si el modo de color de card esta en "por estado", el fondo tambien
     // depende del status — sin esto quedaba con el color del estado viejo
     // hasta el proximo render/recarga.
@@ -7896,7 +7950,7 @@ function maybeAskForReview(gameId, gameName, status) {
       <div style="font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(gameName || '')}</div>
     </div>
     <button id="review-prompt-no" style="background:none;border:none;color:var(--text2);font-size:12px;cursor:pointer">${esc(t('reviewPromptLater'))}</button>
-    <button id="review-prompt-yes" style="border:none;background:var(--green);color:var(--on-accent);font-weight:600;font-size:12px;padding:8px 14px;border-radius:8px;cursor:pointer">${esc(t('reviewPromptCta'))}</button>`;
+    <button id="review-prompt-yes" style="border:none;background:var(--green-fill);color:var(--on-accent);font-weight:600;font-size:12px;padding:8px 14px;border-radius:8px;cursor:pointer">${esc(t('reviewPromptCta'))}</button>`;
   document.body.appendChild(el);
 
   const close = () => el.remove();
@@ -7950,7 +8004,7 @@ async function submitVerifyEmail() {
     onLoginSuccess();
   } catch(e) {
     msgEl.textContent = (e instanceof Error ? e.message : String(e)) || t('codeIncorrect');
-    msgEl.style.color = '#E24B4A';
+    msgEl.style.color = 'var(--red-text)';
     msgEl.style.display = 'block';
   }
 }
@@ -7964,7 +8018,7 @@ async function resendVerification() {
       body: JSON.stringify({ email: _pendingVerifyEmail }),
     });
     msgEl.textContent = t('codeResent');
-    msgEl.style.color = 'var(--green)';
+    msgEl.style.color = 'var(--green-text)';
     msgEl.style.display = 'block';
   } catch(e) {}
 }
@@ -7986,7 +8040,7 @@ async function sendResetCode() {
   const btn   = document.getElementById('send-code-btn');
   if (!email) {
     msg.textContent = t('enterEmailFirst');
-    msg.style.color = 'var(--red)';
+    msg.style.color = 'var(--red-text)';
     msg.style.display = 'block';
     return;
   }
@@ -8001,11 +8055,11 @@ async function sendResetCode() {
     });
     const data = await res.json();
     msg.textContent = data.message || t('codeSentIfExists');
-    msg.style.color = 'var(--green)';
+    msg.style.color = 'var(--green-text)';
     msg.style.display = 'block';
   } catch (e) {
     msg.textContent = t('genericNetworkError');
-    msg.style.color = 'var(--red)';
+    msg.style.color = 'var(--red-text)';
     msg.style.display = 'block';
   } finally {
     btn.disabled = false;
@@ -8028,12 +8082,12 @@ async function submitReset() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail);
     msg.textContent = t('passwordUpdated');
-    msg.style.color = 'var(--green)';
+    msg.style.color = 'var(--green-text)';
     msg.style.display = 'block';
     setTimeout(() => { closeReset(); logout(); }, 2000);
   } catch(e) {
     msg.textContent = e.message;
-    msg.style.color = 'var(--red)';
+    msg.style.color = 'var(--red-text)';
     msg.style.display = 'block';
   }
 }
@@ -8072,12 +8126,12 @@ async function saveSettings() {
     });
     if (!res.ok) throw new Error('Error al guardar');
     msg.textContent = t('savedSyncingSteam');
-    msg.style.color = 'var(--green)';
+    msg.style.color = 'var(--green-text)';
     msg.style.display = 'block';
     setTimeout(() => { closeSettings(); syncAll(); }, 1200);
   } catch(e) {
     msg.textContent = t('saveErrorRetry');
-    msg.style.color = 'var(--red)';
+    msg.style.color = 'var(--red-text)';
     msg.style.display = 'block';
   }
 }
@@ -8138,7 +8192,7 @@ function switchStatsTab(tab) {
     if (pane) pane.style.display = t === tab ? '' : 'none';
     const btn = document.getElementById(`stab-${t}`);
     if (!btn) return;
-    btn.style.color       = t === tab ? 'var(--green)' : 'var(--text2)';
+    btn.style.color       = t === tab ? 'var(--green-text)' : 'var(--text2)';
     btn.style.borderColor = t === tab ? 'var(--green)' : 'var(--border)';
     btn.style.fontWeight  = t === tab ? '600' : 'normal';
   });
@@ -8172,7 +8226,7 @@ async function loadLeaderboard() {
         </div>
         <div style="margin-left:auto;text-align:right">
           <div style="font-size:12px;color:var(--text2)">${esc(t('levelLabel'))} ${me.level || 1}</div>
-          <div style="font-size:12px;color:var(--green);font-weight:600">${(me.xp || 0).toLocaleString()} XP</div>
+          <div style="font-size:12px;color:var(--green-text);font-weight:600">${(me.xp || 0).toLocaleString()} XP</div>
         </div>
       </div>`;
 
@@ -8191,7 +8245,7 @@ async function loadLeaderboard() {
           overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.username)}${premiumMarkHtml(r.is_premium, 13)}</a>
         ${r.title ? titleHtml(r.title, 9) : ''}
         <span style="font-size:11.5px;color:var(--text2);flex-shrink:0">${esc(t('levelLabel'))} ${r.level}</span>
-        <span style="font-size:11.5px;color:var(--green);font-weight:600;flex-shrink:0;min-width:56px;text-align:right">${r.xp.toLocaleString()} XP</span>
+        <span style="font-size:11.5px;color:var(--green-text);font-weight:600;flex-shrink:0;min-width:56px;text-align:right">${r.xp.toLocaleString()} XP</span>
       </div>`;
     }).join('');
 
@@ -8211,7 +8265,7 @@ function switchPeriodType(pt) {
   currentPeriodType = pt;
   ['week','month'].forEach(p => {
     const btn = document.getElementById(`ptab-${p}`);
-    btn.style.color       = p === pt ? 'var(--green)' : 'var(--text2)';
+    btn.style.color       = p === pt ? 'var(--green-text)' : 'var(--text2)';
     btn.style.borderColor = p === pt ? 'var(--green)' : 'var(--border)';
     btn.style.fontWeight  = p === pt ? '600' : 'normal';
   });
@@ -8253,9 +8307,9 @@ function renderPeriodStats(own, glob) {
   const statusRows = Object.entries(own.status_changes || {}).map(([k, count]) => {
     const [from, to] = k.split('->');
     return `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;font-size:13px">
-      <span style="color:${STATUS_DOT_COLORS[from] || 'var(--text2)'}">${statusLabel(from)}</span>
+      <span style="color:${STATUS_TEXT_COLORS[from] || 'var(--text2)'}">${statusLabel(from)}</span>
       <i class="ti ti-arrow-right" style="color:var(--text2);font-size:12px"></i>
-      <span style="color:${STATUS_DOT_COLORS[to] || 'var(--text2)'}">${statusLabel(to)}</span>
+      <span style="color:${STATUS_TEXT_COLORS[to] || 'var(--text2)'}">${statusLabel(to)}</span>
       <span style="color:var(--text2);margin-left:auto">${count}</span>
     </div>`;
   }).join('') || `<div style="color:var(--text2);font-size:13px">${t('periodNoStatusChanges')}</div>`;
@@ -8321,7 +8375,7 @@ function switchActivityRange(range) {
   _activityAnchor = new Date();
   ['year','month','week'].forEach(r => {
     const btn = document.getElementById(`atab-${r}`);
-    btn.style.color       = r === range ? 'var(--green)' : 'var(--text2)';
+    btn.style.color       = r === range ? 'var(--green-text)' : 'var(--text2)';
     btn.style.borderColor = r === range ? 'var(--green)' : 'var(--border)';
     btn.style.fontWeight  = r === range ? '600' : 'normal';
   });
@@ -8588,7 +8642,7 @@ async function loadUserStats() {
             <div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-top:16px;margin-bottom:10px">${t('byRating')}</div>
             ${ratingRows.map(r => `
               <div style="display:flex;align-items:center;gap:6px;margin-bottom:7px;font-size:13px">
-                <span style="color:#EF9F27">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</span>
+                <span style="color:var(--amber-text)">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</span>
                 <span style="color:var(--text2)">:</span>
                 <span style="font-weight:600;min-width:28px;text-align:right">${r.count}</span>
               </div>
@@ -8599,7 +8653,7 @@ async function loadUserStats() {
 
     `;
   } catch(e) {
-    el.innerHTML = `<div style="color:var(--red);padding:16px">${t('errorLoadingStats')}</div>`;
+    el.innerHTML = `<div style="color:var(--red-text);padding:16px">${t('errorLoadingStats')}</div>`;
   }
 }
 
@@ -8635,7 +8689,7 @@ async function loadGlobalRankings() {
     el.innerHTML = `
       ${updatedNote ? `<div style="font-size:11px;color:var(--text2);margin-bottom:14px;display:flex;align-items:center;gap:6px"><i class="ti ti-clock"></i> ${updatedNote}</div>` : ''}
       <div style="margin-bottom:16px">
-        <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--green)">${t('historical')}</div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--green-text)">${t('historical')}</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
           <div>
             ${section(t('mostInLibrary'), rankList(d.most_in_library, 'count', 'usuarios', usersSuffix))}
@@ -8651,7 +8705,7 @@ async function loadGlobalRankings() {
       </div>
 
       <div style="border-top:0.5px solid var(--border);padding-top:16px">
-        <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--green)">${t('last2Weeks')}</div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--green-text)">${t('last2Weeks')}</div>
         ${d.recent ? `
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
           <div>${section(t('mostAdded'), rankList(d.recent.most_added, 'count', '', usersSuffix))}</div>
@@ -8663,7 +8717,7 @@ async function loadGlobalRankings() {
       </div>
     `;
   } catch(e) {
-    el.innerHTML = `<div style="color:var(--red);padding:16px">${t('errorLoadingStats')}</div>`;
+    el.innerHTML = `<div style="color:var(--red-text);padding:16px">${t('errorLoadingStats')}</div>`;
   }
 }
 
@@ -8780,7 +8834,7 @@ function switchConfigTab(tab) {
     const btn = document.getElementById(`tab-${t}`);
     if (!btn) return;
     const active = t === tab;
-    btn.style.color       = active ? 'var(--green)' : 'var(--text2)';
+    btn.style.color       = active ? 'var(--green-text)' : 'var(--text2)';
     btn.style.borderColor = active ? 'var(--green)' : 'var(--border)';
     btn.style.fontWeight  = active ? '600' : 'normal';
   });
@@ -8917,7 +8971,7 @@ async function saveConfig() {
     if (!chkData.available) {
       const msg = document.getElementById('cfg-profile-msg');
       msg.style.display = 'block';
-      msg.style.color   = 'var(--red)';
+      msg.style.color   = 'var(--red-text)';
       msg.textContent   = t('usernameAlreadyInUse');
       return;
     }
@@ -8941,7 +8995,7 @@ async function saveConfig() {
       body:    JSON.stringify(body),
     });
     if (!res.ok) throw new Error();
-    msg.style.color = 'var(--green)';
+    msg.style.color = 'var(--green-text)';
     msg.textContent = t('savedCorrectly');
     if (body.language === 'en' || body.language === 'es' || body.language === 'pt') {
       currentLang = body.language;
@@ -8957,7 +9011,7 @@ async function saveConfig() {
     }
     setTimeout(closeConfigPanel, 1200);
   } catch(e) {
-    msg.style.color = 'var(--red)';
+    msg.style.color = 'var(--red-text)';
     msg.textContent = t('saveError');
   }
 }
@@ -9227,12 +9281,12 @@ async function saveAvatarConfig() {
       body: JSON.stringify({ avatar_config: JSON.stringify(currentAvatarConfig) }),
     });
     if (!res.ok) throw new Error();
-    msg.style.color = 'var(--green)';
+    msg.style.color = 'var(--green-text)';
     msg.textContent = t('avatarSaved');
     renderAvatarPreview();
     setTimeout(closeConfigPanel, 1200);
   } catch (e) {
-    msg.style.color = 'var(--red)';
+    msg.style.color = 'var(--red-text)';
     msg.textContent = t('saveError');
   }
 }
@@ -9336,7 +9390,7 @@ async function openAchievementsPanel() {
     _achievementsData = d;
     renderAchievementsPanel();
   } catch(e) {
-    el.innerHTML = `<div style="color:var(--red);padding:16px">${e.message || t('errorLoadingAchievements')}</div>`;
+    el.innerHTML = `<div style="color:var(--red-text);padding:16px">${e.message || t('errorLoadingAchievements')}</div>`;
   }
 }
 
@@ -9353,7 +9407,7 @@ function renderAchievementsPanel() {
   if (btn) {
     btn.innerHTML = `<i class="ti ${_achievementsOnlyLocked ? 'ti-lock' : 'ti-lock-open'}"></i> Solo bloqueados`;
     btn.style.borderColor = _achievementsOnlyLocked ? 'var(--green)' : 'var(--border)';
-    btn.style.color       = _achievementsOnlyLocked ? 'var(--green)' : 'var(--text2)';
+    btn.style.color       = _achievementsOnlyLocked ? 'var(--green-text)' : 'var(--text2)';
   }
 
   const progress = d.xp_for_next ? Math.min(1, (d.xp - d.xp_current_level) / (d.xp_for_next - d.xp_current_level)) : 1;
@@ -9368,11 +9422,11 @@ function renderAchievementsPanel() {
 
   const tileHtml = a => { const info = achievementInfo(a); const isRare = a.unlocked && a.global_pct < 10; return `
     <div class="${isRare ? 'frame-pulse-dorado' : ''}" style="display:flex;align-items:flex-start;gap:10px;padding:10px;margin-bottom:8px;border-radius:8px;background:var(--bg3);opacity:${a.unlocked ? '1' : '0.55'};${isRare ? 'border:2px solid transparent;' : ''}">
-      <i class="ti ${a.unlocked ? 'ti-circle-check' : 'ti-lock'}" style="font-size:18px;color:${a.unlocked ? 'var(--green)' : 'var(--text2)'};margin-top:2px"></i>
+      <i class="ti ${a.unlocked ? 'ti-circle-check' : 'ti-lock'}" style="font-size:18px;color:${a.unlocked ? 'var(--green-text)' : 'var(--text2)'};margin-top:2px"></i>
       <div style="flex:1;min-width:0">
         <div style="display:flex;align-items:center;gap:6px">
           <span style="font-weight:600;font-size:13px">${info.name}</span>
-          ${a.tier === 'P' ? `<span style="font-size:9px;font-weight:600;color:#EF9F27;background:rgba(239,159,39,0.15);padding:2px 6px;border-radius:6px">${t('premiumLabel')}</span>` : ''}
+          ${a.tier === 'P' ? `<span style="font-size:9px;font-weight:600;color:var(--amber-text);background:rgba(239,159,39,0.15);padding:2px 6px;border-radius:6px">${t('premiumLabel')}</span>` : ''}
         </div>
         <div style="font-size:11px;color:var(--text2);margin-top:2px">${info.description}</div>
         <div style="font-size:10px;color:var(--text2);margin-top:4px">+${a.xp} XP · ${a.global_pct}% ${t('ofUsers')}</div>
@@ -9391,7 +9445,7 @@ function renderAchievementsPanel() {
   el.innerHTML = `
     <div style="padding:14px;background:var(--bg3);border-radius:10px;margin-bottom:16px">
       <div style="display:flex;align-items:center;gap:12px">
-        <div style="width:40px;height:40px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;color:var(--on-accent);font-weight:700;flex-shrink:0">${d.level}</div>
+        <div style="width:40px;height:40px;border-radius:50%;background:var(--green-fill);display:flex;align-items:center;justify-content:center;color:var(--on-accent);font-weight:700;flex-shrink:0">${d.level}</div>
         <div style="flex:1;min-width:0">
           <div style="font-weight:700;font-size:14px">${t('levelLabel')} ${d.level}</div>
           <div style="height:8px;border-radius:4px;background:rgba(136,135,128,0.25);margin-top:6px;overflow:hidden">
@@ -9399,7 +9453,7 @@ function renderAchievementsPanel() {
           </div>
           <div style="font-size:10px;color:var(--text2);margin-top:4px">${d.capped ? t('maxLevelReached') : `${d.xp} / ${d.xp_for_next} XP`}</div>
         </div>
-        ${d.all_completed ? '<i class="ti ti-trophy" style="font-size:26px;color:#EF9F27"></i>' : ''}
+        ${d.all_completed ? '<i class="ti ti-trophy" style="font-size:26px;color:var(--amber-text)"></i>' : ''}
       </div>
       <div style="font-size:11px;color:var(--text2);margin-top:10px">${d.unlocked_count} ${t('of')} ${d.total_count} ${t('achievementsUnlocked')}</div>
       ${!isPremium ? `<div style="margin-top:12px">${levelCosmeticsTeaserHtml()}</div>` : ''}
@@ -9485,7 +9539,7 @@ function renderProfileStreakChip() {
   // un numero suelto sin contexto. El ti-flame es el mismo que ya usa la
   // notificacion de racha en NOTIF_TYPE_META.
   el.innerHTML = `<button onclick="openStreakPanel()" data-i18n-title="streak" title="Racha"
-    style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:#EF9F27;
+    style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--amber-text);
     background:rgba(239,159,39,.14);border:none;padding:2px 7px;border-radius:6px;cursor:pointer;white-space:nowrap;flex-shrink:0">
     <i class="ti ti-flame" style="font-size:11px"></i>${days}</button>`;
 }
@@ -9516,7 +9570,7 @@ function renderStreakModal() {
 
   if (d.xp_gained > 0) {
     html += `<div style="display:inline-block;margin-top:14px;padding:8px 14px;border-radius:20px;background:rgba(29,158,117,0.15)">
-      <span style="${retro};font-size:11px;color:var(--green)">+${d.xp_gained} ${t('streakXpGained')}</span>
+      <span style="${retro};font-size:11px;color:var(--green-text)">+${d.xp_gained} ${t('streakXpGained')}</span>
     </div>`;
   }
 
@@ -9553,7 +9607,7 @@ function renderStreakModal() {
     if (streakClaimedAvatarId) {
       html += `<button onclick="equipStreakAvatar()" style="${retro};font-size:11px;width:100%;margin-top:10px;padding:10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer">${t('streakEquipNowBtn')}</button>`;
     } else {
-      html += `<button id="streak-unlock-btn" onclick="claimSelectedStreakAvatar()" style="${retro};font-size:11px;width:100%;margin-top:10px;padding:10px;border-radius:8px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer" ${d.avatar_credits_available <= 0 ? 'disabled' : ''}>${t('streakUnlockBtn')}</button>`;
+      html += `<button id="streak-unlock-btn" onclick="claimSelectedStreakAvatar()" style="${retro};font-size:11px;width:100%;margin-top:10px;padding:10px;border-radius:8px;border:none;background:var(--green-fill);color:var(--on-accent);cursor:pointer" ${d.avatar_credits_available <= 0 ? 'disabled' : ''}>${t('streakUnlockBtn')}</button>`;
     }
   }
 
@@ -9561,8 +9615,8 @@ function renderStreakModal() {
     html += `<hr style="margin:24px 0;border:none;border-top:1px solid var(--border)" />
       <div style="${retro};font-size:11px">${t('streakFreeUpsellTitle')}</div>
       <div style="margin-top:8px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
-        <span style="${retro};font-size:8px;color:#EF9F27;border:1px solid #EF9F27;border-radius:14px;padding:6px 10px">${t('streakRewardPreviewAvatar')}</span>
-        <span style="${retro};font-size:8px;color:#EF9F27;border:1px solid #EF9F27;border-radius:14px;padding:6px 10px">${t('streakRewardPreviewFrames')}</span>
+        <span style="${retro};font-size:8px;color:var(--amber-text);border:1px solid #EF9F27;border-radius:14px;padding:6px 10px">${t('streakRewardPreviewAvatar')}</span>
+        <span style="${retro};font-size:8px;color:var(--amber-text);border:1px solid #EF9F27;border-radius:14px;padding:6px 10px">${t('streakRewardPreviewFrames')}</span>
       </div>
       <button class="pl-premium-btn pl-premium-btn-sm" style="margin-top:12px" onclick="closeStreakModal();openPaywall('streakAvatars')"><i class="ti ti-crown"></i> ${esc(t('seePremium'))}</button>`;
   }
@@ -9669,7 +9723,7 @@ async function loadGomVoteTab() {
     _gomCandidates = [];
     renderGomVoteTab();
   } catch (e) {
-    el.innerHTML = `<div style="color:var(--red);padding:16px">${e.message || 'Error'}</div>`;
+    el.innerHTML = `<div style="color:var(--red-text);padding:16px">${e.message || 'Error'}</div>`;
   }
 }
 
@@ -9682,7 +9736,7 @@ function _gomCandidateTileHtml(g, selected, disabled) {
       style="display:flex;align-items:center;gap:10px;padding:8px;margin-bottom:8px;border-radius:10px;background:${selected ? 'color-mix(in srgb, var(--green) 12%, var(--bg3))' : 'var(--bg3)'};cursor:${disabled ? 'default' : 'pointer'}">
       ${cover}
       <div style="flex:1;min-width:0;font-weight:600;font-size:13px">${esc(g.name)}</div>
-      ${selected ? '<i class="ti ti-circle-check" style="color:var(--green);font-size:20px"></i>' : ''}
+      ${selected ? '<i class="ti ti-circle-check" style="color:var(--green-text);font-size:20px"></i>' : ''}
     </div>`;
 }
 
@@ -9765,7 +9819,7 @@ async function loadGomHistoryTab() {
     _gomHistory = d.history || [];
     renderGomHistoryTab();
   } catch (e) {
-    el.innerHTML = `<div style="color:var(--red);padding:16px">${e.message || 'Error'}</div>`;
+    el.innerHTML = `<div style="color:var(--red-text);padding:16px">${e.message || 'Error'}</div>`;
   }
 }
 
@@ -9780,7 +9834,7 @@ function renderGomHistoryTab() {
       ? `<img src="${esc(entry.cover_url)}" style="width:46px;height:62px;object-fit:cover;border-radius:6px" onerror="this.style.display='none'">`
       : `<div style="width:46px;height:62px;border-radius:6px;background:var(--bg2);display:flex;align-items:center;justify-content:center">🎮</div>`;
     const ownedBadge = entry.owned
-      ? `<span style="font-size:9px;font-weight:600;padding:2px 6px;border-radius:20px;margin-left:6px;background:${entry.owned === 'wishlist' ? 'rgba(239,159,39,0.15)' : 'rgba(29,158,117,0.15)'};color:${entry.owned === 'wishlist' ? '#EF9F27' : 'var(--green)'}">${entry.owned === 'wishlist' ? t('gomOwnedWishlist') : t('gomOwnedLibrary')}</span>`
+      ? `<span style="font-size:9px;font-weight:600;padding:2px 6px;border-radius:20px;margin-left:6px;background:${entry.owned === 'wishlist' ? 'rgba(239,159,39,0.15)' : 'rgba(29,158,117,0.15)'};color:${entry.owned === 'wishlist' ? 'var(--amber-text)' : 'var(--green-text)'}">${entry.owned === 'wishlist' ? t('gomOwnedWishlist') : t('gomOwnedLibrary')}</span>`
       : '';
     return `
       <div style="display:flex;align-items:center;gap:12px;padding:10px;margin-bottom:10px;border-radius:10px;background:var(--bg3)">
@@ -9856,7 +9910,7 @@ function _novedadesOwnedPillHtml(owned, platform) {
   return `
     <div style="display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:20px;background:${color}26;margin-top:3px">
       <i class="ti ${icon}" style="font-size:10px;color:${color}"></i>
-      <span style="font-size:9px;font-weight:600;color:${color}">${label}</span>
+      <span style="font-size:9px;font-weight:600;color:${isWishlist ? 'var(--amber-text)' : 'var(--green-text)'}">${label}</span>
     </div>
     ${platform ? `<div style="font-size:9px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${platform}</div>` : ''}
   `;
@@ -9874,7 +9928,7 @@ function _novedadesCoverRowHtml(games) {
       <div style="width:96px;flex-shrink:0">
         <div style="position:relative;width:96px;height:118px;border-radius:8px;overflow:hidden;background:var(--bg3)">
           <img src="${esc(g.cover_url || '')}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'" />
-          ${rating != null ? `<div style="position:absolute;top:4px;left:4px;padding:1px 5px;border-radius:20px;background:${_ratingColor(rating)};color:#fff;font-size:9px;font-weight:600">${rating}%</div>` : ''}
+          ${rating != null ? `<div style="position:absolute;top:4px;left:4px;padding:1px 5px;border-radius:20px;background:${_ratingColor(rating)};color:#111;font-size:9px;font-weight:600">${rating}%</div>` : ''}
           <div onclick='${added ? '' : `openNovedadesAddModal(${JSON.stringify(g).replace(/'/g, "&apos;")})`}'
                style="position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:${btnColor};border:1.5px solid #fff;display:flex;align-items:center;justify-content:center;cursor:${added ? 'default' : 'pointer'}">
             <i class="ti ${added ? 'ti-check' : 'ti-plus'}" style="font-size:14px;color:#fff"></i>
@@ -9904,7 +9958,7 @@ function _novedadesSimpleTileHtml(title, subtitle, trailing) {
         <div style="font-size:13px;line-height:1.3;overflow-wrap:break-word">${esc(title)}</div>
         ${subtitle ? `<div style="font-size:11px;color:var(--text2);margin-top:2px">${esc(subtitle)}</div>` : ''}
       </div>
-      <div style="font-weight:600;color:var(--green);flex-shrink:0">${trailing}</div>
+      <div style="font-weight:600;color:var(--green-text);flex-shrink:0">${trailing}</div>
     </div>`;
 }
 
@@ -9937,7 +9991,7 @@ function _novedadesSectionHtml(icon, title, innerHtml) {
   return `
     <div style="margin-bottom:20px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        <i class="ti ${icon}" style="font-size:16px;color:var(--green)"></i>
+        <i class="ti ${icon}" style="font-size:16px;color:var(--green-text)"></i>
         <span style="font-size:14px;font-weight:700">${title}</span>
       </div>
       ${innerHtml}
@@ -9973,7 +10027,7 @@ async function loadNovedadesView() {
       _loadSuggestionScores(_suggestionData.candidates);
     }
   } catch (e) {
-    el.innerHTML = `<div style="color:var(--red);padding:16px">${e.message || t('novedadesError')}</div>`;
+    el.innerHTML = `<div style="color:var(--red-text);padding:16px">${e.message || t('novedadesError')}</div>`;
   }
 }
 
@@ -10067,7 +10121,7 @@ function _suggestionSectionHtml() {
   return `
     <div style="margin-bottom:20px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;cursor:pointer" onclick="toggleSuggestionSection()">
-        <i class="ti ti-device-gamepad-2" style="font-size:16px;color:var(--green)"></i>
+        <i class="ti ti-device-gamepad-2" style="font-size:16px;color:var(--green-text)"></i>
         <span style="font-size:14px;font-weight:700;flex:1">${freqLabel}</span>
         <i class="ti ${minimized ? 'ti-chevron-down' : 'ti-chevron-up'}" style="font-size:14px;color:var(--text2)"></i>
         <div style="position:relative" onclick="event.stopPropagation()">
@@ -10075,7 +10129,7 @@ function _suggestionSectionHtml() {
             <i class="ti ti-dots-vertical" style="font-size:13px"></i>
           </button>
           <div id="suggestion-settings-menu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;z-index:100;min-width:170px;box-shadow:0 4px 16px rgba(0,0,0,0.3);padding:4px 0">
-            <button onclick="disableSuggestionFromWidget()" class="steam-menu-item" style="width:100%;text-align:left;color:var(--red)">${t('suggestionDisable')}</button>
+            <button onclick="disableSuggestionFromWidget()" class="steam-menu-item" style="width:100%;text-align:left;color:var(--red-text)">${t('suggestionDisable')}</button>
           </div>
         </div>
       </div>
@@ -10156,7 +10210,7 @@ function _showPlanPremiumGate() {
       </div>
       <div class="modal-actions">
         <button class="btn-cancel" onclick="this.closest('.modal-overlay').remove()">${t('cancel')}</button>
-        <button class="btn-save" style="background:var(--green)" onclick="this.closest('.modal-overlay').remove();openPaywall('gamePlan')">✨ ${t('seePremium')}</button>
+        <button class="btn-save" onclick="this.closest('.modal-overlay').remove();openPaywall('gamePlan')">✨ ${t('seePremium')}</button>
       </div>
     </div>`;
   document.body.appendChild(overlay);
@@ -10175,7 +10229,7 @@ async function loadPlanListView() {
     _planListData = d.plans || [];
     _renderPlanList();
   } catch (e) {
-    el.innerHTML = `<div style="color:var(--red);padding:16px">${esc(e.message || t('planError'))}</div>`;
+    el.innerHTML = `<div style="color:var(--red-text);padding:16px">${esc(e.message || t('planError'))}</div>`;
   }
 }
 
@@ -10222,7 +10276,7 @@ async function openPlanDetail(planId) {
     _planDetailData = d;
     _renderPlanDetail();
   } catch (e) {
-    el.innerHTML = `<div style="color:var(--red);padding:16px">${esc(e.message || t('planError'))}</div>`;
+    el.innerHTML = `<div style="color:var(--red-text);padding:16px">${esc(e.message || t('planError'))}</div>`;
   }
 }
 
@@ -10258,8 +10312,8 @@ function _renderPlanDetail() {
       <span style="font-size:12px;color:var(--text2)">${t('hoursPerWeek')}: <strong style="color:var(--text)">${p.hours_per_week}h</strong></span>
       <button onclick="_promptEditHoursPerWeek()" style="padding:4px 10px;font-size:11.5px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer">${t('edit')}</button>
       <div style="margin-left:auto;display:flex;gap:8px">
-        ${p.status === 'active' ? `<button onclick="_abandonPlan()" style="padding:4px 10px;font-size:11.5px;border-radius:6px;border:0.5px solid var(--red);background:transparent;color:var(--red);cursor:pointer">${t('abandonPlan')}</button>` : ''}
-        ${p.status === 'abandoned' ? `<button onclick="_resumePlan()" style="padding:4px 10px;font-size:11.5px;border-radius:6px;border:0.5px solid var(--green);background:transparent;color:var(--green);cursor:pointer">${t('resumePlan')}</button>` : ''}
+        ${p.status === 'active' ? `<button onclick="_abandonPlan()" style="padding:4px 10px;font-size:11.5px;border-radius:6px;border:0.5px solid var(--red);background:transparent;color:var(--red-text);cursor:pointer">${t('abandonPlan')}</button>` : ''}
+        ${p.status === 'abandoned' ? `<button onclick="_resumePlan()" style="padding:4px 10px;font-size:11.5px;border-radius:6px;border:0.5px solid var(--green);background:transparent;color:var(--green-text);cursor:pointer">${t('resumePlan')}</button>` : ''}
         <button onclick="_deletePlan()" title="${esc(t('deletePlan'))}" style="padding:4px 8px;font-size:11.5px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer"><i class="ti ti-trash"></i></button>
       </div>
     </div>
@@ -10294,7 +10348,7 @@ function _planStepTimelineHtml(s) {
       </div>
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px">
-          ${isDone ? '<i class="ti ti-circle-check" style="color:var(--green)"></i>' : ''}
+          ${isDone ? '<i class="ti ti-circle-check" style="color:var(--green-text)"></i>' : ''}
           ${esc(s.game_name || s.game_id)}
           ${s.platform ? `<span style="font-size:10px;font-weight:500;color:var(--text2);border:0.5px solid var(--border2);border-radius:4px;padding:1px 5px">${esc(s.platform)}</span>` : ''}
         </div>
@@ -10625,21 +10679,21 @@ function _renderPlanPremiumRequiredDialog() {
     </div>`;
   document.getElementById('plan-wizard-actions').innerHTML = `
     <button class="btn-cancel" onclick="_closePlanWizard()">${t('cancel')}</button>
-    <button class="btn-save" style="background:var(--green)" onclick="_closePlanWizard();openPaywall('gamePlan')">✨ ${t('seePremium')}</button>`;
+    <button class="btn-save" onclick="_closePlanWizard();openPaywall('gamePlan')">✨ ${t('seePremium')}</button>`;
 }
 
 function _renderPlanResumeChoiceDialog(currentHours) {
   document.getElementById('plan-wizard-title').textContent = t('resumeOrRestart');
   document.getElementById('plan-wizard-body').innerHTML = `
     <div style="font-size:13px;color:var(--text2);margin-bottom:14px">${t('resumeOrRestartHint').replace('{hours}', currentHours)}</div>
-    <button onclick="_submitPlanStep('resume')" style="width:100%;padding:12px;border-radius:8px;border:none;background:var(--green);color:var(--on-accent);font-size:13px;cursor:pointer;margin-bottom:8px">${t('resumeChoiceResume')}</button>
+    <button onclick="_submitPlanStep('resume')" style="width:100%;padding:12px;border-radius:8px;border:none;background:var(--green-fill);color:var(--on-accent);font-size:13px;cursor:pointer;margin-bottom:8px">${t('resumeChoiceResume')}</button>
     <button onclick="_submitPlanStep('restart')" style="width:100%;padding:12px;border-radius:8px;border:0.5px solid var(--border2);background:transparent;color:var(--text);font-size:13px;cursor:pointer">${t('resumeChoiceRestart')}</button>`;
   document.getElementById('plan-wizard-actions').innerHTML = `<button class="btn-cancel" onclick="_closePlanWizard()">${t('cancel')}</button>`;
 }
 
 function _novedadesReviewTileHtml(r, i) {
   const name = authorLinkHtml(r.username, r.is_anonymous);
-  const rating = r.rating > 0 ? `<span style="color:var(--amber)">★</span> ${r.rating.toFixed(1)}` : '';
+  const rating = r.rating > 0 ? `<span style="color:var(--amber-text)">★</span> ${r.rating.toFixed(1)}` : '';
   const cover = r.cover_url
     ? `<img src="${esc(r.cover_url)}" style="width:34px;height:44px;object-fit:cover;border-radius:6px" onerror="this.style.display='none'">`
     : `<div style="width:34px;height:44px;border-radius:6px;background:var(--bg3);display:flex;align-items:center;justify-content:center">🎮</div>`;
@@ -10661,7 +10715,7 @@ function _showNovedadesReviewDetail(i) {
   const r = (_novedadesReviews || [])[i];
   if (!r) return;
   const name = authorLinkHtml(r.username, r.is_anonymous);
-  const rating = r.rating > 0 ? `<span style="color:var(--amber)">★</span> ${r.rating.toFixed(1)}` : '';
+  const rating = r.rating > 0 ? `<span style="color:var(--amber-text)">★</span> ${r.rating.toFixed(1)}` : '';
   const cover = r.cover_url
     ? `<img src="${esc(r.cover_url)}" style="width:54px;height:70px;object-fit:cover;border-radius:8px" onerror="this.style.display='none'">`
     : `<div style="width:54px;height:70px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:22px">🎮</div>`;
@@ -10753,12 +10807,12 @@ function _updateNovedadesAddTargetUI() {
   if (libBtn) {
     libBtn.style.background = !_novedadesAddToWishlist ? 'rgba(29,158,117,0.15)' : 'transparent';
     libBtn.style.border = !_novedadesAddToWishlist ? '1px solid var(--green)' : '1px solid var(--border2)';
-    libBtn.style.color = !_novedadesAddToWishlist ? 'var(--green)' : 'var(--text2)';
+    libBtn.style.color = !_novedadesAddToWishlist ? 'var(--green-text)' : 'var(--text2)';
   }
   if (wishBtn) {
     wishBtn.style.background = _novedadesAddToWishlist ? 'rgba(239,159,39,0.15)' : 'transparent';
     wishBtn.style.border = _novedadesAddToWishlist ? '1px solid #EF9F27' : '1px solid var(--border2)';
-    wishBtn.style.color = _novedadesAddToWishlist ? '#EF9F27' : 'var(--text2)';
+    wishBtn.style.color = _novedadesAddToWishlist ? 'var(--amber-text)' : 'var(--text2)';
   }
 }
 
@@ -10911,12 +10965,12 @@ async function _csvPost(dryRun) {
     const d = await res.json().catch(() => ({}));
     if (!res.ok) {
       const msg = { no_name_column: 'csvErrNoName', empty: 'csvErrEmpty', csv_too_big: 'csvErrTooBig' }[d.detail] || 'csvErrGeneric';
-      document.getElementById('csv-import-body').innerHTML = `<div style="color:#E24B4A">${esc(t(msg))}</div>`;
+      document.getElementById('csv-import-body').innerHTML = `<div style="color:var(--red-text)">${esc(t(msg))}</div>`;
       return null;
     }
     return d;
   } catch (e) {
-    document.getElementById('csv-import-body').innerHTML = `<div style="color:#E24B4A">${esc(t('csvErrGeneric'))}</div>`;
+    document.getElementById('csv-import-body').innerHTML = `<div style="color:var(--red-text)">${esc(t('csvErrGeneric'))}</div>`;
     return null;
   }
 }
@@ -10928,7 +10982,7 @@ function renderCsvPreview(d) {
   const cols = Object.entries(d.columns || {}).map(([k, v]) =>
     `<span style="display:inline-block;margin:2px 6px 2px 0;padding:2px 8px;border-radius:6px;background:var(--bg3)">${esc(t(colNames[k] || k))} ← ${esc(v)}</span>`).join('');
   const warn = (key, list) => list && list.length
-    ? `<div style="margin-top:6px;color:var(--amber)">${esc(t(key).replace('{list}', list.join(', ')))}</div>` : '';
+    ? `<div style="margin-top:6px;color:var(--amber-text)">${esc(t(key).replace('{list}', list.join(', ')))}</div>` : '';
   const rows = (d.preview || []).map(g => {
     const hours = g.hours ? ` · ${g.hours} h` : '';
     const stars = g.rating ? ` · ${g.rating}★` : '';
@@ -11015,7 +11069,7 @@ function renderWhatNext({ loading, failed, exhausted } = {}) {
     el.innerHTML = `<div class="u-muted u-fs12" style="padding:28px 0;text-align:center"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite;display:inline-block"></i> ${esc(t('whatNextLoading'))}</div>`;
     return;
   }
-  if (failed) { el.innerHTML = `<div style="color:#E24B4A;font-size:13px">${esc(t('whatNextError'))}</div>`; return; }
+  if (failed) { el.innerHTML = `<div style="color:var(--red-text);font-size:13px">${esc(t('whatNextError'))}</div>`; return; }
   if (!_wnGames.length) { el.innerHTML = `<div class="u-muted u-fs12">${esc(t('whatNextEmpty'))}</div>`; return; }
   el.innerHTML = _wnGames.map(g => {
     const remaining = _wnHours(g.remaining);
@@ -11099,6 +11153,8 @@ function closeFriendsPanel() {
 }
 
 const _badgeTierColors = { bronce: '#CD7F32', plata: '#B0B0B8', oro: '#E0B84C', prisma: '#8E7CE8' };
+// Los mismos como texto (el numero del nivel): en los temas claros se oscurecen.
+const _badgeTierTextColors = { bronce: 'var(--tier-bronce)', plata: 'var(--tier-plata)', oro: 'var(--tier-oro)', prisma: 'var(--tier-prisma)' };
 
 // 15 medallas en total, 10 niveles cada una — 5 bronce (1-50), 5 plata
 // (51-100), 3 oro (101-130), y 2 de diamante: la primera cubre 131-149 (19
@@ -11108,12 +11164,12 @@ const _badgeTierColors = { bronce: '#CD7F32', plata: '#B0B0B8', oro: '#E0B84C', 
 // 150 — para que el numero y la medalla coincidan visualmente, el color se
 // deriva de la misma banda que la medalla en vez del tier del backend.
 // Mismo criterio que widgets/level_badge.dart en la app.
-function _badgeAssetAndColor(level) {
-  if (level <= 50)  return [`badges/bronce_${Math.min(4, Math.floor((level - 1) / 10))}.png`, _badgeTierColors.bronce];
-  if (level <= 100) return [`badges/plata_${Math.min(4, Math.floor((level - 51) / 10))}.png`, _badgeTierColors.plata];
-  if (level <= 130) return [`badges/oro_${Math.min(2, Math.floor((level - 101) / 10))}.png`, _badgeTierColors.oro];
-  if (level <= 149) return ['badges/prisma_0.png', _badgeTierColors.prisma];
-  return ['badges/prisma_1.png', _badgeTierColors.prisma];
+function _badgeAssetAndColor(level, colors = _badgeTierColors) {
+  if (level <= 50)  return [`badges/bronce_${Math.min(4, Math.floor((level - 1) / 10))}.png`, colors.bronce];
+  if (level <= 100) return [`badges/plata_${Math.min(4, Math.floor((level - 51) / 10))}.png`, colors.plata];
+  if (level <= 130) return [`badges/oro_${Math.min(2, Math.floor((level - 101) / 10))}.png`, colors.oro];
+  if (level <= 149) return ['badges/prisma_0.png', colors.prisma];
+  return ['badges/prisma_1.png', colors.prisma];
 }
 
 // Antes esto dibujaba una insignia con forma (circulo/hexagono/estrella/
@@ -11124,13 +11180,13 @@ function _badgeAssetAndColor(level) {
 function levelBadgeHtml(levelInfo, size = 18) {
   if (!levelInfo) return '';
   if (typeof ensureGameThemeFontsLoaded === 'function') ensureGameThemeFontsLoaded();
-  const [asset, color] = _badgeAssetAndColor(levelInfo.level);
+  const [asset, color] = _badgeAssetAndColor(levelInfo.level, _badgeTierTextColors);
   const iconSize = Math.round(size * 2.1);
   const icon = `<img src="${esc(asset)}" style="width:${iconSize}px;height:${iconSize}px;flex-shrink:0;display:block" onerror="this.style.display='none'" />`;
   // El trofeo se muestra al lado del numero (y por lo tanto, al lado del
   // nombre de usuario donde se renderizan juntos), no superpuesto encima.
   const trophy = levelInfo.trophy
-    ? `<i class="ti ti-trophy" style="font-size:${Math.round(size*0.85)}px;color:#EF9F27;margin-right:4px"></i>`
+    ? `<i class="ti ti-trophy" style="font-size:${Math.round(size*0.85)}px;color:var(--amber-text);margin-right:4px"></i>`
     : '';
   return `<span style="display:inline-flex;align-items:center;gap:4px">${icon}<span style="font-family:'Press Start 2P',monospace;color:${color};font-size:${Math.round(size*0.72)}px;flex-shrink:0">${levelInfo.level}</span></span>${trophy}<span style="display:inline-block;width:6px"></span>`;
 }
@@ -11230,7 +11286,7 @@ function usernameFontStyle(fontId) {
     case 'condensed':    return 'letter-spacing:-0.5px';
     case 'expanded':     return 'letter-spacing:1.5px';
     case 'monospace':    return 'font-family:monospace;color:#2ECC71';
-    case 'uppercase':    return 'letter-spacing:1.2px;font-weight:700;text-transform:uppercase;color:#E24B4A';
+    case 'uppercase':    return 'letter-spacing:1.2px;font-weight:700;text-transform:uppercase;color:var(--red-text)';
     case 'retro':        return 'font-family:monospace;font-weight:700;letter-spacing:0.5px;color:#F5C518';
     case 'elegant':       return 'font-style:italic;font-family:serif';
     case 'prisma_font':  return 'font-weight:800;letter-spacing:0.8px;color:#8E7CE8';
@@ -11288,17 +11344,17 @@ async function loadFriendsList() {
       html += `<div style="font-weight:600;font-size:12px;margin-bottom:4px">${t('followersLabel')} (${followers.length})</div>`;
       html += followers.map(r => _requestRowHtml(r, r.following_back ? '' : `
         <button onclick="toggleFollow('${jsAttrEsc(r.username)}')"
-          style="padding:5px 10px;font-size:11px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer">${t('followBack')}</button>
+          style="padding:5px 10px;font-size:11px;border-radius:6px;border:none;background:var(--green-fill);color:var(--on-accent);cursor:pointer">${t('followBack')}</button>
       `)).join('');
     }
     if (friends.length) {
       html += `<div style="font-weight:600;font-size:12px;margin:12px 0 4px">${t('followingLabel')} (${friends.length})</div>`;
       html += friends.map(f => {
         const sessionBadge = f.in_session
-          ? `<span style="background:var(--green);color:var(--on-accent);font-size:10px;padding:2px 6px;border-radius:6px;margin-left:6px">${t('inSession')}</span>`
+          ? `<span style="background:var(--green-fill);color:var(--on-accent);font-size:10px;padding:2px 6px;border-radius:6px;margin-left:6px">${t('inSession')}</span>`
           : '';
         const subtitle = f.in_session
-          ? `<span style="color:var(--green)">${esc(f.session_game || '')} · ${esc(f.session_platform || '')}</span>`
+          ? `<span style="color:var(--green-text)">${esc(f.session_game || '')} · ${esc(f.session_platform || '')}</span>`
           : `${f.library_count} ${gamesLabel(f.library_count)} · ${f.wishlist_count} ${t('wishlistLower')} · ${Math.round(f.total_hours)} hs`;
         const frameId = f.level_info && f.level_info.frame;
         const fontId  = f.level_info && f.level_info.font;
@@ -11318,7 +11374,7 @@ async function loadFriendsList() {
             <i class="ti ti-user-minus"></i>
           </button>
           <button onclick="blockFriendByUsername('${jsAttrEsc(f.username)}')" title="${t('block')}"
-            style="padding:5px 8px;font-size:11px;border-radius:6px;border:0.5px solid var(--red);background:transparent;color:var(--red);cursor:pointer">
+            style="padding:5px 8px;font-size:11px;border-radius:6px;border:0.5px solid var(--red);background:transparent;color:var(--red-text);cursor:pointer">
             <i class="ti ti-ban"></i>
           </button>
         </div>`;
@@ -11367,14 +11423,14 @@ async function addFriendByUsername() {
     input.value = '';
     document.getElementById('friend-add-preview').style.display = 'none';
     msg.style.display = 'block';
-    msg.style.color = 'var(--green)';
+    msg.style.color = 'var(--green-text)';
     msg.textContent = t('nowFollowing').replace('{user}', username);
     checkAchievements();
     await loadFriendsList();
     loadWidgetFriends();
   } catch(e) {
     msg.style.display = 'block';
-    msg.style.color = 'var(--red)';
+    msg.style.color = 'var(--red-text)';
     msg.textContent = e.message || 'No se pudo agregar el amigo';
   }
 }
@@ -11456,7 +11512,7 @@ async function renderFollowButton(username) {
     </a>
     <button id="friend-follow-btn" onclick="toggleFollow('${jsAttrEsc(username)}')"
       style="font-size:12px;font-weight:600;padding:6px 14px;border-radius:6px;cursor:pointer;border:${following ? '0.5px solid var(--border)' : 'none'};
-             background:${following ? 'transparent' : 'var(--green)'};color:${following ? 'var(--text2)' : 'var(--on-accent)'}">
+             background:${following ? 'transparent' : 'var(--green-fill)'};color:${following ? 'var(--text2)' : 'var(--on-accent)'}">
       ${esc(label)}
     </button>`;
 }
@@ -11500,7 +11556,7 @@ function switchFriendTab(tab) {
   ['library','wishlist','stats','common','reviews'].forEach(t => {
     const btn = document.getElementById(`ftab-${t}`);
     const active = t === tab;
-    btn.style.color       = active ? 'var(--green)' : 'var(--text2)';
+    btn.style.color       = active ? 'var(--green-text)' : 'var(--text2)';
     btn.style.borderColor = active ? 'var(--green)' : 'var(--border)';
     btn.style.fontWeight  = active ? '600' : 'normal';
   });
@@ -11526,7 +11582,7 @@ async function loadFriendReviews() {
           <div style="padding:10px;border-radius:10px;background:var(--bg3)">
             <div style="display:flex;justify-content:space-between;align-items:center">
               <span style="font-weight:700;font-size:13px">${esc(r.game_name)}</span>
-              ${r.rating > 0 ? `<span style="font-size:12px"><span style="color:var(--amber)">★</span> ${r.rating.toFixed(1)}</span>` : ''}
+              ${r.rating > 0 ? `<span style="font-size:12px"><span style="color:var(--amber-text)">★</span> ${r.rating.toFixed(1)}</span>` : ''}
             </div>
             <div style="font-size:13px;margin-top:4px">${esc(r.text)}</div>
             <div style="font-size:11px;color:var(--text2);margin-top:4px">${_formatReviewDate(r.updated_at)}</div>
@@ -11566,11 +11622,11 @@ function commonGameCardHtml(g) {
       <div class="game-name">${esc(g.name)}</div>
       <div class="game-meta">
         <span style="color:var(--text2);font-size:11px">${t('you')}:</span> ${platBadge(g.my_platform)}
-        <span style="display:inline-flex;align-items:center;gap:4px;margin-left:4px;font-size:11px;color:${myColor}"><div class="sdot" style="background:${myColor}"></div>${statusLabel(g.my_status)}</span>
+        <span style="display:inline-flex;align-items:center;gap:4px;margin-left:4px;font-size:11px;color:${STATUS_TEXT_COLORS[g.my_status] || 'var(--gray-text)'}"><div class="sdot" style="background:${myColor}"></div>${statusLabel(g.my_status)}</span>
       </div>
       <div class="game-meta" style="margin-top:4px">
         <span style="color:var(--text2);font-size:11px">${esc(currentFriendUsername)}:</span> ${platBadge(g.friend_platform)}
-        <span style="display:inline-flex;align-items:center;gap:4px;margin-left:4px;font-size:11px;color:${friendColor}"><div class="sdot" style="background:${friendColor}"></div>${statusLabel(g.friend_status)}</span>
+        <span style="display:inline-flex;align-items:center;gap:4px;margin-left:4px;font-size:11px;color:${STATUS_TEXT_COLORS[g.friend_status] || 'var(--gray-text)'}"><div class="sdot" style="background:${friendColor}"></div>${statusLabel(g.friend_status)}</span>
       </div>
     </div>
     <div class="game-status-col">
@@ -11591,7 +11647,7 @@ function friendGameCardHtml(g) {
       <div class="game-foot"><span><i class="ti ti-clock" style="font-size:12px"></i>${(g.hours_played||0).toFixed(1)} hs</span>${g.user_rating ? `<span style="margin-left:8px">★ ${g.user_rating}</span>` : ''}</div>
     </div>
     <div class="game-status-col">
-      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:${color}">
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:${STATUS_TEXT_COLORS[g.status] || 'var(--gray-text)'}">
         <div class="sdot" style="background:${color}"></div>${statusLabel(g.status)}
       </div>
     </div>
@@ -12130,7 +12186,7 @@ async function loadSteamIdIntoMenu() {
     document.getElementById('steam-id-input').value = steamId;
     const cur = document.getElementById('steam-id-current');
     cur.textContent = steamId ? `Conectado: ${steamId}` : 'No conectado';
-    cur.style.color = steamId ? 'var(--green)' : 'var(--text2)';
+    cur.style.color = steamId ? 'var(--green-text)' : 'var(--text2)';
   } catch(e) {}
 }
 
@@ -12146,7 +12202,7 @@ async function _saveSteamIdToServer(steamId) {
   if (!res.ok) throw new Error();
   const cur = document.getElementById('steam-id-current');
   cur.textContent = t('savedLabel').replace('{value}', steamId);
-  cur.style.color = 'var(--green)';
+  cur.style.color = 'var(--green-text)';
 }
 
 function closeConnectProfileModal() {
@@ -12191,7 +12247,7 @@ async function searchSteamProfile() {
     document.getElementById('connect-profile-overlay').classList.add('open');
   } catch(e) {
     cur.textContent = e.message || t('profileNotFound');
-    cur.style.color = 'var(--red)';
+    cur.style.color = 'var(--red-text)';
   } finally {
     btn.disabled = false;
   }
@@ -12347,7 +12403,7 @@ async function loadPsnIdIntoMenu() {
     document.getElementById('psn-id-input').value = psnId;
     const cur = document.getElementById('psn-id-current');
     cur.textContent = psnId ? `Conectado: ${psnId}` : 'No conectado';
-    cur.style.color = psnId ? 'var(--green)' : 'var(--text2)';
+    cur.style.color = psnId ? 'var(--green-text)' : 'var(--text2)';
   } catch(e) {}
 }
 
@@ -12360,7 +12416,7 @@ async function _savePsnIdToServer(id) {
   if (!res.ok) throw new Error();
   const cur = document.getElementById('psn-id-current');
   cur.textContent = t('savedLabel').replace('{value}', id);
-  cur.style.color = 'var(--green)';
+  cur.style.color = 'var(--green-text)';
 }
 
 async function searchPsnProfile() {
@@ -12391,7 +12447,7 @@ async function searchPsnProfile() {
     document.getElementById('connect-profile-overlay').classList.add('open');
   } catch(e) {
     cur.textContent = e.message || t('profileNotFound');
-    cur.style.color = 'var(--red)';
+    cur.style.color = 'var(--red-text)';
   } finally {
     btn.disabled = false;
   }
@@ -12532,7 +12588,7 @@ function renderConnectorMenus() {
               style="flex:1;padding:5px 8px;font-size:12px;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;color:var(--text);min-width:0"
               onkeydown="if(event.key==='Enter') connectConnectorCode('${p}')"
               onpaste="_onConnectorCodePaste(event, '${p}')" />
-            <button onclick="connectConnectorCode('${p}')" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;white-space:nowrap">Conectar</button>
+            <button onclick="connectConnectorCode('${p}')" style="padding:5px 10px;font-size:12px;border-radius:6px;border:none;background:var(--green-fill);color:var(--on-accent);cursor:pointer;white-space:nowrap">Conectar</button>
           </div>
           <div id="${p}-status" style="font-size:10px;color:var(--text2);margin-top:4px"></div>
         </div>`}
@@ -12545,7 +12601,7 @@ function renderConnectorMenus() {
             <i class="ti ti-restore"></i> Restablecer biblioteca borrada
           </button>
           <div style="height:0.5px;background:var(--border);margin:4px 0"></div>
-          <button onclick="deletePlatformLibrary('${p}','${c.label}')" class="steam-menu-item" style="color:#e24b4a">
+          <button onclick="deletePlatformLibrary('${p}','${c.label}')" class="steam-menu-item" style="color:var(--red-text)">
             <i class="ti ti-trash"></i> Borrar biblioteca
           </button>
         </div>
@@ -12661,14 +12717,14 @@ async function connectConnectorCode(platform) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Error');
     status.textContent = `✓ ${data.message || t('connectedDefault')}`;
-    status.style.color = 'var(--green)';
+    status.style.color = 'var(--green-text)';
     input.value = '';
     await syncAll(1);
     loadGlobalStats();
     checkAchievements();
   } catch(e) {
     status.textContent = e.message || 'Error al conectar';
-    status.style.color = 'var(--red)';
+    status.style.color = 'var(--red-text)';
   } finally {
     if (_connectorCodeInFlight[platform] === code) delete _connectorCodeInFlight[platform];
   }
@@ -12774,8 +12830,8 @@ function showToast(msg, isError = false) {
     document.body.appendChild(toast);
   }
   toast.textContent = msg;
-  toast.style.background = isError ? 'var(--red)' : 'var(--green)';
-  toast.style.color = '#fff';
+  toast.style.background = isError ? 'var(--red-fill)' : 'var(--green-fill)';
+  toast.style.color = isError ? '#fff' : 'var(--on-accent)';
   toast.style.opacity = '1';
   clearTimeout(toast._timer);
   toast._timer = setTimeout(() => { toast.style.opacity = '0'; }, 3000);
@@ -13855,7 +13911,7 @@ function renderPremiumView() {
         <div style="font-size:12.5px;color:var(--text2);line-height:1.4;margin-top:2px">${esc(b.detail)}</div>
       </div>
     </div>`).join('');
-  const yes = '<i class="ti ti-circle-check" style="color:var(--green);font-size:18px"></i>';
+  const yes = '<i class="ti ti-circle-check" style="color:var(--green-text);font-size:18px"></i>';
   const no = '<i class="ti ti-minus" style="color:var(--text2);font-size:16px"></i>';
   const cmp = [
     [t('cmpLibrary'), yes, yes],
@@ -13945,7 +14001,7 @@ function _showOnboardingCarouselLegacy() {
     <div class="onboarding-slide" style="flex:0 0 ${slideBasis}%">
       ${s.img
         ? `<img src="${esc(s.img)}" alt="">`
-        : `<div style="width:100%;height:200px;display:flex;align-items:center;justify-content:center;background:var(--bg2)"><i class="ti ${s.icon}" style="font-size:64px;color:var(--green)"></i></div>`}
+        : `<div style="width:100%;height:200px;display:flex;align-items:center;justify-content:center;background:var(--bg2)"><i class="ti ${s.icon}" style="font-size:64px;color:var(--green-text)"></i></div>`}
       <div class="onboarding-slide-text">
         <h3>${t(s.titleKey)}</h3>
         <p>${t(s.bodyKey)}</p>
@@ -14419,7 +14475,7 @@ function _positionTourStep(el, step) {
   const isLast = _tourIndex === _tourSteps.length - 1;
   const tip = document.getElementById('tour-tooltip');
   tip.innerHTML = `
-    <h4><i class="ti ${step.icon}" style="color:var(--green);margin-right:6px"></i>${t(step.titleKey)}</h4>
+    <h4><i class="ti ${step.icon}" style="color:var(--green-text);margin-right:6px"></i>${t(step.titleKey)}</h4>
     <p>${t(step.bodyKey)}</p>
     <div class="tour-actions">
       <span class="tour-count">${_tourIndex + 1}/${_tourSteps.length}</span>
@@ -14493,7 +14549,7 @@ function applyPremiumUI() {
     if (!badge) return;
     badge.textContent = isPremium ? t('premiumLabel') : t('freeLabel');
     badge.style.background = isPremium ? 'rgba(29,158,117,0.15)' : 'rgba(136,135,128,0.25)';
-    badge.style.color      = isPremium ? 'var(--green)' : 'var(--text2)';
+    badge.style.color      = isPremium ? 'var(--green-text)' : 'var(--text2)';
     badge.style.cursor     = isPremium ? 'default' : 'pointer';
     badge.onclick = isPremium ? null : () => setView('premium');
   });
@@ -14849,12 +14905,12 @@ function updateFolderBtn() {
   if (activeFolderId === -1) {
     label.textContent = t('folders');
     wrap.style.borderColor = 'var(--green)';
-    wrap.querySelectorAll('button').forEach(b => b.style.color = 'var(--green)');
+    wrap.querySelectorAll('button').forEach(b => b.style.color = 'var(--green-text)');
   } else if (activeFolderId > 0) {
     const f = folders.find(x => x.id === activeFolderId);
     label.textContent = f ? f.name : t('folder');
     wrap.style.borderColor = 'var(--green)';
-    wrap.querySelectorAll('button').forEach(b => b.style.color = 'var(--green)');
+    wrap.querySelectorAll('button').forEach(b => b.style.color = 'var(--green-text)');
   } else {
     label.textContent = `${t('folders')}${folders.length ? ' (' + folders.length + ')' : ''}`;
     wrap.style.borderColor = 'var(--border)';
@@ -14907,7 +14963,7 @@ function renderFolderDropdownItems() {
           <button onclick="event.stopPropagation();openRenameFolder(${f.id},'${jsAttrEsc(f.name)}')"
             style="background:none;border:none;color:var(--text2);cursor:pointer;padding:2px 4px;font-size:12px" title="Renombrar">✏️</button>
           <button onclick="event.stopPropagation();deleteFolder(${f.id})"
-            style="background:none;border:none;color:var(--red);cursor:pointer;padding:2px 4px;font-size:12px" title="Eliminar">🗑</button>
+            style="background:none;border:none;color:var(--red-text);cursor:pointer;padding:2px 4px;font-size:12px" title="Eliminar">🗑</button>
         </div>
       `).join('')
     }
@@ -15042,11 +15098,11 @@ async function renderPublicFolderList(page) {
   gameList.innerHTML = _folderTabsHtml() + `
     <div style="padding:12px 16px 0;display:flex;gap:8px">
       <button onclick="currentView='library';_publicFolderPage=1;switchFolderTab('global')"
-        style="padding:6px 14px;border-radius:20px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${section==='library'?'var(--green)':'var(--bg2)'};color:${section==='library'?'#fff':'var(--text2)'}">
+        style="padding:6px 14px;border-radius:20px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${section==='library'?'var(--green-fill)':'var(--bg2)'};color:${section==='library'?'var(--on-accent)':'var(--text2)'}">
         <i class="ti ti-books" style="font-size:13px"></i> Biblioteca
       </button>
       <button onclick="currentView='wishlist';_publicFolderPage=1;switchFolderTab('global')"
-        style="padding:6px 14px;border-radius:20px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${section==='wishlist'?'#EF9F27':'var(--bg2)'};color:${section==='wishlist'?'#fff':'var(--text2)'}">
+        style="padding:6px 14px;border-radius:20px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${section==='wishlist'?'#EF9F27':'var(--bg2)'};color:${section==='wishlist'?'var(--on-amber)':'var(--text2)'}">
         <i class="ti ti-bookmark" style="font-size:13px"></i> Deseados
       </button>
     </div>
@@ -15079,7 +15135,7 @@ async function renderPublicFolderList(page) {
       ${folders.map(f => `
         <div onclick="openPublicFolderViewer(${f.id})" style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius-md);padding:14px 16px;cursor:pointer">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-            <i class="ti ti-folder" style="font-size:20px;color:var(--green)"></i>
+            <i class="ti ti-folder" style="font-size:20px;color:var(--green-text)"></i>
             <span onclick="event.stopPropagation()">${_voteBtnHtml('list', f.id, f.vote_count, f.voted_by_me)}</span>
           </div>
           <div style="font-size:14px;font-weight:600;margin-bottom:2px">${esc(f.name)}</div>
@@ -15093,7 +15149,7 @@ async function renderPublicFolderList(page) {
     </div>${_pagerHtml(_publicFolderPage, hasMore, 'renderPublicFolderList')}`;
   } catch (e) {
     const el = document.getElementById('public-folders-content');
-    if (el) el.innerHTML = `<div style="color:var(--red)">${e.message || 'Error'}</div>`;
+    if (el) el.innerHTML = `<div style="color:var(--red-text)">${e.message || 'Error'}</div>`;
   }
 }
 
@@ -15122,7 +15178,7 @@ async function openPublicFolderViewer(folderId) {
       </div>
     `).join('');
   } catch (e) {
-    body.innerHTML = `<div style="color:var(--red)">${e.message || 'Error'}</div>`;
+    body.innerHTML = `<div style="color:var(--red-text)">${e.message || 'Error'}</div>`;
   }
 }
 function closePublicFolderViewer() {
@@ -15154,11 +15210,11 @@ function renderFolderList(page) {
   gameList.innerHTML = _folderTabsHtml() + `
     <div style="padding:12px 16px 0;display:flex;gap:8px">
       <button onclick="switchFolderSection('library')"
-        style="padding:6px 14px;border-radius:20px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${section==='library'?'var(--green)':'var(--bg2)'};color:${section==='library'?'#fff':'var(--text2)'}">
+        style="padding:6px 14px;border-radius:20px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${section==='library'?'var(--green-fill)':'var(--bg2)'};color:${section==='library'?'var(--on-accent)':'var(--text2)'}">
         <i class="ti ti-books" style="font-size:13px"></i> Listas de Biblioteca
       </button>
       <button onclick="switchFolderSection('wishlist')"
-        style="padding:6px 14px;border-radius:20px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${section==='wishlist'?'#EF9F27':'var(--bg2)'};color:${section==='wishlist'?'#fff':'var(--text2)'}">
+        style="padding:6px 14px;border-radius:20px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${section==='wishlist'?'#EF9F27':'var(--bg2)'};color:${section==='wishlist'?'var(--on-amber)':'var(--text2)'}">
         <i class="ti ti-bookmark" style="font-size:13px"></i> Listas de Deseados
       </button>
     </div>
@@ -15174,7 +15230,7 @@ function renderFolderList(page) {
           style="padding:4px 8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">${folderSortDir==="asc"?"↑":"↓"}</button>
         ${freeLimitCounterHtml(currentSectionFolders().length, FREE_FOLDERS_LIMIT, 'folders')}
         <button onclick="openCreateFolder()"
-          style="padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer">
+          style="padding:4px 12px;font-size:12px;border-radius:6px;border:none;background:var(--green-fill);color:var(--on-accent);cursor:pointer">
           <i class="ti ti-plus"></i> Nueva lista
         </button>
       </div>
@@ -15186,7 +15242,7 @@ function renderFolderList(page) {
             <div onclick="enterFolder(${f.id})" style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius-md);padding:14px 16px;cursor:pointer;transition:border-color 0.15s"
               onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--border2)'">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-                <i class="ti ti-folder" style="font-size:20px;color:var(--green)"></i>
+                <i class="ti ti-folder" style="font-size:20px;color:var(--green-text)"></i>
                 <div style="display:flex;gap:4px">
                   <button onclick="event.stopPropagation();openFolderAddGamePicker(${f.id})"
                     style="background:none;border:0.5px solid var(--border);border-radius:4px;color:var(--text2);cursor:pointer;padding:2px 6px;font-size:11px" title="Agregar juegos">
@@ -15195,7 +15251,7 @@ function renderFolderList(page) {
                   <button onclick="event.stopPropagation();openRenameFolder(${f.id},'${jsAttrEsc(f.name)}')"
                     style="background:none;border:0.5px solid var(--border);border-radius:4px;color:var(--text2);cursor:pointer;padding:2px 6px;font-size:11px">✏️</button>
                   <button onclick="event.stopPropagation();deleteFolder(${f.id})"
-                    style="background:none;border:0.5px solid var(--border);border-radius:4px;color:var(--red);cursor:pointer;padding:2px 6px;font-size:11px">🗑</button>
+                    style="background:none;border:0.5px solid var(--border);border-radius:4px;color:var(--red-text);cursor:pointer;padding:2px 6px;font-size:11px">🗑</button>
                 </div>
               </div>
               <div style="font-size:14px;font-weight:600;margin-bottom:4px">${esc(f.name)}</div>
@@ -15450,8 +15506,8 @@ async function addExternalGameToFolder(key) {
 function renderFolderGamePicker() {
   const list   = document.getElementById('folder-add-game-list');
   const tabsHtml = `<div style="display:flex;gap:6px;padding:8px 12px 0">
-    <button onclick="switchFolderPickerTab('list')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${_folderPickerTab==='list'?'var(--green)':'var(--bg2)'};color:${_folderPickerTab==='list'?'#fff':'var(--text2)'}">${_folderPickerSection==='wishlist' ? 'Deseados' : 'Biblioteca'}</button>
-    <button onclick="switchFolderPickerTab('external')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${_folderPickerTab==='external'?'var(--green)':'var(--bg2)'};color:${_folderPickerTab==='external'?'#fff':'var(--text2)'}">Otro (externo)</button>
+    <button onclick="switchFolderPickerTab('list')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${_folderPickerTab==='list'?'var(--green-fill)':'var(--bg2)'};color:${_folderPickerTab==='list'?'var(--on-accent)':'var(--text2)'}">${_folderPickerSection==='wishlist' ? 'Deseados' : 'Biblioteca'}</button>
+    <button onclick="switchFolderPickerTab('external')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${_folderPickerTab==='external'?'var(--green-fill)':'var(--bg2)'};color:${_folderPickerTab==='external'?'var(--on-accent)':'var(--text2)'}">Otro (externo)</button>
   </div>`;
   if (_folderPickerTab === 'external') {
     list.innerHTML = tabsHtml + `
@@ -15479,7 +15535,7 @@ function renderFolderGamePicker() {
   const col = (key, label) => {
     const active = _folderPickerSortCol === key;
     const arrow  = active ? (_folderPickerSortDir === 'asc' ? ' ↑' : ' ↓') : '';
-    return `<span onclick="sortFolderPicker('${key}')" style="cursor:pointer;${active?'color:var(--green)':''}">${label}${arrow}</span>`;
+    return `<span onclick="sortFolderPicker('${key}')" style="cursor:pointer;${active?'color:var(--green-text)':''}">${label}${arrow}</span>`;
   };
 
   list.innerHTML = tabsHtml + `
@@ -15714,7 +15770,7 @@ async function renderPublicRankingsList(page) {
       <div onclick="openPublicRankingViewer(${r.id})" style="cursor:pointer;background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:6px">
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div style="display:flex;align-items:center;gap:8px;min-width:0">
-            <i class="ti ti-medal" style="color:var(--green);font-size:18px;flex-shrink:0"></i>
+            <i class="ti ti-medal" style="color:var(--green-text);font-size:18px;flex-shrink:0"></i>
             <strong style="font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.name)}</strong>
           </div>
           <span onclick="event.stopPropagation()">${_voteBtnHtml('ranking', r.id, r.vote_count, r.voted_by_me)}</span>
@@ -15727,7 +15783,7 @@ async function renderPublicRankingsList(page) {
       </div>
     `).join('') + `<div style="grid-column:1/-1">${_pagerHtml(_publicRankingPage, hasMore, 'renderPublicRankingsList')}</div>`;
   } catch (e) {
-    grid.innerHTML = `<div style="grid-column:1/-1;color:var(--red)">${e.message || 'Error'}</div>`;
+    grid.innerHTML = `<div style="grid-column:1/-1;color:var(--red-text)">${e.message || 'Error'}</div>`;
   }
 }
 
@@ -15747,7 +15803,7 @@ async function openPublicRankingViewer(rankingId) {
     }
     body.innerHTML = d.games.map((g, i) => `
       <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)">
-        <span style="font-weight:700;font-size:13px;width:22px;text-align:center;color:var(--green)">${i + 1}</span>
+        <span style="font-weight:700;font-size:13px;width:22px;text-align:center;color:var(--green-text)">${i + 1}</span>
         ${g.cover_url ? `<img src="${esc(g.cover_url)}" style="width:34px;height:44px;object-fit:cover;border-radius:6px" onerror="this.style.display='none'">` : ''}
         <div style="min-width:0;flex:1">
           <div style="font-size:13px;font-weight:600">${esc(g.name)}</div>
@@ -15756,7 +15812,7 @@ async function openPublicRankingViewer(rankingId) {
       </div>
     `).join('');
   } catch (e) {
-    body.innerHTML = `<div style="color:var(--red)">${e.message || 'Error'}</div>`;
+    body.innerHTML = `<div style="color:var(--red-text)">${e.message || 'Error'}</div>`;
   }
 }
 function closePublicRankingViewer() {
@@ -15785,7 +15841,7 @@ function renderRankingsList(page) {
   grid.innerHTML = list.map(r => `
     <div onclick="openRanking(${r.id})" style="cursor:pointer;background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:6px">
       <div style="display:flex;align-items:center;gap:8px">
-        <i class="ti ti-medal" style="color:var(--green);font-size:18px"></i>
+        <i class="ti ti-medal" style="color:var(--green-text);font-size:18px"></i>
         <strong style="font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.name)}</strong>
       </div>
       <div style="font-size:12px;color:var(--text2)">${r.game_count}/${MAX_RANKING_GAMES} ${gamesLabel(MAX_RANKING_GAMES)}</div>
@@ -15965,7 +16021,7 @@ async function addExternalGameToRanking(key) {
 }
 
 function _rankingPickerTabsHtml() {
-  const tab = (key, label) => `<button onclick="switchRankingPickerTab('${key}')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${_rankingPickerTab===key?'var(--green)':'var(--bg2)'};color:${_rankingPickerTab===key?'#fff':'var(--text2)'}">${label}</button>`;
+  const tab = (key, label) => `<button onclick="switchRankingPickerTab('${key}')" style="flex:1;padding:6px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:${_rankingPickerTab===key?'var(--green-fill)':'var(--bg2)'};color:${_rankingPickerTab===key?'var(--on-accent)':'var(--text2)'}">${label}</button>`;
   return `<div style="display:flex;gap:6px;margin-bottom:8px">
     ${tab('library','Biblioteca')}${tab('wishlist','Deseados')}${tab('external','Otro (externo)')}
   </div>`;
@@ -16201,12 +16257,12 @@ function updatePlayButtons() {
     const gid = btn.dataset.gid;
     if (gid === playSession.gameId) {
       btn.innerHTML = playSession.status === 'active' ? '⏸' : '▶';
-      btn.style.background = playSession.status === 'active' ? 'var(--green)' : 'transparent';
-      btn.style.color = playSession.status === 'active' ? 'var(--on-accent)' : 'var(--green)';
+      btn.style.background = playSession.status === 'active' ? 'var(--green-fill)' : 'transparent';
+      btn.style.color = playSession.status === 'active' ? 'var(--on-accent)' : 'var(--green-text)';
     } else {
       btn.innerHTML = '▶';
       btn.style.background = 'transparent';
-      btn.style.color = 'var(--green)';
+      btn.style.color = 'var(--green-text)';
     }
   });
 }
@@ -16356,7 +16412,7 @@ async function onLoginSuccess() {
           <span id="premium-badge" style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px"></span>
           <span id="profile-streak-chip"></span>
         </span>
-        <button id="header-upgrade-btn" onclick="setView('premium')" style="display:none;font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;border:none;background:var(--green);color:var(--on-accent);cursor:pointer">✨ Hacerse Premium</button>
+        <button id="header-upgrade-btn" onclick="setView('premium')" style="display:none;font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;border:none;background:var(--green-fill);color:var(--on-accent);cursor:pointer">✨ Hacerse Premium</button>
       </div>
     </div>
     <button onclick="openShareCard()" data-i18n-title="shareLibrary" title="Compartir mi biblioteca"
@@ -16456,7 +16512,7 @@ async function loadWidgetFriends() {
           <div class="sidebar-widget-row-sub">${t('friendRequestReceived')}</div>
         </div>
         <div style="display:flex;gap:4px;flex-shrink:0">
-          <button onclick="acceptFriendRequest('${jsAttrEsc(r.username)}')" title="${t('accept') || 'Aceptar'}" style="width:22px;height:22px;border-radius:50%;border:none;background:var(--green);color:var(--on-accent);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;padding:0"><i class="ti ti-check"></i></button>
+          <button onclick="acceptFriendRequest('${jsAttrEsc(r.username)}')" title="${t('accept') || 'Aceptar'}" style="width:22px;height:22px;border-radius:50%;border:none;background:var(--green-fill);color:var(--on-accent);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;padding:0"><i class="ti ti-check"></i></button>
           <button onclick="removeFriendByUsername('${jsAttrEsc(r.username)}')" title="${t('reject') || 'Rechazar'}" style="width:22px;height:22px;border-radius:50%;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;padding:0"><i class="ti ti-x"></i></button>
         </div>
       </div>
@@ -16468,7 +16524,7 @@ async function loadWidgetFriends() {
           <div style="width:30px;height:30px;border-radius:50%;overflow:hidden;background:var(--bg3);position:relative">
             <div style="width:30px;height:30px;position:relative;transform:translateY(-11.7%)">${_friendAvatarHtml(f, 30)}</div>
           </div>
-          ${f.in_session ? `<div style="position:absolute;bottom:-1px;right:-1px;width:13px;height:13px;border-radius:50%;background:var(--green);border:1.5px solid var(--bg);display:flex;align-items:center;justify-content:center" title="${t('inSession')}"><i class="ti ti-player-play-filled" style="font-size:7px;color:#fff"></i></div>` : ''}
+          ${f.in_session ? `<div style="position:absolute;bottom:-1px;right:-1px;width:13px;height:13px;border-radius:50%;background:var(--green-fill);border:1.5px solid var(--bg);display:flex;align-items:center;justify-content:center" title="${t('inSession')}"><i class="ti ti-player-play-filled" style="font-size:7px;color:var(--on-accent)"></i></div>` : ''}
         </div>
         <div class="sidebar-widget-row-text">
           <div class="sidebar-widget-row-name">${esc(f.username)}${premiumMarkHtml(f.level_info && f.level_info.is_premium, 12)}</div>
@@ -16896,7 +16952,7 @@ if (document.readyState === 'loading') {
   <p class="u-muted u-mb12" style="font-size:12.5px;line-height:1.5"><span id="cookie-banner-text" data-i18n="cookieBannerText">Usamos cookies para entender cómo se usa Playloggr (Google Analytics). Podés aceptar o rechazar el análisis — la app funciona igual en ambos casos. Más info en nuestra</span> <a class="u-accent" href="/privacy.html" data-i18n="privacyPolicyLink">Política de Privacidad</a>.</p>
   <div class="u-gap8" style="display:flex;justify-content:flex-end">
     <button class="u-muted u-pointer" onclick="setCookieConsent(false)" style="background:transparent;border:0.5px solid var(--border2);padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600" data-i18n="reject">Rechazar</button>
-    <button class="u-pointer" onclick="setCookieConsent(true)" style="background:var(--green);color:var(--on-accent);border:none;padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600" data-i18n="accept">Aceptar</button>
+    <button class="u-pointer" onclick="setCookieConsent(true)" style="background:var(--green-fill);color:var(--on-accent);border:none;padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600" data-i18n="accept">Aceptar</button>
   </div>
 </div>
 </body>
