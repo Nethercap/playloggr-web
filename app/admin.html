@@ -192,9 +192,9 @@
       <div class="msg" id="announcement-msg"></div>
       <div class="table-wrap" style="margin-top:14px">
         <table>
-          <thead><tr><th>Título</th><th>Mensaje</th><th>Estado</th><th>Fecha</th><th></th></tr></thead>
+          <thead><tr><th>Título</th><th>Mensaje</th><th>Botón</th><th>Estado</th><th>Fecha</th><th></th></tr></thead>
           <tbody id="announcements-tbody">
-            <tr><td colspan="5" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>
+            <tr><td colspan="6" style="color:var(--text2)"><div class="spinner"></div> Cargando...</td></tr>
           </tbody>
         </table>
       </div>
@@ -723,20 +723,25 @@ async function loadAnnouncements() {
     if (!res.ok) throw new Error();
     const active = d.announcements.find(a => a.active);
     box.innerHTML = active
-      ? `<span style="color:var(--green)">● Activo:</span> ${active.title ? `<strong>${active.title}</strong> — ` : ''}${active.message}`
+      ? `<span style="color:var(--green)">● Activo:</span> ${active.title ? `<strong>${active.title}</strong> — ` : ''}${active.message}${active.action === 'invite' ? ' <span class="badge badge-premium">botón Invitar</span>' : ''}`
       : '<span style="color:var(--text2)">Sin anuncio activo</span>';
     tbody.innerHTML = d.announcements.length ? d.announcements.map(a => `
       <tr>
         <td>${a.title || '—'}</td>
-        <td style="max-width:260px; white-space:normal">${a.message}${a.action === 'invite' ? ' <span class="badge badge-premium">botón Invitar</span>' : ''}</td>
+        <td style="max-width:260px; white-space:normal">${a.message}</td>
+        <td><select onchange="setAnnouncementAction(${a.id}, this.value)" title="Se puede cambiar después de publicar: no se le vuelve a mostrar a quien ya lo vio"
+              style="font-size:12px; padding:4px 6px; border-radius:6px; border:0.5px solid var(--border2); background:var(--bg3); color:var(--text)">
+            <option value="" ${a.action ? '' : 'selected'}>Sin botón</option>
+            <option value="invite" ${a.action === 'invite' ? 'selected' : ''}>Invitar a un amigo</option>
+          </select></td>
         <td>${a.active ? '<span class="badge badge-premium">Activo</span>' : '<span class="badge badge-free">Inactivo</span>'}</td>
         <td>${new Date(a.created_at).toLocaleString('es-AR')}</td>
         <td>${a.active ? `<button class="icon-btn" title="Desactivar" onclick="deactivateAnnouncement(${a.id})">✖</button>` : ''}</td>
       </tr>
-    `).join('') : '<tr><td colspan="5" style="color:var(--text2)">Todavía no hay anuncios</td></tr>';
+    `).join('') : '<tr><td colspan="6" style="color:var(--text2)">Todavía no hay anuncios</td></tr>';
   } catch (e) {
     box.innerHTML = '<span style="color:var(--red)">Error al cargar</span>';
-    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--red)">Error al cargar</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--red)">Error al cargar</td></tr>';
   }
 }
 
@@ -765,7 +770,7 @@ async function publishAnnouncement() {
     const d = await res.json();
     if (!res.ok) throw new Error(d.detail || 'Error');
     msg.style.color = 'var(--green)';
-    msg.textContent = '✓ Anuncio publicado';
+    msg.textContent = d.action === 'invite' ? '✓ Anuncio publicado, con botón Invitar' : '✓ Anuncio publicado, sin botón';
     document.getElementById('announcement-title').value = '';
     document.getElementById('announcement-message').value = '';
     document.getElementById('announcement-title-en').value = '';
@@ -778,6 +783,26 @@ async function publishAnnouncement() {
     msg.style.color = 'var(--red)';
     msg.textContent = e.message || 'Error al publicar';
   }
+}
+
+// Cambia el boton de un aviso ya publicado (no se le vuelve a mostrar a
+// quien ya lo vio, como pasaria si se publica de nuevo).
+async function setAnnouncementAction(id, action) {
+  const msg = document.getElementById('announcement-msg');
+  msg.style.display = 'block';
+  try {
+    const res = await fetch(`${API}/admin/announcements/${id}/action`, {
+      method: 'POST', headers: headers(), body: JSON.stringify({ action: action || null }),
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.detail || 'Error');
+    msg.style.color = 'var(--green)';
+    msg.textContent = d.action === 'invite' ? '✓ Botón Invitar agregado al anuncio' : '✓ Anuncio sin botón';
+  } catch (e) {
+    msg.style.color = 'var(--red)';
+    msg.textContent = e.message || 'Error al cambiar el botón';
+  }
+  loadAnnouncements();
 }
 
 async function deactivateAnnouncement(id) {
