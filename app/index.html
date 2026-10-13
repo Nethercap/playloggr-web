@@ -1497,6 +1497,20 @@
     .seg-tab { padding:6px 18px; font-size:12px; border:0.5px solid var(--border); background:var(--bg2); color:var(--text2); cursor:pointer; border-radius:20px; }
     .seg-tab-sm { padding:5px 14px; font-size:12px; border-radius:16px; border:0.5px solid var(--border); background:var(--bg2); color:var(--text2); cursor:pointer; }
     .view-pill { padding:6px 16px; border-radius:20px; border:none; cursor:pointer; font-size:13px; font-weight:600; align-items:center; gap:5px; }
+    /* ¿Que juego sigo? (A10). En celular, solo el dado: asi entra al lado de
+       Biblioteca y Deseados sin quedar cortado en la fila que se desliza. */
+    .wn-pill { padding:6px 16px; border-radius:20px; border:1px solid var(--green); background:transparent; color:var(--green); cursor:pointer; font-size:13px; font-weight:600; align-items:center; gap:5px; display:inline-flex; flex-shrink:0; }
+    .wn-pill:hover { background:var(--bg2); }
+    @media (max-width: 640px) { .wn-pill { padding:6px 12px; } .wn-pill .wn-label { display:none; } }
+    .wn-seg { display:flex; border:0.5px solid var(--border); border-radius:8px; overflow:hidden; margin:8px 0 14px; }
+    .wn-seg button { flex:1; padding:8px 6px; border:none; background:var(--bg2); color:var(--text2); cursor:pointer; font-size:13px; font-weight:600; }
+    .wn-seg button[aria-checked="true"] { background:var(--green); color:#fff; }
+    .wn-game { display:flex; gap:12px; align-items:flex-start; margin-bottom:12px; }
+    .wn-game img, .wn-game .wn-ph { width:52px; height:70px; border-radius:6px; object-fit:cover; background:var(--bg3); flex-shrink:0; }
+    .wn-game b { display:block; font-size:14px; }
+    .wn-meta { font-size:12px; color:var(--text2); }
+    .wn-reason { font-size:13px; margin-top:3px; }
+    .wn-reason.fits { color:var(--green); }
     .field { margin-bottom:14px; }
     .field-label { font-size:12px; color:var(--text2); margin-bottom:6px; }
     .field-hint { font-size:10px; color:var(--text2); margin-top:4px; }
@@ -1960,6 +1974,9 @@
       <button id="view-wishlist" class="nav-pill view-pill" onclick="setView('wishlist')"
         style="background:var(--bg2);display:inline-flex">
         <i class="ti ti-bookmark u-fs14"></i> <span data-i18n="wishlist">Deseados</span>
+      </button>
+      <button id="what-next-btn" class="wn-pill" onclick="openWhatNext()" data-i18n-title="whatNextButton" title="¿Qué juego sigo?" aria-label="¿Qué juego sigo?">
+        <i class="ti ti-dice-5 u-fs14" aria-hidden="true"></i> <span class="wn-label" data-i18n="whatNextButton">¿Qué juego sigo?</span>
       </button>
       <button id="view-stats" class="nav-pill view-pill" onclick="setView('stats')" data-i18n-title="stats" title="Estadísticas"
         style="background:var(--bg2);display:inline-flex;flex-shrink:0">
@@ -2694,6 +2711,25 @@
   </div>
 </div>
 
+<!-- ¿Qué juego sigo? (A10) -->
+<div class="modal-overlay" id="whatnext-overlay" onclick="if(event.target===this) closeWhatNext()">
+  <div class="modal u-col" role="dialog" aria-modal="true" aria-labelledby="wn-title" style="width:520px;max-width:92vw;max-height:86vh;display:flex">
+    <div class="modal-title" id="wn-title"><i class="ti ti-dice-5" aria-hidden="true"></i> <span data-i18n="whatNextButton">¿Qué juego sigo?</span></div>
+    <div class="u-fs12 u-muted" data-i18n="whatNextQuestion">¿Cuánto tiempo tenés?</div>
+    <div class="wn-seg" id="wn-times" role="radiogroup" aria-labelledby="wn-title">
+      <button role="radio" data-t="hour" onclick="whatNextSetTime('hour')" data-i18n="whatNextHour">1 hora</button>
+      <button role="radio" data-t="evening" onclick="whatNextSetTime('evening')" data-i18n="whatNextEvening">Una tarde</button>
+      <button role="radio" data-t="weekend" onclick="whatNextSetTime('weekend')" data-i18n="whatNextWeekend">Un finde</button>
+    </div>
+    <div id="wn-results" aria-live="polite" style="overflow-y:auto;min-height:120px"></div>
+    <div class="modal-actions" style="flex-wrap:wrap">
+      <button class="btn-cancel" onclick="closeWhatNext()" data-i18n="close">Cerrar</button>
+      <button class="btn-cancel" id="wn-another" onclick="whatNextLoad(true)"><i class="ti ti-refresh" aria-hidden="true"></i> <span data-i18n="whatNextAnother">Otra opción</span></button>
+      <button class="btn-save" id="wn-share" onclick="whatNextShare()"><i class="ti ti-share" aria-hidden="true"></i> <span data-i18n="whatNextShare">Compartir</span></button>
+    </div>
+  </div>
+</div>
+
 <!-- Friends Modal -->
 <div class="modal-overlay" id="friends-overlay">
   <div class="modal u-col" style="width:680px;max-width:92vw;max-height:82vh;display:flex">
@@ -3394,6 +3430,26 @@ const I18N = {
     inviteShareText: "Sumate a Playloggr para organizar tu backlog de juegos. Si entrás con mi link, los dos nos llevamos un marco exclusivo:",
     frameAlly: "Aliado",
     inviteCta: "Invitar",
+    whatNextButton: "¿Qué juego sigo?",
+    whatNextQuestion: "¿Cuánto tiempo tenés?",
+    whatNextHour: "1 hora",
+    whatNextEvening: "Una tarde",
+    whatNextWeekend: "Un finde",
+    whatNextFits: "Lo terminás en este tiempo · faltan ~{h} h",
+    whatNextSessions: "{n} sesiones como esta · faltan ~{h} h",
+    whatNextStarted: "Ya lo empezaste",
+    whatNextRating: "{n}% positivas en Steam",
+    whatNextAnother: "Otra opción",
+    whatNextShare: "Compartir",
+    whatNextCopied: "Copiado para pegar",
+    whatNextEmpty: "Todavía no tenemos tiempos para los juegos de tu backlog. Si sincronizás Steam aparecen enseguida; los de otras plataformas se van sumando de a poco.",
+    whatNextNoMore: "No hay más opciones para este tiempo.",
+    whatNextError: "No se pudo buscar ahora. Probá de nuevo en un rato.",
+    whatNextLoading: "Buscando en tu backlog…",
+    whatNextShareText: "Tengo {time} libre y Playloggr me propuso: {games} 🎮 ¿Cuál jugarías? playloggr.com",
+    whatNextShareHour: "una hora",
+    whatNextShareEvening: "una tarde",
+    whatNextShareWeekend: "un finde",
     frameAllyLocked: "Marco Aliado: invitá a un amigo y los dos se lo llevan, con o sin Premium.",
     pickThemeCta: 'Elegir un tema',
     customizeAvatarCta: 'Personalizar avatar',
@@ -3748,6 +3804,26 @@ const I18N = {
     inviteShareText: "Join me on Playloggr to organize your game backlog. Sign up with my link and we both get an exclusive frame:",
     frameAlly: "Ally",
     inviteCta: "Invite",
+    whatNextButton: "What do I play next?",
+    whatNextQuestion: "How much time do you have?",
+    whatNextHour: "1 hour",
+    whatNextEvening: "An evening",
+    whatNextWeekend: "A weekend",
+    whatNextFits: "You can finish it in this time · ~{h} h left",
+    whatNextSessions: "{n} sessions like this · ~{h} h left",
+    whatNextStarted: "Already started",
+    whatNextRating: "{n}% positive on Steam",
+    whatNextAnother: "Another option",
+    whatNextShare: "Share",
+    whatNextCopied: "Copied, ready to paste",
+    whatNextEmpty: "We don't have times for your backlog games yet. If you sync Steam they show up right away; games from other platforms get added little by little.",
+    whatNextNoMore: "No more options for this amount of time.",
+    whatNextError: "Couldn't search right now. Try again in a bit.",
+    whatNextLoading: "Looking through your backlog…",
+    whatNextShareText: "I have {time} free and Playloggr suggested: {games} 🎮 Which one would you play? playloggr.com",
+    whatNextShareHour: "an hour",
+    whatNextShareEvening: "an evening",
+    whatNextShareWeekend: "a weekend",
     frameAllyLocked: "Ally frame: invite a friend and you both get it, with or without Premium.",
     pickThemeCta: 'Pick a theme',
     customizeAvatarCta: 'Customize avatar',
@@ -4102,6 +4178,26 @@ const I18N = {
     inviteShareText: "Entre no Playloggr para organizar seu backlog de jogos. Se criar a conta com meu link, nós dois ganhamos uma moldura exclusiva:",
     frameAlly: "Aliado",
     inviteCta: "Convidar",
+    whatNextButton: "O que eu jogo agora?",
+    whatNextQuestion: "Quanto tempo você tem?",
+    whatNextHour: "1 hora",
+    whatNextEvening: "Uma tarde",
+    whatNextWeekend: "Um fim de semana",
+    whatNextFits: "Dá para terminar nesse tempo · faltam ~{h} h",
+    whatNextSessions: "{n} sessões como esta · faltam ~{h} h",
+    whatNextStarted: "Já começou",
+    whatNextRating: "{n}% positivas na Steam",
+    whatNextAnother: "Outra opção",
+    whatNextShare: "Compartilhar",
+    whatNextCopied: "Copiado para colar",
+    whatNextEmpty: "Ainda não temos tempos para os jogos do seu backlog. Se você sincronizar a Steam, eles aparecem na hora; os de outras plataformas vão sendo adicionados aos poucos.",
+    whatNextNoMore: "Não há mais opções para esse tempo.",
+    whatNextError: "Não foi possível buscar agora. Tente de novo daqui a pouco.",
+    whatNextLoading: "Procurando no seu backlog…",
+    whatNextShareText: "Tenho {time} livre e o Playloggr me sugeriu: {games} 🎮 Qual você jogaria? playloggr.com",
+    whatNextShareHour: "uma hora",
+    whatNextShareEvening: "uma tarde",
+    whatNextShareWeekend: "um fim de semana",
     frameAllyLocked: "Moldura Aliado: convide um amigo e vocês dois ganham, com ou sem Premium.",
     pickThemeCta: 'Escolher um tema',
     customizeAvatarCta: 'Personalizar avatar',
@@ -10588,6 +10684,91 @@ async function checkAchievements() {
       _hasCheckedLevelOnce = true;
     }
   } catch (e) {}
+}
+
+// ── ¿Qué juego sigo? (A10): 3 juegos que entran en el tiempo que hay
+// (GET /what-next). "Otra opción" no repite lo ya mostrado para ese tiempo.
+let _wnTime = 'evening', _wnGames = [], _wnSeen = new Set(), _wnLoading = false;
+
+function openWhatNext() {
+  document.getElementById('whatnext-overlay').classList.add('open');
+  whatNextSetTime(_wnTime);
+}
+
+function closeWhatNext() {
+  document.getElementById('whatnext-overlay').classList.remove('open');
+}
+
+function whatNextSetTime(time) {
+  _wnTime = time;
+  document.querySelectorAll('#wn-times button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.t === time)));
+  whatNextLoad(false);
+}
+
+function _wnHours(h) {
+  const s = Number.isInteger(h) ? String(h) : h.toFixed(1);
+  return currentLang === 'en' ? s : s.replace('.', ',');
+}
+
+async function whatNextLoad(another) {
+  if (_wnLoading) return;
+  if (another) _wnGames.forEach(g => _wnSeen.add(g.id)); else { _wnSeen = new Set(); _wnGames = []; }
+  _wnLoading = true;
+  renderWhatNext({ loading: true });
+  try {
+    const q = new URLSearchParams({ time: _wnTime });
+    if (another && _wnSeen.size) q.set('exclude', [..._wnSeen].join(','));
+    const res = await fetch(`${apiBase()}/api/v1/what-next?${q}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+    if (!res.ok) throw new Error(res.status);
+    const d = await res.json();
+    const games = d.games || [];
+    const exhausted = another && !games.length;
+    if (!exhausted) _wnGames = games;
+    renderWhatNext({ exhausted });
+  } catch (e) {
+    renderWhatNext({ failed: true });
+  } finally {
+    _wnLoading = false;
+  }
+}
+
+function renderWhatNext({ loading, failed, exhausted } = {}) {
+  const el = document.getElementById('wn-results');
+  const hasGames = !loading && !failed && _wnGames.length > 0;
+  document.getElementById('wn-another').style.display = hasGames ? '' : 'none';
+  document.getElementById('wn-share').style.display = hasGames ? '' : 'none';
+  if (loading) {
+    el.innerHTML = `<div class="u-muted u-fs12" style="padding:28px 0;text-align:center"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite;display:inline-block"></i> ${esc(t('whatNextLoading'))}</div>`;
+    return;
+  }
+  if (failed) { el.innerHTML = `<div style="color:#E24B4A;font-size:13px">${esc(t('whatNextError'))}</div>`; return; }
+  if (!_wnGames.length) { el.innerHTML = `<div class="u-muted u-fs12">${esc(t('whatNextEmpty'))}</div>`; return; }
+  el.innerHTML = _wnGames.map(g => {
+    const remaining = _wnHours(g.remaining);
+    const reason = g.fits
+      ? t('whatNextFits').replace('{h}', remaining)
+      : t('whatNextSessions').replace('{n}', g.sessions).replace('{h}', remaining);
+    const meta = [g.platform, g.status !== 'Backlog' ? t('whatNextStarted') : null].filter(Boolean).join(' · ');
+    const cover = g.cover_url
+      ? `<img src="${esc(g.cover_url)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=&quot;wn-ph&quot;></div>'">`
+      : '<div class="wn-ph"></div>';
+    return `<div class="wn-game">${cover}<div style="min-width:0">
+        <b>${esc(g.name)}</b>
+        <div class="wn-meta">${esc(meta)}</div>
+        <div class="wn-reason${g.fits ? ' fits' : ''}">${esc(reason)}</div>
+        ${g.rating_pct != null ? `<div class="wn-meta">${esc(t('whatNextRating').replace('{n}', g.rating_pct))}</div>` : ''}
+      </div></div>`;
+  }).join('') + (exhausted ? `<div class="u-muted u-fs12">${esc(t('whatNextNoMore'))}</div>` : '');
+}
+
+async function whatNextShare() {
+  const time = t({ hour: 'whatNextShareHour', evening: 'whatNextShareEvening', weekend: 'whatNextShareWeekend' }[_wnTime]);
+  const text = t('whatNextShareText').replace('{time}', time).replace('{games}', _wnGames.map(g => g.name).join(', '));
+  if (navigator.share) {
+    try { await navigator.share({ text }); } catch (e) {}
+    return;
+  }
+  try { await navigator.clipboard.writeText(text); showToast(t('whatNextCopied')); } catch (e) {}
 }
 
 async function openFriendsPanel() {
