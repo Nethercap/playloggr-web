@@ -245,12 +245,26 @@
   /* Temas: el menú es como el de un juego, con el cursor ▶ */
   .themes { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 64px; align-items: center; }
   .themes .sub { max-width: 32em; }
-  .theme-menu { list-style: none; margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 26px; }
-  .theme-menu li { font: 400 11px/2.5 var(--font-retro); color: #cfcfcf; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .theme-menu li::before { content: "\25B6"; color: var(--green); margin-right: 10px; visibility: hidden; }
-  .theme-menu li:hover::before, .theme-menu li:first-child::before { visibility: visible; }
-  .theme-menu li:first-child { color: #fff; }
+  /* En el orden del video, de arriba abajo; un solo cursor: el del tema que
+     se ve en el celular, o el que esta debajo del mouse. */
+  .theme-menu { list-style: none; margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(6, auto); grid-auto-flow: column; gap: 4px 26px; }
+  .theme-menu li { min-width: 0; }
+  .theme-menu button, .theme-menu span.more { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 0; font: 400 11px/2.5 var(--font-retro); color: #cfcfcf; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .theme-menu button { cursor: pointer; }
+  .theme-menu button::before, .theme-menu span.more::before { content: "\25B6"; color: var(--green); margin-right: 10px; visibility: hidden; }
+  .theme-menu button.on { color: #fff; }
+  .theme-menu button.on::before { visibility: visible; }
+  .theme-menu button:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
   .theme-menu em { font: 500 13px var(--font); color: #7f7f7f; font-style: normal; margin-left: 8px; }
+
+  /* Zoom de las capturas en la misma pagina */
+  .zoomable { cursor: zoom-in; }
+  .tour-shot .area, .area-n { pointer-events: none; }
+  .lightbox { position: fixed; inset: 0; z-index: 1000; background: rgba(8,8,8,.92); display: flex; align-items: center; justify-content: center; padding: 24px; cursor: zoom-out; animation: lb-in .15s ease-out; }
+  @keyframes lb-in { from { opacity: 0; } }
+  .lightbox img { max-width: 100%; max-height: 100%; width: auto; height: auto; border-radius: 8px; box-shadow: 0 30px 80px rgba(0,0,0,.6); }
+  .lightbox button { position: fixed; top: 14px; right: 16px; width: 44px; height: 44px; border: 0; border-radius: 50%; background: #1f1f1f; color: #f0f0f0; font-size: 22px; cursor: pointer; }
+  @media (prefers-reduced-motion: reduce) { .lightbox { animation: none; } }
   .phone { width: min(280px, 78vw); aspect-ratio: 9 / 16; border-radius: 30px; padding: 9px; background: #0b0b0d; box-shadow: 0 0 0 1px #2a2a2a, 0 30px 60px rgba(0,0,0,.55); margin: 0 auto; transform: rotate(3deg); }
   .phone video { width: 100%; height: 100%; border-radius: 22px; display: block; object-fit: cover; background: #151515; }
   .phone-hand { font-size: 27px; transform: rotate(-3deg); margin: 18px 0 0 40px; display: flex; align-items: flex-start; gap: 6px; }
@@ -367,7 +381,7 @@
     .hero-sub { font-size: 17px; }
     .area-n { font-size: 22px; }
     .feat-list { grid-template-columns: 1fr; }
-    .theme-menu { grid-template-columns: 1fr; }
+    .theme-menu { grid-template-columns: 1fr; grid-template-rows: none; grid-auto-flow: row; }
     .price { font-size: 13.5px; }
     .price th, .price td { padding: 10px 6px; }
     .price th:first-child, .price td:first-child { padding-left: 0; width: auto; }
@@ -450,7 +464,7 @@
     <p class="sub">Print real, sem retoque: 393 jogos e 163 na fila.</p>
     <div class="tour">
       <div class="tour-shot">
-        <a href="/assets/screenshots/biblioteca.png" target="_blank" rel="noopener"><img src="/assets/screenshots/biblioteca.png" width="1488" height="1143" alt="Biblioteca de jogos no Playloggr, com status, horas e nota" loading="lazy" /></a>
+        <a class="zoomable" href="/assets/screenshots/biblioteca.png" target="_blank" rel="noopener"><img src="/assets/screenshots/biblioteca.png" width="1488" height="1143" alt="Biblioteca de jogos no Playloggr, com status, horas e nota" loading="lazy" /></a>
           <span class="area" data-circle="21" style="left:30.6%;top:25.4%;width:10.8%;height:2.9%"></span><span class="area-n" style="left:43.6%;top:23.2%" aria-hidden="true">1</span>
           <span class="area" data-circle="22" style="left:30.6%;top:28.9%;width:16.4%;height:2.5%"></span><span class="area-n" style="left:49.6%;top:31.6%" aria-hidden="true">2</span>
           <span class="area" data-circle="23" style="left:86.2%;top:25.4%;width:10.5%;height:3.5%"></span><span class="area-n" style="left:82.6%;top:24.4%" aria-hidden="true">3</span>
@@ -469,9 +483,9 @@
       </div>
     </div>
     <div class="more-shots">
-        <figure><a href="/assets/screenshots/estadisticas.png" target="_blank" rel="noopener"><img src="/assets/screenshots/estadisticas.png" width="1350" height="860" alt="Estatísticas de jogo no Playloggr" loading="lazy" /></a><figcaption>Estatísticas por status, plataforma e nota</figcaption></figure>
-        <figure><a href="/assets/screenshots/logros.png" target="_blank" rel="noopener"><img src="/assets/screenshots/logros.png" width="721" height="1144" alt="Conquistas e níveis no Playloggr" loading="lazy" /></a><figcaption>Conquistas e níveis por jogar</figcaption></figure>
-        <figure><a href="/assets/screenshots/personalizacion.png" target="_blank" rel="noopener"><img src="/assets/screenshots/personalizacion.png" width="893" height="887" alt="Avatar, molduras e banners no Playloggr" loading="lazy" /></a><figcaption>Avatares, molduras e banners por nível</figcaption></figure>
+        <figure><a class="zoomable" href="/assets/screenshots/estadisticas.png" target="_blank" rel="noopener"><img src="/assets/screenshots/estadisticas.png" width="1350" height="860" alt="Estatísticas de jogo no Playloggr" loading="lazy" /></a><figcaption>Estatísticas por status, plataforma e nota</figcaption></figure>
+        <figure><a class="zoomable" href="/assets/screenshots/logros.png" target="_blank" rel="noopener"><img src="/assets/screenshots/logros.png" width="721" height="1144" alt="Conquistas e níveis no Playloggr" loading="lazy" /></a><figcaption>Conquistas e níveis por jogar</figcaption></figure>
+        <figure><a class="zoomable" href="/assets/screenshots/personalizacion.png" target="_blank" rel="noopener"><img src="/assets/screenshots/personalizacion.png" width="893" height="887" alt="Avatar, molduras e banners no Playloggr" loading="lazy" /></a><figcaption>Avatares, molduras e banners por nível</figcaption></figure>
     </div>
   </div>
 </section>
@@ -506,7 +520,7 @@
     <div>
       <h2>Sua biblioteca com a cara do seu jogo favorito</h2>
       <p class="sub">14 temas inspirados em videogames mudam as cores, as fontes e até o jeito de dar nota. Os de temporada, como o Halloween, são grátis; qualquer outro pode ser testado por 45 segundos sem Premium.</p>
-      <ul class="theme-menu"><li>Halloween<em>grátis</em></li><li>Cyberpunk</li><li>Atomic Green<em>Fallout 3</em></li><li>Erdtree<em>Elden Ring</em></li><li>Knee-Deep<em>Doom</em></li><li>Hallownest<em>Hollow Knight</em></li><li>Pelican Town<em>Stardew Valley</em></li><li>Phantom<em>Persona 5</em></li><li>Sheikah<em>Zelda</em></li><li>Guaca-Guaca<em>Pac-Man</em></li><li>e mais</li></ul>
+      <ul class="theme-menu"><li><button type="button" data-t="1.4">Halloween<em>grátis</em></button></li><li><button type="button" data-t="2.8">Atomic Green<em>Fallout 3</em></button></li><li><button type="button" data-t="4.2">Knee-Deep<em>Doom</em></button></li><li><button type="button" data-t="5.6">Erdtree<em>Elden Ring</em></button></li><li><button type="button" data-t="7.0">Guaca-Guaca<em>Pac-Man</em></button></li><li><button type="button" data-t="8.4">Hallownest<em>Hollow Knight</em></button></li><li><button type="button" data-t="9.8">Pelican Town<em>Stardew Valley</em></button></li><li><button type="button" data-t="11.2">Phantom<em>Persona 5</em></button></li><li><button type="button" data-t="12.6">Sheikah<em>Zelda</em></button></li><li><button type="button">Cyberpunk</button></li><li><span class="more">e mais</span></li></ul>
     </div>
     <div>
       <div class="phone">
@@ -944,6 +958,77 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
   var t;
   window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(draw, 150); });
+})();
+</script>
+<script>
+/* Menu de temas: el cursor sigue al tema que muestra el video, se mueve con
+   el mouse y al hacer clic el video salta a ese tema. Zoom de capturas: se
+   abren grandes en la misma pagina en vez de en otra pestaña. */
+(function () {
+  var v = document.getElementById('themes-video');
+  var items = Array.prototype.slice.call(document.querySelectorAll('.theme-menu button'));
+  if (v && items.length) {
+    var hovered = null;
+    var show = function (btn) { items.forEach(function (b) { b.classList.toggle('on', b === btn); }); };
+    var current = function () {
+      var t = v.currentTime, found = null;
+      items.forEach(function (b) { var s = parseFloat(b.dataset.t); if (!isNaN(s) && t >= s) found = b; });
+      return found;
+    };
+    var sync = function () { if (!hovered) show(current()); };
+    // Cuadro a cuadro mientras reproduce (timeupdate llega cada ~250 ms y el
+    // cursor quedaba atrasado respecto del cambio de tema).
+    var tick = function () { sync(); if (!v.paused) requestAnimationFrame(tick); };
+    v.addEventListener('play', function () { requestAnimationFrame(tick); });
+    v.addEventListener('seeked', sync);
+    items.forEach(function (b) {
+      b.addEventListener('mouseenter', function () { hovered = b; show(b); });
+      b.addEventListener('mouseleave', function () { hovered = null; sync(); });
+      b.addEventListener('focus', function () { show(b); });
+      b.addEventListener('blur', sync);
+      b.addEventListener('click', function () {
+        var s = parseFloat(b.dataset.t);
+        if (isNaN(s)) return;
+        var go = function () {
+          v.currentTime = s + 0.05;
+          if (!v.controls) v.play().catch(function () {});
+        };
+        if (v.readyState >= 1) go();
+        else { v.preload = 'auto'; v.addEventListener('loadedmetadata', go, { once: true }); v.load(); }
+      });
+    });
+  }
+
+  var opener = null;
+  var close = function () {
+    var box = document.querySelector('.lightbox');
+    if (!box) return;
+    box.remove();
+    document.body.style.overflow = '';
+    document.removeEventListener('keydown', onKey);
+    if (opener) opener.focus();
+  };
+  var onKey = function (e) { if (e.key === 'Escape') close(); };
+  Array.prototype.forEach.call(document.querySelectorAll('a.zoomable'), function (a) {
+    a.addEventListener('click', function (e) {
+      if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
+      e.preventDefault();
+      opener = a;
+      var img = a.querySelector('img');
+      var box = document.createElement('div');
+      box.className = 'lightbox';
+      box.setAttribute('role', 'dialog');
+      box.setAttribute('aria-modal', 'true');
+      box.setAttribute('aria-label', img ? img.alt : '');
+      box.innerHTML = '<img src="' + a.getAttribute('href') + '" alt=""><button type="button" aria-label="Fechar">\u2715</button>';
+      box.querySelector('img').alt = img ? img.alt : '';
+      box.addEventListener('click', close);
+      document.body.appendChild(box);
+      document.body.style.overflow = 'hidden';
+      document.addEventListener('keydown', onKey);
+      box.querySelector('button').focus();
+    });
+  });
 })();
 </script>
 </body>
