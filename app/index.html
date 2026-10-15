@@ -2437,8 +2437,6 @@
   .sc-dots { flex: 1; min-width: 10px; border-bottom: 1.5px dotted #a8a399; transform: translateY(-3px); }
   .sc-rank { font: 400 9px 'Press Start 2P', monospace; color: #8a8a8a; }
   .sc-nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .sc-card [data-circle] { position: relative; display: inline-block; }
-  .sc-card canvas { display: inline-block; vertical-align: middle; }
   .sc-cover { background: #1c2420 center / cover no-repeat; }
 
   /* Biblioteca: el ticket */
@@ -2461,28 +2459,7 @@
   .sc-tk canvas.sc-stamp { position: absolute; right: -40px; top: 112px; width: 104px; height: 104px; pointer-events: none; }
   .sc-tk-quip { font-size: 23px; text-align: center; margin: 20px 0 0; transform: rotate(-2deg); }
 
-  /* Semana o mes: la polaroid */
-  .sc-week { padding: 26px 24px 18px; }
-  .sc-wk-top { display: flex; align-items: center; gap: 10px; }
-  .sc-wk-top b { display: block; font-size: 14.5px; font-weight: 800; }
-  .sc-wk-top span { display: block; font-size: 12px; color: #9a9a9a; }
-  .sc-wk-big { font: 900 33px/1.08 'Mulish', sans-serif; letter-spacing: -.025em; margin: 22px 0 26px; }
-  .sc-wk-main { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 18px; align-items: start; }
-  .sc-pol { margin: 0; background: #F4F1EA; padding: 8px 8px 30px; transform: rotate(-4deg); position: relative; box-shadow: 0 14px 26px rgba(0,0,0,.55); }
-  .sc-pol .sc-cover, .sc-pol-ph { width: 134px; height: 176px; }
-  .sc-pol-ph { background: #1c2420; color: #EFE9DC; font: 700 24px/1.05 'Caveat', cursive; display: flex; align-items: center; justify-content: center; text-align: center; padding: 12px; overflow: hidden; }
-  .sc-pol figcaption { position: absolute; left: 6px; right: 6px; bottom: 4px; text-align: center; font: 700 20px/1.1 'Caveat', cursive; color: #24324a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sc-tape { position: absolute; width: 70px; height: 22px; top: -11px; left: 34px; background: rgba(232,224,196,.72); transform: rotate(-5deg); z-index: 2; }
-  .sc-wk-quip { font-size: 22px; margin: 4px 0 0; transform: rotate(-3deg); }
-  .sc-wk-quip canvas { display: block; margin: 2px 0 0 -6px; }
-  .sc-wk-list { list-style: none; padding: 0; margin: 14px 0 0; }
-  .sc-wk-list li { display: grid; grid-template-columns: 18px 30px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 7px 0; border-top: 1px solid #2a2a2a; font-size: 13.5px; font-weight: 700; }
-  .sc-wk-list .sc-cover { width: 30px; height: 40px; border-radius: 2px; }
-  .sc-wk-list b { font: 400 12px 'Space Mono', monospace; color: #9a9a9a; white-space: nowrap; }
-  .sc-wk-tally { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 24px 0 18px; font-size: 14.5px; font-weight: 700; color: #dcdcdc; }
-  .sc-wk-tally span { display: flex; align-items: center; gap: 7px; }
-
-  /* El año: guardar partida */
+  /* Semana, mes y año: guardar partida */
   .sc-save { padding: 26px 22px 18px; background: #0d0e0d; }
   .sc-sv-head { font: 400 13px 'Press Start 2P', monospace; color: #1D9E75; display: flex; gap: 6px; align-items: center; }
   .sc-cur { animation: sc-blink 1s steps(2) infinite; }
@@ -2495,7 +2472,7 @@
   .sc-sv-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
   .sc-sv-row b { font-size: 16px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .sc-sv-y { font: 400 11px 'Press Start 2P', monospace; color: #1D9E75; }
-  #wrapped-title { font-size: 12.5px; color: #a9a9a9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sc-sv-lv { font-size: 12.5px; color: #a9a9a9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .sc-sv-t { font: 700 14px 'Space Mono', monospace; color: #f0f0f0; white-space: nowrap; }
   .sc-sv-stats { margin: 22px 0 0; padding: 0; }
   .sc-sv-stats div { display: flex; align-items: baseline; gap: 8px; padding: 4px 0; font-size: 14px; }
@@ -2564,16 +2541,21 @@
   </div>
 </div>
 
-<!-- Resumen de periodo compartible. Es el patron Spotify Wrapped: el numero
-     del que la gente se enorgullece ("12 hs esta semana", "completé Hades")
-     en una imagen que se comparte sola. El juego mas jugado va como polaroid. -->
+<!-- Resumen de semana o mes compartible, con el mismo formato que el del año
+     (pantalla de guardar partida): el slot con avatar y horas en reloj, las
+     estadisticas del periodo y los juegos mas jugados como party. -->
 <div class="modal-overlay" id="period-share-overlay">
   <div class="modal u-mw380" style="padding:0;overflow:hidden">
-    <div id="period-share-card" class="sc-card sc-week">
-      <div class="sc-wk-top"><div id="period-share-avatar"></div><div><b id="period-share-user"></b><span id="period-share-range"></span></div></div>
-      <div class="sc-wk-big" id="period-share-hours"></div>
-      <div class="sc-wk-main" id="period-share-games"></div>
-      <div class="sc-wk-tally" id="period-share-chips"></div>
+    <div id="period-share-card" class="sc-card sc-save">
+      <div class="sc-sv-head"><span id="period-share-eyebrow"></span><span class="sc-cur">&#9646;</span></div>
+      <div class="sc-px-frame sc-sv-slot"><i></i><i></i><i></i><i></i>
+        <div id="period-share-avatar"></div>
+        <div>
+          <div class="sc-sv-row"><b id="period-share-user"></b><span class="sc-sv-y" id="period-share-range"></span></div>
+          <div class="sc-sv-row"><span class="sc-sv-lv" id="period-share-title"></span><span class="sc-sv-t" id="period-share-clock"></span></div>
+        </div>
+      </div>
+      <div id="period-share-body"></div>
       <div class="sc-foot"><canvas data-logo="15"></canvas><span id="period-share-url">playloggr.com</span></div>
     </div>
     <div class="u-gap8" style="display:flex;padding:14px 18px 18px">
@@ -2595,7 +2577,7 @@
         <div id="wrapped-avatar"></div>
         <div>
           <div class="sc-sv-row"><b id="wrapped-user"></b><span class="sc-sv-y" id="wrapped-year"></span></div>
-          <div class="sc-sv-row"><span id="wrapped-title"></span><span class="sc-sv-t" id="wrapped-clock"></span></div>
+          <div class="sc-sv-row"><span class="sc-sv-lv" id="wrapped-title"></span><span class="sc-sv-t" id="wrapped-clock"></span></div>
         </div>
       </div>
       <div id="wrapped-body"></div>
@@ -3897,10 +3879,8 @@ const I18N = {
     scTotalGames: 'TOTAL JUEGOS', scTotalHours: 'HORAS JUGADAS', scLife: 'EQUIVALE A {days} DÍAS DE TU VIDA',
     scThanks: '¡GRACIAS POR JUGAR!', scNoRefunds: 'NO SE ACEPTAN DEVOLUCIONES', scStampRing: 'JUGADOR VERIFICADO · PLAYLOGGR · ',
     scQuipGrowing: 'y el backlog sigue creciendo', scQuipTaming: 'lo estoy domando',
-    scWeekSame: 'Semana del {d1} al {d2} de {m}', scWeekCross: 'Semana del {d1} de {m1} al {d2} de {m2}',
-    scWeekBig: 'Esta semana jugué {h}', scMonthBig: 'Este mes jugué {h}', scHours: 'horas', scHour: 'hora',
     scQuipAteWeek: '{g} se comió la semana', scQuipAteMonth: '{g} se comió el mes', scQuipSpread: 'repartido entre {n} juegos',
-    scDone: 'Terminé {n}', scStarted: 'Empecé {n}',
+    scGamesPlayed: 'juegos jugados', scContinueShort: '¿SEGUIMOS?',
     scSaved: 'PARTIDA GUARDADA', scLvShort: 'Nv.', scClass: 'CLASE', scParty: 'TU PARTY',
     scFactPlat: 'Jugaste más en {p}.', scFactMonth: 'Tu mes más gamer fue {m}.', scContinue: '¿CONTINUAR EN {y}?', scYes: 'DALE', scNo: 'NO',
     streakDaysShort: 'días de racha', shareLibrary: 'Compartir mi biblioteca', shareLibraryShort: 'Compartir',
@@ -4315,10 +4295,8 @@ const I18N = {
     scTotalGames: 'TOTAL GAMES', scTotalHours: 'HOURS PLAYED', scLife: "THAT'S {days} DAYS OF YOUR LIFE",
     scThanks: 'THANKS FOR PLAYING!', scNoRefunds: 'NO REFUNDS', scStampRing: 'VERIFIED PLAYER · PLAYLOGGR · ',
     scQuipGrowing: 'and the backlog keeps growing', scQuipTaming: "I'm taming it",
-    scWeekSame: 'Week of {m} {d1}–{d2}', scWeekCross: 'Week of {m1} {d1} – {m2} {d2}',
-    scWeekBig: 'This week I played {h}', scMonthBig: 'This month I played {h}', scHours: 'hours', scHour: 'hour',
     scQuipAteWeek: '{g} ate my whole week', scQuipAteMonth: '{g} ate my whole month', scQuipSpread: 'spread across {n} games',
-    scDone: 'Finished {n}', scStarted: 'Started {n}',
+    scGamesPlayed: 'games played', scContinueShort: 'KEEP PLAYING?',
     scSaved: 'PROGRESS SAVED', scLvShort: 'Lv.', scClass: 'CLASS', scParty: 'YOUR PARTY',
     scFactPlat: 'You played most on {p}.', scFactMonth: 'Your top month was {m}.', scContinue: 'CONTINUE IN {y}?', scYes: 'YES', scNo: 'NO',
     streakDaysShort: 'day streak', shareLibrary: 'Share my library', shareLibraryShort: 'Share',
@@ -4733,10 +4711,8 @@ const I18N = {
     scTotalGames: 'TOTAL DE JOGOS', scTotalHours: 'HORAS JOGADAS', scLife: 'SÃO {days} DIAS DA SUA VIDA',
     scThanks: 'OBRIGADO POR JOGAR!', scNoRefunds: 'NÃO ACEITAMOS DEVOLUÇÕES', scStampRing: 'JOGADOR VERIFICADO · PLAYLOGGR · ',
     scQuipGrowing: 'e o backlog continua crescendo', scQuipTaming: 'tô domando ele',
-    scWeekSame: 'Semana de {d1} a {d2} de {m}', scWeekCross: 'Semana de {d1} de {m1} a {d2} de {m2}',
-    scWeekBig: 'Esta semana joguei {h}', scMonthBig: 'Este mês joguei {h}', scHours: 'horas', scHour: 'hora',
     scQuipAteWeek: '{g} engoliu minha semana', scQuipAteMonth: '{g} engoliu meu mês', scQuipSpread: 'dividido entre {n} jogos',
-    scDone: 'Terminei {n}', scStarted: 'Comecei {n}',
+    scGamesPlayed: 'jogos jogados', scContinueShort: 'CONTINUAR?',
     scSaved: 'JOGO SALVO', scLvShort: 'Nv.', scClass: 'CLASSE', scParty: 'SUA PARTY',
     scFactPlat: 'Você jogou mais no {p}.', scFactMonth: 'Seu mês mais gamer foi {m}.', scContinue: 'CONTINUAR EM {y}?', scYes: 'BORA', scNo: 'DEPOIS',
     streakDaysShort: 'dias de sequência', shareLibrary: 'Compartilhar minha biblioteca', shareLibraryShort: 'Compartilhar',
@@ -14261,14 +14237,9 @@ function openShareCard() {
 // ── Tarjetas para compartir: dibujos ─────────────────────────────────────
 // html2canvas no exporta filter, mask ni clip-path, asi que lo que no es texto
 // (borde del ticket, sello, codigo de barras, garabatos, avatar) se dibuja en
-// <canvas>, que se copia tal cual. Los garabatos usan una semilla fija: salen
-// iguales cada vez que se abre la tarjeta.
+// <canvas>, que se copia tal cual. El sello y el codigo de barras usan una
+// semilla fija: salen iguales cada vez que se abre la tarjeta.
 const _SC_GREEN = '#1D9E75';
-const _SC_CHECKS = [
-  'M2.2 8.6c1.6 1.1 3 2.6 4.3 4.9C9.3 8 12.6 4.3 18.2 1.6',
-  'M1.8 9.4c1.9.9 3.4 2.4 4.6 4.6C8.9 8.6 12.9 4.6 18.6 2.2',
-  'M2.6 7.8c1.4 1.4 2.6 3 3.6 5.6 3-6.3 6.4-9.4 11.8-11.8',
-];
 function _scRng(seed) {
   let s = seed | 0;
   return () => { s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
@@ -14285,35 +14256,8 @@ function _scCanvas(c, w, h) {
   return ctx;
 }
 function _scPen(ctx, color, w) { ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; }
-function _scCurve(ctx, p) {
-  ctx.moveTo(p[0][0], p[0][1]);
-  for (let i = 0; i < p.length - 1; i++) {
-    const a = p[i - 1] || p[i], b = p[i], c = p[i + 1], e = p[i + 2] || c;
-    ctx.bezierCurveTo(b[0] + (c[0] - a[0]) / 6, b[1] + (c[1] - a[1]) / 6, c[0] - (e[0] - b[0]) / 6, c[1] - (e[1] - b[1]) / 6, c[0], c[1]);
-  }
-}
 function _scN(n) { return Number(n || 0).toLocaleString(currentLang, { useGrouping: 'always' }); }
 function _scH(h) { return `${(Math.round((h || 0) * 10) / 10).toLocaleString(currentLang)} h`; }
-
-// Circulo a mano alrededor de un elemento: un canvas un poco mas grande, encima.
-function _scCircle(el, seed) {
-  el.querySelectorAll(':scope > canvas.sc-ink').forEach(c => c.remove());
-  const w = el.offsetWidth, h = el.offsetHeight;
-  if (!w || !h) return;
-  const px = Math.max(8, h * .3), py = Math.max(6, h * .25), W = w + px * 2, H = h + py * 2;
-  const c = document.createElement('canvas');
-  c.className = 'sc-ink';
-  c.style.cssText = `position:absolute;left:${-px}px;top:${-py}px;pointer-events:none`;
-  const ctx = _scCanvas(c, W, H), r = _scRng(seed);
-  const n = 9, pts = [], a0 = -2.3 + r() * .5, laps = 1.12 + r() * .08;
-  for (let i = 0; i <= Math.round(n * laps); i++) {
-    const a = a0 + i / n * Math.PI * 2, k = 1 + (r() - .5) * .1;
-    pts.push([W / 2 + Math.cos(a) * (W / 2 - 2) * k * (1 + i * .006), H / 2 + Math.sin(a) * (H / 2 - 2) * k]);
-  }
-  _scPen(ctx, _SC_GREEN, Math.max(2.2, Math.min(3.2, h * .06)));
-  ctx.beginPath(); _scCurve(ctx, pts); ctx.stroke();
-  el.appendChild(c);
-}
 
 // Borde dentado del ticket (arriba o abajo).
 function _scZigzag(c) {
@@ -14398,26 +14342,10 @@ function _scPutAvatar(id, h, gray) {
   box.appendChild(_scAvatarCanvas(h, gray));
 }
 
-// Tildes, flechas e iconos chicos ([data-ck], [data-arrow], [data-play]) y los
-// circulos a mano ([data-circle]) de una tarjeta.
+// Borde del ticket y logo de una tarjeta.
 function _scDraw(root) {
   if (!root) return;
   root.querySelectorAll('canvas.sc-zz').forEach(_scZigzag);
-  root.querySelectorAll('canvas[data-ck]').forEach(c => {
-    const ctx = _scCanvas(c, 20, 16);
-    _scPen(ctx, _SC_GREEN, 2.6);
-    ctx.stroke(new Path2D(_SC_CHECKS[+c.dataset.ck % 3]));
-  });
-  root.querySelectorAll('canvas[data-arrow]').forEach(c => {
-    const [w, h] = c.dataset.size.split(',').map(Number), ctx = _scCanvas(c, w, h);
-    _scPen(ctx, _SC_GREEN, 2.4);
-    ctx.stroke(new Path2D(c.dataset.arrow));
-  });
-  root.querySelectorAll('canvas[data-play]').forEach(c => {
-    const ctx = _scCanvas(c, 12, 14);
-    ctx.fillStyle = '#378ADD';
-    ctx.fill(new Path2D('M0 0h2v2h2v2h2v2h2v2H6v2H4v2H2v2H0z'));
-  });
   root.querySelectorAll('canvas[data-logo]').forEach(c => {
     // El mismo joystick del favicon: cuadrado oscuro y el icono en verde.
     const z = +c.dataset.logo, ctx = _scCanvas(c, z, z), k = z / 64;
@@ -14429,7 +14357,6 @@ function _scDraw(root) {
     ['M12 5h3.5a5 5 0 0 1 0 10h-5.5l-4.015 4.227a2.3 2.3 0 0 1 -3.923 -2.035l1.634 -8.173a5 5 0 0 1 4.904 -4.019h3.4z',
      'M14 15l4.07 4.284a2.3 2.3 0 0 0 3.925 -2.023l-1.6 -8.232', 'M8 9v2', 'M7 10h2', 'M14 10h2'].forEach(d => ctx.stroke(new Path2D(d)));
   });
-  root.querySelectorAll('[data-circle]').forEach(el => _scCircle(el, +el.dataset.circle || 1));
 }
 
 // Las fuentes de las tarjetas (Space Mono, Caveat, Press Start 2P) vienen en
@@ -14559,23 +14486,40 @@ async function shareWelcomeStats() {
   return exportCardAsImage('welcome-stats-card', 'playloggr.png');
 }
 
-// ── Semana o mes: la polaroid ──────────────────────────────────────────────
+// ── Semana, mes y año: guardar partida ────────────────────────────────────
+// Piezas comunes de la pantalla de guardar partida.
+function _scClock(hours) {
+  const mins = Math.round((hours || 0) * 60);
+  return `${_scN(Math.floor(mins / 60))}:${String(mins % 60).padStart(2, '0')}`;
+}
+function _scStat(label, value) {
+  return `<div><dt>${esc(label.charAt(0).toUpperCase() + label.slice(1))}</dt><span class="sc-dots"></span><dd>${value}</dd></div>`;
+}
+function _scPartyList(games) {
+  return `<ol class="sc-sv-list">${games.map((g, i) => `<li><span class="sc-rank">${i + 1}</span><span class="sc-nm">${esc(g.name)}</span><b>${_scH(g.hours)}</b></li>`).join('')}</ol>`;
+}
+function _scContinue(question) {
+  return `<div class="sc-sv-cont"><span>${esc(question)}</span><span class="sc-on">${esc(t('scYes'))}</span><span>${esc(t('scNo'))}</span></div>`;
+}
+function _scSlotTitle(id = 'wrapped-title') {
+  const title = titleLabel(userTitle);
+  document.getElementById(id).textContent = `${t('scLvShort')} ${userLevel}${title ? ' · ' + title : ''}`;
+}
+
 // El ultimo resumen cargado en el tab de periodo, para armar la tarjeta sin
 // volver a pedirlo.
 let _lastPeriodOwn = null;
 
-function _scRangeLabel(a, b, isWeek) {
+// El periodo en el slot, con la fuente pixel: "5-11 OCT", "29 SEP-5 OCT" u
+// "OCT 2026". Sin tildes ni puntos: Press Start 2P no tiene mayusculas
+// acentuadas.
+function _scPeriodTag(a, b, isWeek) {
   const d = iso => { const [y, m, dd] = String(iso).split('-'); return new Date(+y, +m - 1, +dd); };
   const s = d(a), e = d(b);
-  if (isNaN(s) || isNaN(e)) return `${a} → ${b}`;
-  if (!isWeek) {
-    const n = s.toLocaleDateString(currentLang, { month: 'long', year: 'numeric' });
-    return n.charAt(0).toUpperCase() + n.slice(1);
-  }
-  const m = x => x.toLocaleDateString(currentLang, { month: 'long' });
-  return t(s.getMonth() === e.getMonth() ? 'scWeekSame' : 'scWeekCross')
-    .replace('{d1}', s.getDate()).replace('{d2}', e.getDate())
-    .replace('{m1}', m(s)).replace('{m2}', m(e)).replace('{m}', m(e));
+  if (isNaN(s) || isNaN(e)) return '';
+  const mon = x => x.toLocaleDateString(currentLang, { month: 'short' }).replace(/\./g, '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase();
+  if (!isWeek) return `${mon(s)} ${s.getFullYear()}`;
+  return s.getMonth() === e.getMonth() ? `${s.getDate()}-${e.getDate()} ${mon(e)}` : `${s.getDate()} ${mon(s)}-${e.getDate()} ${mon(e)}`;
 }
 
 function openPeriodShareCard() {
@@ -14583,36 +14527,12 @@ function openPeriodShareCard() {
   if (!own || !own.has_data) return;
   const isWeek = currentPeriodType === 'week';
   ensureGameThemeFontsLoaded();
+  document.getElementById('period-share-eyebrow').textContent = t('scSaved');
   document.getElementById('period-share-user').textContent = authUser || '';
-  document.getElementById('period-share-range').textContent = _scRangeLabel(own.period_start, own.period_end, isWeek);
-  _scPutAvatar('period-share-avatar', 40, false);
-
-  // "Esta semana jugué 14,5 horas", con el numero circulado a mano.
-  const hrs = Math.round((own.total_hours || 0) * 10) / 10;
-  document.getElementById('period-share-hours').innerHTML = esc(t(isWeek ? 'scWeekBig' : 'scMonthBig'))
-    .replace('{h}', `<span data-circle="${_scSeed(own.period_start || 'p')}">${hrs.toLocaleString(currentLang)} ${esc(hrs === 1 ? t('scHour') : t('scHours'))}</span>`);
-
-  // El mas jugado va como polaroid; el 2.º y el 3.º, como renglones. Es lo que
-  // la gente cuenta ("me pase la semana en Hades"), no la tabla completa.
-  const all = Object.entries(own.hours_by_game || {}).sort((a, b) => b[1] - a[1]);
-  const top = all.slice(0, 3);
-  let main = '';
-  if (top.length) {
-    const [name, h] = top[0];
-    const cover = _scCoverFor(name);
-    const share = own.total_hours ? h / own.total_hours : 0;
-    const quip = share >= .5 ? t(isWeek ? 'scQuipAteWeek' : 'scQuipAteMonth').replace('{g}', name)
-      : all.length >= 3 ? t('scQuipSpread').replace('{n}', all.length) : '';
-    const rest = top.slice(1).map(([n, hh], i) => {
-      const c = _scCoverFor(n);
-      return `<li><span class="sc-rank">${i + 2}</span>${c ? _scCoverDiv(c) : '<span></span>'}<span class="sc-nm">${esc(n)}</span><b>${_scH(hh)}</b></li>`;
-    }).join('');
-    main = `<figure class="sc-pol"><span class="sc-tape"></span>${cover ? _scCoverDiv(cover) : `<div class="sc-pol-ph">${esc(name)}</div>`}<figcaption>${esc(name)} · ${_scH(h)}</figcaption></figure>
-      <div>${quip ? `<p class="sc-hand sc-wk-quip">${esc(quip)}<canvas data-arrow="M54 4 C 40 8, 24 16, 8 26 M16 29 L7 27 L11 18" data-size="60,34"></canvas></p>` : ''}${rest ? `<ol class="sc-wk-list">${rest}</ol>` : ''}</div>`;
-  }
-  const gamesEl = document.getElementById('period-share-games');
-  gamesEl.innerHTML = main;
-  gamesEl.style.display = main ? '' : 'none';
+  document.getElementById('period-share-range').textContent = _scPeriodTag(own.period_start, own.period_end, isWeek);
+  document.getElementById('period-share-clock').textContent = _scClock(own.total_hours);
+  _scSlotTitle('period-share-title');
+  _scPutAvatar('period-share-avatar', 58, false);
 
   // Completados y empezados en el periodo, desde los cambios de estado.
   let completed = 0, started = 0;
@@ -14621,9 +14541,21 @@ function openPeriodShareCard() {
     if (to === 'Completado') completed += n;
     if (to === 'Jugando') started += n;
   });
-  document.getElementById('period-share-chips').innerHTML =
-    (completed > 0 ? `<span><canvas data-ck="1"></canvas>${esc(t('scDone').replace('{n}', completed))}</span>` : '') +
-    (started > 0 ? `<span><canvas data-play></canvas>${esc(t('scStarted').replace('{n}', started))}</span>` : '');
+  const games = Object.entries(own.hours_by_game || {}).sort((a, b) => b[1] - a[1]);
+  const hrs = Math.round((own.total_hours || 0) * 10) / 10;
+  // Una frase con lo que la gente cuenta ("me pase la semana en Hades").
+  let fact = '';
+  if (games.length && own.total_hours && games[0][1] / own.total_hours >= .5) {
+    fact = esc(t(isWeek ? 'scQuipAteWeek' : 'scQuipAteMonth')).replace('{g}', `<b>${esc(games[0][0])}</b>`) + '.';
+  } else if (games.length >= 3) {
+    const spread = t('scQuipSpread').replace('{n}', games.length);
+    fact = esc(spread.charAt(0).toUpperCase() + spread.slice(1)) + '.';
+  }
+  document.getElementById('period-share-body').innerHTML = `
+    <dl class="sc-sv-stats">${_scStat(t('wrappedHoursLbl'), hrs.toLocaleString(currentLang))}${_scStat(t('scGamesPlayed'), _scN(games.length))}${_scStat(t('periodShareCompletedN'), _scN(completed))}${_scStat(t('periodShareStartedN'), _scN(started))}</dl>
+    ${games.length ? `<span class="sc-sv-lbl">${esc(t('scParty'))}</span>${_scPartyList(games.slice(0, 5).map(([name, hours]) => ({ name, hours })))}` : ''}
+    ${fact ? `<p class="sc-sv-facts">${fact}</p>` : ''}
+    ${_scContinue(t('scContinueShort'))}`;
 
   document.getElementById('period-share-url').textContent = authUser ? `playloggr.com/u/${authUser}` : 'playloggr.com';
   document.getElementById('period-share-overlay').classList.add('open');
@@ -14636,11 +14568,6 @@ function openPeriodShareCard() {
 // GET /wrapped arma todo del lado del backend; aca solo se pinta la tarjeta
 // (misma exportacion que la del resumen de periodo).
 let _wrappedYear = null;
-
-function _scSlotTitle() {
-  const title = titleLabel(userTitle);
-  document.getElementById('wrapped-title').textContent = `${t('scLvShort')} ${userLevel}${title ? ' · ' + title : ''}`;
-}
 
 async function openWrapped(year) {
   const overlay = document.getElementById('wrapped-overlay');
@@ -14687,12 +14614,10 @@ function renderWrapped(w) {
     return;
   }
   // Las horas del año como reloj de partida guardada: 812:30.
-  const mins = Math.round((w.total_hours || 0) * 60);
-  clock.textContent = `${_scN(Math.floor(mins / 60))}:${String(mins % 60).padStart(2, '0')}`;
-  const cap = x => x ? x.charAt(0).toUpperCase() + x.slice(1) : x;
+  clock.textContent = _scClock(w.total_hours);
   const fmtDate = iso => { const [y, m, d] = iso.split('-'); return new Date(+y, +m - 1, +d).toLocaleDateString(currentLang, { day: 'numeric', month: 'long' }); };
   const monthName = ym => { const [y, m] = ym.split('-'); return new Date(+y, +m - 1, 1).toLocaleDateString(currentLang, { month: 'long' }); };
-  const stat = (label, n) => `<div><dt>${esc(cap(label))}</dt><span class="sc-dots"></span><dd>${_scN(n)}</dd></div>`;
+  const stat = (label, n) => _scStat(label, _scN(n));
   // Si se empezo a registrar despues del 1 de enero, se aclara: las horas
   // son desde ahi, no del año entero.
   const since = w.since && !w.since.endsWith('-01-01')
@@ -14704,7 +14629,7 @@ function renderWrapped(w) {
   const covers = games.map(g => g.cover_url || g.cover || _scCoverFor(g.name));
   const party = games.length && covers.every(Boolean)
     ? `<div class="sc-party">${games.map((g, i) => `<figure>${_scCoverDiv(covers[i])}<figcaption>${_scN(Math.round(g.hours || 0))} h</figcaption></figure>`).join('')}</div>`
-    : `<ol class="sc-sv-list">${games.map((g, i) => `<li><span class="sc-rank">${i + 1}</span><span class="sc-nm">${esc(g.name)}</span><b>${_scH(g.hours)}</b></li>`).join('')}</ol>`;
+    : _scPartyList(games);
   const facts = [
     w.top_platform ? esc(t('scFactPlat')).replace('{p}', `<b>${esc(w.top_platform.name)}</b>`) : '',
     w.top_month ? esc(t('scFactMonth')).replace('{m}', `<b>${esc(monthName(w.top_month.month))}</b>`) : '',
@@ -14716,7 +14641,7 @@ function renderWrapped(w) {
     <div class="sc-sv-class"><b>${esc(arch)}</b><p>${esc(t('wrappedArchD_' + w.archetype))}</p></div>
     ${games.length ? `<span class="sc-sv-lbl">${esc(t('scParty'))}</span>${party}` : ''}
     ${facts ? `<p class="sc-sv-facts">${facts}</p>` : ''}
-    <div class="sc-sv-cont"><span>${esc(t('scContinue').replace('{y}', (w.year || new Date().getFullYear()) + 1))}</span><span class="sc-on">${esc(t('scYes'))}</span><span>${esc(t('scNo'))}</span></div>`;
+    ${_scContinue(t('scContinue').replace('{y}', (w.year || new Date().getFullYear()) + 1))}`;
 }
 
 // Aviso en la biblioteca en diciembre y enero (enero = el año que termino),
