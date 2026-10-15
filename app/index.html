@@ -2422,33 +2422,140 @@
   </div>
 </div>
 
+<!-- Tarjetas para compartir (estética Bitácora). Cada una es un objeto que
+     se reconoce: el ticket (biblioteca), la polaroid (semana o mes) y la
+     pantalla de guardar partida (el año). Colores y fuentes fijos, no siguen
+     el tema: la imagen que sale afuera se ve igual para todos. Lo que no es
+     texto se dibuja en <canvas> (ver _scDraw), porque html2canvas no exporta
+     filter, mask ni clip-path, y las portadas van como fondo porque ignora
+     object-fit. -->
+<style>
+  .sc-card { width: 100%; max-width: 380px; margin: 0 auto; background: #111; color: #f0f0f0; font-family: 'Mulish', sans-serif; text-align: left; position: relative; overflow: hidden; line-height: 1.4; }
+  .sc-card *, .sc-card *::before, .sc-card *::after { box-sizing: border-box; }
+  .sc-hand { font-family: 'Caveat', cursive; font-weight: 700; color: #1D9E75; line-height: 1.05; }
+  .sc-foot { display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 11px; color: #7a7a7a; letter-spacing: .02em; }
+  .sc-dots { flex: 1; min-width: 10px; border-bottom: 1.5px dotted #a8a399; transform: translateY(-3px); }
+  .sc-rank { font: 400 9px 'Press Start 2P', monospace; color: #8a8a8a; }
+  .sc-nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sc-card [data-circle] { position: relative; display: inline-block; }
+  .sc-card canvas { display: inline-block; vertical-align: middle; }
+  .sc-cover { background: #1c2420 center / cover no-repeat; }
+
+  /* Biblioteca: el ticket */
+  .sc-ticket { padding: 32px 0 18px; }
+  .sc-tk { width: 292px; margin: 0 auto; position: relative; transform: rotate(-1.6deg); box-shadow: 0 20px 28px rgba(0,0,0,.5); }
+  .sc-tk canvas.sc-zz { display: block; width: 292px; height: 9px; }
+  .sc-tk-body { background: #F4F0E6; color: #262626; font: 400 11.5px/1.65 'Space Mono', monospace; padding: 8px 20px 14px; }
+  .sc-tk-logo { display: flex; align-items: center; justify-content: center; gap: 8px; font: 400 12px 'Press Start 2P', monospace; color: #111; margin: 6px 0; }
+  .sc-tk-c { text-align: center; }
+  .sc-tk-s { font-size: 10px; color: #555; }
+  .sc-tk-rule { border-top: 1.5px dashed #9a958a; margin: 9px 0; }
+  .sc-tk-row, .sc-tk-item, .sc-tk-total { display: flex; align-items: baseline; gap: 6px; }
+  .sc-tk-row span:last-child, .sc-tk-total span:last-child { margin-left: auto; text-align: right; }
+  .sc-tk-item i { width: 8px; height: 8px; flex: none; display: inline-block; }
+  .sc-tk-total { font-weight: 700; font-size: 14px; }
+  .sc-tk-player { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center; }
+  .sc-tk-player b { display: block; font-size: 15px; font-weight: 700; word-break: break-all; }
+  #welcome-stats-badges span { display: block; font-size: 10.5px; line-height: 1.5; }
+  .sc-tk canvas.sc-bar { display: block; width: 100%; height: 36px; margin: 4px 0 6px; }
+  .sc-tk canvas.sc-stamp { position: absolute; right: -40px; top: 112px; width: 104px; height: 104px; pointer-events: none; }
+  .sc-tk-quip { font-size: 23px; text-align: center; margin: 20px 0 0; transform: rotate(-2deg); }
+
+  /* Semana o mes: la polaroid */
+  .sc-week { padding: 26px 24px 18px; }
+  .sc-wk-top { display: flex; align-items: center; gap: 10px; }
+  .sc-wk-top b { display: block; font-size: 14.5px; font-weight: 800; }
+  .sc-wk-top span { display: block; font-size: 12px; color: #9a9a9a; }
+  .sc-wk-big { font: 900 33px/1.08 'Mulish', sans-serif; letter-spacing: -.025em; margin: 22px 0 26px; }
+  .sc-wk-main { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 18px; align-items: start; }
+  .sc-pol { margin: 0; background: #F4F1EA; padding: 8px 8px 30px; transform: rotate(-4deg); position: relative; box-shadow: 0 14px 26px rgba(0,0,0,.55); }
+  .sc-pol .sc-cover, .sc-pol-ph { width: 134px; height: 176px; }
+  .sc-pol-ph { background: #1c2420; color: #EFE9DC; font: 700 24px/1.05 'Caveat', cursive; display: flex; align-items: center; justify-content: center; text-align: center; padding: 12px; overflow: hidden; }
+  .sc-pol figcaption { position: absolute; left: 6px; right: 6px; bottom: 4px; text-align: center; font: 700 20px/1.1 'Caveat', cursive; color: #24324a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sc-tape { position: absolute; width: 70px; height: 22px; top: -11px; left: 34px; background: rgba(232,224,196,.72); transform: rotate(-5deg); z-index: 2; }
+  .sc-wk-quip { font-size: 22px; margin: 4px 0 0; transform: rotate(-3deg); }
+  .sc-wk-quip canvas { display: block; margin: 2px 0 0 -6px; }
+  .sc-wk-list { list-style: none; padding: 0; margin: 14px 0 0; }
+  .sc-wk-list li { display: grid; grid-template-columns: 18px 30px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 7px 0; border-top: 1px solid #2a2a2a; font-size: 13.5px; font-weight: 700; }
+  .sc-wk-list .sc-cover { width: 30px; height: 40px; border-radius: 2px; }
+  .sc-wk-list b { font: 400 12px 'Space Mono', monospace; color: #9a9a9a; white-space: nowrap; }
+  .sc-wk-tally { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 24px 0 18px; font-size: 14.5px; font-weight: 700; color: #dcdcdc; }
+  .sc-wk-tally span { display: flex; align-items: center; gap: 7px; }
+
+  /* El año: guardar partida */
+  .sc-save { padding: 26px 22px 18px; background: #0d0e0d; }
+  .sc-sv-head { font: 400 13px 'Press Start 2P', monospace; color: #1D9E75; display: flex; gap: 6px; align-items: center; }
+  .sc-cur { animation: sc-blink 1s steps(2) infinite; }
+  @keyframes sc-blink { 50% { opacity: 0; } }
+  .sc-px-frame { background: #121815; border: 3px solid #1D9E75; position: relative; }
+  .sc-px-frame > i { position: absolute; width: 3px; height: 3px; background: #0d0e0d; }
+  .sc-px-frame > i:nth-of-type(1) { left: -3px; top: -3px; } .sc-px-frame > i:nth-of-type(2) { right: -3px; top: -3px; }
+  .sc-px-frame > i:nth-of-type(3) { left: -3px; bottom: -3px; } .sc-px-frame > i:nth-of-type(4) { right: -3px; bottom: -3px; }
+  .sc-sv-slot { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center; padding: 10px 12px; margin-top: 18px; }
+  .sc-sv-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .sc-sv-row b { font-size: 16px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sc-sv-y { font: 400 11px 'Press Start 2P', monospace; color: #1D9E75; }
+  #wrapped-title { font-size: 12.5px; color: #a9a9a9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sc-sv-t { font: 700 14px 'Space Mono', monospace; color: #f0f0f0; white-space: nowrap; }
+  .sc-sv-stats { margin: 22px 0 0; padding: 0; }
+  .sc-sv-stats div { display: flex; align-items: baseline; gap: 8px; padding: 4px 0; font-size: 14px; }
+  .sc-sv-stats dt { color: #bdbdbd; }
+  .sc-sv-stats .sc-dots { border-bottom: 2px dotted #3a3a3a; }
+  .sc-sv-stats dd { margin: 0; font: 700 16px 'Space Mono', monospace; color: #fff; }
+  .sc-sv-since { font-size: 11px; color: #8a8a8a; margin-top: 4px; }
+  .sc-sv-lbl { font: 400 9px 'Press Start 2P', monospace; color: #B9A8FF; display: block; margin: 22px 0 8px; }
+  .sc-sv-class b { font: 900 22px 'Mulish', sans-serif; display: block; }
+  .sc-sv-class p { margin: 2px 0 0; color: #a9a9a9; font-size: 13px; }
+  .sc-party { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px; }
+  .sc-party figure { margin: 0; min-width: 0; }
+  .sc-party .sc-cover { padding-top: 133%; border-radius: 2px; }
+  .sc-party figure:first-child .sc-cover { border: 2px solid #EF9F27; }
+  .sc-party figcaption { font: 700 11px 'Space Mono', monospace; color: #bdbdbd; text-align: center; margin-top: 5px; }
+  .sc-sv-list { list-style: none; padding: 0; margin: 0; }
+  .sc-sv-list li { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 6px 0; border-top: 1px solid #222; font-size: 13.5px; font-weight: 700; }
+  .sc-sv-list b { font: 400 12px 'Space Mono', monospace; color: #9a9a9a; }
+  .sc-sv-facts { font-size: 13.5px; color: #a9a9a9; margin: 18px 0 0; }
+  .sc-sv-facts b { color: #f0f0f0; }
+  .sc-sv-cont { font: 400 10px/1.4 'Press Start 2P', monospace; color: #cfcfcf; text-align: center; margin: 22px 0 18px; display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 16px; }
+  .sc-sv-cont .sc-on { color: #fff; }
+  .sc-sv-cont .sc-on::before { content: '\25B6  '; color: #1D9E75; }
+  .sc-sv-empty { font-size: 13px; color: #a9a9a9; padding: 18px 0; }
+</style>
+
 <!-- Momento "wow": primera vez que la biblioteca deja de estar vacia. Es el
      unico instante en que el usuario ve de golpe el valor del producto, y la
      tarjeta esta pensada para compartirse (lleva el dominio adentro), que es
      el motor de crecimiento organico que hoy no existe. -->
 <div class="modal-overlay" id="welcome-stats-overlay">
   <div class="modal u-mw380" style="padding:0;overflow:hidden">
-    <div id="welcome-stats-card" style="padding:26px 22px;background:linear-gradient(160deg,#16231d,#111111);text-align:center">
-      <div class="field u-fs11 u-accent" style="letter-spacing:.08em;text-transform:uppercase;font-weight:700" data-i18n="wowEyebrow">Tu biblioteca</div>
-      <div class="u-rel" id="welcome-stats-avatar" style="width:72px;height:72px;margin:0 auto 10px;border-radius:50%;overflow:hidden;background:var(--bg3)"></div>
-      <div id="welcome-stats-user" style="font-size:15px;font-weight:700;margin-bottom:9px"></div>
-      <!-- Nivel + racha juntos, arriba de los numeros: son los dos datos de
-           progreso que la gente comparte, y de nada sirve que el nivel viva
-           solo en el header si la imagen que sale afuera no lo lleva. -->
-      <div class="u-gap8 u-center u-items-center" id="welcome-stats-badges" style="display:flex;flex-wrap:wrap;margin-bottom:18px"></div>
-      <div class="u-center" style="display:flex;gap:26px;margin-bottom:16px">
-        <div>
-          <div id="welcome-stats-games" style="font-size:30px;font-weight:800;line-height:1">0</div>
-          <div class="u-muted" style="font-size:10.5px;margin-top:3px" data-i18n="wowGames">juegos</div>
+    <div id="welcome-stats-card" class="sc-card sc-ticket">
+      <div class="sc-tk">
+        <canvas class="sc-zz" data-edge="top"></canvas>
+        <div class="sc-tk-body">
+          <div class="sc-tk-logo"><canvas data-logo="18"></canvas>PLAYLOGGR</div>
+          <div class="sc-tk-c sc-tk-s" id="welcome-stats-url">playloggr.com</div>
+          <div class="sc-tk-rule"></div>
+          <div class="sc-tk-row"><span data-i18n="scDate">FECHA</span><span id="sc-tk-date"></span></div>
+          <div class="sc-tk-row"><span data-i18n="scTill">CAJA 01</span><span data-i18n="scServed">ATENDIÓ: VOS</span></div>
+          <div class="sc-tk-rule"></div>
+          <!-- Nivel, titulo y racha junto al avatar: son los datos de progreso
+               que la gente comparte. -->
+          <div class="sc-tk-player"><div id="welcome-stats-avatar"></div><div><b id="welcome-stats-user"></b><span id="welcome-stats-badges"></span></div></div>
+          <div class="sc-tk-rule"></div>
+          <div id="welcome-stats-breakdown"></div>
+          <div class="sc-tk-rule"></div>
+          <div class="sc-tk-total"><span data-i18n="scTotalGames">TOTAL JUEGOS</span><span id="welcome-stats-games">0</span></div>
+          <div class="sc-tk-total"><span data-i18n="scTotalHours">HORAS JUGADAS</span><span id="welcome-stats-hours">0</span></div>
+          <div class="sc-tk-c sc-tk-s" id="welcome-stats-life" style="margin-top:4px"></div>
+          <div class="sc-tk-rule"></div>
+          <canvas class="sc-bar" id="sc-tk-barcode"></canvas>
+          <div class="sc-tk-c" data-i18n="scThanks">¡GRACIAS POR JUGAR!</div>
+          <div class="sc-tk-c sc-tk-s" data-i18n="scNoRefunds">NO SE ACEPTAN DEVOLUCIONES</div>
         </div>
-        <div>
-          <div class="u-accent" id="welcome-stats-hours" style="font-size:30px;font-weight:800;line-height:1">0</div>
-          <div class="u-muted" style="font-size:10.5px;margin-top:3px" data-i18n="wowHours">horas</div>
-        </div>
+        <canvas class="sc-zz" data-edge="bottom"></canvas>
+        <canvas class="sc-stamp" id="sc-tk-stamp"></canvas>
       </div>
-      <div class="field u-muted" id="welcome-stats-life" style="font-size:12.5px"></div>
-      <div class="u-gap8 u-center" id="welcome-stats-breakdown" style="display:flex;flex-wrap:wrap"></div>
-      <div id="welcome-stats-url" style="margin-top:20px;font-size:10.5px;color:#777;letter-spacing:.04em">playloggr.com</div>
+      <div class="sc-hand sc-tk-quip" id="sc-tk-quip"></div>
     </div>
     <div class="u-gap8" style="display:flex;padding:14px 18px 18px">
       <button class="btn-cancel u-flex1" onclick="closeWelcomeStats()" data-i18n="close">Cerrar</button>
@@ -2459,25 +2566,15 @@
 
 <!-- Resumen de periodo compartible. Es el patron Spotify Wrapped: el numero
      del que la gente se enorgullece ("12 hs esta semana", "completé Hades")
-     en una imagen que se comparte sola. Misma tarjeta que la de biblioteca,
-     otro contenido. -->
+     en una imagen que se comparte sola. El juego mas jugado va como polaroid. -->
 <div class="modal-overlay" id="period-share-overlay">
   <div class="modal u-mw380" style="padding:0;overflow:hidden">
-    <div id="period-share-card" style="padding:26px 22px;background:linear-gradient(160deg,#16231d,#111111);text-align:center">
-      <div class="u-fs11 u-accent" id="period-share-eyebrow" style="letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin-bottom:3px"></div>
-      <div class="field u-muted" id="period-share-range" style="font-size:10.5px"></div>
-      <div class="u-center u-items-center" style="display:flex;gap:10px;margin-bottom:16px">
-        <div class="u-rel" id="period-share-avatar" style="width:40px;height:40px;border-radius:50%;overflow:hidden;background:var(--bg3);flex-shrink:0"></div>
-        <div style="text-align:left">
-          <div class="u-fs14" id="period-share-user" style="font-weight:700;line-height:1.2"></div>
-          <div id="period-share-title" style="line-height:1.2"></div>
-        </div>
-      </div>
-      <div class="u-accent" id="period-share-hours" style="font-size:44px;font-weight:800;line-height:1">0</div>
-      <div class="u-fs11 u-muted" style="margin:4px 0 16px" id="period-share-hours-lbl"></div>
-      <div class="field u-gap6 u-col" id="period-share-games" style="display:flex;text-align:left"></div>
-      <div class="u-gap8 u-center" id="period-share-chips" style="display:flex;flex-wrap:wrap"></div>
-      <div id="period-share-url" style="margin-top:18px;font-size:10.5px;color:#777;letter-spacing:.04em">playloggr.com</div>
+    <div id="period-share-card" class="sc-card sc-week">
+      <div class="sc-wk-top"><div id="period-share-avatar"></div><div><b id="period-share-user"></b><span id="period-share-range"></span></div></div>
+      <div class="sc-wk-big" id="period-share-hours"></div>
+      <div class="sc-wk-main" id="period-share-games"></div>
+      <div class="sc-wk-tally" id="period-share-chips"></div>
+      <div class="sc-foot"><canvas data-logo="15"></canvas><span id="period-share-url">playloggr.com</span></div>
     </div>
     <div class="u-gap8" style="display:flex;padding:14px 18px 18px">
       <button class="btn-cancel u-flex1" onclick="document.getElementById('period-share-overlay').classList.remove('open')" data-i18n="close">Cerrar</button>
@@ -2486,22 +2583,23 @@
   </div>
 </div>
 
-<!-- "Tu año en Playloggr" (estilo Wrapped). Datos de GET /wrapped; se abre
-     desde Estadisticas > Semana/Mes ("Mi año"), el aviso de diciembre/enero
-     en la biblioteca o el link /app/#wrapped. -->
+<!-- "Tu año en Playloggr" (estilo Wrapped), como la pantalla de guardar
+     partida de un RPG. Datos de GET /wrapped; se abre desde Estadisticas >
+     Semana/Mes ("Mi año"), el aviso de diciembre/enero en la biblioteca o el
+     link /app/#wrapped. -->
 <div class="modal-overlay" id="wrapped-overlay">
   <div class="modal u-mw380" style="padding:0;overflow:hidden">
-    <div id="wrapped-card" style="padding:28px 22px 22px;background:linear-gradient(165deg,#221a3a 0%,#16231d 55%,#111111 100%);text-align:center">
-      <div class="u-fs11" id="wrapped-eyebrow" style="letter-spacing:.08em;text-transform:uppercase;font-weight:800;margin-bottom:12px;color:#b9a8ff"></div>
-      <div class="u-center u-items-center" style="display:flex;gap:10px;margin-bottom:16px">
-        <div class="u-rel" id="wrapped-avatar" style="width:40px;height:40px;border-radius:50%;overflow:hidden;background:var(--bg3);flex-shrink:0"></div>
-        <div style="text-align:left">
-          <div class="u-fs14" id="wrapped-user" style="font-weight:700;line-height:1.2"></div>
-          <div id="wrapped-title" style="line-height:1.2"></div>
+    <div id="wrapped-card" class="sc-card sc-save">
+      <div class="sc-sv-head"><span id="wrapped-eyebrow"></span><span class="sc-cur">&#9646;</span></div>
+      <div class="sc-px-frame sc-sv-slot"><i></i><i></i><i></i><i></i>
+        <div id="wrapped-avatar"></div>
+        <div>
+          <div class="sc-sv-row"><b id="wrapped-user"></b><span class="sc-sv-y" id="wrapped-year"></span></div>
+          <div class="sc-sv-row"><span id="wrapped-title"></span><span class="sc-sv-t" id="wrapped-clock"></span></div>
         </div>
       </div>
       <div id="wrapped-body"></div>
-      <div id="wrapped-url" style="margin-top:18px;font-size:10.5px;color:#777;letter-spacing:.04em">playloggr.com</div>
+      <div class="sc-foot"><canvas data-logo="15"></canvas><span id="wrapped-url">playloggr.com</span></div>
     </div>
     <div class="u-gap8" style="display:flex;padding:14px 18px 18px">
       <button class="btn-cancel u-flex1" onclick="document.getElementById('wrapped-overlay').classList.remove('open')" data-i18n="close">Cerrar</button>
@@ -3795,6 +3893,16 @@ const I18N = {
     activateManual: 'A mano', activateLater: 'Lo hago más tarde',
     wowEyebrow: 'Tu biblioteca', wowGames: 'juegos', wowHours: 'horas', wowShare: 'Compartir',
     wowLife: 'Son {days} días de tu vida jugando',
+    scDate: 'FECHA', scTill: 'CAJA 01', scServed: 'ATENDIÓ: VOS', scLevel: 'NIVEL', scStreak: 'RACHA: {n} DÍAS',
+    scTotalGames: 'TOTAL JUEGOS', scTotalHours: 'HORAS JUGADAS', scLife: 'EQUIVALE A {days} DÍAS DE TU VIDA',
+    scThanks: '¡GRACIAS POR JUGAR!', scNoRefunds: 'NO SE ACEPTAN DEVOLUCIONES', scStampRing: 'JUGADOR VERIFICADO · PLAYLOGGR · ',
+    scQuipGrowing: 'y el backlog sigue creciendo', scQuipTaming: 'lo estoy domando',
+    scWeekSame: 'Semana del {d1} al {d2} de {m}', scWeekCross: 'Semana del {d1} de {m1} al {d2} de {m2}',
+    scWeekBig: 'Esta semana jugué {h}', scMonthBig: 'Este mes jugué {h}', scHours: 'horas', scHour: 'hora',
+    scQuipAteWeek: '{g} se comió la semana', scQuipAteMonth: '{g} se comió el mes', scQuipSpread: 'repartido entre {n} juegos',
+    scDone: 'Terminé {n}', scStarted: 'Empecé {n}',
+    scSaved: 'PARTIDA GUARDADA', scLvShort: 'Nv.', scClass: 'CLASE', scParty: 'TU PARTY',
+    scFactPlat: 'Jugaste más en {p}.', scFactMonth: 'Tu mes más gamer fue {m}.', scContinue: '¿CONTINUAR EN {y}?', scYes: 'DALE', scNo: 'NO',
     streakDaysShort: 'días de racha', shareLibrary: 'Compartir mi biblioteca', shareLibraryShort: 'Compartir',
     reviewPromptTitle: '¿Qué te pareció?', reviewPromptTitleDropped: '¿Por qué lo dejaste?', reviewPromptCta: 'Escribir reseña', reviewPromptLater: 'Ahora no',
     notifPrefsLabel: 'Notificaciones', notifPrefsNews: 'Novedades (lanzamientos, juegos gratis, lo más jugado)',
@@ -4203,6 +4311,16 @@ const I18N = {
     activateManual: 'Manually', activateLater: "I'll do it later",
     wowEyebrow: 'Your library', wowGames: 'games', wowHours: 'hours', wowShare: 'Share',
     wowLife: "That's {days} days of your life playing",
+    scDate: 'DATE', scTill: 'TILL 01', scServed: 'SERVED BY: YOU', scLevel: 'LEVEL', scStreak: 'STREAK: {n} DAYS',
+    scTotalGames: 'TOTAL GAMES', scTotalHours: 'HOURS PLAYED', scLife: "THAT'S {days} DAYS OF YOUR LIFE",
+    scThanks: 'THANKS FOR PLAYING!', scNoRefunds: 'NO REFUNDS', scStampRing: 'VERIFIED PLAYER · PLAYLOGGR · ',
+    scQuipGrowing: 'and the backlog keeps growing', scQuipTaming: "I'm taming it",
+    scWeekSame: 'Week of {m} {d1}–{d2}', scWeekCross: 'Week of {m1} {d1} – {m2} {d2}',
+    scWeekBig: 'This week I played {h}', scMonthBig: 'This month I played {h}', scHours: 'hours', scHour: 'hour',
+    scQuipAteWeek: '{g} ate my whole week', scQuipAteMonth: '{g} ate my whole month', scQuipSpread: 'spread across {n} games',
+    scDone: 'Finished {n}', scStarted: 'Started {n}',
+    scSaved: 'PROGRESS SAVED', scLvShort: 'Lv.', scClass: 'CLASS', scParty: 'YOUR PARTY',
+    scFactPlat: 'You played most on {p}.', scFactMonth: 'Your top month was {m}.', scContinue: 'CONTINUE IN {y}?', scYes: 'YES', scNo: 'NO',
     streakDaysShort: 'day streak', shareLibrary: 'Share my library', shareLibraryShort: 'Share',
     reviewPromptTitle: 'What did you think?', reviewPromptTitleDropped: 'Why did you drop it?', reviewPromptCta: 'Write a review', reviewPromptLater: 'Not now',
     notifPrefsLabel: 'Notifications', notifPrefsNews: 'News (releases, free games, most played)',
@@ -4611,6 +4729,16 @@ const I18N = {
     activateManual: 'Manualmente', activateLater: 'Faço isso depois',
     wowEyebrow: 'Sua biblioteca', wowGames: 'jogos', wowHours: 'horas', wowShare: 'Compartilhar',
     wowLife: 'São {days} dias da sua vida jogando',
+    scDate: 'DATA', scTill: 'CAIXA 01', scServed: 'ATENDENTE: VOCÊ', scLevel: 'NÍVEL', scStreak: 'SEQUÊNCIA: {n} DIAS',
+    scTotalGames: 'TOTAL DE JOGOS', scTotalHours: 'HORAS JOGADAS', scLife: 'SÃO {days} DIAS DA SUA VIDA',
+    scThanks: 'OBRIGADO POR JOGAR!', scNoRefunds: 'NÃO ACEITAMOS DEVOLUÇÕES', scStampRing: 'JOGADOR VERIFICADO · PLAYLOGGR · ',
+    scQuipGrowing: 'e o backlog continua crescendo', scQuipTaming: 'tô domando ele',
+    scWeekSame: 'Semana de {d1} a {d2} de {m}', scWeekCross: 'Semana de {d1} de {m1} a {d2} de {m2}',
+    scWeekBig: 'Esta semana joguei {h}', scMonthBig: 'Este mês joguei {h}', scHours: 'horas', scHour: 'hora',
+    scQuipAteWeek: '{g} engoliu minha semana', scQuipAteMonth: '{g} engoliu meu mês', scQuipSpread: 'dividido entre {n} jogos',
+    scDone: 'Terminei {n}', scStarted: 'Comecei {n}',
+    scSaved: 'JOGO SALVO', scLvShort: 'Nv.', scClass: 'CLASSE', scParty: 'SUA PARTY',
+    scFactPlat: 'Você jogou mais no {p}.', scFactMonth: 'Seu mês mais gamer foi {m}.', scContinue: 'CONTINUAR EM {y}?', scYes: 'BORA', scNo: 'DEPOIS',
     streakDaysShort: 'dias de sequência', shareLibrary: 'Compartilhar minha biblioteca', shareLibraryShort: 'Compartilhar',
     reviewPromptTitle: 'O que você achou?', reviewPromptTitleDropped: 'Por que você largou?', reviewPromptCta: 'Escrever avaliação', reviewPromptLater: 'Agora não',
     notifPrefsLabel: 'Notificações', notifPrefsNews: 'Novidades (lançamentos, jogos grátis, mais jogados)',
@@ -4792,7 +4920,7 @@ function ensureGameThemeFontsLoaded() {
   const link = document.createElement('link');
   link.id = 'game-theme-fonts';
   link.rel = 'stylesheet';
-  link.href = 'https://fonts.googleapis.com/css2?family=Play:wght@400;700&family=VT323&family=Share+Tech+Mono&family=Cinzel:wght@600;700&family=EB+Garamond&family=Mulish:wght@400;500;600;700&family=PT+Sans&family=Press+Start+2P&family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;600;700&family=Titillium+Web:wght@400;600;700&family=Rajdhani:wght@500;600;700&family=Metal+Mania&family=Oswald:wght@400;500;600&family=Rubik:wght@400;500;600;700&family=Creepster&family=Alegreya+Sans:wght@400;500;700&family=Nunito:wght@400;600;700&family=Barlow:wght@400;500;600;700&family=Anton&family=Exo+2:wght@400;500;600;700&family=Marcellus+SC&display=swap';
+  link.href = 'https://fonts.googleapis.com/css2?family=Play:wght@400;700&family=VT323&family=Share+Tech+Mono&family=Cinzel:wght@600;700&family=EB+Garamond&family=Mulish:wght@400;500;600;700&family=PT+Sans&family=Press+Start+2P&family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;600;700&family=Titillium+Web:wght@400;600;700&family=Rajdhani:wght@500;600;700&family=Metal+Mania&family=Oswald:wght@400;500;600&family=Rubik:wght@400;500;600;700&family=Creepster&family=Alegreya+Sans:wght@400;500;700&family=Nunito:wght@400;600;700&family=Barlow:wght@400;500;600;700&family=Anton&family=Exo+2:wght@400;500;600;700&family=Marcellus+SC&family=Caveat:wght@700&family=Space+Mono:wght@400;700&family=Mulish:wght@800;900&display=swap';
   document.head.appendChild(link);
 }
 
@@ -14130,52 +14258,231 @@ function openShareCard() {
   }, 0);
 }
 
-// El transform recorta la cabeza/torso del pixel-doll, que es lo que se ve
-// bien en redondo (mismo criterio que la miniatura del panel de perfil). Los
-// avatares de racha son imagenes enteras ya encuadradas, no se recortan.
+// ── Tarjetas para compartir: dibujos ─────────────────────────────────────
+// html2canvas no exporta filter, mask ni clip-path, asi que lo que no es texto
+// (borde del ticket, sello, codigo de barras, garabatos, avatar) se dibuja en
+// <canvas>, que se copia tal cual. Los garabatos usan una semilla fija: salen
+// iguales cada vez que se abre la tarjeta.
+const _SC_GREEN = '#1D9E75';
+const _SC_CHECKS = [
+  'M2.2 8.6c1.6 1.1 3 2.6 4.3 4.9C9.3 8 12.6 4.3 18.2 1.6',
+  'M1.8 9.4c1.9.9 3.4 2.4 4.6 4.6C8.9 8.6 12.9 4.6 18.6 2.2',
+  'M2.6 7.8c1.4 1.4 2.6 3 3.6 5.6 3-6.3 6.4-9.4 11.8-11.8',
+];
+function _scRng(seed) {
+  let s = seed | 0;
+  return () => { s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+}
+function _scSeed(str) { let h = 7; for (const c of String(str)) h = Math.imul(h, 31) + c.charCodeAt(0) | 0; return h; }
+// Canvas a x3: la tarjeta se exporta a x2 y asi los trazos no salen borrosos.
+function _scCanvas(c, w, h) {
+  const r = 3;
+  c.width = Math.round(w * r); c.height = Math.round(h * r);
+  c.style.width = w + 'px'; c.style.height = h + 'px';
+  const ctx = c.getContext('2d');
+  ctx.setTransform(r, 0, 0, r, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  return ctx;
+}
+function _scPen(ctx, color, w) { ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; }
+function _scCurve(ctx, p) {
+  ctx.moveTo(p[0][0], p[0][1]);
+  for (let i = 0; i < p.length - 1; i++) {
+    const a = p[i - 1] || p[i], b = p[i], c = p[i + 1], e = p[i + 2] || c;
+    ctx.bezierCurveTo(b[0] + (c[0] - a[0]) / 6, b[1] + (c[1] - a[1]) / 6, c[0] - (e[0] - b[0]) / 6, c[1] - (e[1] - b[1]) / 6, c[0], c[1]);
+  }
+}
+function _scN(n) { return Number(n || 0).toLocaleString(currentLang, { useGrouping: 'always' }); }
+function _scH(h) { return `${(Math.round((h || 0) * 10) / 10).toLocaleString(currentLang)} h`; }
+
+// Circulo a mano alrededor de un elemento: un canvas un poco mas grande, encima.
+function _scCircle(el, seed) {
+  el.querySelectorAll(':scope > canvas.sc-ink').forEach(c => c.remove());
+  const w = el.offsetWidth, h = el.offsetHeight;
+  if (!w || !h) return;
+  const px = Math.max(8, h * .3), py = Math.max(6, h * .25), W = w + px * 2, H = h + py * 2;
+  const c = document.createElement('canvas');
+  c.className = 'sc-ink';
+  c.style.cssText = `position:absolute;left:${-px}px;top:${-py}px;pointer-events:none`;
+  const ctx = _scCanvas(c, W, H), r = _scRng(seed);
+  const n = 9, pts = [], a0 = -2.3 + r() * .5, laps = 1.12 + r() * .08;
+  for (let i = 0; i <= Math.round(n * laps); i++) {
+    const a = a0 + i / n * Math.PI * 2, k = 1 + (r() - .5) * .1;
+    pts.push([W / 2 + Math.cos(a) * (W / 2 - 2) * k * (1 + i * .006), H / 2 + Math.sin(a) * (H / 2 - 2) * k]);
+  }
+  _scPen(ctx, _SC_GREEN, Math.max(2.2, Math.min(3.2, h * .06)));
+  ctx.beginPath(); _scCurve(ctx, pts); ctx.stroke();
+  el.appendChild(c);
+}
+
+// Borde dentado del ticket (arriba o abajo).
+function _scZigzag(c) {
+  const w = 292, h = 9, ctx = _scCanvas(c, w, h), top = c.dataset.edge === 'top';
+  ctx.fillStyle = '#F4F0E6';
+  ctx.beginPath();
+  ctx.moveTo(0, top ? h : 0);
+  for (let x = 0; x < w; x += 12) { ctx.lineTo(x + 6, top ? 0 : h); ctx.lineTo(x + 12, top ? h : 0); }
+  ctx.lineTo(w, top ? h + 1 : -1); ctx.lineTo(0, top ? h + 1 : -1);
+  ctx.closePath(); ctx.fill();
+}
+
+// Codigo de barras armado con el nombre de usuario: cada perfil tiene el suyo.
+function _scBarcode(c, key) {
+  const w = c.parentNode.clientWidth - 40 || 252, h = 36, ctx = _scCanvas(c, w, h), r = _scRng(_scSeed(key));
+  ctx.fillStyle = '#1d1d1d';
+  for (let x = 0; x < w;) { const bw = 1 + Math.floor(r() * 3.2); ctx.fillRect(x, 0, Math.min(bw, w - x), h); x += bw + 1 + Math.floor(r() * 2.6); }
+}
+
+// Sello de goma con el nivel: anillo de texto, numero al centro y tinta gastada.
+function _scStamp(c, level) {
+  const S = 104, ctx = _scCanvas(c, S, S), r = _scRng(_scSeed('sello' + level));
+  ctx.translate(S / 2, S / 2);
+  ctx.rotate(-0.25);
+  ctx.strokeStyle = ctx.fillStyle = 'rgba(29,158,117,.92)';
+  ctx.lineWidth = 3.6; ctx.beginPath(); ctx.arc(0, 0, 46, 0, Math.PI * 2); ctx.stroke();
+  ctx.lineWidth = 1.3; ctx.beginPath(); ctx.arc(0, 0, 28, 0, Math.PI * 2); ctx.stroke();
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = '700 8.6px "Space Mono", monospace';
+  const ring = [...t('scStampRing')];
+  ring.forEach((ch, i) => { ctx.save(); ctx.rotate(i / ring.length * Math.PI * 2); ctx.fillText(ch, 0, -37); ctx.restore(); });
+  ctx.font = '700 8px "Space Mono", monospace';
+  ctx.fillText(t('scLevel'), 0, -8);
+  ctx.font = `${String(level).length > 2 ? 11 : 14}px "Press Start 2P", monospace`;
+  ctx.fillText(String(level), 0, 9);
+  // Tinta gastada: se borran motas al azar (siempre las mismas).
+  ctx.globalCompositeOperation = 'destination-out';
+  for (let i = 0; i < 260; i++) {
+    const a = r() * Math.PI * 2, d = Math.sqrt(r()) * 50;
+    ctx.globalAlpha = .25 + r() * .75;
+    ctx.beginPath(); ctx.arc(Math.cos(a) * d, Math.sin(a) * d, .3 + r() * 1.3, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+}
+
+// Avatar pixel en canvas, recortado al muñeco y sin suavizar (las <img> que
+// arma pixelAvatarHtml salen borrosas en html2canvas). gray = impreso en el
+// ticket, en escala de grises.
+function _scAvatarCanvas(h, gray) {
+  const cfg = currentAvatarConfig || {};
+  const c = document.createElement('canvas');
+  const load = src => new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+  const finish = ctx => {
+    if (!gray) return;
+    const d = ctx.getImageData(0, 0, c.width, c.height), px = d.data;
+    for (let i = 0; i < px.length; i += 4) { const v = Math.min(255, Math.max(0, (px[i] * .3 + px[i + 1] * .59 + px[i + 2] * .11 - 128) * 1.25 + 110)); px[i] = px[i + 1] = px[i + 2] = v; }
+    ctx.putImageData(d, 0, 0);
+  };
+  if (cfg.streakAvatarId) {
+    const ctx = _scCanvas(c, h, h);
+    load(`streak_avatars/${cfg.streakAvatarId}.png`).then(img => {
+      if (!img) return;
+      const k = Math.min(h / img.width, h / img.height);
+      ctx.drawImage(img, (h - img.width * k) / 2, (h - img.height * k) / 2, img.width * k, img.height * k);
+      finish(ctx);
+    });
+    return c;
+  }
+  const w = Math.round(h * 36 / 50), ctx = _scCanvas(c, w, h);
+  ctx.imageSmoothingEnabled = false;
+  const layers = AVATAR_LAYER_ORDER.map(cat => cfg[cat] ? `avatar_pixel/${cat}/${cfg[cat]}.png` : null).filter(Boolean);
+  Promise.all(layers.map(load)).then(imgs => {
+    imgs.forEach(img => img && ctx.drawImage(img, 14, 14, 36, 50, 0, 0, w, h));
+    finish(ctx);
+  });
+  return c;
+}
+function _scPutAvatar(id, h, gray) {
+  const box = document.getElementById(id);
+  if (!box) return;
+  box.innerHTML = '';
+  box.appendChild(_scAvatarCanvas(h, gray));
+}
+
+// Tildes, flechas e iconos chicos ([data-ck], [data-arrow], [data-play]) y los
+// circulos a mano ([data-circle]) de una tarjeta.
+function _scDraw(root) {
+  if (!root) return;
+  root.querySelectorAll('canvas.sc-zz').forEach(_scZigzag);
+  root.querySelectorAll('canvas[data-ck]').forEach(c => {
+    const ctx = _scCanvas(c, 20, 16);
+    _scPen(ctx, _SC_GREEN, 2.6);
+    ctx.stroke(new Path2D(_SC_CHECKS[+c.dataset.ck % 3]));
+  });
+  root.querySelectorAll('canvas[data-arrow]').forEach(c => {
+    const [w, h] = c.dataset.size.split(',').map(Number), ctx = _scCanvas(c, w, h);
+    _scPen(ctx, _SC_GREEN, 2.4);
+    ctx.stroke(new Path2D(c.dataset.arrow));
+  });
+  root.querySelectorAll('canvas[data-play]').forEach(c => {
+    const ctx = _scCanvas(c, 12, 14);
+    ctx.fillStyle = '#378ADD';
+    ctx.fill(new Path2D('M0 0h2v2h2v2h2v2h2v2H6v2H4v2H2v2H0z'));
+  });
+  root.querySelectorAll('canvas[data-logo]').forEach(c => {
+    // El mismo joystick del favicon: cuadrado oscuro y el icono en verde.
+    const z = +c.dataset.logo, ctx = _scCanvas(c, z, z), k = z / 64;
+    ctx.scale(k, k);
+    ctx.fillStyle = '#132420';
+    ctx.beginPath(); ctx.roundRect(0, 0, 64, 64, 14); ctx.fill();
+    ctx.translate(12, 12); ctx.scale(1.667, 1.667);
+    _scPen(ctx, _SC_GREEN, 2);
+    ['M12 5h3.5a5 5 0 0 1 0 10h-5.5l-4.015 4.227a2.3 2.3 0 0 1 -3.923 -2.035l1.634 -8.173a5 5 0 0 1 4.904 -4.019h3.4z',
+     'M14 15l4.07 4.284a2.3 2.3 0 0 0 3.925 -2.023l-1.6 -8.232', 'M8 9v2', 'M7 10h2', 'M14 10h2'].forEach(d => ctx.stroke(new Path2D(d)));
+  });
+  root.querySelectorAll('[data-circle]').forEach(el => _scCircle(el, +el.dataset.circle || 1));
+}
+
+// Las fuentes de las tarjetas (Space Mono, Caveat, Press Start 2P) vienen en
+// la hoja de fuentes de los temas. Se espera a que esten antes de dibujar el
+// sello y antes de exportar.
+function _scFontsReady() {
+  ensureGameThemeFontsLoaded();
+  const link = document.getElementById('game-theme-fonts');
+  const sheet = link && !link.sheet
+    ? new Promise(res => { link.addEventListener('load', res, { once: true }); link.addEventListener('error', res, { once: true }); setTimeout(res, 4000); })
+    : Promise.resolve();
+  return sheet.then(() => Promise.all(['400 10px "Space Mono"', '700 10px "Space Mono"', '400 10px "Press Start 2P"', '700 20px Caveat', '800 14px Mulish', '900 14px Mulish']
+    .map(f => document.fonts.load(f).catch(() => null))));
+}
+
+// Portada de un juego de la biblioteca ya cargada, por nombre. Puede no estar
+// (la biblioteca se carga de a 40): en ese caso la tarjeta usa texto.
+function _scCoverFor(name) {
+  const key = String(name || '').trim().toLowerCase();
+  const g = (allGames || []).find(x => String(x.name || '').trim().toLowerCase() === key);
+  if (!g) return '';
+  return g.cover_url || (g.app_id ? `https://cdn.cloudflare.steamstatic.com/steam/apps/${g.app_id}/library_600x900.jpg` : '');
+}
+function _scCoverDiv(url, cls = '') {
+  return `<div class="sc-cover ${cls}" style="background-image:url('${esc(url).replace(/'/g, '%27')}')"></div>`;
+}
+
+// ── Biblioteca: el ticket ──────────────────────────────────────────────────
 function _renderShareCardAvatar() {
-  const avBox = document.getElementById('welcome-stats-avatar');
-  if (!avBox) return;
-  const shift = currentAvatarConfig.streakAvatarId ? '0' : '-11.7%';
-  avBox.innerHTML = `<div style="width:72px;height:72px;position:relative;transform:translateY(${shift})">
-    ${pixelAvatarHtml(currentAvatarConfig, 72)}</div>`;
+  _scPutAvatar('welcome-stats-avatar', 58, true);
 }
 
-function _shareChip(inner, color) {
-  return `<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;
-    color:${color};background:${color === '#EF9F27' ? 'rgba(239,159,39,.14)' : 'rgba(255,255,255,.07)'};
-    padding:4px 12px;border-radius:20px;line-height:1">${inner}</span>`;
-}
-
-// Nivel + racha. No se arma con levelBadgeHtml() a proposito: esa version es
-// para ir pegada al nombre de usuario dentro de la app, donde el contexto se
-// entiende solo. Acá la imagen sale a Twitter/Discord y la ve gente que no
-// conoce Playloggr, asi que la medalla necesita la palabra "Nivel" al lado.
 function _renderShareCardBadges() {
   const box = document.getElementById('welcome-stats-badges');
   if (!box) return;
-  if (typeof ensureGameThemeFontsLoaded === 'function') ensureGameThemeFontsLoaded();
-
-  const [asset, tierColor] = _badgeAssetAndColor(userLevel);
-  const trophy = userTrophy ? `<i class="ti ti-trophy" style="font-size:12px;color:#EF9F27"></i>` : '';
-  const level = _shareChip(
-    `<img src="${esc(asset)}" style="width:26px;height:26px;object-fit:contain;display:block;margin:-4px 0 -4px -5px" onerror="this.style.display='none'">
-     <span style="color:var(--text2);font-weight:600">${esc(t('levelLabel'))}</span>
-     <span style="font-family:'Press Start 2P',monospace;color:${tierColor};font-size:11px">${userLevel}</span>${trophy}`,
-    'var(--text)');
-
-  // Sin icono a proposito: el texto ya dice "N dias de racha", bonfire.png es
-  // negro (necesita un filtro CSS que html2canvas no exporta) y una fuente de
-  // iconos puede salir como cuadrito en la imagen generada.
   const days = (streakState && streakState.streak_days) || 0;
-  const streak = days > 0
-    ? _shareChip(`${days} ${esc(t('streakDaysShort'))}`, '#EF9F27') : '';
-
-  box.innerHTML = level + streak;
+  const title = titleLabel(userTitle);
+  box.innerHTML = `<span>${esc(t('scLevel'))} ${userLevel}${title ? ' · ' + esc(title.toUpperCase()) : ''}</span>` +
+    (days > 0 ? `<span>${esc(t('scStreak').replace('{n}', days))}</span>` : '');
+  const stamp = document.getElementById('sc-tk-stamp');
+  if (stamp) _scStamp(stamp, userLevel);
 }
 
 function _renderShareCardChrome() {
   _renderShareCardAvatar();
+  _renderShareCardBadges();
+}
+
+function _scDrawTicket() {
+  const card = document.getElementById('welcome-stats-card');
+  _scDraw(card);
+  const bar = document.getElementById('sc-tk-barcode');
+  if (bar) _scBarcode(bar, authUser || 'playloggr');
   _renderShareCardBadges();
 }
 
@@ -14195,28 +14502,35 @@ function _fillAndOpenShareCard(data, delay) {
   // link directo a este perfil publico en vez de a la home.
   const urlEl = document.getElementById('welcome-stats-url');
   if (urlEl) urlEl.textContent = authUser ? `playloggr.com/u/${authUser}` : 'playloggr.com';
-  document.getElementById('welcome-stats-games').textContent = total.toLocaleString();
-  document.getElementById('welcome-stats-hours').textContent = hours.toLocaleString();
+  const now = new Date();
+  document.getElementById('sc-tk-date').textContent =
+    now.toLocaleDateString(currentLang, { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' +
+    now.toLocaleTimeString(currentLang, { hour: '2-digit', minute: '2-digit', hour12: false });
+  document.getElementById('welcome-stats-games').textContent = _scN(total);
+  document.getElementById('welcome-stats-hours').textContent = _scN(hours);
   document.getElementById('welcome-stats-life').textContent =
-    days > 0 ? t('wowLife').replace('{days}', days.toLocaleString()) : '';
+    days > 0 ? t('scLife').replace('{days}', _scN(days)) : '';
 
-  // Todos los estados que el usuario realmente tenga, en orden fijo y con los
-  // mismos colores que el resto de la app (STATUS_DOT_COLORS). "Deseados" sale
-  // aparte porque /backlog lo excluye del conteo por estado.
+  // Un renglon por estado que el usuario realmente tenga, en orden fijo y con
+  // los colores de la app (STATUS_DOT_COLORS). "Deseados" sale aparte porque
+  // /backlog lo excluye del conteo por estado.
   const by = { ...(data.by_status || {}) };
   const wish = (window._globalStats || {}).wishlist_count || 0;
   if (wish > 0) by['Deseados'] = wish;
-  const chips = ['Jugando', 'Completado', 'Intermitente', 'Abandonado', 'Backlog', 'Deseados']
-    .filter(st => (by[st] || 0) > 0)
-    .map(st => {
-      const color = STATUS_DOT_COLORS[st] || 'var(--text2)';
-      return `<span style="font-size:11px;padding:4px 10px;border-radius:20px;background:${color}22;color:${color};font-weight:600">
-        ${by[st]} ${esc(statusLabel(st))}
-      </span>`;
-    }).join('');
-  document.getElementById('welcome-stats-breakdown').innerHTML = chips;
+  document.getElementById('welcome-stats-breakdown').innerHTML =
+    ['Jugando', 'Completado', 'Intermitente', 'Abandonado', 'Backlog', 'Deseados']
+      .filter(st => (by[st] || 0) > 0)
+      .map(st => `<div class="sc-tk-item"><i style="background:${STATUS_DOT_COLORS[st] || '#888780'}"></i><span>${esc(statusLabel(st).toUpperCase())}</span><span class="sc-dots"></span><span>${_scN(by[st])}</span></div>`)
+      .join('');
+  // La nota a mano se elige con los datos.
+  document.getElementById('sc-tk-quip').textContent = total > 0
+    ? ((by['Backlog'] || 0) > (by['Completado'] || 0) ? t('scQuipGrowing') : t('scQuipTaming')) : '';
 
-  const open = () => document.getElementById('welcome-stats-overlay').classList.add('open');
+  const open = () => {
+    document.getElementById('welcome-stats-overlay').classList.add('open');
+    requestAnimationFrame(_scDrawTicket);
+    _scFontsReady().then(_scDrawTicket);
+  };
   if (delay) setTimeout(open, delay); else open();
 }
 
@@ -14230,7 +14544,7 @@ async function exportCardAsImage(cardId, filename) {
   const card = document.getElementById(cardId);
   if (!card) return;
   try {
-    await loadScriptOnce(HTML2CANVAS_SRC);
+    await Promise.all([loadScriptOnce(HTML2CANVAS_SRC), _scFontsReady().catch(() => {})]);
     const canvas = await html2canvas(card, { backgroundColor: '#111111', useCORS: true, scale: 2 });
     const a = document.createElement('a');
     a.href = canvas.toDataURL('image/png');
@@ -14245,35 +14559,60 @@ async function shareWelcomeStats() {
   return exportCardAsImage('welcome-stats-card', 'playloggr.png');
 }
 
+// ── Semana o mes: la polaroid ──────────────────────────────────────────────
 // El ultimo resumen cargado en el tab de periodo, para armar la tarjeta sin
 // volver a pedirlo.
 let _lastPeriodOwn = null;
+
+function _scRangeLabel(a, b, isWeek) {
+  const d = iso => { const [y, m, dd] = String(iso).split('-'); return new Date(+y, +m - 1, +dd); };
+  const s = d(a), e = d(b);
+  if (isNaN(s) || isNaN(e)) return `${a} → ${b}`;
+  if (!isWeek) {
+    const n = s.toLocaleDateString(currentLang, { month: 'long', year: 'numeric' });
+    return n.charAt(0).toUpperCase() + n.slice(1);
+  }
+  const m = x => x.toLocaleDateString(currentLang, { month: 'long' });
+  return t(s.getMonth() === e.getMonth() ? 'scWeekSame' : 'scWeekCross')
+    .replace('{d1}', s.getDate()).replace('{d2}', e.getDate())
+    .replace('{m1}', m(s)).replace('{m2}', m(e)).replace('{m}', m(e));
+}
 
 function openPeriodShareCard() {
   const own = _lastPeriodOwn;
   if (!own || !own.has_data) return;
   const isWeek = currentPeriodType === 'week';
-  document.getElementById('period-share-eyebrow').textContent = isWeek ? t('periodShareWeek') : t('periodShareMonth');
-  document.getElementById('period-share-range').textContent = `${own.period_start} → ${own.period_end}`;
+  ensureGameThemeFontsLoaded();
   document.getElementById('period-share-user').textContent = authUser || '';
-  document.getElementById('period-share-title').innerHTML = titleHtml(userTitle, 8.5);
-  const av = document.getElementById('period-share-avatar');
-  const shift = currentAvatarConfig.streakAvatarId ? '0' : '-11.7%';
-  av.innerHTML = `<div style="width:40px;height:40px;position:relative;transform:translateY(${shift})">${pixelAvatarHtml(currentAvatarConfig, 40)}</div>`;
+  document.getElementById('period-share-range').textContent = _scRangeLabel(own.period_start, own.period_end, isWeek);
+  _scPutAvatar('period-share-avatar', 40, false);
 
+  // "Esta semana jugué 14,5 horas", con el numero circulado a mano.
   const hrs = Math.round((own.total_hours || 0) * 10) / 10;
-  document.getElementById('period-share-hours').textContent = hrs.toLocaleString();
-  document.getElementById('period-share-hours-lbl').textContent = isWeek ? t('periodShareHoursWeek') : t('periodShareHoursMonth');
+  document.getElementById('period-share-hours').innerHTML = esc(t(isWeek ? 'scWeekBig' : 'scMonthBig'))
+    .replace('{h}', `<span data-circle="${_scSeed(own.period_start || 'p')}">${hrs.toLocaleString(currentLang)} ${esc(hrs === 1 ? t('scHour') : t('scHours'))}</span>`);
 
-  // Top 3 juegos por horas: es lo que la gente cuenta ("me pase la semana
-  // en Hades"), no la tabla completa.
-  const top = Object.entries(own.hours_by_game || {}).sort((a, b) => b[1] - a[1]).slice(0, 3);
-  document.getElementById('period-share-games').innerHTML = top.map(([name, h], i) => `
-    <div style="display:flex;align-items:center;gap:8px;font-size:12px">
-      <span style="width:18px;height:18px;border-radius:${i === 0 ? '50%' : '4px'};border:1.5px solid ${['#E0B84C','#B0B0B8','#CD7F32'][i]};color:${['#E0B84C','#B0B0B8','#CD7F32'][i]};font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">${i + 1}</span>
-      <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600">${esc(name)}</span>
-      <span style="color:var(--text2);flex-shrink:0">${h} hs</span>
-    </div>`).join('');
+  // El mas jugado va como polaroid; el 2.º y el 3.º, como renglones. Es lo que
+  // la gente cuenta ("me pase la semana en Hades"), no la tabla completa.
+  const all = Object.entries(own.hours_by_game || {}).sort((a, b) => b[1] - a[1]);
+  const top = all.slice(0, 3);
+  let main = '';
+  if (top.length) {
+    const [name, h] = top[0];
+    const cover = _scCoverFor(name);
+    const share = own.total_hours ? h / own.total_hours : 0;
+    const quip = share >= .5 ? t(isWeek ? 'scQuipAteWeek' : 'scQuipAteMonth').replace('{g}', name)
+      : all.length >= 3 ? t('scQuipSpread').replace('{n}', all.length) : '';
+    const rest = top.slice(1).map(([n, hh], i) => {
+      const c = _scCoverFor(n);
+      return `<li><span class="sc-rank">${i + 2}</span>${c ? _scCoverDiv(c) : '<span></span>'}<span class="sc-nm">${esc(n)}</span><b>${_scH(hh)}</b></li>`;
+    }).join('');
+    main = `<figure class="sc-pol"><span class="sc-tape"></span>${cover ? _scCoverDiv(cover) : `<div class="sc-pol-ph">${esc(name)}</div>`}<figcaption>${esc(name)} · ${_scH(h)}</figcaption></figure>
+      <div>${quip ? `<p class="sc-hand sc-wk-quip">${esc(quip)}<canvas data-arrow="M54 4 C 40 8, 24 16, 8 26 M16 29 L7 27 L11 18" data-size="60,34"></canvas></p>` : ''}${rest ? `<ol class="sc-wk-list">${rest}</ol>` : ''}</div>`;
+  }
+  const gamesEl = document.getElementById('period-share-games');
+  gamesEl.innerHTML = main;
+  gamesEl.style.display = main ? '' : 'none';
 
   // Completados y empezados en el periodo, desde los cambios de estado.
   let completed = 0, started = 0;
@@ -14282,86 +14621,102 @@ function openPeriodShareCard() {
     if (to === 'Completado') completed += n;
     if (to === 'Jugando') started += n;
   });
-  const chip = (n, label, color) => n > 0
-    ? `<span style="font-size:11px;padding:4px 10px;border-radius:20px;background:${color}22;color:${color};font-weight:600">${n} ${esc(label)}</span>` : '';
   document.getElementById('period-share-chips').innerHTML =
-    chip(completed, completed === 1 ? t('periodShareCompleted1') : t('periodShareCompletedN'), STATUS_DOT_COLORS['Completado']) +
-    chip(started, started === 1 ? t('periodShareStarted1') : t('periodShareStartedN'), STATUS_DOT_COLORS['Jugando']);
+    (completed > 0 ? `<span><canvas data-ck="1"></canvas>${esc(t('scDone').replace('{n}', completed))}</span>` : '') +
+    (started > 0 ? `<span><canvas data-play></canvas>${esc(t('scStarted').replace('{n}', started))}</span>` : '');
 
   document.getElementById('period-share-url').textContent = authUser ? `playloggr.com/u/${authUser}` : 'playloggr.com';
   document.getElementById('period-share-overlay').classList.add('open');
+  const card = document.getElementById('period-share-card');
+  requestAnimationFrame(() => _scDraw(card));
+  _scFontsReady().then(() => _scDraw(card));
 }
 
-// ── "Tu año en Playloggr" (Wrapped) ──────────────────────────────────────
+// ── "Tu año en Playloggr" (Wrapped): guardar partida ──────────────────────
 // GET /wrapped arma todo del lado del backend; aca solo se pinta la tarjeta
-// (mismo estilo y exportacion que la del resumen de periodo).
+// (misma exportacion que la del resumen de periodo).
 let _wrappedYear = null;
+
+function _scSlotTitle() {
+  const title = titleLabel(userTitle);
+  document.getElementById('wrapped-title').textContent = `${t('scLvShort')} ${userLevel}${title ? ' · ' + title : ''}`;
+}
 
 async function openWrapped(year) {
   const overlay = document.getElementById('wrapped-overlay');
   const body = document.getElementById('wrapped-body');
+  ensureGameThemeFontsLoaded();
   body.innerHTML = `<div class="spinner" style="margin:18px auto"></div>`;
+  document.getElementById('wrapped-eyebrow').textContent = t('scSaved');
   document.getElementById('wrapped-user').textContent = authUser || '';
-  document.getElementById('wrapped-title').innerHTML = titleHtml(userTitle, 8.5);
+  document.getElementById('wrapped-year').textContent = year || '';
+  document.getElementById('wrapped-clock').textContent = '';
+  _scSlotTitle();
   // Con /app/#wrapped se abre apenas arranca la app, antes de que cargue el
-  // avatar: se espera a que este (la promesa es la misma que usa el resto).
-  avatarConfigReady().then(() => {
-    const shift = currentAvatarConfig.streakAvatarId ? '0' : '-11.7%';
-    document.getElementById('wrapped-avatar').innerHTML = `<div style="width:40px;height:40px;position:relative;transform:translateY(${shift})">${pixelAvatarHtml(currentAvatarConfig, 40)}</div>`;
+  // avatar y el nivel: se espera a que esten (las promesas son las mismas que
+  // usa el resto).
+  _scPutAvatar('wrapped-avatar', 58, false);
+  Promise.allSettled([avatarConfigReady(), premiumStatusReady()]).then(() => {
+    _scPutAvatar('wrapped-avatar', 58, false);
+    _scSlotTitle();
   });
   document.getElementById('wrapped-url').textContent = authUser ? `playloggr.com/u/${authUser}` : 'playloggr.com';
   overlay.classList.add('open');
+  const card = document.getElementById('wrapped-card');
+  requestAnimationFrame(() => _scDraw(card));
+  _scFontsReady().then(() => _scDraw(card));
   try {
     const q = year ? `?year=${encodeURIComponent(year)}` : '';
     const res = await fetch(`${apiBase()}/api/v1/wrapped${q}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
     if (!res.ok) throw new Error(res.status);
     renderWrapped(await res.json());
   } catch (e) {
-    body.innerHTML = `<div class="u-fs12 u-muted" style="padding:12px 0">${esc(t('wrappedEmpty'))}</div>`;
+    body.innerHTML = `<div class="sc-sv-empty">${esc(t('wrappedEmpty'))}</div>`;
   }
 }
 
 function renderWrapped(w) {
   _wrappedYear = w.year;
-  document.getElementById('wrapped-eyebrow').textContent = t('wrappedEyebrow').replace('{y}', w.year);
+  document.getElementById('wrapped-year').textContent = w.year || '';
   document.getElementById('wrapped-share-btn').style.display = w.has_data ? '' : 'none';
   const body = document.getElementById('wrapped-body');
+  const clock = document.getElementById('wrapped-clock');
   if (!w.has_data) {
-    body.innerHTML = `<div class="u-fs12 u-muted" style="padding:12px 0">${esc(t('wrappedEmpty'))}</div>`;
+    clock.textContent = '';
+    body.innerHTML = `<div class="sc-sv-empty">${esc(t('wrappedEmpty'))}</div>`;
     return;
   }
+  // Las horas del año como reloj de partida guardada: 812:30.
+  const mins = Math.round((w.total_hours || 0) * 60);
+  clock.textContent = `${_scN(Math.floor(mins / 60))}:${String(mins % 60).padStart(2, '0')}`;
+  const cap = x => x ? x.charAt(0).toUpperCase() + x.slice(1) : x;
   const fmtDate = iso => { const [y, m, d] = iso.split('-'); return new Date(+y, +m - 1, +d).toLocaleDateString(currentLang, { day: 'numeric', month: 'long' }); };
-  const monthName = ym => { const [y, m] = ym.split('-'); const n = new Date(+y, +m - 1, 1).toLocaleDateString(currentLang, { month: 'long' }); return n.charAt(0).toUpperCase() + n.slice(1); };
+  const monthName = ym => { const [y, m] = ym.split('-'); return new Date(+y, +m - 1, 1).toLocaleDateString(currentLang, { month: 'long' }); };
+  const stat = (label, n) => `<div><dt>${esc(cap(label))}</dt><span class="sc-dots"></span><dd>${_scN(n)}</dd></div>`;
   // Si se empezo a registrar despues del 1 de enero, se aclara: las horas
   // son desde ahi, no del año entero.
   const since = w.since && !w.since.endsWith('-01-01')
-    ? `<div style="font-size:10.5px;color:var(--text2);margin-top:2px">${esc(t('wrappedSince').replace('{d}', fmtDate(w.since)))}</div>` : '';
-  const tile = (n, label) => `<div style="flex:1;background:#ffffff0d;border-radius:10px;padding:8px 4px">
-      <div style="font-size:20px;font-weight:800">${Number(n).toLocaleString()}</div>
-      <div style="font-size:10px;color:var(--text2)">${esc(label)}</div></div>`;
-  const medal = ['#E0B84C', '#B0B0B8', '#CD7F32', '#777', '#777'];
-  const games = (w.top_games || []).map((g, i) => `
-    <div style="display:flex;align-items:center;gap:8px;font-size:12px">
-      <span style="width:18px;height:18px;border-radius:${i === 0 ? '50%' : '4px'};border:1.5px solid ${medal[i]};color:${medal[i]};font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">${i + 1}</span>
-      <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600">${esc(g.name)}</span>
-      <span style="color:var(--text2);flex-shrink:0">${g.hours} hs</span>
-    </div>`).join('');
+    ? `<div class="sc-sv-since">${esc(t('wrappedSince').replace('{d}', fmtDate(w.since)))}</div>` : '';
+  // La clase va sin el emoji: en la pantalla de RPG queda solo el nombre.
+  const arch = t('wrappedArch_' + w.archetype).replace(/^[^\p{L}]+/u, '');
+  // El top 5 como "party" si estan todas las portadas; si falta alguna, como lista.
+  const games = w.top_games || [];
+  const covers = games.map(g => g.cover_url || g.cover || _scCoverFor(g.name));
+  const party = games.length && covers.every(Boolean)
+    ? `<div class="sc-party">${games.map((g, i) => `<figure>${_scCoverDiv(covers[i])}<figcaption>${_scN(Math.round(g.hours || 0))} h</figcaption></figure>`).join('')}</div>`
+    : `<ol class="sc-sv-list">${games.map((g, i) => `<li><span class="sc-rank">${i + 1}</span><span class="sc-nm">${esc(g.name)}</span><b>${_scH(g.hours)}</b></li>`).join('')}</ol>`;
   const facts = [
-    w.top_platform ? `<div><div style="font-size:10px;color:var(--text2)">${esc(t('wrappedTopPlatform'))}</div><div style="font-weight:700;font-size:13px">${esc(w.top_platform.name)}</div></div>` : '',
-    w.top_month ? `<div><div style="font-size:10px;color:var(--text2)">${esc(t('wrappedTopMonth'))}</div><div style="font-weight:700;font-size:13px">${esc(monthName(w.top_month.month))}</div></div>` : '',
-  ].filter(Boolean).join('');
+    w.top_platform ? esc(t('scFactPlat')).replace('{p}', `<b>${esc(w.top_platform.name)}</b>`) : '',
+    w.top_month ? esc(t('scFactMonth')).replace('{m}', `<b>${esc(monthName(w.top_month.month))}</b>`) : '',
+  ].filter(Boolean).join(' ');
   body.innerHTML = `
-    <div style="font-size:46px;font-weight:800;line-height:1;color:var(--green)">${Math.round(w.total_hours).toLocaleString()}</div>
-    <div class="u-fs11 u-muted" style="margin-top:4px">${esc(t('wrappedHoursLbl'))}</div>${since}
-    <div style="display:flex;gap:8px;margin:16px 0">
-      ${tile(w.completed, t('wrappedCompleted'))}${tile(w.days_played, t('wrappedDays'))}${tile((w.achievements || 0) + (w.platform_achievements || 0), t('wrappedAchievements'))}
-    </div>
-    <div style="display:flex;flex-direction:column;gap:6px;text-align:left">${games}</div>
-    ${facts ? `<div style="display:flex;justify-content:space-around;gap:10px;margin-top:16px">${facts}</div>` : ''}
-    <div style="margin-top:16px;padding:10px;border-radius:10px;background:#b9a8ff1f;border:1px solid #b9a8ff55">
-      <div style="font-weight:800;font-size:15px">${esc(t('wrappedArch_' + w.archetype))}</div>
-      <div style="font-size:11px;color:var(--text2);margin-top:2px">${esc(t('wrappedArchD_' + w.archetype))}</div>
-    </div>`;
+    <dl class="sc-sv-stats">${stat(t('wrappedHoursLbl'), Math.floor(w.total_hours || 0))}${stat(t('wrappedCompleted'), w.completed)}${stat(t('wrappedDays'), w.days_played)}${stat(t('wrappedAchievements'), (w.achievements || 0) + (w.platform_achievements || 0))}</dl>
+    ${since}
+    <span class="sc-sv-lbl">${esc(t('scClass'))}</span>
+    <div class="sc-sv-class"><b>${esc(arch)}</b><p>${esc(t('wrappedArchD_' + w.archetype))}</p></div>
+    ${games.length ? `<span class="sc-sv-lbl">${esc(t('scParty'))}</span>${party}` : ''}
+    ${facts ? `<p class="sc-sv-facts">${facts}</p>` : ''}
+    <div class="sc-sv-cont"><span>${esc(t('scContinue').replace('{y}', (w.year || new Date().getFullYear()) + 1))}</span><span class="sc-on">${esc(t('scYes'))}</span><span>${esc(t('scNo'))}</span></div>`;
 }
 
 // Aviso en la biblioteca en diciembre y enero (enero = el año que termino),
